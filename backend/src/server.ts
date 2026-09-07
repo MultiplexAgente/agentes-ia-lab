@@ -11,6 +11,7 @@ import { channelsRouter } from './routes/channels.js';
 import { dashboardRouter } from './routes/dashboard.js';
 import { logsRouter } from './routes/logs.js';
 import { billingRouter } from './routes/billing.js';
+import { authRouter } from './routes/auth.js';
 
 dotenv.config();
 
@@ -43,6 +44,7 @@ app.use('/api/channels', channelsRouter);
 app.use('/api/dashboard', dashboardRouter);
 app.use('/api/logs', logsRouter);
 app.use('/api/billing', billingRouter);
+app.use('/api/auth', authRouter);
 
 // Inicialização do Servidor
 if (process.env.NODE_ENV !== 'test') {

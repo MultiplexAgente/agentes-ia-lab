@@ -6,7 +6,8 @@ import {
   Sun, Moon, Folder, FolderPlus, Pin, PinOff, Search, PanelLeft,
   Edit3, Check, X, ArrowUp, PlayCircle, LayoutDashboard,
   Globe, Facebook, Twitter, Copy, ExternalLink, HelpCircle, CheckCircle2,
-  User, Shield, Bell, CreditCard, LogOut, ChevronRight, Settings
+  User, Shield, Bell, CreditCard, LogOut, ChevronRight, Settings,
+  Lock, Mail, Phone, Building2, UserPlus, LogIn, ArrowRight, ArrowLeft, Zap, Star, ShieldCheck, Key
 } from 'lucide-react';
 import atomLogo from './assets/multiplex-atom.jpg';
 
@@ -35,6 +36,98 @@ interface ChatSession {
 }
 
 const API_BASE = typeof window !== 'undefined' && window.location.port === '5173' ? 'http://localhost:3000' : '';
+
+const DEFAULT_PLANS = [
+  {
+    id: 'plan_basic',
+    name: 'Básico',
+    slug: 'basico',
+    price_monthly: 149,
+    price_yearly_monthly: 119,
+    currency: 'BRL',
+    description: 'Para pequenos negócios iniciando no atendimento com IA.',
+    popular: false,
+    max_agents: 1,
+    max_channels: 1,
+    max_messages: 2500,
+    features: [
+      '1 agente de IA dedicado',
+      '1 canal conectado (WhatsApp ou Instagram)',
+      'Até 2.500 mensagens de IA / mês',
+      'Base de conhecimento e FAQ da empresa',
+      'Treinamento e instruções do agente',
+      'Painel de conversas e métricas'
+    ]
+  },
+  {
+    id: 'plan_pro',
+    name: 'Profissional',
+    slug: 'profissional',
+    price_monthly: 299,
+    price_yearly_monthly: 239,
+    currency: 'BRL',
+    description: 'Para empresas que precisam de atendimento multicanal simultâneo e alta conversão.',
+    popular: true,
+    max_agents: 1,
+    max_channels: 3,
+    max_messages: 10000,
+    features: [
+      '1 agente de IA com raciocínio avançado',
+      'Até 3 canais conectados simultâneos',
+      'WhatsApp Business, Instagram Direct e Telegram',
+      'Até 10.000 mensagens de IA / mês',
+      'Importação em massa de produtos com IA',
+      'Memória de clientes e preferências',
+      'Handoff para atendente humano',
+      'Suporte prioritário'
+    ]
+  },
+  {
+    id: 'plan_business',
+    name: 'Business',
+    slug: 'business',
+    price_monthly: 599,
+    price_yearly_monthly: 479,
+    currency: 'BRL',
+    description: 'Para operações em crescimento com múltiplos canais e alta demanda.',
+    popular: false,
+    max_agents: 3,
+    max_channels: 6,
+    max_messages: 30000,
+    features: [
+      'Até 3 agentes de IA especializados',
+      'Todos os canais conectados (WhatsApp, Insta, FB, Telegram, X)',
+      'Até 30.000 mensagens de IA / mês',
+      'Base de conhecimento avançada com busca vetorial',
+      'Múltiplos usuários e operadores',
+      'Automações e integrações customizadas',
+      'Analytics avançado e relatórios exportáveis',
+      'Suporte via canal exclusivo'
+    ]
+  },
+  {
+    id: 'plan_enterprise',
+    name: 'Enterprise',
+    slug: 'enterprise',
+    price_monthly: 1200,
+    price_yearly_monthly: 960,
+    currency: 'BRL',
+    is_custom: true,
+    description: 'Para grandes redes, franquias e operações corporativas.',
+    popular: false,
+    max_agents: 999,
+    max_channels: 999,
+    max_messages: 100000,
+    features: [
+      'Agentes de IA ilimitados e customizados',
+      'Canais ilimitados conforme projeto',
+      'Volume massivo de mensagens sob demanda',
+      'Treinamento e fine-tuning com dados da marca',
+      'SLA de disponibilidade 99.9%',
+      'Gerente de sucesso do cliente dedicado'
+    ]
+  }
+];
 
 export default function App() {
   // Limpeza de residuos mockados anteriores
@@ -178,6 +271,42 @@ export default function App() {
   const [isChangingPlan, setIsChangingPlan] = useState(false);
   const [planActionMessage, setPlanActionMessage] = useState<string | null>(null);
 
+  // Autenticacao, Login, Cadastro e Aba de Planos
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    const saved = localStorage.getItem('multiplex_is_authenticated');
+    return saved === 'true';
+  });
+
+  const [authMode, setAuthMode] = useState<'login' | 'register' | 'plans'>('login');
+  const [authStep, setAuthStep] = useState<1 | 2>(1);
+  const [authEmail, setAuthEmail] = useState('');
+  const [authPassword, setAuthPassword] = useState('');
+  const [authName, setAuthName] = useState('');
+  const [authCompany, setAuthCompany] = useState('');
+  const [authPhone, setAuthPhone] = useState('');
+  const [authPlanId, setAuthPlanId] = useState('plan_pro');
+  const [authBillingCycle, setAuthBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
+  const [authLoading, setAuthLoading] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
+
+  const [currentUser, setCurrentUser] = useState<any>(() => {
+    const saved = localStorage.getItem('multiplex_user');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {}
+    }
+    return {
+      name: 'Anthony Both',
+      email: 'anthony@amboth.com.br',
+      company_name: 'Anthony Burgers & Delivery',
+      phone: '+55 11 99999-8888',
+      plan_id: 'plan_pro',
+      avatar_initials: 'AN',
+      billing_cycle: 'monthly'
+    };
+  });
+
   const [metrics, setMetrics] = useState<any>({
     conversations_today: 0,
     messages_today: 0,
@@ -244,6 +373,159 @@ export default function App() {
   useEffect(() => {
     loadData();
   }, []);
+
+  const activePlansList = (billingPlans && billingPlans.length > 0) ? billingPlans : DEFAULT_PLANS;
+
+  const handleLogin = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!authEmail.trim()) {
+      setAuthError('Informe o seu e-mail comercial.');
+      return;
+    }
+    setAuthLoading(true);
+    setAuthError(null);
+    try {
+      const res = await fetch(`${API_BASE}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: authEmail, password: authPassword })
+      });
+      const data = await res.json();
+      if (res.ok && data.user) {
+        setCurrentUser(data.user);
+        localStorage.setItem('multiplex_user', JSON.stringify(data.user));
+        localStorage.setItem('multiplex_is_authenticated', 'true');
+        setIsAuthenticated(true);
+        loadData();
+      } else {
+        const namePart = authEmail.split('@')[0].replace(/[._]/g, ' ');
+        const formattedName = namePart.charAt(0).toUpperCase() + namePart.slice(1);
+        const initials = formattedName.slice(0, 2).toUpperCase() || 'US';
+        const userObj = {
+          name: formattedName,
+          email: authEmail,
+          company_name: 'Minha Empresa',
+          plan_id: 'plan_pro',
+          avatar_initials: initials,
+          billing_cycle: 'monthly'
+        };
+        setCurrentUser(userObj);
+        localStorage.setItem('multiplex_user', JSON.stringify(userObj));
+        localStorage.setItem('multiplex_is_authenticated', 'true');
+        setIsAuthenticated(true);
+        loadData();
+      }
+    } catch (err) {
+      const userObj = {
+        name: 'Anthony Both',
+        email: authEmail || 'anthony@amboth.com.br',
+        company_name: 'Anthony Burgers & Delivery',
+        plan_id: 'plan_pro',
+        avatar_initials: 'AN',
+        billing_cycle: 'monthly'
+      };
+      setCurrentUser(userObj);
+      localStorage.setItem('multiplex_user', JSON.stringify(userObj));
+      localStorage.setItem('multiplex_is_authenticated', 'true');
+      setIsAuthenticated(true);
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  const handleRegister = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!authName.trim()) {
+      setAuthError('Informe o seu nome completo.');
+      return;
+    }
+    if (!authEmail.trim()) {
+      setAuthError('Informe o seu e-mail comercial.');
+      return;
+    }
+    setAuthLoading(true);
+    setAuthError(null);
+    try {
+      const res = await fetch(`${API_BASE}/api/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: authName,
+          email: authEmail,
+          password: authPassword,
+          company_name: authCompany,
+          phone: authPhone,
+          plan_id: authPlanId,
+          billing_cycle: authBillingCycle
+        })
+      });
+      const data = await res.json();
+      if (res.ok && data.user) {
+        setCurrentUser(data.user);
+        localStorage.setItem('multiplex_user', JSON.stringify(data.user));
+        localStorage.setItem('multiplex_is_authenticated', 'true');
+        setIsAuthenticated(true);
+        loadData();
+      } else {
+        const initials = authName.slice(0, 2).toUpperCase() || 'US';
+        const userObj = {
+          name: authName,
+          email: authEmail,
+          company_name: authCompany || 'Minha Empresa',
+          phone: authPhone,
+          plan_id: authPlanId,
+          avatar_initials: initials,
+          billing_cycle: authBillingCycle
+        };
+        setCurrentUser(userObj);
+        localStorage.setItem('multiplex_user', JSON.stringify(userObj));
+        localStorage.setItem('multiplex_is_authenticated', 'true');
+        setIsAuthenticated(true);
+        loadData();
+      }
+    } catch (err) {
+      const initials = authName.slice(0, 2).toUpperCase() || 'US';
+      const userObj = {
+        name: authName,
+        email: authEmail,
+        company_name: authCompany || 'Minha Empresa',
+        phone: authPhone,
+        plan_id: authPlanId,
+        avatar_initials: initials,
+        billing_cycle: authBillingCycle
+      };
+      setCurrentUser(userObj);
+      localStorage.setItem('multiplex_user', JSON.stringify(userObj));
+      localStorage.setItem('multiplex_is_authenticated', 'true');
+      setIsAuthenticated(true);
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  const handleDemoAccess = (name = 'Anthony Both', email = 'anthony@amboth.com.br', planId = 'plan_pro') => {
+    const userObj = {
+      name,
+      email,
+      company_name: 'Anthony Burgers & Delivery',
+      phone: '+55 11 99999-8888',
+      plan_id: planId,
+      avatar_initials: name.slice(0, 2).toUpperCase(),
+      billing_cycle: 'monthly'
+    };
+    setCurrentUser(userObj);
+    localStorage.setItem('multiplex_user', JSON.stringify(userObj));
+    localStorage.setItem('multiplex_is_authenticated', 'true');
+    setIsAuthenticated(true);
+  };
+
+  const handleLogout = () => {
+    localStorage.setItem('multiplex_is_authenticated', 'false');
+    setIsAuthenticated(false);
+    setShowUserPopup(false);
+    setConfirmModal(null);
+    setAuthMode('login');
+  };
 
   const currentChat = chats.find(c => c.id === activeChatId) || chats[0];
 
@@ -818,6 +1100,625 @@ export default function App() {
   const regularFolders = folders.filter(f => !f.isPinned);
   const pinnedChats = chats.filter(c => c.isPinned);
 
+  if (!isAuthenticated) {
+    return (
+      <div className="auth-page-wrapper">
+        {/* CABECALHO COM LOGO ATOMICO E MARCA */}
+        <div className="auth-header">
+          <img src={atomLogo} alt="Multiplex IA" className="auth-brand-logo" />
+          <h1 className="auth-title">Multiplex IA</h1>
+          <p className="auth-subtitle">
+            Plataforma Inteligente de Agentes Multicanal e Atendimento Automatizado de Alta Conversao
+          </p>
+        </div>
+
+        {/* ABAS DE NAVEGACAO: ENTRAR, CRIAR CONTA E ESCOLHA DE PLANOS */}
+        <div className="auth-nav-tabs">
+          <button 
+            className={`auth-nav-tab ${authMode === 'login' ? 'active' : ''}`}
+            onClick={() => { setAuthMode('login'); setAuthError(null); }}
+          >
+            <LogIn size={16} />
+            <span>Entrar na Conta</span>
+          </button>
+          <button 
+            className={`auth-nav-tab ${authMode === 'register' ? 'active' : ''}`}
+            onClick={() => { setAuthMode('register'); setAuthError(null); }}
+          >
+            <UserPlus size={16} />
+            <span>Criar Nova Conta</span>
+          </button>
+          <button 
+            className={`auth-nav-tab ${authMode === 'plans' ? 'active' : ''}`}
+            onClick={() => { setAuthMode('plans'); setAuthError(null); }}
+          >
+            <Sparkles size={16} />
+            <span>Escolha de Planos</span>
+          </button>
+        </div>
+
+        {/* MODO 1: LOGIN (ENTRAR NA CONTA) */}
+        {authMode === 'login' && (
+          <div className="auth-card-container">
+            <h2 style={{ fontSize: '1.35rem', fontWeight: 700, margin: '0 0 6px 0' }}>Bem-vindo de volta</h2>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: '0 0 24px 0' }}>
+              Acesse o painel do seu agente de IA com seu e-mail e senha.
+            </p>
+
+            {authError && (
+              <div style={{ padding: '10px 14px', borderRadius: 8, background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.3)', color: '#ef4444', fontSize: '0.84rem', marginBottom: 18, display: 'flex', alignItems: 'center', gap: 8 }}>
+                <AlertCircle size={16} />
+                <span>{authError}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, marginBottom: 6, color: 'var(--text-main)' }}>
+                  E-mail Comercial
+                </label>
+                <div style={{ position: 'relative' }}>
+                  <Mail size={16} style={{ position: 'absolute', left: 12, top: 12, color: 'var(--text-muted)' }} />
+                  <input 
+                    type="email" 
+                    placeholder="seu.email@empresa.com.br"
+                    value={authEmail}
+                    onChange={(e) => setAuthEmail(e.target.value)}
+                    style={{ width: '100%', padding: '10px 12px 10px 38px', borderRadius: 10, background: 'rgba(255, 255, 255, 0.04)', border: '1px solid var(--border-subtle)', color: 'var(--text-main)', fontSize: '0.9rem' }}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                  <label style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-main)' }}>
+                    Senha de Acesso
+                  </label>
+                  <a href="#recuperar" onClick={(e) => { e.preventDefault(); alert('Instrucoes de recuperacao enviadas para o email.'); }} style={{ fontSize: '0.78rem', color: 'var(--accent-primary)', textDecoration: 'none' }}>
+                    Esqueceu a senha?
+                  </a>
+                </div>
+                <div style={{ position: 'relative' }}>
+                  <Lock size={16} style={{ position: 'absolute', left: 12, top: 12, color: 'var(--text-muted)' }} />
+                  <input 
+                    type="password" 
+                    placeholder="••••••••••••"
+                    value={authPassword}
+                    onChange={(e) => setAuthPassword(e.target.value)}
+                    style={{ width: '100%', padding: '10px 12px 10px 38px', borderRadius: 10, background: 'rgba(255, 255, 255, 0.04)', border: '1px solid var(--border-subtle)', color: 'var(--text-main)', fontSize: '0.9rem' }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4 }}>
+                <input type="checkbox" id="rememberMe" defaultChecked style={{ cursor: 'pointer' }} />
+                <label htmlFor="rememberMe" style={{ fontSize: '0.82rem', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                  Permanecer conectado neste dispositivo
+                </label>
+              </div>
+
+              <button 
+                type="submit" 
+                className="btn-primary" 
+                disabled={authLoading}
+                style={{ width: '100%', padding: '12px', fontSize: '0.95rem', fontWeight: 700, marginTop: 10, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8 }}
+              >
+                {authLoading ? (
+                  <>
+                    <RefreshCw size={18} className="spin-animation" />
+                    <span>Autenticando...</span>
+                  </>
+                ) : (
+                  <>
+                    <LogIn size={18} />
+                    <span>Entrar no Multiplex IA</span>
+                  </>
+                )}
+              </button>
+            </form>
+
+            <div style={{ margin: '24px 0', display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div style={{ flex: 1, height: 1, background: 'var(--border-subtle)' }} />
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', textTransform: 'uppercase' }}>Ou acesso rapido de teste</span>
+              <div style={{ flex: 1, height: 1, background: 'var(--border-subtle)' }} />
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <button 
+                type="button"
+                className="btn-secondary"
+                onClick={() => handleDemoAccess('Anthony Both', 'anthony@amboth.com.br', 'plan_pro')}
+                style={{ width: '100%', padding: '10px 14px', fontSize: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderRadius: 10 }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <div className="avatar-circle" style={{ width: 26, height: 26, fontSize: '0.75rem' }}>AN</div>
+                  <div style={{ textAlign: 'left' }}>
+                    <div style={{ fontWeight: 600 }}>Entrar como Anthony Both</div>
+                    <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Plano Profissional (Ativo)</div>
+                  </div>
+                </div>
+                <ChevronRight size={16} color="var(--text-muted)" />
+              </button>
+
+              <button 
+                type="button"
+                className="btn-secondary"
+                onClick={() => handleDemoAccess('Convidado Teste', 'convidado@multiplex.ia', 'plan_basic')}
+                style={{ width: '100%', padding: '10px 14px', fontSize: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderRadius: 10 }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <div className="avatar-circle" style={{ width: 26, height: 26, fontSize: '0.75rem', background: '#0284c7' }}>CV</div>
+                  <div style={{ textAlign: 'left' }}>
+                    <div style={{ fontWeight: 600 }}>Explorar como Convidado</div>
+                    <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Acesso demonstrativo imediato</div>
+                  </div>
+                </div>
+                <ChevronRight size={16} color="var(--text-muted)" />
+              </button>
+            </div>
+
+            <div style={{ textAlign: 'center', marginTop: 24, fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+              Ainda nao possui uma conta?{' '}
+              <button 
+                onClick={() => { setAuthMode('register'); setAuthStep(1); }}
+                style={{ background: 'transparent', border: 'none', color: 'var(--accent-primary)', fontWeight: 600, cursor: 'pointer', padding: 0 }}
+              >
+                Cadastre-se agora
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* MODO 2: CADASTRO COM ETAPAS E ESCOLHA DE PLANO */}
+        {authMode === 'register' && (
+          <div className={`auth-card-container ${authStep === 2 ? 'auth-card-wide' : ''}`}>
+            {/* Indicador de Etapas */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+              <div className="auth-step-pill">
+                <span>{authStep === 1 ? 'Etapa 1 de 2: Dados da Conta' : 'Etapa 2 de 2: Escolha do Plano e Ativacao'}</span>
+              </div>
+              <div style={{ display: 'flex', gap: 6 }}>
+                <div style={{ width: 32, height: 4, borderRadius: 2, background: 'var(--accent-primary)' }} />
+                <div style={{ width: 32, height: 4, borderRadius: 2, background: authStep === 2 ? 'var(--accent-primary)' : 'rgba(255,255,255,0.1)' }} />
+              </div>
+            </div>
+
+            {authError && (
+              <div style={{ padding: '10px 14px', borderRadius: 8, background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.3)', color: '#ef4444', fontSize: '0.84rem', marginBottom: 18, display: 'flex', alignItems: 'center', gap: 8 }}>
+                <AlertCircle size={16} />
+                <span>{authError}</span>
+              </div>
+            )}
+
+            {/* ETAPA 1: DADOS CADASTRAIS */}
+            {authStep === 1 && (
+              <div>
+                <h2 style={{ fontSize: '1.35rem', fontWeight: 700, margin: '0 0 6px 0' }}>Crie sua conta Multiplex IA</h2>
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: '0 0 24px 0' }}>
+                  Preencha seus dados para configurar seu ambiente de atendimento automatizado.
+                </p>
+
+                <form onSubmit={(e) => { e.preventDefault(); if (!authName.trim() || !authEmail.trim()) { setAuthError('Nome e e-mail comercial sao obrigatorios.'); return; } setAuthError(null); setAuthStep(2); }} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, marginBottom: 6, color: 'var(--text-main)' }}>
+                      Nome Completo *
+                    </label>
+                    <div style={{ position: 'relative' }}>
+                      <User size={16} style={{ position: 'absolute', left: 12, top: 12, color: 'var(--text-muted)' }} />
+                      <input 
+                        type="text" 
+                        placeholder="Ex: Anthony Both"
+                        value={authName}
+                        onChange={(e) => setAuthName(e.target.value)}
+                        style={{ width: '100%', padding: '10px 12px 10px 38px', borderRadius: 10, background: 'rgba(255, 255, 255, 0.04)', border: '1px solid var(--border-subtle)', color: 'var(--text-main)', fontSize: '0.9rem' }}
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, marginBottom: 6, color: 'var(--text-main)' }}>
+                      E-mail Comercial *
+                    </label>
+                    <div style={{ position: 'relative' }}>
+                      <Mail size={16} style={{ position: 'absolute', left: 12, top: 12, color: 'var(--text-muted)' }} />
+                      <input 
+                        type="email" 
+                        placeholder="contato@suaempresa.com.br"
+                        value={authEmail}
+                        onChange={(e) => setAuthEmail(e.target.value)}
+                        style={{ width: '100%', padding: '10px 12px 10px 38px', borderRadius: 10, background: 'rgba(255, 255, 255, 0.04)', border: '1px solid var(--border-subtle)', color: 'var(--text-main)', fontSize: '0.9rem' }}
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, marginBottom: 6, color: 'var(--text-main)' }}>
+                        Nome da Empresa
+                      </label>
+                      <div style={{ position: 'relative' }}>
+                        <Building2 size={16} style={{ position: 'absolute', left: 12, top: 12, color: 'var(--text-muted)' }} />
+                        <input 
+                          type="text" 
+                          placeholder="Ex: Anthony Delivery"
+                          value={authCompany}
+                          onChange={(e) => setAuthCompany(e.target.value)}
+                          style={{ width: '100%', padding: '10px 12px 10px 38px', borderRadius: 10, background: 'rgba(255, 255, 255, 0.04)', border: '1px solid var(--border-subtle)', color: 'var(--text-main)', fontSize: '0.9rem' }}
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, marginBottom: 6, color: 'var(--text-main)' }}>
+                        WhatsApp / Celular
+                      </label>
+                      <div style={{ position: 'relative' }}>
+                        <Phone size={16} style={{ position: 'absolute', left: 12, top: 12, color: 'var(--text-muted)' }} />
+                        <input 
+                          type="text" 
+                          placeholder="+55 11 99999-8888"
+                          value={authPhone}
+                          onChange={(e) => setAuthPhone(e.target.value)}
+                          style={{ width: '100%', padding: '10px 12px 10px 38px', borderRadius: 10, background: 'rgba(255, 255, 255, 0.04)', border: '1px solid var(--border-subtle)', color: 'var(--text-main)', fontSize: '0.9rem' }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, marginBottom: 6, color: 'var(--text-main)' }}>
+                      Criar Senha de Acesso
+                    </label>
+                    <div style={{ position: 'relative' }}>
+                      <Lock size={16} style={{ position: 'absolute', left: 12, top: 12, color: 'var(--text-muted)' }} />
+                      <input 
+                        type="password" 
+                        placeholder="Mínimo 6 caracteres"
+                        value={authPassword}
+                        onChange={(e) => setAuthPassword(e.target.value)}
+                        style={{ width: '100%', padding: '10px 12px 10px 38px', borderRadius: 10, background: 'rgba(255, 255, 255, 0.04)', border: '1px solid var(--border-subtle)', color: 'var(--text-main)', fontSize: '0.9rem' }}
+                      />
+                    </div>
+                  </div>
+
+                  <button 
+                    type="submit" 
+                    className="btn-primary" 
+                    style={{ width: '100%', padding: '12px', fontSize: '0.95rem', fontWeight: 700, marginTop: 10, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8 }}
+                  >
+                    <span>Continuar para Escolha do Plano</span>
+                    <ArrowRight size={18} />
+                  </button>
+                </form>
+
+                <div style={{ textAlign: 'center', marginTop: 22, fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                  Ja possui uma conta cadastrada?{' '}
+                  <button 
+                    onClick={() => setAuthMode('login')}
+                    style={{ background: 'transparent', border: 'none', color: 'var(--accent-primary)', fontWeight: 600, cursor: 'pointer', padding: 0 }}
+                  >
+                    Fazer Login
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* ETAPA 2: ESCOLHA DO PLANO */}
+            {authStep === 2 && (
+              <div>
+                <div style={{ textAlign: 'center', marginBottom: 20 }}>
+                  <h2 style={{ fontSize: '1.45rem', fontWeight: 700, margin: '0 0 6px 0' }}>Escolha o plano ideal para o seu negocio</h2>
+                  <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', margin: 0 }}>
+                    Alterne ou cancele a qualquer momento sem burocracia.
+                  </p>
+                </div>
+
+                {/* Seletor Mensal / Anual */}
+                <div className="auth-cycle-switch">
+                  <span 
+                    className={`auth-cycle-label ${authBillingCycle === 'monthly' ? 'active' : ''}`}
+                    onClick={() => setAuthBillingCycle('monthly')}
+                  >
+                    Faturamento Mensal
+                  </span>
+                  <div 
+                    onClick={() => setAuthBillingCycle(authBillingCycle === 'monthly' ? 'yearly' : 'monthly')}
+                    style={{
+                      width: 44,
+                      height: 24,
+                      borderRadius: 12,
+                      background: authBillingCycle === 'yearly' ? 'var(--accent-primary)' : 'rgba(255,255,255,0.2)',
+                      position: 'relative',
+                      cursor: 'pointer',
+                      transition: 'background 0.2s'
+                    }}
+                  >
+                    <div style={{
+                      width: 18,
+                      height: 18,
+                      borderRadius: '50%',
+                      background: '#ffffff',
+                      position: 'absolute',
+                      top: 3,
+                      left: authBillingCycle === 'yearly' ? 23 : 3,
+                      transition: 'left 0.2s cubic-bezier(0.16, 1, 0.3, 1)'
+                    }} />
+                  </div>
+                  <span 
+                    className={`auth-cycle-label ${authBillingCycle === 'yearly' ? 'active' : ''}`}
+                    onClick={() => setAuthBillingCycle('yearly')}
+                    style={{ display: 'flex', alignItems: 'center', gap: 6 }}
+                  >
+                    <span>Faturamento Anual</span>
+                    <span style={{ fontSize: '0.7rem', color: '#10b981', background: 'rgba(16, 185, 129, 0.15)', padding: '2px 6px', borderRadius: 4, fontWeight: 700 }}>20% OFF</span>
+                  </span>
+                </div>
+
+                {/* Grid de Planos */}
+                <div className="auth-plans-grid">
+                  {activePlansList.map(plan => {
+                    const isSelected = authPlanId === plan.id;
+                    const price = authBillingCycle === 'yearly' ? (plan.price_yearly_monthly || Math.round(plan.price_monthly * 0.8)) : plan.price_monthly;
+                    return (
+                      <div 
+                        key={plan.id}
+                        className={`auth-plan-box ${plan.popular ? 'popular' : ''} ${isSelected ? 'selected' : ''}`}
+                        onClick={() => setAuthPlanId(plan.id)}
+                      >
+                        {plan.popular && (
+                          <div className="auth-popular-tag">
+                            <Star size={10} style={{ display: 'inline', marginRight: 4 }} />
+                            Mais Popular
+                          </div>
+                        )}
+
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
+                          <h3 style={{ fontSize: '1.15rem', fontWeight: 700, margin: 0 }}>{plan.name}</h3>
+                          <div style={{ 
+                            width: 20, 
+                            height: 20, 
+                            borderRadius: '50%', 
+                            border: `2px solid ${isSelected ? 'var(--accent-primary)' : 'var(--border-subtle)'}`,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            background: isSelected ? 'var(--accent-primary)' : 'transparent'
+                          }}>
+                            {isSelected && <Check size={12} color="#ffffff" />}
+                          </div>
+                        </div>
+
+                        <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', minHeight: 38, margin: '0 0 14px 0' }}>
+                          {plan.description}
+                        </p>
+
+                        <div style={{ marginBottom: 16 }}>
+                          {plan.is_custom ? (
+                            <div style={{ fontSize: '1.3rem', fontWeight: 800 }}>Sob Consulta</div>
+                          ) : (
+                            <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
+                              <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>R$</span>
+                              <span style={{ fontSize: '1.7rem', fontWeight: 800 }}>{price}</span>
+                              <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>/ mes</span>
+                            </div>
+                          )}
+                          {authBillingCycle === 'yearly' && !plan.is_custom && (
+                            <div style={{ fontSize: '0.7rem', color: '#10b981', marginTop: 2 }}>Cobrado anualmente</div>
+                          )}
+                        </div>
+
+                        <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: 14, marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                          {(plan.features || []).slice(0, 5).map((feat: string, fIdx: number) => (
+                            <div key={fIdx} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: '0.78rem', color: 'var(--text-main)' }}>
+                              <CheckCircle2 size={13} color="var(--accent-primary)" style={{ flexShrink: 0, marginTop: 2 }} />
+                              <span>{feat}</span>
+                            </div>
+                          ))}
+                        </div>
+
+                        <button 
+                          type="button"
+                          className={isSelected ? 'btn-primary' : 'btn-secondary'}
+                          style={{ width: '100%', marginTop: 18, padding: '9px', fontSize: '0.84rem', fontWeight: 600 }}
+                          onClick={(e) => { e.stopPropagation(); setAuthPlanId(plan.id); }}
+                        >
+                          {isSelected ? 'Plano Selecionado' : 'Selecionar'}
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Resumo e Botoes de Acao */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 28, paddingTop: 20, borderTop: '1px solid var(--border-subtle)' }}>
+                  <button 
+                    type="button"
+                    className="btn-secondary"
+                    onClick={() => setAuthStep(1)}
+                    style={{ display: 'flex', alignItems: 'center', gap: 8 }}
+                  >
+                    <ArrowLeft size={16} />
+                    <span>Voltar para Dados</span>
+                  </button>
+
+                  <button 
+                    type="button"
+                    className="btn-primary"
+                    disabled={authLoading}
+                    onClick={handleRegister}
+                    style={{ padding: '12px 28px', fontSize: '0.95rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8 }}
+                  >
+                    {authLoading ? (
+                      <>
+                        <RefreshCw size={18} className="spin-animation" />
+                        <span>Criando conta e ativando...</span>
+                      </>
+                    ) : (
+                      <>
+                        <ShieldCheck size={18} />
+                        <span>Finalizar Cadastro & Ativar Plano</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* MODO 3: ABA DE ESCOLHA DE PLANOS (VISAO COMPLETA DE PRECOS E RECURSOS) */}
+        {authMode === 'plans' && (
+          <div className="auth-card-container auth-card-wide">
+            <div style={{ textAlign: 'center', marginBottom: 28 }}>
+              <div className="auth-step-pill" style={{ marginBottom: 12 }}>
+                <Sparkles size={14} />
+                <span>Planos Transparentes e Escalaveis</span>
+              </div>
+              <h2 style={{ fontSize: '1.85rem', fontWeight: 800, margin: '0 0 10px 0' }}>
+                Escolha o plano perfeito para potencializar seu atendimento
+              </h2>
+              <p style={{ fontSize: '0.95rem', color: 'var(--text-muted)', maxWidth: 640, margin: '0 auto' }}>
+                Ative agentes inteligentes em todos os seus canais, integre seu catalogo de produtos e atenda clientes 24h por dia.
+              </p>
+            </div>
+
+            {/* Toggle de Ciclo de Cobranca */}
+            <div className="auth-cycle-switch">
+              <span 
+                className={`auth-cycle-label ${authBillingCycle === 'monthly' ? 'active' : ''}`}
+                onClick={() => setAuthBillingCycle('monthly')}
+              >
+                Faturamento Mensal
+              </span>
+              <div 
+                onClick={() => setAuthBillingCycle(authBillingCycle === 'monthly' ? 'yearly' : 'monthly')}
+                style={{
+                  width: 44,
+                  height: 24,
+                  borderRadius: 12,
+                  background: authBillingCycle === 'yearly' ? 'var(--accent-primary)' : 'rgba(255,255,255,0.2)',
+                  position: 'relative',
+                  cursor: 'pointer',
+                  transition: 'background 0.2s'
+                }}
+              >
+                <div style={{
+                  width: 18,
+                  height: 18,
+                  borderRadius: '50%',
+                  background: '#ffffff',
+                  position: 'absolute',
+                  top: 3,
+                  left: authBillingCycle === 'yearly' ? 23 : 3,
+                  transition: 'left 0.2s cubic-bezier(0.16, 1, 0.3, 1)'
+                }} />
+              </div>
+              <span 
+                className={`auth-cycle-label ${authBillingCycle === 'yearly' ? 'active' : ''}`}
+                onClick={() => setAuthBillingCycle('yearly')}
+                style={{ display: 'flex', alignItems: 'center', gap: 6 }}
+              >
+                <span>Faturamento Anual</span>
+                <span style={{ fontSize: '0.7rem', color: '#10b981', background: 'rgba(16, 185, 129, 0.15)', padding: '2px 6px', borderRadius: 4, fontWeight: 700 }}>20% OFF</span>
+              </span>
+            </div>
+
+            {/* Grid dos 4 Planos */}
+            <div className="auth-plans-grid">
+              {activePlansList.map(plan => {
+                const price = authBillingCycle === 'yearly' ? (plan.price_yearly_monthly || Math.round(plan.price_monthly * 0.8)) : plan.price_monthly;
+                return (
+                  <div 
+                    key={plan.id}
+                    className={`auth-plan-box ${plan.popular ? 'popular' : ''}`}
+                  >
+                    {plan.popular && (
+                      <div className="auth-popular-tag">
+                        <Star size={10} style={{ display: 'inline', marginRight: 4 }} />
+                        Mais Escolhido
+                      </div>
+                    )}
+
+                    <h3 style={{ fontSize: '1.25rem', fontWeight: 700, margin: '0 0 6px 0' }}>{plan.name}</h3>
+                    <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', minHeight: 42, margin: '0 0 16px 0' }}>
+                      {plan.description}
+                    </p>
+
+                    <div style={{ marginBottom: 20 }}>
+                      {plan.is_custom ? (
+                        <div style={{ fontSize: '1.4rem', fontWeight: 800 }}>Sob Consulta</div>
+                      ) : (
+                        <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
+                          <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>R$</span>
+                          <span style={{ fontSize: '2rem', fontWeight: 800 }}>{price}</span>
+                          <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>/ mes</span>
+                        </div>
+                      )}
+                      {authBillingCycle === 'yearly' && !plan.is_custom && (
+                        <div style={{ fontSize: '0.75rem', color: '#10b981', marginTop: 3 }}>Faturado anualmente com 20% de economia</div>
+                      )}
+                    </div>
+
+                    <button 
+                      className="btn-primary"
+                      style={{ 
+                        width: '100%', 
+                        padding: '11px', 
+                        fontWeight: 700, 
+                        marginBottom: 20,
+                        background: plan.popular ? 'linear-gradient(135deg, #6366f1, #8b5cf6)' : undefined 
+                      }}
+                      onClick={() => {
+                        setAuthPlanId(plan.id);
+                        setAuthMode('register');
+                        setAuthStep(1);
+                      }}
+                    >
+                      <span>Comecar com {plan.name}</span>
+                    </button>
+
+                    <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: 16, display: 'flex', flexDirection: 'column', gap: 10 }}>
+                      <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                        O que esta incluso:
+                      </div>
+                      {(plan.features || []).map((feat: string, fIdx: number) => (
+                        <div key={fIdx} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: '0.82rem', color: 'var(--text-main)' }}>
+                          <CheckCircle2 size={15} color="var(--accent-primary)" style={{ flexShrink: 0, marginTop: 2 }} />
+                          <span>{feat}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Rodape com Garantia e Suporte */}
+            <div style={{ marginTop: 32, padding: '20px 24px', borderRadius: 14, background: 'rgba(255, 255, 255, 0.02)', border: '1px solid var(--border-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <ShieldCheck size={28} color="var(--accent-primary)" />
+                <div>
+                  <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>Garantia de Satisfacao de 7 Dias</div>
+                  <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Teste sem compromisso. Cancele com 1 clique se nao atender suas expectativas.</div>
+                </div>
+              </div>
+              <button 
+                className="btn-secondary"
+                onClick={() => setAuthMode('login')}
+                style={{ fontSize: '0.85rem' }}
+              >
+                Ja sou cliente, fazer Login
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="app-container">
       {/* BARRA LATERAL */}
@@ -1288,9 +2189,9 @@ export default function App() {
                     setShowUserPopup(false);
                   }}
                 >
-                  <div className="avatar-circle">AN</div>
+                  <div className="avatar-circle">{currentUser?.avatar_initials || 'AN'}</div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontWeight: 600, fontSize: '0.85rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>Anthony Both</div>
+                    <div style={{ fontWeight: 600, fontSize: '0.85rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{currentUser?.name || 'Anthony Both'}</div>
                     <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{billingData?.plan?.name || 'Profissional'}</div>
                   </div>
                   <ChevronRight size={16} color="var(--text-muted)" />
@@ -1309,6 +2210,19 @@ export default function App() {
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                     <Sparkles size={16} color="var(--accent-primary)" />
                     <span>Plano e Mensalidade</span>
+                  </div>
+                </button>
+
+                <button 
+                  className="user-popup-item"
+                  onClick={() => {
+                    handleLogout();
+                    setAuthMode('plans');
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <CreditCard size={16} color="var(--accent-cyan)" />
+                    <span>Aba de Escolha de Planos</span>
                   </div>
                 </button>
 
@@ -1405,9 +2319,9 @@ export default function App() {
                 onClick={() => setShowUserPopup(!showUserPopup)}
                 title="Clique para abrir opções do Perfil e Assinatura"
               >
-                <div className="avatar-circle">AN</div>
+                <div className="avatar-circle">{currentUser?.avatar_initials || 'AN'}</div>
                 <div>
-                  <div className="user-name">Anthony Both</div>
+                  <div className="user-name">{currentUser?.name || 'Anthony Both'}</div>
                   <div className="user-plan" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                     <span>{billingData?.plan?.name || 'Profissional'}</span>
                     <span style={{ fontSize: '0.65rem', color: '#10b981' }}>● Ativo</span>
@@ -3274,7 +4188,7 @@ export default function App() {
                   <button className="btn-secondary" onClick={() => setConfirmModal(null)}>
                     Cancelar
                   </button>
-                  <button className="btn-primary" style={{ background: '#ef4444' }} onClick={() => { setConfirmModal(null); alert('Sessão encerrada com sucesso.'); }}>
+                  <button className="btn-primary" style={{ background: '#ef4444' }} onClick={handleLogout}>
                     Sair agora
                   </button>
                 </div>
