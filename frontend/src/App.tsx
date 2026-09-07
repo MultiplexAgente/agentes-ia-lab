@@ -1200,28 +1200,28 @@ export default function App() {
       {/* TELA: ENSINAR IA */}
       {activeView === 'teach' && (
         <div className="main-panel-scrollable">
-          <div className="page-header">
+          <div className="page-header" style={{ marginBottom: 0 }}>
             <div>
-              <h1 className="page-title">Ensinar IA</h1>
-              <p className="page-desc">Ensine novos produtos, regras, horarios ou precos em linguagem natural.</p>
+              <h1 className="page-title" style={{ fontSize: '1.3rem' }}>Ensinar IA</h1>
+              <p className="page-desc" style={{ fontSize: '0.8rem' }}>Ensine novos produtos, regras, horarios ou precos em linguagem natural.</p>
             </div>
-            <button className="btn-secondary" onClick={() => setActiveView('chat')}>
-              <MessageSquare size={16} /> Voltar ao Chat
+            <button className="btn-secondary" style={{ padding: '6px 12px', fontSize: '0.8rem' }} onClick={() => setActiveView('chat')}>
+              <MessageSquare size={14} /> Voltar ao Chat
             </button>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 20 }}>
-            <div className="glass-panel" style={{ padding: 20, display: 'flex', flexDirection: 'column', height: '650px' }}>
-              <h2 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: 12 }}>Treinamento Conversacional</h2>
-              <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 12, paddingRight: 6 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 14, height: 'calc(100vh - 130px)', minHeight: '340px', maxHeight: '450px' }}>
+            <div className="glass-panel" style={{ padding: 14, display: 'flex', flexDirection: 'column', height: '100%' }}>
+              <h2 style={{ fontSize: '0.95rem', fontWeight: 600, marginBottom: 8 }}>Treinamento Conversacional</h2>
+              <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 8, paddingRight: 4 }}>
                 {teachChat.map((m, idx) => (
                   <div key={idx} style={{ alignSelf: m.sender === 'user' ? 'flex-end' : 'flex-start', maxWidth: '85%' }}>
                     <div style={{
                       background: m.sender === 'user' ? 'var(--accent-primary)' : 'var(--bg-card-inner)',
                       color: m.sender === 'user' ? '#fff' : 'var(--text-main)',
-                      padding: '10px 14px',
-                      borderRadius: 16,
-                      fontSize: '0.9rem',
+                      padding: '8px 12px',
+                      borderRadius: 14,
+                      fontSize: '0.84rem',
                       border: m.sender === 'agent' ? '1px solid var(--border-subtle)' : 'none'
                     }}>
                       {m.text}
@@ -1230,33 +1230,34 @@ export default function App() {
                 ))}
               </div>
 
-              <div style={{ display: 'flex', gap: 10, marginTop: 14 }}>
+              <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
                 <input 
                   type="text" 
                   placeholder="Ex: O combo especial custa R$ 35,00..."
                   value={teachInput}
                   onChange={(e) => setTeachInput(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSendTeach()}
+                  style={{ padding: '8px 10px', fontSize: '0.82rem' }}
                 />
-                <button className="btn-primary" onClick={handleSendTeach}>
-                  <Send size={16} /> Ensinar
+                <button className="btn-primary" style={{ padding: '8px 14px', fontSize: '0.82rem' }} onClick={handleSendTeach}>
+                  <Send size={14} /> Ensinar
                 </button>
               </div>
             </div>
 
-            <div className="glass-panel" style={{ padding: 20, overflowY: 'auto', maxHeight: '650px' }}>
-              <h2 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: 12 }}>Conhecimento Estruturado ({structuredHistory.length})</h2>
+            <div className="glass-panel" style={{ padding: 14, overflowY: 'auto', height: '100%' }}>
+              <h2 style={{ fontSize: '0.95rem', fontWeight: 600, marginBottom: 8 }}>Conhecimento Estruturado ({structuredHistory.length})</h2>
               {structuredHistory.length === 0 ? (
-                <div style={{ color: 'var(--text-dim)', fontSize: '0.88rem' }}>Nenhum item estruturado ainda. Use o chat para ensinar o Multiplex.</div>
+                <div style={{ color: 'var(--text-dim)', fontSize: '0.82rem', padding: '10px 0' }}>Nenhum item estruturado ainda. Use o chat para ensinar o Multiplex.</div>
               ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                   {structuredHistory.map(item => (
-                    <div key={item.id} className="glass-card" style={{ padding: 12 }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 600, fontSize: '0.88rem' }}>
+                    <div key={item.id} className="glass-card" style={{ padding: 10 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 600, fontSize: '0.82rem' }}>
                         <span>{item.subject}</span>
-                        <span className="badge" style={{ background: 'rgba(99,102,241,0.15)', color: 'var(--accent-cyan)' }}>{item.item_type}</span>
+                        <span className="badge" style={{ background: 'rgba(99,102,241,0.15)', color: 'var(--accent-cyan)', fontSize: '0.68rem', padding: '2px 6px' }}>{item.item_type}</span>
                       </div>
-                      <pre style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: 6, whiteSpace: 'pre-wrap' }}>
+                      <pre style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: 4, whiteSpace: 'pre-wrap' }}>
                         {JSON.stringify(item.data, null, 2)}
                       </pre>
                     </div>
@@ -1518,27 +1519,27 @@ export default function App() {
       {/* TELA: PLAYGROUND */}
       {activeView === 'playground' && (
         <div className="main-panel-scrollable">
-          <div className="page-header">
+          <div className="page-header" style={{ marginBottom: 0 }}>
             <div>
-              <h1 className="page-title">Playground de Testes</h1>
-              <p className="page-desc">Simulacao e inspecao de funcoes e regras em tempo real.</p>
+              <h1 className="page-title" style={{ fontSize: '1.3rem' }}>Playground de Testes</h1>
+              <p className="page-desc" style={{ fontSize: '0.8rem' }}>Simulacao e inspecao de funcoes e regras em tempo real.</p>
             </div>
-            <button className="btn-secondary" onClick={() => setActiveView('chat')}>
-              <MessageSquare size={16} /> Voltar ao Chat
+            <button className="btn-secondary" style={{ padding: '6px 12px', fontSize: '0.8rem' }} onClick={() => setActiveView('chat')}>
+              <MessageSquare size={14} /> Voltar ao Chat
             </button>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1.3fr 1fr', gap: 20 }}>
-            <div className="glass-panel" style={{ padding: 20, display: 'flex', flexDirection: 'column', height: '620px' }}>
-              <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1.3fr 1fr', gap: 14, height: 'calc(100vh - 130px)', minHeight: '340px', maxHeight: '450px' }}>
+            <div className="glass-panel" style={{ padding: 14, display: 'flex', flexDirection: 'column', height: '100%' }}>
+              <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 8, paddingRight: 4 }}>
                 {playgroundMessages.map((m, idx) => (
                   <div key={idx} style={{ alignSelf: m.role === 'user' ? 'flex-end' : 'flex-start', maxWidth: '85%' }}>
                     <div style={{
                       background: m.role === 'user' ? 'var(--accent-primary)' : 'var(--bg-card-inner)',
                       color: m.role === 'user' ? '#fff' : 'var(--text-main)',
-                      padding: '10px 14px',
-                      borderRadius: 16,
-                      fontSize: '0.9rem',
+                      padding: '8px 12px',
+                      borderRadius: 14,
+                      fontSize: '0.84rem',
                       border: m.role === 'assistant' ? '1px solid var(--border-subtle)' : 'none'
                     }}>
                       {m.content}
@@ -1547,22 +1548,23 @@ export default function App() {
                 ))}
               </div>
 
-              <div style={{ display: 'flex', gap: 10, marginTop: 14 }}>
+              <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
                 <input 
                   type="text" 
                   placeholder="Digite uma mensagem de teste..."
                   value={playgroundInput}
                   onChange={(e) => setPlaygroundInput(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handlePlaygroundSend()}
+                  style={{ padding: '8px 10px', fontSize: '0.82rem' }}
                 />
-                <button className="btn-primary" onClick={handlePlaygroundSend}>
-                  <Send size={16} /> Testar
+                <button className="btn-primary" style={{ padding: '8px 14px', fontSize: '0.82rem' }} onClick={handlePlaygroundSend}>
+                  <Send size={14} /> Testar
                 </button>
               </div>
             </div>
 
-            <div className="glass-panel" style={{ padding: 20, overflowY: 'auto', maxHeight: '620px' }}>
-              <h2 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: 12 }}>Diagnostico de Execucao</h2>
+            <div className="glass-panel" style={{ padding: 14, overflowY: 'auto', height: '100%' }}>
+              <h2 style={{ fontSize: '0.95rem', fontWeight: 600, marginBottom: 8 }}>Diagnostico de Execucao</h2>
               {playgroundDebug ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                   <div className="glass-card" style={{ padding: 12 }}>

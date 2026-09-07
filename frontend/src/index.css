@@ -680,14 +680,14 @@ body.light .n8n-badge {
   transform: scale(1.08);
 }
 
-/* Painel de Conteúdo para Telas Principais */
+/* Painel de Conteudo para Telas Principais */
 .main-panel-scrollable {
   flex: 1;
   overflow-y: auto;
-  padding: 30px;
+  padding: 16px 20px;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 14px;
   height: 100vh;
 }
 
