@@ -325,7 +325,7 @@ export default function App() {
           </div>
           <div>
             <div className="brand-title">Multiplex</div>
-            <div className="brand-subtitle">Agente de IA Omnichannel</div>
+            <div className="brand-subtitle">Agente de IA Multicanal</div>
           </div>
         </div>
 
@@ -334,7 +334,7 @@ export default function App() {
             <LayoutDashboard size={18} /> Dashboard
           </button>
           <button className={`nav-item ${activeTab === 'inbox' ? 'active' : ''}`} onClick={() => setActiveTab('inbox')}>
-            <MessageSquare size={18} /> Inbox Omnichannel
+            <MessageSquare size={18} /> Inbox Multicanal
           </button>
           <button className={`nav-item ${activeTab === 'teach' ? 'active' : ''}`} onClick={() => setActiveTab('teach')}>
             <Sparkles size={18} /> Ensinar IA

@@ -26,7 +26,7 @@ app.get('/api/health', (req, res) => {
   res.json({
     status: 'online',
     timestamp: new Date().toISOString(),
-    service: 'Omnichannel AI Agent SaaS Platform',
+    service: 'Agente de IA Multicanal - Multiplex',
     version: '1.0.0',
     n8n_connected: true
   });
@@ -47,7 +47,7 @@ app.use('/api/logs', logsRouter);
 if (process.env.NODE_ENV !== 'test') {
   app.listen(PORT, () => {
     console.log(`=======================================================`);
-    console.log(`🚀 AGENTE DE IA OMNICHANNEL - BACKEND RODANDO NA PORTA ${PORT}`);
+    console.log(`🚀 AGENTE DE IA MULTICANAL - MULTIPLEX RODANDO NA PORTA ${PORT}`);
     console.log(`🌐 Health Check: http://localhost:${PORT}/api/health`);
     console.log(`🤖 Integração com n8n: http://localhost:5678`);
     console.log(`=======================================================`);

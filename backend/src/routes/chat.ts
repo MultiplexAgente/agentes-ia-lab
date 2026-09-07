@@ -11,7 +11,7 @@ export const chatRouter = Router();
 const DEFAULT_COMPANY_ID = '11111111-1111-1111-1111-111111111111';
 
 /**
- * Lista conversas unificadas (Inbox Omnichannel) com filtros
+ * Lista conversas unificadas (Inbox Multicanal) com filtros
  */
 chatRouter.get('/conversations', (req: Request, res: Response) => {
   const companyId = (req.query.companyId as string) || DEFAULT_COMPANY_ID;
