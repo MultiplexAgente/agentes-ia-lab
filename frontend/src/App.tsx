@@ -274,7 +274,7 @@ export default function App() {
   // Autenticacao, Login, Cadastro e Aba de Planos
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
     const saved = localStorage.getItem('multiplex_is_authenticated');
-    return saved === 'true';
+    return saved !== 'false';
   });
 
   const [authMode, setAuthMode] = useState<'login' | 'register' | 'plans'>('login');
@@ -1103,180 +1103,257 @@ export default function App() {
   if (!isAuthenticated) {
     return (
       <div className="auth-page-wrapper">
-        {/* CABECALHO COM LOGO ATOMICO E MARCA */}
-        <div className="auth-header">
-          <img src={atomLogo} alt="Multiplex IA" className="auth-brand-logo" />
-          <h1 className="auth-title">Multiplex IA</h1>
-          <p className="auth-subtitle">
-            Plataforma Inteligente de Agentes Multicanal e Atendimento Automatizado de Alta Conversao
-          </p>
-        </div>
+        {/* BARRA SUPERIOR DE NAVEGACAO */}
+        <header className="auth-top-navbar">
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <img 
+              src={atomLogo} 
+              alt="Multiplex IA" 
+              style={{ width: 34, height: 34, borderRadius: 10, objectFit: 'cover', border: '1px solid rgba(0, 210, 255, 0.4)', boxShadow: '0 0 12px rgba(0, 210, 255, 0.25)' }} 
+            />
+            <div>
+              <div style={{ fontWeight: 800, fontSize: '1.05rem', letterSpacing: '-0.3px', display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span>Multiplex IA</span>
+                <span style={{ fontSize: '0.68rem', color: '#06b6d4', background: 'rgba(6, 182, 212, 0.12)', border: '1px solid rgba(6, 182, 212, 0.3)', padding: '2px 8px', borderRadius: 10, fontWeight: 700 }}>v1.2 GPT-4o</span>
+              </div>
+              <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Plataforma de Agentes Multicanal</div>
+            </div>
+          </div>
 
-        {/* ABAS DE NAVEGACAO: ENTRAR, CRIAR CONTA E ESCOLHA DE PLANOS */}
-        <div className="auth-nav-tabs">
-          <button 
-            className={`auth-nav-tab ${authMode === 'login' ? 'active' : ''}`}
-            onClick={() => { setAuthMode('login'); setAuthError(null); }}
-          >
-            <LogIn size={16} />
-            <span>Entrar na Conta</span>
-          </button>
-          <button 
-            className={`auth-nav-tab ${authMode === 'register' ? 'active' : ''}`}
-            onClick={() => { setAuthMode('register'); setAuthError(null); }}
-          >
-            <UserPlus size={16} />
-            <span>Criar Nova Conta</span>
-          </button>
-          <button 
-            className={`auth-nav-tab ${authMode === 'plans' ? 'active' : ''}`}
-            onClick={() => { setAuthMode('plans'); setAuthError(null); }}
-          >
-            <Sparkles size={16} />
-            <span>Escolha de Planos</span>
-          </button>
-        </div>
+          <div className="auth-nav-tabs">
+            <button 
+              className={`auth-nav-tab ${authMode === 'login' ? 'active' : ''}`}
+              onClick={() => { setAuthMode('login'); setAuthError(null); }}
+            >
+              <LogIn size={15} />
+              <span>Entrar na Conta</span>
+            </button>
+            <button 
+              className={`auth-nav-tab ${authMode === 'register' ? 'active' : ''}`}
+              onClick={() => { setAuthMode('register'); setAuthError(null); }}
+            >
+              <UserPlus size={15} />
+              <span>Criar Nova Conta</span>
+            </button>
+            <button 
+              className={`auth-nav-tab ${authMode === 'plans' ? 'active' : ''}`}
+              onClick={() => { setAuthMode('plans'); setAuthError(null); }}
+            >
+              <Sparkles size={15} />
+              <span>Escolha de Planos</span>
+            </button>
+          </div>
 
-        {/* MODO 1: LOGIN (ENTRAR NA CONTA) */}
+          <button 
+            className="btn-secondary"
+            onClick={() => handleDemoAccess('Anthony Both', 'anthony@amboth.com.br', 'plan_pro')}
+            style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.84rem', padding: '8px 16px', borderRadius: 10, borderColor: 'rgba(99, 102, 241, 0.4)', background: 'rgba(99, 102, 241, 0.1)' }}
+          >
+            <span>Acessar Painel Direto</span>
+            <ArrowRight size={15} color="var(--accent-primary)" />
+          </button>
+        </header>
+
+        {/* MODO 1: LOGIN (SPLIT SCREEN SAAS) */}
         {authMode === 'login' && (
-          <div className="auth-card-container">
-            <h2 style={{ fontSize: '1.35rem', fontWeight: 700, margin: '0 0 6px 0' }}>Bem-vindo de volta</h2>
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: '0 0 24px 0' }}>
-              Acesse o painel do seu agente de IA com seu e-mail e senha.
-            </p>
-
-            {authError && (
-              <div style={{ padding: '10px 14px', borderRadius: 8, background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.3)', color: '#ef4444', fontSize: '0.84rem', marginBottom: 18, display: 'flex', alignItems: 'center', gap: 8 }}>
-                <AlertCircle size={16} />
-                <span>{authError}</span>
+          <div className="auth-split-layout">
+            {/* LADO ESQUERDO: APRESENTACAO E PROVAS DE VALOR */}
+            <div className="auth-hero-showcase">
+              <div className="auth-hero-pill">
+                <Sparkles size={13} />
+                <span>Atendimento Automatizado de Alta Conversao</span>
               </div>
-            )}
 
-            <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <div>
-                <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, marginBottom: 6, color: 'var(--text-main)' }}>
-                  E-mail Comercial
-                </label>
-                <div style={{ position: 'relative' }}>
-                  <Mail size={16} style={{ position: 'absolute', left: 12, top: 12, color: 'var(--text-muted)' }} />
-                  <input 
-                    type="email" 
-                    placeholder="seu.email@empresa.com.br"
-                    value={authEmail}
-                    onChange={(e) => setAuthEmail(e.target.value)}
-                    style={{ width: '100%', padding: '10px 12px 10px 38px', borderRadius: 10, background: 'rgba(255, 255, 255, 0.04)', border: '1px solid var(--border-subtle)', color: 'var(--text-main)', fontSize: '0.9rem' }}
-                    required
-                  />
+              <h1 className="auth-hero-title">
+                O Cérebro de IA Multicanal para sua Empresa.
+              </h1>
+
+              <p className="auth-hero-desc">
+                Atenda clientes no WhatsApp, Instagram e Telegram com respostas instantâneas, consulta automática ao catálogo de produtos e integração humanizada 24 horas por dia.
+              </p>
+
+              <div className="auth-feature-list">
+                <div className="auth-feature-item">
+                  <div className="auth-feature-icon">
+                    <Smartphone size={18} />
+                  </div>
+                  <div>
+                    <div style={{ fontWeight: 700, fontSize: '0.9rem', marginBottom: 2 }}>Multicanal Simultâneo</div>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Atenda no WhatsApp oficial, Instagram Direct e Telegram em tempo real sem filas.</div>
+                  </div>
+                </div>
+
+                <div className="auth-feature-item">
+                  <div className="auth-feature-icon" style={{ background: 'rgba(6, 182, 212, 0.15)', color: 'var(--accent-cyan)' }}>
+                    <UtensilsCrossed size={18} />
+                  </div>
+                  <div>
+                    <div style={{ fontWeight: 700, fontSize: '0.9rem', marginBottom: 2 }}>Catálogo Inteligente com IA</div>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Cole texto de produtos ou cardápios inteiros e a IA estrutura nomes, preços e categorias em 1 clique.</div>
+                  </div>
+                </div>
+
+                <div className="auth-feature-item">
+                  <div className="auth-feature-icon" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#10b981' }}>
+                    <ShieldCheck size={18} />
+                  </div>
+                  <div>
+                    <div style={{ fontWeight: 700, fontSize: '0.9rem', marginBottom: 2 }}>Handoff Seguro e Memória</div>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Transfira para atendentes humanos quando necessário com contexto de conversa preservado.</div>
+                  </div>
                 </div>
               </div>
 
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                  <label style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-main)' }}>
-                    Senha de Acesso
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 16px', borderRadius: 10, background: 'rgba(255, 255, 255, 0.02)', border: '1px solid var(--border-subtle)', width: 'fit-content' }}>
+                <Activity size={16} color="#10b981" />
+                <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+                  <strong style={{ color: 'var(--text-main)' }}>+12.840</strong> mensagens atendidas hoje com 99.4% de satisfação.
+                </span>
+              </div>
+            </div>
+
+            {/* LADO DIREITO: FORMULARIO DE LOGIN */}
+            <div className="auth-card-container">
+              <div style={{ marginBottom: 20 }}>
+                <h2 style={{ fontSize: '1.4rem', fontWeight: 700, margin: '0 0 6px 0' }}>Entrar na sua Conta</h2>
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: 0 }}>
+                  Informe seus dados para acessar o painel do Multiplex IA.
+                </p>
+              </div>
+
+              {authError && (
+                <div style={{ padding: '10px 14px', borderRadius: 8, background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.3)', color: '#ef4444', fontSize: '0.84rem', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <AlertCircle size={16} />
+                  <span>{authError}</span>
+                </div>
+              )}
+
+              <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, marginBottom: 6, color: 'var(--text-main)' }}>
+                    E-mail Comercial
                   </label>
-                  <a href="#recuperar" onClick={(e) => { e.preventDefault(); alert('Instrucoes de recuperacao enviadas para o email.'); }} style={{ fontSize: '0.78rem', color: 'var(--accent-primary)', textDecoration: 'none' }}>
-                    Esqueceu a senha?
-                  </a>
-                </div>
-                <div style={{ position: 'relative' }}>
-                  <Lock size={16} style={{ position: 'absolute', left: 12, top: 12, color: 'var(--text-muted)' }} />
-                  <input 
-                    type="password" 
-                    placeholder="••••••••••••"
-                    value={authPassword}
-                    onChange={(e) => setAuthPassword(e.target.value)}
-                    style={{ width: '100%', padding: '10px 12px 10px 38px', borderRadius: 10, background: 'rgba(255, 255, 255, 0.04)', border: '1px solid var(--border-subtle)', color: 'var(--text-main)', fontSize: '0.9rem' }}
-                  />
-                </div>
-              </div>
-
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4 }}>
-                <input type="checkbox" id="rememberMe" defaultChecked style={{ cursor: 'pointer' }} />
-                <label htmlFor="rememberMe" style={{ fontSize: '0.82rem', color: 'var(--text-muted)', cursor: 'pointer' }}>
-                  Permanecer conectado neste dispositivo
-                </label>
-              </div>
-
-              <button 
-                type="submit" 
-                className="btn-primary" 
-                disabled={authLoading}
-                style={{ width: '100%', padding: '12px', fontSize: '0.95rem', fontWeight: 700, marginTop: 10, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8 }}
-              >
-                {authLoading ? (
-                  <>
-                    <RefreshCw size={18} className="spin-animation" />
-                    <span>Autenticando...</span>
-                  </>
-                ) : (
-                  <>
-                    <LogIn size={18} />
-                    <span>Entrar no Multiplex IA</span>
-                  </>
-                )}
-              </button>
-            </form>
-
-            <div style={{ margin: '24px 0', display: 'flex', alignItems: 'center', gap: 12 }}>
-              <div style={{ flex: 1, height: 1, background: 'var(--border-subtle)' }} />
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', textTransform: 'uppercase' }}>Ou acesso rapido de teste</span>
-              <div style={{ flex: 1, height: 1, background: 'var(--border-subtle)' }} />
-            </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              <button 
-                type="button"
-                className="btn-secondary"
-                onClick={() => handleDemoAccess('Anthony Both', 'anthony@amboth.com.br', 'plan_pro')}
-                style={{ width: '100%', padding: '10px 14px', fontSize: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderRadius: 10 }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <div className="avatar-circle" style={{ width: 26, height: 26, fontSize: '0.75rem' }}>AN</div>
-                  <div style={{ textAlign: 'left' }}>
-                    <div style={{ fontWeight: 600 }}>Entrar como Anthony Both</div>
-                    <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Plano Profissional (Ativo)</div>
+                  <div style={{ position: 'relative' }}>
+                    <Mail size={16} style={{ position: 'absolute', left: 12, top: 12, color: 'var(--text-muted)' }} />
+                    <input 
+                      type="email" 
+                      placeholder="seu.email@empresa.com.br"
+                      value={authEmail}
+                      onChange={(e) => setAuthEmail(e.target.value)}
+                      style={{ width: '100%', padding: '10px 12px 10px 38px', borderRadius: 10, background: 'rgba(255, 255, 255, 0.04)', border: '1px solid var(--border-subtle)', color: 'var(--text-main)', fontSize: '0.9rem' }}
+                      required
+                    />
                   </div>
                 </div>
-                <ChevronRight size={16} color="var(--text-muted)" />
-              </button>
 
-              <button 
-                type="button"
-                className="btn-secondary"
-                onClick={() => handleDemoAccess('Convidado Teste', 'convidado@multiplex.ia', 'plan_basic')}
-                style={{ width: '100%', padding: '10px 14px', fontSize: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderRadius: 10 }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <div className="avatar-circle" style={{ width: 26, height: 26, fontSize: '0.75rem', background: '#0284c7' }}>CV</div>
-                  <div style={{ textAlign: 'left' }}>
-                    <div style={{ fontWeight: 600 }}>Explorar como Convidado</div>
-                    <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Acesso demonstrativo imediato</div>
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                    <label style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-main)' }}>
+                      Senha de Acesso
+                    </label>
+                    <a href="#recuperar" onClick={(e) => { e.preventDefault(); alert('Instrucoes enviadas para o email cadastrado.'); }} style={{ fontSize: '0.78rem', color: 'var(--accent-primary)', textDecoration: 'none' }}>
+                      Esqueceu a senha?
+                    </a>
+                  </div>
+                  <div style={{ position: 'relative' }}>
+                    <Lock size={16} style={{ position: 'absolute', left: 12, top: 12, color: 'var(--text-muted)' }} />
+                    <input 
+                      type="password" 
+                      placeholder="••••••••••••"
+                      value={authPassword}
+                      onChange={(e) => setAuthPassword(e.target.value)}
+                      style={{ width: '100%', padding: '10px 12px 10px 38px', borderRadius: 10, background: 'rgba(255, 255, 255, 0.04)', border: '1px solid var(--border-subtle)', color: 'var(--text-main)', fontSize: '0.9rem' }}
+                    />
                   </div>
                 </div>
-                <ChevronRight size={16} color="var(--text-muted)" />
-              </button>
-            </div>
 
-            <div style={{ textAlign: 'center', marginTop: 24, fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-              Ainda nao possui uma conta?{' '}
-              <button 
-                onClick={() => { setAuthMode('register'); setAuthStep(1); }}
-                style={{ background: 'transparent', border: 'none', color: 'var(--accent-primary)', fontWeight: 600, cursor: 'pointer', padding: 0 }}
-              >
-                Cadastre-se agora
-              </button>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '2px 0' }}>
+                  <input type="checkbox" id="rememberMe" defaultChecked style={{ cursor: 'pointer', accentColor: 'var(--accent-primary)' }} />
+                  <label htmlFor="rememberMe" style={{ fontSize: '0.82rem', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                    Permanecer conectado neste dispositivo
+                  </label>
+                </div>
+
+                <button 
+                  type="submit" 
+                  className="btn-primary" 
+                  disabled={authLoading}
+                  style={{ width: '100%', padding: '12px', fontSize: '0.95rem', fontWeight: 700, marginTop: 6, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8 }}
+                >
+                  {authLoading ? (
+                    <>
+                      <RefreshCw size={18} className="spin-animation" />
+                      <span>Autenticando...</span>
+                    </>
+                  ) : (
+                    <>
+                      <LogIn size={18} />
+                      <span>Entrar no Multiplex IA</span>
+                    </>
+                  )}
+                </button>
+              </form>
+
+              <div style={{ margin: '20px 0', display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div style={{ flex: 1, height: 1, background: 'var(--border-subtle)' }} />
+                <span style={{ fontSize: '0.72rem', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: 0.5 }}>Acesso Rapido de Testes</span>
+                <div style={{ flex: 1, height: 1, background: 'var(--border-subtle)' }} />
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <button 
+                  type="button"
+                  className="btn-secondary"
+                  onClick={() => handleDemoAccess('Anthony Both', 'anthony@amboth.com.br', 'plan_pro')}
+                  style={{ width: '100%', padding: '9px 12px', fontSize: '0.84rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderRadius: 10 }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <div className="avatar-circle" style={{ width: 24, height: 24, fontSize: '0.7rem' }}>AN</div>
+                    <div style={{ textAlign: 'left' }}>
+                      <div style={{ fontWeight: 600 }}>Anthony Both</div>
+                      <div style={{ fontSize: '0.7rem', color: '#10b981' }}>Plano Profissional (Ativo)</div>
+                    </div>
+                  </div>
+                  <ChevronRight size={15} color="var(--text-muted)" />
+                </button>
+
+                <button 
+                  type="button"
+                  className="btn-secondary"
+                  onClick={() => handleDemoAccess('Convidado Teste', 'convidado@multiplex.ia', 'plan_basic')}
+                  style={{ width: '100%', padding: '9px 12px', fontSize: '0.84rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderRadius: 10 }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <div className="avatar-circle" style={{ width: 24, height: 24, fontSize: '0.7rem', background: '#0284c7' }}>CV</div>
+                    <div style={{ textAlign: 'left' }}>
+                      <div style={{ fontWeight: 600 }}>Explorar como Convidado</div>
+                      <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Demonstração imediata</div>
+                    </div>
+                  </div>
+                  <ChevronRight size={15} color="var(--text-muted)" />
+                </button>
+              </div>
+
+              <div style={{ textAlign: 'center', marginTop: 20, fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                Ainda nao possui uma conta?{' '}
+                <button 
+                  onClick={() => { setAuthMode('register'); setAuthStep(1); }}
+                  style={{ background: 'transparent', border: 'none', color: 'var(--accent-primary)', fontWeight: 600, cursor: 'pointer', padding: 0 }}
+                >
+                  Cadastre-se e escolha um plano
+                </button>
+              </div>
             </div>
           </div>
         )}
 
         {/* MODO 2: CADASTRO COM ETAPAS E ESCOLHA DE PLANO */}
         {authMode === 'register' && (
-          <div className={`auth-card-container ${authStep === 2 ? 'auth-card-wide' : ''}`}>
+          <div className={`auth-card-container ${authStep === 2 ? 'auth-card-wide' : ''}`} style={{ maxWidth: authStep === 2 ? 1160 : 540, margin: '30px auto' }}>
             {/* Indicador de Etapas */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
               <div className="auth-step-pill">
-                <span>{authStep === 1 ? 'Etapa 1 de 2: Dados da Conta' : 'Etapa 2 de 2: Escolha do Plano e Ativacao'}</span>
+                <span>{authStep === 1 ? 'Etapa 1 de 2: Dados da Conta' : 'Etapa 2 de 2: Escolha do Plano e Ativação'}</span>
               </div>
               <div style={{ display: 'flex', gap: 6 }}>
                 <div style={{ width: 32, height: 4, borderRadius: 2, background: 'var(--accent-primary)' }} />
@@ -1295,7 +1372,7 @@ export default function App() {
             {authStep === 1 && (
               <div>
                 <h2 style={{ fontSize: '1.35rem', fontWeight: 700, margin: '0 0 6px 0' }}>Crie sua conta Multiplex IA</h2>
-                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: '0 0 24px 0' }}>
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: '0 0 20px 0' }}>
                   Preencha seus dados para configurar seu ambiente de atendimento automatizado.
                 </p>
 
@@ -1394,7 +1471,7 @@ export default function App() {
                   </button>
                 </form>
 
-                <div style={{ textAlign: 'center', marginTop: 22, fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                <div style={{ textAlign: 'center', marginTop: 20, fontSize: '0.85rem', color: 'var(--text-muted)' }}>
                   Ja possui uma conta cadastrada?{' '}
                   <button 
                     onClick={() => setAuthMode('login')}
@@ -1410,9 +1487,9 @@ export default function App() {
             {authStep === 2 && (
               <div>
                 <div style={{ textAlign: 'center', marginBottom: 20 }}>
-                  <h2 style={{ fontSize: '1.45rem', fontWeight: 700, margin: '0 0 6px 0' }}>Escolha o plano ideal para o seu negocio</h2>
+                  <h2 style={{ fontSize: '1.45rem', fontWeight: 700, margin: '0 0 6px 0' }}>Escolha o plano ideal para o seu negócio</h2>
                   <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', margin: 0 }}>
-                    Alterne ou cancele a qualquer momento sem burocracia.
+                    Alterne ou cancele a qualquer momento sem fidelidade ou burocracia.
                   </p>
                 </div>
 
@@ -1572,20 +1649,20 @@ export default function App() {
         {/* MODO 3: ABA DE ESCOLHA DE PLANOS (VISAO COMPLETA DE PRECOS E RECURSOS) */}
         {authMode === 'plans' && (
           <div className="auth-card-container auth-card-wide">
-            <div style={{ textAlign: 'center', marginBottom: 28 }}>
-              <div className="auth-step-pill" style={{ marginBottom: 12 }}>
+            <div style={{ textAlign: 'center', marginBottom: 24 }}>
+              <div className="auth-step-pill" style={{ marginBottom: 10 }}>
                 <Sparkles size={14} />
-                <span>Planos Transparentes e Escalaveis</span>
+                <span>Planos Transparentes e Escaláveis</span>
               </div>
-              <h2 style={{ fontSize: '1.85rem', fontWeight: 800, margin: '0 0 10px 0' }}>
+              <h2 style={{ fontSize: '1.85rem', fontWeight: 800, margin: '0 0 8px 0' }}>
                 Escolha o plano perfeito para potencializar seu atendimento
               </h2>
-              <p style={{ fontSize: '0.95rem', color: 'var(--text-muted)', maxWidth: 640, margin: '0 auto' }}>
-                Ative agentes inteligentes em todos os seus canais, integre seu catalogo de produtos e atenda clientes 24h por dia.
+              <p style={{ fontSize: '0.92rem', color: 'var(--text-muted)', maxWidth: 640, margin: '0 auto' }}>
+                Ative agentes inteligentes em todos os seus canais, integre seu catálogo de produtos e atenda clientes 24h por dia.
               </p>
             </div>
 
-            {/* Toggle de Ciclo de Cobranca */}
+            {/* Toggle de Ciclo de Cobrança */}
             <div className="auth-cycle-switch">
               <span 
                 className={`auth-cycle-label ${authBillingCycle === 'monthly' ? 'active' : ''}`}
@@ -1647,7 +1724,7 @@ export default function App() {
                       {plan.description}
                     </p>
 
-                    <div style={{ marginBottom: 20 }}>
+                    <div style={{ marginBottom: 18 }}>
                       {plan.is_custom ? (
                         <div style={{ fontSize: '1.4rem', fontWeight: 800 }}>Sob Consulta</div>
                       ) : (
@@ -1658,7 +1735,7 @@ export default function App() {
                         </div>
                       )}
                       {authBillingCycle === 'yearly' && !plan.is_custom && (
-                        <div style={{ fontSize: '0.75rem', color: '#10b981', marginTop: 3 }}>Faturado anualmente com 20% de economia</div>
+                        <div style={{ fontSize: '0.72rem', color: '#10b981', marginTop: 2 }}>Faturado anualmente com 20% de desconto</div>
                       )}
                     </div>
 
@@ -1668,7 +1745,7 @@ export default function App() {
                         width: '100%', 
                         padding: '11px', 
                         fontWeight: 700, 
-                        marginBottom: 20,
+                        marginBottom: 18,
                         background: plan.popular ? 'linear-gradient(135deg, #6366f1, #8b5cf6)' : undefined 
                       }}
                       onClick={() => {
@@ -1677,16 +1754,16 @@ export default function App() {
                         setAuthStep(1);
                       }}
                     >
-                      <span>Comecar com {plan.name}</span>
+                      <span>Começar com {plan.name}</span>
                     </button>
 
-                    <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: 16, display: 'flex', flexDirection: 'column', gap: 10 }}>
-                      <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                    <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: 14, display: 'flex', flexDirection: 'column', gap: 9 }}>
+                      <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 0.5 }}>
                         O que esta incluso:
                       </div>
                       {(plan.features || []).map((feat: string, fIdx: number) => (
-                        <div key={fIdx} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: '0.82rem', color: 'var(--text-main)' }}>
-                          <CheckCircle2 size={15} color="var(--accent-primary)" style={{ flexShrink: 0, marginTop: 2 }} />
+                        <div key={fIdx} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: '0.8rem', color: 'var(--text-main)' }}>
+                          <CheckCircle2 size={14} color="var(--accent-primary)" style={{ flexShrink: 0, marginTop: 2 }} />
                           <span>{feat}</span>
                         </div>
                       ))}
@@ -1696,22 +1773,31 @@ export default function App() {
               })}
             </div>
 
-            {/* Rodape com Garantia e Suporte */}
-            <div style={{ marginTop: 32, padding: '20px 24px', borderRadius: 14, background: 'rgba(255, 255, 255, 0.02)', border: '1px solid var(--border-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
+            {/* Rodapé com Garantia e Suporte */}
+            <div style={{ marginTop: 28, padding: '18px 22px', borderRadius: 14, background: 'rgba(255, 255, 255, 0.02)', border: '1px solid var(--border-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <ShieldCheck size={28} color="var(--accent-primary)" />
+                <ShieldCheck size={26} color="var(--accent-primary)" />
                 <div>
-                  <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>Garantia de Satisfacao de 7 Dias</div>
-                  <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Teste sem compromisso. Cancele com 1 clique se nao atender suas expectativas.</div>
+                  <div style={{ fontWeight: 600, fontSize: '0.88rem' }}>Garantia de Satisfação de 7 Dias</div>
+                  <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Teste sem compromisso. Cancele com 1 clique se não atender suas expectativas.</div>
                 </div>
               </div>
-              <button 
-                className="btn-secondary"
-                onClick={() => setAuthMode('login')}
-                style={{ fontSize: '0.85rem' }}
-              >
-                Ja sou cliente, fazer Login
-              </button>
+              <div style={{ display: 'flex', gap: 10 }}>
+                <button 
+                  className="btn-secondary"
+                  onClick={() => setAuthMode('login')}
+                  style={{ fontSize: '0.84rem' }}
+                >
+                  Já sou cliente, fazer Login
+                </button>
+                <button 
+                  className="btn-primary"
+                  onClick={() => handleDemoAccess('Anthony Both', 'anthony@amboth.com.br', 'plan_pro')}
+                  style={{ fontSize: '0.84rem' }}
+                >
+                  Acessar Painel Agora
+                </button>
+              </div>
             </div>
           </div>
         )}
