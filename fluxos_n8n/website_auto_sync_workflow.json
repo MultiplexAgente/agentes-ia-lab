@@ -1,0 +1,156 @@
+{
+  "name": "Multiplex IA - Sincronização Automática de Sites",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 1
+            }
+          ]
+        }
+      },
+      "name": "Disparador Agendado (Hourly)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [180, 300],
+      "id": "node-schedule-trigger"
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "http://localhost:3000/api/sources/sync/due",
+        "options": {}
+      },
+      "name": "Buscar Fontes Pendentes de Sincronização",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [400, 300],
+      "id": "node-get-due-sources"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "sources",
+        "options": {}
+      },
+      "name": "Iterar Cada Fonte de Site",
+      "type": "n8n-nodes-base.itemLists",
+      "typeVersion": 3,
+      "position": [620, 300],
+      "id": "node-split-sources"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://localhost:3000/api/sources/{{ $json.id }}/sync",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"company_id\": \"{{ $json.company_id }}\"\n}",
+        "options": {}
+      },
+      "name": "Executar Sincronização Incremental",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [840, 300],
+      "id": "node-execute-sync"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{ $json.changes_count }}",
+              "operation": "larger",
+              "value2": 0
+            }
+          ]
+        }
+      },
+      "name": "Houve Alterações de Preço/Disponibilidade?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1060, 300],
+      "id": "node-check-changes"
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "log",
+              "value": "=Multiplex IA: Sincronização concluída com sucesso. {{ $json.changes_count }} alterações detectadas no site. Itens ativos no catálogo: {{ $json.total_catalog_items }}."
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Registrar Log de Alterações na IA",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1300, 220],
+      "id": "node-log-changes"
+    }
+  ],
+  "connections": {
+    "Disparador Agendado (Hourly)": {
+      "main": [
+        [
+          {
+            "node": "Buscar Fontes Pendentes de Sincronização",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Fontes Pendentes de Sincronização": {
+      "main": [
+        [
+          {
+            "node": "Iterar Cada Fonte de Site",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Iterar Cada Fonte de Site": {
+      "main": [
+        [
+          {
+            "node": "Executar Sincronização Incremental",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Executar Sincronização Incremental": {
+      "main": [
+        [
+          {
+            "node": "Houve Alterações de Preço/Disponibilidade?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Houve Alterações de Preço/Disponibilidade?": {
+      "main": [
+        [
+          {
+            "node": "Registrar Log de Alterações na IA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

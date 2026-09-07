@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 import { 
   Company, Agent, AgentPersonality, AgentRule, Product, ProductCategory,
   Customer, Conversation, Message, StructuredKnowledgeItem, Order,
-  AgentMemoryItem
+  AgentMemoryItem, KnowledgeSource, SourceSyncRun, SourceSyncChange, NormalizedCatalogItem
 } from '../types/index.js';
 
 dotenv.config();
@@ -41,6 +41,10 @@ export class InMemoryStore {
   public orders: Map<string, Order[]> = new Map(); // key = company_id
   public memories: Map<string, AgentMemoryItem[]> = new Map(); // key = customer_id
   public webhookEvents: Set<string> = new Set(); // companyId:channel:externalMessageId
+  public sources: Map<string, KnowledgeSource> = new Map(); // key = source_id
+  public syncRuns: Map<string, SourceSyncRun> = new Map(); // key = run_id
+  public syncChanges: Map<string, SourceSyncChange> = new Map(); // key = change_id
+  public catalogItems: Map<string, NormalizedCatalogItem> = new Map(); // key = item_id
 
   private constructor() {
     this.seedCleanWorkspace();
@@ -67,6 +71,10 @@ export class InMemoryStore {
     this.orders.clear();
     this.memories.clear();
     this.webhookEvents.clear();
+    this.sources.clear();
+    this.syncRuns.clear();
+    this.syncChanges.clear();
+    this.catalogItems.clear();
     this.seedCleanWorkspace();
   }
 
@@ -124,3 +132,5 @@ export class InMemoryStore {
 }
 
 export const store = InMemoryStore.getInstance();
+export const db = store;
+

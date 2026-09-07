@@ -91,17 +91,40 @@ export class ToolRegistry {
       },
       handler: async (args, ctx) => {
         const products = store.products.get(ctx.companyId) || [];
-        return products.filter(p => {
+        const catalogItems = Array.from(store.catalogItems.values()).filter(
+          i => i.company_id === ctx.companyId && i.status === 'AVAILABLE'
+        );
+
+        const listA = products.filter(p => {
           if (!p.available) return false;
-          if (args.query && !p.name.toLowerCase().includes(args.query.toLowerCase())) return false;
+          if (args.query && !p.name.toLowerCase().includes(args.query.toLowerCase()) && !p.description.toLowerCase().includes(args.query.toLowerCase())) return false;
           return true;
         }).map(p => ({
           name: p.name,
           price: p.price,
           description: p.description,
           ingredients: p.ingredients,
-          addons: p.variations
+          addons: p.variations,
+          source: 'Manual'
         }));
+
+        const listB = catalogItems.filter(i => {
+          if (args.query) {
+            const q = args.query.toLowerCase();
+            return i.name.toLowerCase().includes(q) || (i.description || '').toLowerCase().includes(q) || (i.category || '').toLowerCase().includes(q);
+          }
+          return true;
+        }).map(i => ({
+          name: i.name,
+          price: i.price !== undefined ? i.price : 'Sob consulta',
+          description: i.description,
+          category: i.category,
+          source_url: i.source_url,
+          attributes: i.attributes,
+          source: 'Site Sincronizado'
+        }));
+
+        return [...listA, ...listB];
       }
     });
 
@@ -109,7 +132,7 @@ export class ToolRegistry {
     this.tools.set('get_product', {
       definition: {
         name: 'get_product',
-        description: 'Recupera detalhes completos de um produto específico (preço, ingredientes, adicionais).',
+        description: 'Recupera detalhes completos de um produto específico (preço, ingredientes, adicionais, link do site).',
         parameters: {
           type: 'object',
           properties: {
@@ -120,17 +143,39 @@ export class ToolRegistry {
       },
       handler: async (args, ctx) => {
         const product = await knowledgeBaseService.getProductByName(ctx.companyId, args.product_name);
-        if (!product) return { found: false, message: 'Produto não encontrado no cardápio.' };
-        return {
-          found: true,
-          name: product.name,
-          price: product.price,
-          description: product.description,
-          ingredients: product.ingredients,
-          addons: product.variations || []
-        };
+        if (product) {
+          return {
+            found: true,
+            name: product.name,
+            price: product.price,
+            description: product.description,
+            ingredients: product.ingredients,
+            addons: product.variations || []
+          };
+        }
+
+        // Fallback: check website catalog items
+        const catalogItem = Array.from(store.catalogItems.values()).find(
+          i => i.company_id === ctx.companyId && i.name.toLowerCase().includes(args.product_name.toLowerCase())
+        );
+
+        if (catalogItem) {
+          return {
+            found: true,
+            name: catalogItem.name,
+            price: catalogItem.price,
+            description: catalogItem.description,
+            category: catalogItem.category,
+            source_url: catalogItem.source_url,
+            attributes: catalogItem.attributes,
+            source: 'Site Oficial Sincronizado'
+          };
+        }
+
+        return { found: false, message: 'Produto não encontrado no cardápio ou site oficial.' };
       }
     });
+
 
     // 4. get_price
     this.tools.set('get_price', {
@@ -435,5 +480,118 @@ export class ToolRegistry {
         };
       }
     });
+
+    // 12. consultar_catalog (Busca no catálogo sincronizado do site)
+    this.tools.set('consultar_catalog', {
+      definition: {
+        name: 'consultar_catalog',
+        description: 'Consulta itens, produtos, serviços, imóveis ou pratos sincronizados diretamente do site oficial da empresa.',
+        parameters: {
+          type: 'object',
+          properties: {
+            query: { type: 'string', description: 'Termo de busca, nome do item ou categoria.' },
+            business_type: { type: 'string', description: 'Filtro opcional por segmento (RESTAURANTE, IMOBILIÁRIA, CONCESSIONÁRIA, HOTEL, SERVIÇOS, LOJA, ECOMMERCE).' }
+          }
+        }
+      },
+      handler: async (args, ctx) => {
+        const items = Array.from(store.catalogItems.values()).filter(
+          item => item.company_id === ctx.companyId && item.status === 'AVAILABLE'
+        );
+
+        const filtered = items.filter(item => {
+          if (args.business_type && item.attributes?.businessType && item.attributes.businessType !== args.business_type) {
+            return false;
+          }
+          if (args.query) {
+            const q = args.query.toLowerCase();
+            const matchesName = item.name.toLowerCase().includes(q);
+            const matchesDesc = (item.description || '').toLowerCase().includes(q);
+            const matchesCat = (item.category || '').toLowerCase().includes(q);
+            return matchesName || matchesDesc || matchesCat;
+          }
+          return true;
+        });
+
+        return filtered.slice(0, 10).map(i => ({
+          name: i.name,
+          price: i.price !== undefined ? `${i.currency} ${i.price.toFixed(2)}` : 'Sob consulta',
+          category: i.category,
+          description: i.description,
+          status: i.status,
+          attributes: i.attributes,
+          source_url: i.source_url,
+          images: i.images
+        }));
+      }
+    });
+
+    // 13. consultar_properties (Imobiliária)
+    this.tools.set('consultar_properties', {
+      definition: {
+        name: 'consultar_properties',
+        description: 'Consulta imóveis sincronizados do site (apartamentos, casas, terrenos, locação ou venda).',
+        parameters: {
+          type: 'object',
+          properties: {
+            tipo: { type: 'string', description: 'Tipo do imóvel (apartamento, casa, terreno)' },
+            quartos: { type: 'number', description: 'Quantidade mínima de quartos' },
+            max_price: { type: 'number', description: 'Preço máximo em reais' }
+          }
+        }
+      },
+      handler: async (args, ctx) => {
+        const items = Array.from(store.catalogItems.values()).filter(
+          i => i.company_id === ctx.companyId && i.status === 'AVAILABLE' && 
+          (i.attributes?.businessType === 'IMOBILIÁRIA' || i.category?.toLowerCase().includes('imóve') || i.category?.toLowerCase().includes('apart') || i.category?.toLowerCase().includes('casa'))
+        );
+
+        return items.filter(i => {
+          if (args.max_price && i.price && i.price > args.max_price) return false;
+          if (args.quartos && i.attributes?.quartos && i.attributes.quartos < args.quartos) return false;
+          if (args.tipo && !i.name.toLowerCase().includes(args.tipo.toLowerCase())) return false;
+          return true;
+        }).map(i => ({
+          titulo: i.name,
+          valor: i.price ? `R$ ${i.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : 'Sob consulta',
+          descricao: i.description,
+          caracteristicas: i.attributes,
+          link_do_imovel: i.source_url
+        }));
+      }
+    });
+
+    // 14. consultar_services (Prestadores de serviço / Clínicas)
+    this.tools.set('consultar_services', {
+      definition: {
+        name: 'consultar_services',
+        description: 'Consulta procedimentos, consultas e serviços oferecidos sincronizados do site.',
+        parameters: {
+          type: 'object',
+          properties: {
+            query: { type: 'string', description: 'Nome do serviço ou especialidade.' }
+          }
+        }
+      },
+      handler: async (args, ctx) => {
+        const items = Array.from(store.catalogItems.values()).filter(
+          i => i.company_id === ctx.companyId && i.status === 'AVAILABLE' &&
+          (i.attributes?.businessType === 'SERVIÇOS' || i.category?.toLowerCase().includes('servi'))
+        );
+
+        return items.filter(i => {
+          if (!args.query) return true;
+          return i.name.toLowerCase().includes(args.query.toLowerCase()) || 
+                 (i.description || '').toLowerCase().includes(args.query.toLowerCase());
+        }).map(i => ({
+          servico: i.name,
+          preco: i.price ? `R$ ${i.price.toFixed(2)}` : 'Sob avaliação',
+          detalhes: i.description,
+          atributos: i.attributes,
+          link_oficial: i.source_url
+        }));
+      }
+    });
   }
 }
+

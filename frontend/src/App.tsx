@@ -258,7 +258,32 @@ export default function App() {
   const [newKbSubject, setNewKbSubject] = useState('');
   const [newKbContent, setNewKbContent] = useState('');
 
+  // Sincronização Automática de Sites & Fontes de Conhecimento
+  const [knowledgeTab, setKnowledgeTab] = useState<'sources' | 'catalog' | 'faq'>('sources');
+  const [sourcesList, setSourcesList] = useState<any[]>([]);
+  const [catalogList, setCatalogList] = useState<any[]>([]);
+  const [showAddSourceModal, setShowAddSourceModal] = useState(false);
+  const [selectedSourceType, setSelectedSourceType] = useState<'SITE' | 'DOCUMENT' | 'TEXT' | 'FILE' | 'OTHER'>('SITE');
+  const [newSourceUrl, setNewSourceUrl] = useState('');
+  const [newSourceName, setNewSourceName] = useState('');
+  const [newSourceSegment, setNewSourceSegment] = useState<'AUTO' | 'RESTAURANTE' | 'IMOBILIÁRIA' | 'LOJA' | 'ECOMMERCE' | 'CONCESSIONÁRIA' | 'HOTEL' | 'SERVIÇOS' | 'EMPRESA_GERAL'>('AUTO');
+  const [newSourceFrequency, setNewSourceFrequency] = useState<'1h' | '6h' | '12h' | '24h' | 'semanal'>('24h');
+  const [newSourceAutoSync, setNewSourceAutoSync] = useState(true);
+  const [isSyncingSourceId, setIsSyncingSourceId] = useState<string | null>(null);
+  const [syncStepText, setSyncStepText] = useState('');
+  const [syncProgressPercent, setSyncProgressPercent] = useState(0);
+  const [syncDetailText, setSyncDetailText] = useState('');
+  const [syncSummaryData, setSyncSummaryData] = useState<any | null>(null);
+  const [historyModalSource, setHistoryModalSource] = useState<any | null>(null);
+  const [historyRuns, setHistoryRuns] = useState<any[]>([]);
+  const [selectedRunChanges, setSelectedRunChanges] = useState<any[]>([]);
+  const [selectedRunId, setSelectedRunId] = useState<string | null>(null);
+  const [catalogSearch, setCatalogSearch] = useState('');
+  const [catalogSegmentFilter, setCatalogSegmentFilter] = useState('ALL');
+  const [sourceFormError, setSourceFormError] = useState<string | null>(null);
+
   const [channels, setChannels] = useState<any[]>([]);
+
   // Assistente de Conexao de Canais com IA
   const [selectedChannel, setSelectedChannel] = useState<any | null>(null);
   const [channelModalTab, setChannelModalTab] = useState<'guide' | 'ai_chat' | 'credentials'>('guide');
@@ -361,7 +386,7 @@ export default function App() {
 
   const loadData = async () => {
     try {
-      const [resProd, resAgent, resKb, resChan, resDash, resHist, resLogs, resBill, resPlans] = await Promise.all([
+      const [resProd, resAgent, resKb, resChan, resDash, resHist, resLogs, resBill, resPlans, resSources, resCatalog] = await Promise.all([
         fetch(`${API_BASE}/api/products`).catch(() => null),
         fetch(`${API_BASE}/api/agent/config`).catch(() => null),
         fetch(`${API_BASE}/api/knowledge`).catch(() => null),
@@ -370,7 +395,9 @@ export default function App() {
         fetch(`${API_BASE}/api/teach/history`).catch(() => null),
         fetch(`${API_BASE}/api/logs`).catch(() => null),
         fetch(`${API_BASE}/api/billing/current`).catch(() => null),
-        fetch(`${API_BASE}/api/billing/plans`).catch(() => null)
+        fetch(`${API_BASE}/api/billing/plans`).catch(() => null),
+        fetch(`${API_BASE}/api/sources`).catch(() => null),
+        fetch(`${API_BASE}/api/sources/catalog/items`).catch(() => null)
       ]);
 
       if (resProd?.ok) setProducts(await resProd.json());
@@ -388,10 +415,19 @@ export default function App() {
       if (resLogs?.ok) setLogsList(await resLogs.json());
       if (resBill?.ok) setBillingData(await resBill.json());
       if (resPlans?.ok) setBillingPlans(await resPlans.json());
+      if (resSources?.ok) {
+        const srcData = await resSources.json();
+        if (srcData.sources) setSourcesList(srcData.sources);
+      }
+      if (resCatalog?.ok) {
+        const catData = await resCatalog.json();
+        if (catData.items) setCatalogList(catData.items);
+      }
     } catch (e) {
       console.warn('API local nao acessivel no momento');
     }
   };
+
 
   useEffect(() => {
     loadData();
@@ -1213,6 +1249,247 @@ export default function App() {
       console.error(e);
     }
   };
+
+  // Recarregar Fontes e Catálogo Sincronizado
+  const refreshSourcesAndCatalog = async () => {
+    try {
+      const [resSources, resCatalog] = await Promise.all([
+        fetch(`${API_BASE}/api/sources`).catch(() => null),
+        fetch(`${API_BASE}/api/sources/catalog/items`).catch(() => null)
+      ]);
+      if (resSources?.ok) {
+        const d = await resSources.json();
+        if (d.sources) setSourcesList(d.sources);
+      }
+      if (resCatalog?.ok) {
+        const c = await resCatalog.json();
+        if (c.items) setCatalogList(c.items);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // Cadastrar nova fonte e disparar primeira sincronização
+  const handleCreateAndSyncSource = async () => {
+    setSourceFormError(null);
+    if (selectedSourceType === 'SITE') {
+      if (!newSourceUrl.trim()) {
+        setSourceFormError('Informe a URL do site (ex: https://empresa.com.br)');
+        return;
+      }
+      let urlInput = newSourceUrl.trim();
+      if (!urlInput.startsWith('http://') && !urlInput.startsWith('https://')) {
+        urlInput = 'https://' + urlInput;
+      }
+
+      try {
+        setIsSyncingSourceId('new');
+        setSyncProgressPercent(15);
+        setSyncStepText('Validando URL e registrando fonte...');
+        setSyncDetailText(urlInput);
+
+        const resCreate = await fetch(`${API_BASE}/api/sources`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            url: urlInput,
+            name: newSourceName.trim() || undefined,
+            source_type: 'SITE',
+            business_type: newSourceSegment === 'AUTO' ? undefined : newSourceSegment,
+            auto_sync: newSourceAutoSync,
+            sync_frequency: newSourceFrequency
+          })
+        });
+
+        const createData = await resCreate.json();
+        if (!resCreate.ok || !createData.success) {
+          throw new Error(createData.error || 'Falha ao cadastrar fonte.');
+        }
+
+        const source = createData.source;
+        setIsSyncingSourceId(source.id);
+
+        // Animação gradual do stepper durante a primeira sincronização
+        setSyncProgressPercent(30);
+        setSyncStepText('Lendo robots.txt e descobrindo sitemap...');
+        setSyncDetailText(`${source.url}/sitemap.xml`);
+
+        setTimeout(() => {
+          setSyncProgressPercent(55);
+          setSyncStepText('Rastreando páginas e descobrindo catálogo...');
+        }, 1200);
+
+        setTimeout(() => {
+          setSyncProgressPercent(78);
+          setSyncStepText('Extraindo dados estruturados (Schema.org / JSON-LD / OpenGraph)...');
+        }, 2200);
+
+        const resSync = await fetch(`${API_BASE}/api/sources/${source.id}/sync`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+
+        const syncData = await resSync.json();
+        if (!resSync.ok || !syncData.success) {
+          throw new Error(syncData.error || 'Falha durante a sincronização do site.');
+        }
+
+        setSyncProgressPercent(100);
+        setSyncStepText('Catálogo estruturado e sincronizado com o Multiplex IA!');
+        setSyncDetailText(`${syncData.run?.items_found || 0} itens processados.`);
+
+        await refreshSourcesAndCatalog();
+
+        // Limpa campos e exibe resumo
+        setNewSourceUrl('');
+        setNewSourceName('');
+        setShowAddSourceModal(false);
+        setIsSyncingSourceId(null);
+
+        setSyncSummaryData({
+          sourceName: source.name,
+          url: source.url,
+          run: syncData.run,
+          totalCatalog: syncData.total_catalog_items
+        });
+      } catch (err: any) {
+        setIsSyncingSourceId(null);
+        setSourceFormError(err.message || 'Erro ao sincronizar site.');
+      }
+    } else {
+      // Outras fontes (Documento, Texto, Arquivo)
+      try {
+        const res = await fetch(`${API_BASE}/api/sources`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            url: `internal://${selectedSourceType.toLowerCase()}/${Date.now()}`,
+            name: newSourceName.trim() || `Fonte ${selectedSourceType}`,
+            source_type: selectedSourceType,
+            auto_sync: false
+          })
+        });
+        if (res.ok) {
+          await refreshSourcesAndCatalog();
+          setShowAddSourceModal(false);
+          setNewSourceName('');
+        }
+      } catch (err: any) {
+        setSourceFormError(err.message || 'Erro ao adicionar fonte.');
+      }
+    }
+  };
+
+  // Sincronizar agora manualmente
+  const handleSyncSourceNow = async (source: any) => {
+    try {
+      setIsSyncingSourceId(source.id);
+      setSyncProgressPercent(25);
+      setSyncStepText('Iniciando sincronização incremental...');
+      setSyncDetailText(source.url);
+
+      setTimeout(() => {
+        setSyncProgressPercent(65);
+        setSyncStepText('Detectando alterações e calculando hashes...');
+      }, 1000);
+
+      const res = await fetch(`${API_BASE}/api/sources/${source.id}/sync`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Erro na sincronização.');
+      }
+
+      setSyncProgressPercent(100);
+      setSyncStepText('Sincronização concluída com sucesso!');
+      await refreshSourcesAndCatalog();
+
+      setIsSyncingSourceId(null);
+      setSyncSummaryData({
+        sourceName: source.name,
+        url: source.url,
+        run: data.run,
+        totalCatalog: data.total_catalog_items
+      });
+    } catch (err: any) {
+      setIsSyncingSourceId(null);
+      alert('Erro na sincronização: ' + err.message);
+    }
+  };
+
+  // Alterar auto-sync
+  const handleToggleAutoSync = async (source: any) => {
+    try {
+      const nextVal = !source.auto_sync;
+      await fetch(`${API_BASE}/api/sources/${source.id}/config`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ auto_sync: nextVal })
+      });
+      await refreshSourcesAndCatalog();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // Alterar frequência
+  const handleChangeFrequency = async (source: any, freq: string) => {
+    try {
+      await fetch(`${API_BASE}/api/sources/${source.id}/config`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sync_frequency: freq })
+      });
+      await refreshSourcesAndCatalog();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // Excluir fonte
+  const handleDeleteSource = async (source: any) => {
+    if (!confirm(`Deseja remover a fonte "${source.name}" e seus itens associados?`)) return;
+    try {
+      await fetch(`${API_BASE}/api/sources/${source.id}`, { method: 'DELETE' });
+      await refreshSourcesAndCatalog();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // Abrir histórico de sincronizações
+  const handleOpenHistory = async (source: any) => {
+    try {
+      setHistoryModalSource(source);
+      setSelectedRunChanges([]);
+      setSelectedRunId(null);
+      const res = await fetch(`${API_BASE}/api/sources/${source.id}/runs`);
+      if (res.ok) {
+        const data = await res.json();
+        setHistoryRuns(data.runs || []);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // Ver alterações de uma execução específica
+  const handleSelectRunForChanges = async (runId: string) => {
+    try {
+      setSelectedRunId(runId);
+      const res = await fetch(`${API_BASE}/api/sources/runs/${runId}/changes`);
+      if (res.ok) {
+        const data = await res.json();
+        setSelectedRunChanges(data.changes || []);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
 
   const filteredChats = chats.filter(c => {
     if (selectedFolderFilter && c.folderId !== selectedFolderFilter) return false;
@@ -3724,61 +4001,814 @@ export default function App() {
         </div>
       )}
 
-      {/* TELA: BASE DE CONHECIMENTO */}
+      {/* TELA: AGENTE IA > CONHECIMENTO > FONTES & SINCRONIZAÇÃO AUTOMÁTICA */}
       {activeView === 'knowledge' && (
         <div className="main-panel-scrollable">
-          <div className="page-header">
+          <div className="page-header" style={{ marginBottom: 18 }}>
             <div>
-              <h1 className="page-title">Base de Conhecimento e FAQ</h1>
-              <p className="page-desc">Politicas e informacoes consultadas pelo Multiplex.</p>
-            </div>
-            <button className="btn-secondary" onClick={() => setActiveView('chat')}>
-              <MessageSquare size={16} /> Voltar ao Chat
-            </button>
-          </div>
-
-          <div className="glass-panel" style={{ padding: 20 }}>
-            <h2 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: 14 }}>Novo Artigo / FAQ</h2>
-            <input 
-              type="text" 
-              placeholder="Assunto / Pergunta"
-              value={newKbSubject}
-              onChange={(e) => setNewKbSubject(e.target.value)}
-              style={{ marginBottom: 12 }}
-            />
-            <textarea 
-              placeholder="Resposta ou diretriz correspondente..."
-              value={newKbContent}
-              onChange={(e) => setNewKbContent(e.target.value)}
-              rows={3}
-              style={{ marginBottom: 12 }}
-            />
-            <button className="btn-primary" onClick={handleAddKnowledge}>
-              <Plus size={16} /> Salvar Artigo
-            </button>
-          </div>
-
-          <div>
-            <h2 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: 12 }}>Artigos Cadastrados ({knowledgeList.length})</h2>
-            {knowledgeList.length === 0 ? (
-              <div className="glass-card" style={{ padding: 24, textAlign: 'center', color: 'var(--text-dim)' }}>
-                Nenhum artigo cadastrado ainda.
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
+                <h1 className="page-title" style={{ margin: 0 }}>Base de Conhecimento do Agente</h1>
+                <span className="bonasoft-badge-tag">Tecnologia BONASOFT</span>
               </div>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                {knowledgeList.map((k, i) => (
-                  <div key={k.id || i} className="glass-card" style={{ padding: 14 }}>
-                    <div style={{ fontWeight: 600, color: 'var(--accent-primary)', fontSize: '0.95rem' }}>{k.subject}</div>
-                    <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: 4 }}>
-                      {k.data?.content || JSON.stringify(k.data)}
+              <p className="page-desc">
+                Sincronize seu site automaticamente ou gerencie artigos, manuais e o catálogo oficial da sua empresa.
+              </p>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <button 
+                className="btn-primary" 
+                onClick={() => {
+                  setSourceFormError(null);
+                  setSelectedSourceType('SITE');
+                  setShowAddSourceModal(true);
+                }}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}
+              >
+                <Plus size={16} /> Adicionar Fonte
+              </button>
+              <button className="btn-secondary" onClick={() => setActiveView('chat')}>
+                <MessageSquare size={16} /> Voltar ao Chat
+              </button>
+            </div>
+          </div>
+
+          {/* Navegação de Sub-Abas do Conhecimento */}
+          <div className="sources-tab-nav">
+            <button 
+              className={`sources-tab-btn ${knowledgeTab === 'sources' ? 'active' : ''}`}
+              onClick={() => setKnowledgeTab('sources')}
+            >
+              <Globe size={16} />
+              Fontes Conectadas
+              <span style={{ 
+                background: knowledgeTab === 'sources' ? 'rgba(168, 85, 247, 0.25)' : 'rgba(255,255,255,0.08)',
+                padding: '2px 7px',
+                borderRadius: 10,
+                fontSize: '0.72rem'
+              }}>
+                {sourcesList.length}
+              </span>
+            </button>
+
+            <button 
+              className={`sources-tab-btn ${knowledgeTab === 'catalog' ? 'active' : ''}`}
+              onClick={() => setKnowledgeTab('catalog')}
+            >
+              <ShoppingBag size={16} />
+              Itens Sincronizados (Catálogo)
+              <span style={{ 
+                background: knowledgeTab === 'catalog' ? 'rgba(168, 85, 247, 0.25)' : 'rgba(255,255,255,0.08)',
+                padding: '2px 7px',
+                borderRadius: 10,
+                fontSize: '0.72rem'
+              }}>
+                {catalogList.length}
+              </span>
+            </button>
+
+            <button 
+              className={`sources-tab-btn ${knowledgeTab === 'faq' ? 'active' : ''}`}
+              onClick={() => setKnowledgeTab('faq')}
+            >
+              <BookOpen size={16} />
+              Artigos & FAQ Manuais
+              <span style={{ 
+                background: knowledgeTab === 'faq' ? 'rgba(168, 85, 247, 0.25)' : 'rgba(255,255,255,0.08)',
+                padding: '2px 7px',
+                borderRadius: 10,
+                fontSize: '0.72rem'
+              }}>
+                {knowledgeList.length}
+              </span>
+            </button>
+          </div>
+
+          {/* ABA 1: FONTES CONECTADAS */}
+          {knowledgeTab === 'sources' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+              {sourcesList.length === 0 ? (
+                <div className="glass-card" style={{ padding: 48, textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14 }}>
+                  <div style={{ width: 64, height: 64, borderRadius: 20, background: 'rgba(168, 85, 247, 0.12)', border: '1px solid rgba(168, 85, 247, 0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#c084fc' }}>
+                    <Globe size={32} />
+                  </div>
+                  <h3 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0 }}>Nenhum site ou fonte conectado ainda</h3>
+                  <p style={{ maxWidth: 520, color: 'var(--text-muted)', fontSize: '0.9rem', lineHeight: 1.5, margin: 0 }}>
+                    Informe a URL do seu site (restaurante, loja, imobiliária, clínica ou serviços) e o Multiplex IA descobrirá o catálogo, normalizará os itens e manterá preços e disponibilidades atualizados.
+                  </p>
+                  <button 
+                    className="btn-primary" 
+                    onClick={() => {
+                      setSourceFormError(null);
+                      setSelectedSourceType('SITE');
+                      setShowAddSourceModal(true);
+                    }}
+                    style={{ marginTop: 8 }}
+                  >
+                    <Plus size={16} /> Sincronizar Primeiro Site
+                  </button>
+                </div>
+              ) : (
+                <div className="sources-grid">
+                  {sourcesList.map((source) => {
+                    const isSyncing = isSyncingSourceId === source.id;
+                    const formattedDate = source.last_synced_at
+                      ? new Date(source.last_synced_at).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })
+                      : 'Nunca sincronizado';
+
+                    return (
+                      <div key={source.id} className="source-card">
+                        <div>
+                          <div className="source-card-header">
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                              <div className="source-icon-badge">
+                                {source.source_type === 'SITE' ? <Globe size={22} /> : <FileText size={22} />}
+                              </div>
+                              <div>
+                                <h3 style={{ fontSize: '1.05rem', fontWeight: 700, margin: '0 0 2px 0' }}>{source.name}</h3>
+                                <a 
+                                  href={source.url.startsWith('http') ? source.url : '#'} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  style={{ fontSize: '0.78rem', color: 'var(--text-muted)', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 4 }}
+                                >
+                                  {source.url.replace(/^https?:\/\//, '')} <ExternalLink size={12} />
+                                </a>
+                              </div>
+                            </div>
+                            <span className="source-segment-pill">
+                              {source.business_type || 'EMPRESA'}
+                            </span>
+                          </div>
+
+                          {/* Status & Resumo de contadores */}
+                          <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.8rem' }}>
+                              <span style={{ color: 'var(--text-muted)' }}>Status da fonte:</span>
+                              <span style={{ 
+                                fontWeight: 700, 
+                                color: source.status === 'ACTIVE' ? '#4ade80' : source.status === 'ERROR' ? '#f87171' : '#fbbf24',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: 5
+                              }}>
+                                <span style={{ width: 8, height: 8, borderRadius: '50%', background: source.status === 'ACTIVE' ? '#4ade80' : source.status === 'ERROR' ? '#f87171' : '#fbbf24' }} />
+                                {source.status === 'ACTIVE' ? 'Ativa & Sincronizada' : source.status === 'ERROR' ? 'Com Erro' : 'Pendente'}
+                              </span>
+                            </div>
+
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.8rem' }}>
+                              <span style={{ color: 'var(--text-muted)' }}>Última sincronização:</span>
+                              <span style={{ fontWeight: 500, color: 'var(--text-color)' }}>{formattedDate}</span>
+                            </div>
+
+                            <div className="sync-counters-row" style={{ marginTop: 6 }}>
+                              <span className="sync-chip total">
+                                📦 {source.items_count || 0} itens na IA
+                              </span>
+                              <span className="sync-chip created">
+                                +{catalogList.filter(i => i.source_id === source.id && i.status === 'AVAILABLE').length} ativos
+                              </span>
+                              {catalogList.filter(i => i.source_id === source.id && i.status === 'UNAVAILABLE').length > 0 && (
+                                <span className="sync-chip removed">
+                                  −{catalogList.filter(i => i.source_id === source.id && i.status === 'UNAVAILABLE').length} indisponíveis
+                                </span>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Configuração de Sincronização Automática */}
+                          <div style={{ marginTop: 16, paddingTop: 14, borderTop: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                              <label style={{ fontSize: '0.82rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
+                                <input 
+                                  type="checkbox"
+                                  checked={source.auto_sync}
+                                  onChange={() => handleToggleAutoSync(source)}
+                                  style={{ cursor: 'pointer' }}
+                                />
+                                Sincronização Automática
+                              </label>
+
+                              <select 
+                                value={source.sync_frequency || '24h'}
+                                onChange={(e) => handleChangeFrequency(source, e.target.value)}
+                                disabled={!source.auto_sync}
+                                style={{ 
+                                  padding: '4px 8px', 
+                                  fontSize: '0.78rem', 
+                                  borderRadius: 8,
+                                  background: 'var(--input-bg)',
+                                  color: 'var(--text-color)',
+                                  border: '1px solid var(--border-color)',
+                                  cursor: source.auto_sync ? 'pointer' : 'not-allowed',
+                                  opacity: source.auto_sync ? 1 : 0.5
+                                }}
+                              >
+                                <option value="1h">A cada 1 hora</option>
+                                <option value="6h">A cada 6 horas</option>
+                                <option value="12h">A cada 12 horas</option>
+                                <option value="24h">A cada 24 horas</option>
+                                <option value="semanal">Semanal</option>
+                              </select>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Ações do Card */}
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 10, paddingTop: 14, borderTop: '1px solid var(--border-color)' }}>
+                          <button 
+                            className="btn-primary" 
+                            onClick={() => handleSyncSourceNow(source)}
+                            disabled={isSyncing}
+                            style={{ flex: 1, minWidth: 140, padding: '7px 12px', fontSize: '0.82rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
+                          >
+                            <RefreshCw size={14} className={isSyncing ? 'spin' : ''} />
+                            {isSyncing ? 'Sincronizando...' : 'Sincronizar agora'}
+                          </button>
+
+                          <button 
+                            className="btn-secondary" 
+                            onClick={() => {
+                              setCatalogSegmentFilter('ALL');
+                              setKnowledgeTab('catalog');
+                            }}
+                            style={{ padding: '7px 10px', fontSize: '0.82rem', display: 'inline-flex', alignItems: 'center', gap: 5 }}
+                            title="Ver itens deste site"
+                          >
+                            <ShoppingBag size={14} /> Itens
+                          </button>
+
+                          <button 
+                            className="btn-secondary" 
+                            onClick={() => handleOpenHistory(source)}
+                            style={{ padding: '7px 10px', fontSize: '0.82rem', display: 'inline-flex', alignItems: 'center', gap: 5 }}
+                            title="Histórico de alterações e sincronizações"
+                          >
+                            <Clock size={14} /> Histórico
+                          </button>
+
+                          <button 
+                            className="btn-secondary" 
+                            onClick={() => handleDeleteSource(source)}
+                            style={{ padding: '7px 10px', color: '#f87171' }}
+                            title="Excluir fonte"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ABA 2: ITENS SINCRONIZADOS (CATÁLOGO DA IA) */}
+          {knowledgeTab === 'catalog' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              {/* Barra de Busca e Filtros */}
+              <div className="glass-panel" style={{ padding: 14, display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1, minWidth: 260 }}>
+                  <Search size={16} style={{ color: 'var(--text-muted)' }} />
+                  <input 
+                    type="text" 
+                    placeholder="Buscar itens sincronizados por nome, descrição ou categoria..."
+                    value={catalogSearch}
+                    onChange={(e) => setCatalogSearch(e.target.value)}
+                    style={{ margin: 0, padding: '8px 12px', fontSize: '0.88rem' }}
+                  />
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Segmento:</span>
+                  {['ALL', 'RESTAURANTE', 'IMOBILIÁRIA', 'CONCESSIONÁRIA', 'SERVIÇOS'].map((seg) => (
+                    <button
+                      key={seg}
+                      onClick={() => setCatalogSegmentFilter(seg)}
+                      style={{
+                        padding: '5px 10px',
+                        borderRadius: 8,
+                        fontSize: '0.76rem',
+                        fontWeight: 600,
+                        border: '1px solid',
+                        borderColor: catalogSegmentFilter === seg ? '#a855f7' : 'var(--border-color)',
+                        background: catalogSegmentFilter === seg ? 'rgba(168, 85, 247, 0.15)' : 'var(--input-bg)',
+                        color: catalogSegmentFilter === seg ? '#c084fc' : 'var(--text-muted)',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      {seg === 'ALL' ? 'Todos' : seg}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Grid de Itens */}
+              {catalogList.length === 0 ? (
+                <div className="glass-card" style={{ padding: 40, textAlign: 'center', color: 'var(--text-muted)' }}>
+                  Nenhum item sincronizado ainda. Conecte seu site oficial na aba "Fontes Conectadas".
+                </div>
+              ) : (
+                <div className="catalog-items-grid">
+                  {catalogList
+                    .filter(item => {
+                      if (catalogSegmentFilter !== 'ALL' && item.attributes?.businessType !== catalogSegmentFilter) return false;
+                      if (catalogSearch.trim()) {
+                        const q = catalogSearch.toLowerCase();
+                        const matchName = item.name.toLowerCase().includes(q);
+                        const matchDesc = (item.description || '').toLowerCase().includes(q);
+                        const matchCat = (item.category || '').toLowerCase().includes(q);
+                        return matchName || matchDesc || matchCat;
+                      }
+                      return true;
+                    })
+                    .map((item) => (
+                      <div key={item.id} className="catalog-item-card">
+                        {item.images && item.images.length > 0 ? (
+                          <img src={item.images[0]} alt={item.name} className="catalog-item-img" />
+                        ) : (
+                          <div style={{ height: 120, background: 'rgba(255,255,255,0.02)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
+                            <ShoppingBag size={28} />
+                          </div>
+                        )}
+
+                        <div className="catalog-item-body">
+                          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
+                            <span style={{ fontSize: '0.72rem', fontWeight: 600, color: 'var(--accent-primary)', textTransform: 'uppercase' }}>
+                              {item.category || 'Geral'}
+                            </span>
+                            <span style={{ 
+                              fontSize: '0.68rem', 
+                              fontWeight: 700, 
+                              padding: '2px 6px', 
+                              borderRadius: 6,
+                              background: item.status === 'AVAILABLE' ? 'rgba(34, 197, 94, 0.12)' : 'rgba(239, 68, 68, 0.12)',
+                              color: item.status === 'AVAILABLE' ? '#4ade80' : '#f87171'
+                            }}>
+                              {item.status === 'AVAILABLE' ? 'Disponível' : 'Indisponível'}
+                            </span>
+                          </div>
+
+                          <h4 style={{ fontSize: '0.95rem', fontWeight: 700, margin: 0, lineHeight: 1.3 }}>{item.name}</h4>
+                          
+                          {item.description && (
+                            <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: 0, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                              {item.description}
+                            </p>
+                          )}
+
+                          {/* Preço e Atributos */}
+                          <div style={{ marginTop: 'auto', paddingTop: 8, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                            <div className="catalog-price-badge">
+                              {item.price !== undefined ? `R$ ${Number(item.price).toFixed(2).replace('.', ',')}` : 'Sob consulta'}
+                            </div>
+
+                            {item.source_url && (
+                              <a 
+                                href={item.source_url} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                style={{ fontSize: '0.74rem', color: '#60a5fa', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 3 }}
+                              >
+                                Ver no site <ExternalLink size={11} />
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ABA 3: ARTIGOS & FAQ MANUAIS */}
+          {knowledgeTab === 'faq' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+              <div className="glass-panel" style={{ padding: 20 }}>
+                <h2 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: 14 }}>Novo Artigo / FAQ</h2>
+                <input 
+                  type="text" 
+                  placeholder="Assunto / Pergunta"
+                  value={newKbSubject}
+                  onChange={(e) => setNewKbSubject(e.target.value)}
+                  style={{ marginBottom: 12 }}
+                />
+                <textarea 
+                  placeholder="Resposta ou diretriz correspondente..."
+                  value={newKbContent}
+                  onChange={(e) => setNewKbContent(e.target.value)}
+                  rows={3}
+                  style={{ marginBottom: 12 }}
+                />
+                <button className="btn-primary" onClick={handleAddKnowledge}>
+                  <Plus size={16} /> Salvar Artigo
+                </button>
+              </div>
+
+              <div>
+                <h2 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: 12 }}>Artigos Cadastrados ({knowledgeList.length})</h2>
+                {knowledgeList.length === 0 ? (
+                  <div className="glass-card" style={{ padding: 24, textAlign: 'center', color: 'var(--text-dim)' }}>
+                    Nenhum artigo cadastrado ainda.
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    {knowledgeList.map((k, i) => (
+                      <div key={k.id || i} className="glass-card" style={{ padding: 14 }}>
+                        <div style={{ fontWeight: 600, color: 'var(--accent-primary)', fontSize: '0.95rem' }}>{k.subject}</div>
+                        <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: 4 }}>
+                          {k.data?.content || JSON.stringify(k.data)}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* MODAL: ADICIONAR FONTE DE CONHECIMENTO */}
+          {showAddSourceModal && (
+            <div className="modal-backdrop" onClick={() => !isSyncingSourceId && setShowAddSourceModal(false)}>
+              <div className="glass-panel" style={{ maxWidth: 540, width: '90%', padding: 26 }} onClick={(e) => e.stopPropagation()}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(168, 85, 247, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#c084fc' }}>
+                      <Globe size={20} />
+                    </div>
+                    <h2 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0 }}>Adicionar Fonte de Conhecimento</h2>
+                  </div>
+                  {!isSyncingSourceId && (
+                    <button onClick={() => setShowAddSourceModal(false)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                      <X size={20} />
+                    </button>
+                  )}
+                </div>
+
+                <p style={{ fontSize: '0.84rem', color: 'var(--text-muted)', margin: '0 0 16px 0' }}>
+                  Escolha o tipo de fonte para ensinar o Multiplex IA:
+                </p>
+
+                {/* Seleção do Tipo de Fonte */}
+                <div className="source-type-selection-grid">
+                  {[
+                    { id: 'SITE', label: 'Site', desc: 'Sincronização web', icon: <Globe size={18} /> },
+                    { id: 'DOCUMENT', label: 'Documento', desc: 'PDF, DOCX', icon: <FileText size={18} /> },
+                    { id: 'TEXT', label: 'Texto', desc: 'Anotações livres', icon: <Edit3 size={18} /> },
+                    { id: 'FILE', label: 'Arquivo', desc: 'Planilhas CSV', icon: <Paperclip size={18} /> },
+                    { id: 'OTHER', label: 'Outra fonte', desc: 'Notion, Drive', icon: <Layers size={18} /> }
+                  ].map((t) => (
+                    <div 
+                      key={t.id} 
+                      className={`source-type-option ${selectedSourceType === t.id ? 'active' : ''}`}
+                      onClick={() => !isSyncingSourceId && setSelectedSourceType(t.id as any)}
+                    >
+                      <div style={{ color: selectedSourceType === t.id ? '#c084fc' : 'var(--text-muted)' }}>
+                        {t.icon}
+                      </div>
+                      <span>{t.label}</span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Formulário para Site */}
+                {selectedSourceType === 'SITE' && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, marginBottom: 6 }}>
+                        URL do Site Oficial *
+                      </label>
+                      <input 
+                        type="url"
+                        placeholder="https://empresa.com.br"
+                        value={newSourceUrl}
+                        onChange={(e) => setNewSourceUrl(e.target.value)}
+                        disabled={Boolean(isSyncingSourceId)}
+                        style={{ margin: 0 }}
+                      />
+                      <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: 4, display: 'block' }}>
+                        Exemplo: https://empresa.com.br ou https://minhaloja.com
+                      </span>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, marginBottom: 6 }}>
+                          Nome Identificador
+                        </label>
+                        <input 
+                          type="text"
+                          placeholder="Ex: Site Principal"
+                          value={newSourceName}
+                          onChange={(e) => setNewSourceName(e.target.value)}
+                          disabled={Boolean(isSyncingSourceId)}
+                          style={{ margin: 0 }}
+                        />
+                      </div>
+
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, marginBottom: 6 }}>
+                          Segmento do Negócio
+                        </label>
+                        <select 
+                          value={newSourceSegment}
+                          onChange={(e) => setNewSourceSegment(e.target.value as any)}
+                          disabled={Boolean(isSyncingSourceId)}
+                          style={{ 
+                            width: '100%', 
+                            padding: '10px 12px', 
+                            borderRadius: 10, 
+                            background: 'var(--input-bg)', 
+                            color: 'var(--text-color)', 
+                            border: '1px solid var(--border-color)' 
+                          }}
+                        >
+                          <option value="AUTO">✨ Auto-Detectar</option>
+                          <option value="RESTAURANTE">Restaurante / Delivery</option>
+                          <option value="IMOBILIÁRIA">Imobiliária / Imóveis</option>
+                          <option value="LOJA">Loja / Varejo</option>
+                          <option value="ECOMMERCE">E-commerce</option>
+                          <option value="CONCESSIONÁRIA">Concessionária / Veículos</option>
+                          <option value="HOTEL">Hotel / Pousada</option>
+                          <option value="SERVIÇOS">Prestador de Serviços / Clínica</option>
+                          <option value="EMPRESA_GERAL">Empresa em Geral</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 14px', borderRadius: 10, background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-color)' }}>
+                      <div>
+                        <div style={{ fontSize: '0.84rem', fontWeight: 600 }}>Sincronização Recorrente</div>
+                        <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>Manter catálogo atualizado automaticamente</div>
+                      </div>
+                      <select 
+                        value={newSourceFrequency}
+                        onChange={(e) => setNewSourceFrequency(e.target.value as any)}
+                        disabled={Boolean(isSyncingSourceId)}
+                        style={{ padding: '6px 10px', borderRadius: 8, background: 'var(--input-bg)', color: 'var(--text-color)', border: '1px solid var(--border-color)', fontSize: '0.8rem' }}
+                      >
+                        <option value="1h">A cada 1h</option>
+                        <option value="6h">A cada 6h</option>
+                        <option value="12h">A cada 12h</option>
+                        <option value="24h">A cada 24h</option>
+                        <option value="semanal">Semanal</option>
+                      </select>
+                    </div>
+
+                    {sourceFormError && (
+                      <div style={{ padding: '10px 14px', borderRadius: 10, background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.3)', color: '#f87171', fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <AlertCircle size={16} /> {sourceFormError}
+                      </div>
+                    )}
+
+                    {/* Stepper de progresso em tempo real */}
+                    {isSyncingSourceId && (
+                      <div className="sync-progress-box">
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.84rem' }}>
+                          <span style={{ fontWeight: 600, color: '#c084fc', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                            <RefreshCw size={14} className="spin" /> {syncStepText}
+                          </span>
+                          <span style={{ fontWeight: 700 }}>{syncProgressPercent}%</span>
+                        </div>
+
+                        <div className="progress-bar-track">
+                          <div className="progress-bar-fill" style={{ width: `${syncProgressPercent}%` }} />
+                        </div>
+
+                        {syncDetailText && (
+                          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                            {syncDetailText}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 8 }}>
+                      {!isSyncingSourceId && (
+                        <button className="btn-secondary" onClick={() => setShowAddSourceModal(false)}>
+                          Cancelar
+                        </button>
+                      )}
+                      <button 
+                        className="btn-primary" 
+                        onClick={handleCreateAndSyncSource}
+                        disabled={Boolean(isSyncingSourceId)}
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: 8, minWidth: 160, justifyContent: 'center' }}
+                      >
+                        {isSyncingSourceId ? (
+                          <>
+                            <RefreshCw size={15} className="spin" /> Processando...
+                          </>
+                        ) : (
+                          <>
+                            <Zap size={15} /> Sincronizar site
+                          </>
+                        )}
+                      </button>
                     </div>
                   </div>
-                ))}
+                )}
+
+                {/* Formulário para outras fontes */}
+                {selectedSourceType !== 'SITE' && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, marginBottom: 6 }}>
+                        Nome ou Título da Fonte
+                      </label>
+                      <input 
+                        type="text"
+                        placeholder="Ex: Manual de Produtos 2026"
+                        value={newSourceName}
+                        onChange={(e) => setNewSourceName(e.target.value)}
+                        style={{ margin: 0 }}
+                      />
+                    </div>
+
+                    <div style={{ padding: 24, border: '2px dashed var(--border-color)', borderRadius: 12, textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.84rem' }}>
+                      <Paperclip size={24} style={{ marginBottom: 6 }} />
+                      <div>Arraste arquivos ou clique para selecionar do computador</div>
+                    </div>
+
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 8 }}>
+                      <button className="btn-secondary" onClick={() => setShowAddSourceModal(false)}>
+                        Cancelar
+                      </button>
+                      <button className="btn-primary" onClick={handleCreateAndSyncSource}>
+                        <Check size={16} /> Salvar Fonte
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
-            )}
+            </div>
+          )}
+
+          {/* MODAL: RESUMO DA SINCRONIZAÇÃO */}
+          {syncSummaryData && (
+            <div className="modal-backdrop" onClick={() => setSyncSummaryData(null)}>
+              <div className="glass-panel" style={{ maxWidth: 500, width: '90%', padding: 26 }} onClick={(e) => e.stopPropagation()}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
+                  <div style={{ width: 44, height: 44, borderRadius: 14, background: 'rgba(34, 197, 94, 0.15)', border: '1px solid rgba(34, 197, 94, 0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#4ade80' }}>
+                    <CheckCircle2 size={24} />
+                  </div>
+                  <div>
+                    <h2 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0 }}>Sincronização Concluída!</h2>
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{syncSummaryData.sourceName} ({syncSummaryData.url})</span>
+                  </div>
+                </div>
+
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: 18 }}>
+                  O Multiplex IA processou o site e atualizou a base de conhecimento com os dados estruturados mais recentes.
+                </p>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 18 }}>
+                  <div className="glass-card" style={{ padding: 12 }}>
+                    <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>Páginas & Itens Lidos</div>
+                    <div style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-color)' }}>
+                      {syncSummaryData.run?.items_found || 0}
+                    </div>
+                  </div>
+
+                  <div className="glass-card" style={{ padding: 12 }}>
+                    <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>Novos Itens Criados</div>
+                    <div style={{ fontSize: '1.25rem', fontWeight: 700, color: '#4ade80' }}>
+                      +{syncSummaryData.run?.items_created || 0}
+                    </div>
+                  </div>
+
+                  <div className="glass-card" style={{ padding: 12 }}>
+                    <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>Itens Atualizados</div>
+                    <div style={{ fontSize: '1.25rem', fontWeight: 700, color: '#38bdf8' }}>
+                      ↻ {syncSummaryData.run?.items_updated || 0}
+                    </div>
+                  </div>
+
+                  <div className="glass-card" style={{ padding: 12 }}>
+                    <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>Total Ativo no Agente</div>
+                    <div style={{ fontSize: '1.25rem', fontWeight: 700, color: '#c084fc' }}>
+                      📦 {syncSummaryData.totalCatalog || 0}
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
+                  <button className="btn-secondary" onClick={() => setSyncSummaryData(null)}>
+                    Fechar
+                  </button>
+                  <button 
+                    className="btn-primary" 
+                    onClick={() => {
+                      setSyncSummaryData(null);
+                      setKnowledgeTab('catalog');
+                    }}
+                  >
+                    <ShoppingBag size={15} /> Ver Itens Sincronizados
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* MODAL: HISTÓRICO DE SINCRONIZAÇÕES & ALTERAÇÕES */}
+          {historyModalSource && (
+            <div className="modal-backdrop" onClick={() => setHistoryModalSource(null)}>
+              <div className="glass-panel" style={{ maxWidth: 650, width: '92%', maxHeight: '85vh', overflowY: 'auto', padding: 26 }} onClick={(e) => e.stopPropagation()}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+                  <div>
+                    <h2 style={{ fontSize: '1.2rem', fontWeight: 700, margin: '0 0 2px 0' }}>Histórico de Sincronizações</h2>
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{historyModalSource.name} — {historyModalSource.url}</span>
+                  </div>
+                  <button onClick={() => setHistoryModalSource(null)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                    <X size={20} />
+                  </button>
+                </div>
+
+                {historyRuns.length === 0 ? (
+                  <div style={{ padding: 24, textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.88rem' }}>
+                    Nenhuma execução registrada para esta fonte ainda.
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                    {historyRuns.map((run) => {
+                      const isSelected = selectedRunId === run.id;
+                      const runDate = new Date(run.started_at).toLocaleString('pt-BR');
+
+                      return (
+                        <div 
+                          key={run.id}
+                          className="glass-card" 
+                          style={{ 
+                            padding: 14, 
+                            cursor: 'pointer',
+                            borderColor: isSelected ? '#a855f7' : undefined,
+                            background: isSelected ? 'rgba(168, 85, 247, 0.08)' : undefined
+                          }}
+                          onClick={() => handleSelectRunForChanges(run.id)}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                              <span style={{ 
+                                width: 8, 
+                                height: 8, 
+                                borderRadius: '50%', 
+                                background: run.status === 'COMPLETED' ? '#4ade80' : '#f87171' 
+                              }} />
+                              <span style={{ fontSize: '0.84rem', fontWeight: 600 }}>{runDate}</span>
+                            </div>
+                            <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
+                              {run.status === 'COMPLETED' ? 'Sucesso' : 'Falha'}
+                            </span>
+                          </div>
+
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, fontSize: '0.76rem' }}>
+                            <span className="sync-chip created">+{run.items_created} novos</span>
+                            <span className="sync-chip updated">↻ {run.items_updated} atualizados</span>
+                            <span className="sync-chip removed">−{run.items_removed} removidos</span>
+                            <span className="sync-chip total">✓ {run.items_unchanged} inalterados</span>
+                          </div>
+
+                          {/* Se este run estiver selecionado, exibe a lista de alterações detalhadas */}
+                          {isSelected && selectedRunChanges.length > 0 && (
+                            <div style={{ marginTop: 12, paddingTop: 10, borderTop: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: 6 }}>
+                              <div style={{ fontSize: '0.76rem', fontWeight: 700, color: 'var(--accent-primary)', textTransform: 'uppercase' }}>
+                                Alterações Detectadas ({selectedRunChanges.length}):
+                              </div>
+                              {selectedRunChanges.map((change) => (
+                                <div key={change.id} style={{ fontSize: '0.78rem', padding: '6px 8px', borderRadius: 6, background: 'rgba(255,255,255,0.03)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                  <span style={{ fontWeight: 600 }}>{change.item_name}</span>
+                                  <span style={{ 
+                                    padding: '2px 6px', 
+                                    borderRadius: 4, 
+                                    fontSize: '0.7rem', 
+                                    fontWeight: 700,
+                                    background: change.change_type === 'CREATED' ? 'rgba(34, 197, 94, 0.2)' : change.change_type === 'PRICE_CHANGED' ? 'rgba(56, 189, 248, 0.2)' : 'rgba(239, 68, 68, 0.2)',
+                                    color: change.change_type === 'CREATED' ? '#4ade80' : change.change_type === 'PRICE_CHANGED' ? '#38bdf8' : '#f87171'
+                                  }}>
+                                    {change.change_type === 'PRICE_CHANGED' ? `Preço: R$ ${change.old_data?.price} ➔ R$ ${change.new_data?.price}` : change.change_type}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* ── BONASOFT Watermark ── */}
+          <div className="bonasoft-watermark-container" style={{ marginTop: 28 }}>
+            <p className="bonasoft-watermark">BONASOFT</p>
           </div>
         </div>
       )}
+
 
       {/* TELA: CONECTAR CANAIS MULTICANAL COM ASSISTENTE DE IA */}
       {activeView === 'channels' && (

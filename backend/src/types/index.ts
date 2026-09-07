@@ -220,3 +220,131 @@ export interface AIServiceResponse {
   latency_ms: number;
   handoff_triggered: boolean;
 }
+
+// =========================================================================
+// SINCRONIZAÇÃO AUTOMÁTICA DE SITE E FONTES DE CONHECIMENTO
+// =========================================================================
+
+export type BusinessType = 
+  | 'RESTAURANTE' 
+  | 'LOJA' 
+  | 'ECOMMERCE' 
+  | 'IMOBILIÁRIA' 
+  | 'CONCESSIONÁRIA' 
+  | 'HOTEL' 
+  | 'SERVIÇOS' 
+  | 'EMPRESA_GERAL'
+  | 'OUTRO';
+
+export type SourceType = 'site' | 'document' | 'text' | 'file' | 'other' | 'SITE' | 'DOCUMENT' | 'TEXT' | 'FILE' | 'OTHER';
+export type SyncFrequency = '1h' | '6h' | '12h' | '24h' | 'weekly' | 'semanal';
+
+export interface KnowledgeSource {
+  id: string;
+  company_id: string;
+  name: string;
+  type?: SourceType;
+  source_type?: SourceType;
+  url: string;
+  business_type?: BusinessType;
+  auto_sync: boolean;
+  sync_frequency: SyncFrequency;
+  status: 'connected' | 'syncing' | 'error' | 'pending' | 'ACTIVE' | 'ERROR' | 'PENDING';
+  last_sync_at?: string;
+  last_synced_at?: string;
+  last_sync_status?: 'SUCCESS' | 'FAILED' | 'WARNING';
+  next_sync_at?: string;
+  items_count: number;
+  metadata?: Record<string, any>;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SourceSyncRun {
+  id: string;
+  company_id: string;
+  source_id: string;
+  started_at: string;
+  finished_at?: string;
+  completed_at?: string;
+  status: 'running' | 'completed' | 'failed' | 'RUNNING' | 'COMPLETED' | 'FAILED';
+  items_found: number;
+  items_created: number;
+  items_updated: number;
+  items_removed: number;
+  items_unchanged: number;
+  errors?: string[];
+  error_message?: string;
+  duration_ms?: number;
+}
+
+export interface SourceSyncChange {
+  id: string;
+  sync_run_id?: string;
+  run_id?: string;
+  item_id: string;
+  item_title?: string;
+  item_name?: string;
+  change_type: 'CREATED' | 'UPDATED' | 'REMOVED' | 'PRICE_CHANGED' | 'AVAILABILITY_CHANGED';
+  field?: string;
+  old_value?: any;
+  new_value?: any;
+  old_data?: any;
+  new_data?: any;
+  created_at: string;
+}
+
+export interface NormalizedCatalogItem {
+  id: string;
+  company_id: string;
+  source_id: string;
+  external_id?: string;
+  source_url?: string;
+  item_type?: 'product' | 'property' | 'menu_item' | 'service' | 'other';
+  title?: string;
+  name: string;
+  description?: string;
+  category?: string;
+  price?: number;
+  currency?: string;
+  availability?: boolean;
+  sku?: string;
+  brand?: string;
+  images?: string[];
+  attributes?: Record<string, any>;
+  property_details?: {
+    property_type: string;
+    transaction_type: 'venda' | 'aluguel' | 'temporada';
+    condominium_fee?: number;
+    iptu?: number;
+    bedrooms?: number;
+    suites?: number;
+    bathrooms?: number;
+    parking_spaces?: number;
+    built_area?: number;
+    land_area?: number;
+    address?: string;
+    neighborhood?: string;
+    city?: string;
+    state?: string;
+    postal_code?: string;
+    amenities?: string[];
+  };
+  menu_details?: {
+    ingredients?: string[];
+    variations?: Array<{ name: string; additional_price: number }>;
+    add_ons?: string[];
+  };
+  service_details?: {
+    duration_minutes?: number;
+    provider?: string;
+  };
+  raw_data?: any;
+  content_hash: string;
+  status: 'AVAILABLE' | 'UNAVAILABLE' | 'REMOVED' | 'OUT_OF_STOCK';
+  last_seen_at?: string;
+  last_synced_at?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
