@@ -382,5 +382,58 @@ export class ToolRegistry {
         };
       }
     });
+
+    // 11. bulk_register_products
+    this.tools.set('bulk_register_products', {
+      definition: {
+        name: 'bulk_register_products',
+        description: 'Cadastra ou adiciona uma lista de múltiplos produtos no catálogo do restaurante/loja quando o usuário fornece ou dita produtos, preços e descrições.',
+        parameters: {
+          type: 'object',
+          properties: {
+            products: {
+              type: 'array',
+              description: 'Lista de produtos extraídos para cadastro',
+              items: {
+                type: 'object',
+                properties: {
+                  name: { type: 'string', description: 'Nome do produto' },
+                  price: { type: 'number', description: 'Preço numérico do produto em reais' },
+                  description: { type: 'string', description: 'Descrição dos ingredientes ou detalhes do produto' },
+                  category: { type: 'string', description: 'Categoria do produto' }
+                },
+                required: ['name', 'price']
+              }
+            }
+          },
+          required: ['products']
+        }
+      },
+      handler: async (args, ctx) => {
+        const productsList = store.products.get(ctx.companyId) || [];
+        const added = [];
+        for (const p of args.products || []) {
+          if (!p.name) continue;
+          const newP = {
+            id: uuidv4(),
+            company_id: ctx.companyId,
+            name: p.name.trim(),
+            price: Number(p.price) || 0,
+            description: p.description || '',
+            available: true,
+            ingredients: [],
+            variations: []
+          };
+          productsList.push(newP);
+          added.push(newP);
+        }
+        store.products.set(ctx.companyId, productsList);
+        return {
+          success: true,
+          count: added.length,
+          message: `${added.length} produtos cadastrados com sucesso no cardápio.`
+        };
+      }
+    });
   }
 }

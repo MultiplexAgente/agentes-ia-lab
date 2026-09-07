@@ -137,6 +137,14 @@ export default function App() {
   const [newProductPrice, setNewProductPrice] = useState('');
   const [newProductDesc, setNewProductDesc] = useState('');
 
+  // Importacao de Cardapio em Massa com Multiplex IA
+  const [rawMenuText, setRawMenuText] = useState('');
+  const [isParsingMenu, setIsParsingMenu] = useState(false);
+  const [parsedProducts, setParsedProducts] = useState<Array<{ name: string; price: number; description: string; category?: string; ingredients?: string[] }>>([]);
+  const [isSavingBatch, setIsSavingBatch] = useState(false);
+  const [batchSuccessMsg, setBatchSuccessMsg] = useState('');
+  const [showManualAdd, setShowManualAdd] = useState(false);
+
   const [rules, setRules] = useState<any[]>([]);
   const [newRuleText, setNewRuleText] = useState('');
   const [newRulePriority, setNewRulePriority] = useState(5);
@@ -439,7 +447,7 @@ export default function App() {
     }
   };
 
-  // Adicionar Produto
+  // Adicionar Produto Manual
   const handleAddProduct = async () => {
     if (!newProductName.trim() || !newProductPrice) return;
     try {
@@ -463,6 +471,111 @@ export default function App() {
     } catch (e) {
       console.error(e);
     }
+  };
+
+  // Extrair produtos de texto com Multiplex IA (GPT-4o)
+  const handleParseMenuWithAI = async () => {
+    if (!rawMenuText.trim()) return;
+    setIsParsingMenu(true);
+    setBatchSuccessMsg('');
+    try {
+      const res = await fetch(`${API_BASE}/api/products/parse-ai`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: rawMenuText })
+      });
+      const data = await res.json();
+      if (res.ok && Array.isArray(data.products) && data.products.length > 0) {
+        setParsedProducts(data.products);
+      } else {
+        alert(data.error || 'Nenhum produto identificado. Certifique-se de incluir nomes e precos no texto.');
+      }
+    } catch (e) {
+      console.error(e);
+      alert('Erro de comunicacao com a API da Multiplex IA.');
+    } finally {
+      setIsParsingMenu(false);
+    }
+  };
+
+  // Salvar lote de produtos extraidos
+  const handleSaveBatchProducts = async () => {
+    if (parsedProducts.length === 0) return;
+    setIsSavingBatch(true);
+    try {
+      const res = await fetch(`${API_BASE}/api/products/batch`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ products: parsedProducts })
+      });
+      const data = await res.json();
+      if (res.ok && data.products) {
+        setProducts([...products, ...data.products]);
+        setBatchSuccessMsg(`${data.count} produtos cadastrados com sucesso no cardapio.`);
+        setParsedProducts([]);
+        setRawMenuText('');
+      } else {
+        alert(data.error || 'Falha ao salvar produtos no catalogo.');
+      }
+    } catch (e) {
+      console.error(e);
+      alert('Erro ao salvar produtos no catalogo.');
+    } finally {
+      setIsSavingBatch(false);
+    }
+  };
+
+  // Importar e Salvar Tudo Direto com IA em 1 clique
+  const handleDirectImportAI = async () => {
+    if (!rawMenuText.trim()) return;
+    setIsParsingMenu(true);
+    setBatchSuccessMsg('');
+    try {
+      const parseRes = await fetch(`${API_BASE}/api/products/parse-ai`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: rawMenuText })
+      });
+      const parseData = await parseRes.json();
+      if (parseRes.ok && Array.isArray(parseData.products) && parseData.products.length > 0) {
+        const batchRes = await fetch(`${API_BASE}/api/products/batch`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ products: parseData.products })
+        });
+        const batchData = await batchRes.json();
+        if (batchRes.ok && batchData.products) {
+          setProducts([...products, ...batchData.products]);
+          setBatchSuccessMsg(`${batchData.count} produtos identificados e adicionados com sucesso.`);
+          setRawMenuText('');
+          setParsedProducts([]);
+        }
+      } else {
+        alert(parseData.error || 'Nenhum produto identificado no texto.');
+      }
+    } catch (e) {
+      console.error(e);
+      alert('Erro ao importar produtos com IA.');
+    } finally {
+      setIsParsingMenu(false);
+    }
+  };
+
+  // Excluir produto do catalogo
+  const handleDeleteProduct = async (id: string) => {
+    try {
+      const res = await fetch(`${API_BASE}/api/products/${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        setProducts(products.filter(p => p.id !== id));
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  // Remover item especifico da pre-visualizacao
+  const handleRemoveParsedItem = (index: number) => {
+    setParsedProducts(parsedProducts.filter((_, idx) => idx !== index));
   };
 
   // Adicionar Regra
@@ -1275,59 +1388,237 @@ export default function App() {
       {/* TELA: CARDAPIO E PRODUTOS */}
       {activeView === 'menu' && (
         <div className="main-panel-scrollable">
-          <div className="page-header">
+          <div className="page-header" style={{ marginBottom: 16 }}>
             <div>
               <h1 className="page-title">Cardapio e Produtos</h1>
-              <p className="page-desc">Cadastre e gerencie os itens que o Multiplex GPT consulta durante o atendimento.</p>
+              <p className="page-desc">Copie e cole listas de produtos do seu site ou cardapio. A Multiplex IA separa e organiza tudo automaticamente.</p>
             </div>
             <button className="btn-secondary" onClick={() => setActiveView('chat')}>
               <MessageSquare size={16} /> Voltar ao Chat
             </button>
           </div>
 
-          <div className="glass-panel" style={{ padding: 20 }}>
-            <h2 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: 14 }}>Cadastrar Novo Produto</h2>
-            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 12, marginBottom: 12 }}>
-              <input 
-                type="text" 
-                placeholder="Nome do produto" 
-                value={newProductName}
-                onChange={(e) => setNewProductName(e.target.value)}
-              />
-              <input 
-                type="number" 
-                placeholder="Preco (ex: 29.90)" 
-                value={newProductPrice}
-                onChange={(e) => setNewProductPrice(e.target.value)}
-              />
+          {/* PAINEL PRINCIPAL: IMPORTACAO INTELIGENTE COM MULTIPLEX IA */}
+          <div className="glass-panel" style={{ padding: 22, marginBottom: 20, border: '1px solid rgba(0, 210, 255, 0.3)', background: 'linear-gradient(180deg, rgba(15, 23, 42, 0.75), rgba(10, 15, 30, 0.85))' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div style={{ width: 32, height: 32, borderRadius: '50%', overflow: 'hidden', border: '1px solid rgba(0, 210, 255, 0.4)', minWidth: 32 }}>
+                  <img src={atomLogo} alt="Multiplex IA" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                </div>
+                <div>
+                  <h2 style={{ fontSize: '1.15rem', fontWeight: 700, margin: 0 }}>Importar Cardapio em Massa com Multiplex IA</h2>
+                  <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>Cole texto corrido, lista de precos, descricoes do site ou cardapio em texto</span>
+                </div>
+              </div>
+
+              <span className="badge" style={{ background: 'rgba(0, 210, 255, 0.15)', color: '#00d2ff', border: '1px solid rgba(0, 210, 255, 0.3)' }}>
+                GPT-4o Extrator
+              </span>
             </div>
+
             <textarea 
-              placeholder="Descricao, ingredientes e adicionais..."
-              value={newProductDesc}
-              onChange={(e) => setNewProductDesc(e.target.value)}
-              rows={2}
-              style={{ marginBottom: 14 }}
+              placeholder="Cole aqui os produtos copiados do seu site, cardapio ou mensagem...&#10;&#10;Exemplo:&#10;Pizza Calabresa Especial - R$ 48,00 - Molho caseiro, mussarela, calabresa e cebola&#10;Pizza Quatro Queijos - R$ 56,90 - Mussarela, provolone, gorgonzola e catupiry&#10;Coca-Cola 2L - R$ 14,00&#10;Cerveja Long Neck - R$ 11,50"
+              value={rawMenuText}
+              onChange={(e) => setRawMenuText(e.target.value)}
+              rows={5}
+              style={{ width: '100%', fontSize: '0.88rem', lineHeight: '1.4', marginBottom: 14, resize: 'vertical' }}
             />
-            <button className="btn-primary" onClick={handleAddProduct}>
-              <Plus size={16} /> Adicionar Produto
-            </button>
+
+            <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+              <button 
+                className="btn-primary" 
+                onClick={handleParseMenuWithAI}
+                disabled={isParsingMenu || !rawMenuText.trim()}
+                style={{ background: 'linear-gradient(135deg, #0284c7, #2563eb)' }}
+              >
+                {isParsingMenu ? (
+                  <>
+                    <RefreshCw size={16} className="animate-spin" />
+                    <span>Multiplex IA separando produtos...</span>
+                  </>
+                ) : (
+                  <>
+                    <Sparkles size={16} />
+                    <span>Analisar e Separar Produtos</span>
+                  </>
+                )}
+              </button>
+
+              <button 
+                className="btn-primary" 
+                onClick={handleDirectImportAI}
+                disabled={isParsingMenu || !rawMenuText.trim()}
+                style={{ background: 'linear-gradient(135deg, #059669, #10b981)' }}
+              >
+                {isParsingMenu ? (
+                  <RefreshCw size={16} className="animate-spin" />
+                ) : (
+                  <Check size={16} />
+                )}
+                <span>Importar e Cadastrar Tudo em 1 Clique</span>
+              </button>
+
+              {rawMenuText.trim().length > 0 && (
+                <button 
+                  className="btn-secondary" 
+                  onClick={() => { setRawMenuText(''); setParsedProducts([]); setBatchSuccessMsg(''); }}
+                >
+                  Limpar
+                </button>
+              )}
+            </div>
+
+            {batchSuccessMsg && (
+              <div style={{ marginTop: 14, padding: '10px 14px', borderRadius: 8, background: 'rgba(16, 185, 129, 0.15)', border: '1px solid rgba(16, 185, 129, 0.3)', color: '#10b981', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Check size={16} />
+                <span>{batchSuccessMsg}</span>
+              </div>
+            )}
           </div>
 
+          {/* PRE-VISUALIZACAO DOS PRODUTOS IDENTIFICADOS PELA IA */}
+          {parsedProducts.length > 0 && (
+            <div className="glass-panel" style={{ padding: 20, marginBottom: 20, border: '1px solid rgba(16, 185, 129, 0.4)', background: 'rgba(16, 185, 129, 0.04)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+                <div>
+                  <h3 style={{ fontSize: '1.05rem', fontWeight: 700, margin: 0 }}>
+                    {parsedProducts.length} Produtos Identificados pela Multiplex IA
+                  </h3>
+                  <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Confira os itens abaixo antes de adicionar ao catalogo</span>
+                </div>
+
+                <div style={{ display: 'flex', gap: 10 }}>
+                  <button 
+                    className="btn-primary"
+                    onClick={handleSaveBatchProducts}
+                    disabled={isSavingBatch}
+                    style={{ background: 'linear-gradient(135deg, #059669, #10b981)' }}
+                  >
+                    {isSavingBatch ? (
+                      <RefreshCw size={16} className="animate-spin" />
+                    ) : (
+                      <Check size={16} />
+                    )}
+                    <span>Confirmar e Salvar Todos ({parsedProducts.length})</span>
+                  </button>
+
+                  <button 
+                    className="btn-secondary"
+                    onClick={() => setParsedProducts([])}
+                  >
+                    <X size={16} /> Descartar
+                  </button>
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 12 }}>
+                {parsedProducts.map((p, idx) => (
+                  <div key={idx} className="glass-card" style={{ padding: 14, position: 'relative' }}>
+                    <button 
+                      onClick={() => handleRemoveParsedItem(idx)}
+                      style={{ position: 'absolute', top: 8, right: 8, background: 'transparent', border: 'none', color: 'var(--text-dim)', cursor: 'pointer' }}
+                      title="Remover este item da lista"
+                    >
+                      <X size={14} />
+                    </button>
+                    <div style={{ fontWeight: 700, fontSize: '0.95rem', paddingRight: 20 }}>{p.name}</div>
+                    <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 4 }}>
+                      <span style={{ color: '#10b981', fontWeight: 700, fontSize: '0.9rem' }}>R$ {Number(p.price).toFixed(2)}</span>
+                      {p.category && (
+                        <span className="badge" style={{ fontSize: '0.68rem', padding: '1px 6px', background: 'rgba(255,255,255,0.08)' }}>
+                          {p.category}
+                        </span>
+                      )}
+                    </div>
+                    {p.description && (
+                      <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: 6, marginBottom: 0 }}>
+                        {p.description}
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ACORDEAO: CADASTRO MANUAL INDIVIDUAL (OPCIONAL) */}
+          <div style={{ marginBottom: 20 }}>
+            <button 
+              className="btn-secondary" 
+              onClick={() => setShowManualAdd(!showManualAdd)}
+              style={{ fontSize: '0.85rem', width: '100%', justifyContent: 'space-between', padding: '10px 16px' }}
+            >
+              <span>+ Cadastrar 1 item manualmente (sem IA)</span>
+              <span>{showManualAdd ? 'Ocultar' : 'Expandir'}</span>
+            </button>
+
+            {showManualAdd && (
+              <div className="glass-panel" style={{ padding: 18, marginTop: 8 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 12, marginBottom: 12 }}>
+                  <input 
+                    type="text" 
+                    placeholder="Nome do produto" 
+                    value={newProductName}
+                    onChange={(e) => setNewProductName(e.target.value)}
+                  />
+                  <input 
+                    type="number" 
+                    placeholder="Preco (ex: 29.90)" 
+                    value={newProductPrice}
+                    onChange={(e) => setNewProductPrice(e.target.value)}
+                  />
+                </div>
+                <textarea 
+                  placeholder="Descricao, ingredientes e adicionais..."
+                  value={newProductDesc}
+                  onChange={(e) => setNewProductDesc(e.target.value)}
+                  rows={2}
+                  style={{ marginBottom: 12 }}
+                />
+                <button className="btn-primary" onClick={handleAddProduct}>
+                  <Plus size={16} /> Adicionar Produto Individual
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* LISTAGEM DOS PRODUTOS CADASTRADOS NO SISTEMA */}
           <div>
-            <h2 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: 12 }}>Produtos Cadastrados ({products.length})</h2>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+              <h2 style={{ fontSize: '1.1rem', fontWeight: 600, margin: 0 }}>
+                Produtos Cadastrados no Catalogo ({products.length})
+              </h2>
+              {products.length > 0 && (
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                  Itens ativos consultados pela Multiplex IA durante conversas
+                </span>
+              )}
+            </div>
+
             {products.length === 0 ? (
-              <div className="glass-card" style={{ padding: 24, textAlign: 'center', color: 'var(--text-dim)' }}>
-                Nenhum produto cadastrado ainda.
+              <div className="glass-card" style={{ padding: 28, textAlign: 'center', color: 'var(--text-dim)' }}>
+                Nenhum produto cadastrado ainda. Cole a lista do seu cardapio acima para que a Multiplex IA organize tudo em segundos.
               </div>
             ) : (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 14 }}>
                 {products.map(p => (
-                  <div key={p.id} className="glass-card" style={{ padding: 16 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                  <div key={p.id} className="glass-card" style={{ padding: 16, position: 'relative' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10 }}>
                       <span style={{ fontWeight: 700, fontSize: '1rem' }}>{p.name}</span>
-                      <span style={{ color: '#10b981', fontWeight: 700 }}>R$ {Number(p.price).toFixed(2)}</span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span style={{ color: '#10b981', fontWeight: 700 }}>R$ {Number(p.price).toFixed(2)}</span>
+                        <button 
+                          onClick={() => handleDeleteProduct(p.id)}
+                          style={{ background: 'transparent', border: 'none', color: 'var(--text-dim)', cursor: 'pointer', padding: 2 }}
+                          title="Excluir produto"
+                        >
+                          <Trash2 size={15} color="#ef4444" />
+                        </button>
+                      </div>
                     </div>
-                    <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginTop: 6 }}>{p.description || 'Sem descricao'}</p>
+                    <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginTop: 6, marginBottom: 0 }}>
+                      {p.description || 'Sem descricao'}
+                    </p>
                   </div>
                 ))}
               </div>

@@ -101,3 +101,134 @@ productsRouter.post('/categories', (req: Request, res: Response) => {
 
   return res.status(201).json(category);
 });
+
+// Extrair múltiplos produtos a partir de texto colado com Multiplex IA (GPT-4o)
+productsRouter.post('/parse-ai', async (req: Request, res: Response) => {
+  const { text } = req.body;
+  if (!text || typeof text !== 'string' || text.trim().length === 0) {
+    return res.status(400).json({ error: 'Texto não fornecido para extração.' });
+  }
+
+  try {
+    let extractedProducts: any[] = [];
+
+    if (process.env.OPENAI_API_KEY) {
+      const { OpenAI } = await import('openai');
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const prompt = `Você é o extrator inteligente do Multiplex IA.
+O usuário copiou e colou uma lista, cardápio ou trecho de site de produtos com nomes, valores e descrições.
+Sua tarefa é analisar o texto, identificar cada produto individual e extrair:
+- name: Nome claro do produto (string)
+- price: Valor em reais em formato numérico float (ex: 29.90 ou 45.00). Converta R$ ou vírgulas para float. Se não houver valor, coloque 0.
+- description: Descrição, ingredientes ou detalhes (string).
+- category: Categoria sugerida (ex: Lanches, Hambúrgueres, Pizzas, Bebidas, Porções, Sobremesas, Geral).
+- ingredients: Array de ingredientes identificados (se houver).
+
+Texto bruto recebido:
+"""
+${text}
+"""
+
+Retorne EXCLUSIVAMENTE um objeto JSON no formato exato:
+{
+  "products": [
+    {
+      "name": "Nome do Produto",
+      "price": 29.90,
+      "description": "Ingredientes e detalhes",
+      "category": "Lanches",
+      "ingredients": ["Ingrediente 1", "Ingrediente 2"]
+    }
+  ]
+}
+PROIBIDO usar emojis.`;
+
+      const completion = await openai.chat.completions.create({
+        model: process.env.OPENAI_MODEL || 'gpt-4o',
+        messages: [
+          { role: 'system', content: 'Você é um extrator de catálogos e produtos em JSON estrito. Responda apenas com JSON válido. PROIBIDO usar emojis.' },
+          { role: 'user', content: prompt }
+        ],
+        response_format: { type: 'json_object' },
+        temperature: 0.1
+      });
+
+      const rawContent = completion.choices[0]?.message?.content || '{}';
+      const parsed = JSON.parse(rawContent);
+      if (Array.isArray(parsed.products)) {
+        extractedProducts = parsed.products;
+      }
+    }
+
+    // Fallback inteligente caso a IA não retorne ou falhe
+    if (extractedProducts.length === 0) {
+      const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+      for (const line of lines) {
+        const priceMatch = line.match(/(?:r\$|\$)\s*(\d+[.,]?\d*)/i) || line.match(/(\d+[.,]\d{2})/);
+        if (priceMatch) {
+          const rawPrice = priceMatch[1].replace(',', '.');
+          const price = parseFloat(rawPrice);
+          const parts = line.split(/(?:r\$|\$|\-|\:)/i).map(p => p.trim()).filter(Boolean);
+          const name = parts[0] || 'Produto';
+          const description = parts.slice(1).join(' - ').replace(priceMatch[0], '').trim();
+          extractedProducts.push({
+            name,
+            price: isNaN(price) ? 0 : price,
+            description: description || 'Extraído do texto',
+            category: 'Geral',
+            ingredients: []
+          });
+        }
+      }
+    }
+
+    return res.json({
+      success: true,
+      count: extractedProducts.length,
+      products: extractedProducts
+    });
+  } catch (error: any) {
+    console.error('Erro na extração de produtos:', error);
+    return res.status(500).json({ error: error.message || 'Falha ao processar produtos com IA.' });
+  }
+});
+
+// Inserir múltiplos produtos em lote (Bulk Insert)
+productsRouter.post('/batch', (req: Request, res: Response) => {
+  const companyId = (req.body.companyId as string) || DEFAULT_COMPANY_ID;
+  const { products } = req.body;
+
+  if (!Array.isArray(products) || products.length === 0) {
+    return res.status(400).json({ error: 'Nenhum produto fornecido para inserção em lote.' });
+  }
+
+  const currentProducts = store.products.get(companyId) || [];
+  const inserted: Product[] = [];
+
+  for (const p of products) {
+    if (!p.name || typeof p.name !== 'string') continue;
+    const newProd: Product = {
+      id: uuidv4(),
+      company_id: companyId,
+      category_id: p.category_id,
+      name: p.name.trim(),
+      description: p.description || '',
+      price: Number(p.price) || 0,
+      available: true,
+      ingredients: Array.isArray(p.ingredients) ? p.ingredients : [],
+      variations: Array.isArray(p.variations) ? p.variations : []
+    };
+    currentProducts.push(newProd);
+    inserted.push(newProd);
+  }
+
+  store.products.set(companyId, currentProducts);
+
+  return res.status(201).json({
+    success: true,
+    message: `${inserted.length} produtos adicionados com sucesso ao catálogo.`,
+    count: inserted.length,
+    products: inserted
+  });
+});
+
