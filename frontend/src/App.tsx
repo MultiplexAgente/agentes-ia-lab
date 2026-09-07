@@ -3,10 +3,24 @@ import {
   Bot, MessageSquare, LayoutDashboard, UtensilsCrossed, Sliders, BookOpen, 
   Share2, PlayCircle, Activity, Send, CheckCircle2, UserCheck, ShieldAlert,
   ArrowRight, Sparkles, RefreshCw, Plus, Trash2, Clock, DollarSign, Users,
-  ShoppingBag, HelpCircle, FileText, Smartphone, Instagram, MessageCircle, AlertCircle
+  ShoppingBag, HelpCircle, FileText, Smartphone, Instagram, MessageCircle, AlertCircle,
+  Sun, Moon
 } from 'lucide-react';
 
 export default function App() {
+  const [theme, setTheme] = useState<'dark' | 'light'>(() => {
+    return (localStorage.getItem('multiplex_theme') as 'dark' | 'light') || 'dark';
+  });
+
+  useEffect(() => {
+    document.body.className = theme;
+    localStorage.setItem('multiplex_theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prev => prev === 'dark' ? 'light' : 'dark');
+  };
+
   const [activeTab, setActiveTab] = useState<'dashboard' | 'inbox' | 'teach' | 'menu' | 'personality' | 'knowledge' | 'channels' | 'playground' | 'logs'>('dashboard');
 
   // Dashboard Data (Limpo em 0)
@@ -360,11 +374,20 @@ export default function App() {
         </nav>
 
         <div className="sidebar-footer">
+          <button 
+            className="btn-secondary" 
+            style={{ width: '100%', fontSize: '0.8rem', justifyContent: 'center' }} 
+            onClick={toggleTheme}
+            title={theme === 'dark' ? 'Ativar Tema Claro' : 'Ativar Tema Escuro'}
+          >
+            {theme === 'dark' ? <Sun size={15} color="var(--accent-amber)" /> : <Moon size={15} color="var(--accent-primary)" />}
+            <span>{theme === 'dark' ? 'Mudar para Tema Claro' : 'Mudar para Tema Escuro'}</span>
+          </button>
           <div className="n8n-badge">
             <span className="pulse-dot"></span>
             <span>n8n Local: Conectado (:5678)</span>
           </div>
-          <button className="btn-secondary" style={{ width: '100%', fontSize: '0.8rem' }} onClick={fetchData}>
+          <button className="btn-secondary" style={{ width: '100%', fontSize: '0.8rem', justifyContent: 'center' }} onClick={fetchData}>
             <RefreshCw size={14} /> Atualizar Painel
           </button>
         </div>
