@@ -156,7 +156,7 @@ export default function App() {
   const [teachChat, setTeachChat] = useState<Array<{ sender: 'user' | 'agent'; text: string; structured?: any }>>([
     { 
       sender: 'agent', 
-      text: 'Ola, sou o Multiplex. Insira informacoes sobre produtos, precos, regras ou horarios para eu aprender.' 
+      text: 'Ola, sou a Multiple IA. Insira informacoes sobre produtos, precos, regras ou horarios para eu aprender.' 
     }
   ]);
   const [teachInput, setTeachInput] = useState('');
@@ -164,7 +164,7 @@ export default function App() {
 
   // Playground
   const [playgroundMessages, setPlaygroundMessages] = useState<Array<{ role: 'user' | 'assistant'; content: string }>>([
-    { role: 'assistant', content: 'Ambiente de testes do Multiplex. Digite para testar a execucao de funcoes e regras.' }
+    { role: 'assistant', content: 'Ambiente de testes da Multiple IA. Digite para testar a execucao de funcoes e regras.' }
   ]);
   const [playgroundInput, setPlaygroundInput] = useState('');
   const [playgroundDebug, setPlaygroundDebug] = useState<any>(null);
@@ -525,7 +525,7 @@ export default function App() {
           <div className="chatgpt-sidebar-header">
             <div className="chatgpt-brand" onClick={() => setActiveView('chat')} style={{ cursor: 'pointer' }}>
               <Bot size={20} color="var(--accent-primary)" />
-              <span>Multiplex</span>
+              <span>Multiple IA</span>
             </div>
             <div className="chatgpt-header-actions">
               <button 
@@ -977,10 +977,10 @@ export default function App() {
           <div className="chatgpt-user-footer">
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 4px' }}>
               <div className="user-profile-row" style={{ flex: 1, padding: 0 }}>
-                <div className="avatar-circle">M</div>
+                <div className="avatar-circle">AN</div>
                 <div>
-                  <div className="user-name">Multiplex</div>
-                  <div className="user-plan">Agente de IA Multicanal</div>
+                  <div className="user-name">Anthony Both</div>
+                  <div className="user-plan">Free</div>
                 </div>
               </div>
 
@@ -1029,7 +1029,7 @@ export default function App() {
 
               <div className="model-selector">
                 <Bot size={16} color="var(--accent-primary)" />
-                <span>Multiplex (GPT-4o)</span>
+                <span>Multiple IA (GPT-4o)</span>
                 <span className="badge" style={{ fontSize: '0.68rem', padding: '2px 6px', background: 'rgba(16,185,129,0.15)', color: '#10b981' }}>
                   Funcoes Ativas
                 </span>
@@ -1066,7 +1066,7 @@ export default function App() {
                   </div>
                   <h1 className="chat-welcome-title">Como posso ajudar voce hoje?</h1>
                   <p style={{ color: 'var(--text-dim)', fontSize: '0.9rem' }}>
-                    Multiplex GPT integrado com cardapio, frete, agendamentos e regras.
+                    Multiple IA integrada com cardapio, frete, agendamentos e regras.
                   </p>
 
                   <div className="chat-welcome-suggestions">
@@ -1139,7 +1139,7 @@ export default function App() {
                   </div>
                   <div className="message-body-ai" style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--text-dim)' }}>
                     <RefreshCw size={16} className="animate-spin" />
-                    <span>Multiplex GPT pensando e executando funcoes...</span>
+                    <span>Multiple IA pensando e executando funcoes...</span>
                   </div>
                 </div>
               )}
@@ -1160,7 +1160,7 @@ export default function App() {
               <input 
                 type="text"
                 className="capsule-input"
-                placeholder="Pergunte qualquer coisa ao Multiplex GPT..."
+                placeholder="Pergunte qualquer coisa a Multiple IA..."
                 value={chatInput}
                 onChange={(e) => setChatInput(e.target.value)}
                 onKeyDown={(e) => {
@@ -1191,7 +1191,7 @@ export default function App() {
               </button>
             </div>
             <div className="chatgpt-disclaimer">
-              O Multiplex GPT executa as funcoes personalizadas adicionadas por voce.
+              A Multiple IA executa as funcoes personalizadas adicionadas por voce.
             </div>
           </div>
         </main>
