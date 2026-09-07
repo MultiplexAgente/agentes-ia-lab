@@ -8,9 +8,12 @@ import {
   Globe, Facebook, Twitter, Copy, ExternalLink, HelpCircle, CheckCircle2,
   User, Shield, Bell, CreditCard, LogOut, ChevronRight, Settings,
   Lock, Mail, Phone, Building2, UserPlus, LogIn, ArrowRight, ArrowLeft, Zap, Star, ShieldCheck, Key,
-  Mic, MicOff, Volume2, VolumeX, ThumbsUp, ThumbsDown, FileText, Paperclip, ChevronDown, Bot, Cpu, ShoppingBag, Truck, Calendar, Clock, DollarSign, Share2, Download, Terminal, Layers
+  Mic, MicOff, Volume2, VolumeX, ThumbsUp, ThumbsDown, FileText, Paperclip, ChevronDown, Bot, Cpu, ShoppingBag, Truck, Calendar, Clock, DollarSign, Share2, Download, Terminal, Layers, Wand2
 } from 'lucide-react';
 import atomLogo from './assets/multiplex-atom.jpg';
+import { AIBuilderView } from './components/builder/AIBuilderView';
+import { DynamicModuleView } from './components/builder/DynamicModuleView';
+import { AIBuilderModule } from './types/builder';
 
 interface FolderItem {
   id: string;
@@ -168,7 +171,25 @@ export default function App() {
   };
 
   // Visao ativa
-  const [activeView, setActiveView] = useState<'chat' | 'teach' | 'menu' | 'personality' | 'knowledge' | 'channels' | 'playground' | 'logs' | 'dashboard'>('chat');
+  const [activeView, setActiveView] = useState<'chat' | 'teach' | 'menu' | 'personality' | 'knowledge' | 'channels' | 'playground' | 'logs' | 'dashboard' | 'builder' | 'dynamic_module'>('chat');
+  const [currentDynamicModule, setCurrentDynamicModule] = useState<AIBuilderModule | null>(null);
+  const [sidebarModules, setSidebarModules] = useState<AIBuilderModule[]>([]);
+
+  const loadSidebarModules = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/api/builder/modules`);
+      if (res.ok) {
+        const json = await res.json();
+        setSidebarModules(json.modules || []);
+      }
+    } catch (e) {
+      console.warn('Falha ao sincronizar módulos na sidebar:', e);
+    }
+  };
+
+  useEffect(() => {
+    loadSidebarModules();
+  }, [activeView]);
 
   // Pastas criadas pelo usuario (Inicia vazio)
   const [folders, setFolders] = useState<FolderItem[]>(() => {
@@ -2278,6 +2299,22 @@ export default function App() {
                 </div>
               </div>
 
+              {/* AI APP BUILDER (CRIAR COM IA) */}
+              <div 
+                className={`sidebar-item ${activeView === 'builder' ? 'active' : ''}`}
+                onClick={() => setActiveView('builder')}
+                style={{ 
+                  background: activeView === 'builder' ? 'rgba(99, 102, 241, 0.15)' : undefined,
+                  border: activeView === 'builder' ? '1px solid rgba(99, 102, 241, 0.3)' : undefined
+                }}
+              >
+                <div className="item-main">
+                  <Wand2 size={17} color="#8b5cf6" />
+                  <span style={{ fontWeight: 600, color: 'var(--text-main)' }}>Criar com IA</span>
+                </div>
+                <span style={{ fontSize: '0.62rem', padding: '2px 6px', borderRadius: 4, background: 'linear-gradient(135deg, #6366f1, #a855f7)', color: '#fff', fontWeight: 800 }}>NOVO</span>
+              </div>
+
               <div 
                 className={`sidebar-item ${activeView === 'menu' ? 'active' : ''}`}
                 onClick={() => setActiveView('menu')}
@@ -2355,6 +2392,37 @@ export default function App() {
                 </div>
               </div>
             </div>
+
+            {/* MODULOS CRIADOS COM IA (NAVEGACAO DINAMICA - SECTION 33) */}
+            {sidebarModules.length > 0 && (
+              <div className="sidebar-section">
+                <div className="sidebar-section-header">
+                  <span>Módulos com IA ({sidebarModules.length})</span>
+                  <Sparkles size={12} color="#8b5cf6" />
+                </div>
+                {sidebarModules.map(mod => (
+                  <div 
+                    key={mod.id}
+                    className={`sidebar-item ${activeView === 'dynamic_module' && currentDynamicModule?.id === mod.id ? 'active' : ''}`}
+                    onClick={() => {
+                      setCurrentDynamicModule(mod);
+                      setActiveView('dynamic_module');
+                    }}
+                    style={{
+                      background: activeView === 'dynamic_module' && currentDynamicModule?.id === mod.id ? 'rgba(99, 102, 241, 0.15)' : undefined
+                    }}
+                  >
+                    <div className="item-main">
+                      <LayoutDashboard size={16} color="#818cf8" />
+                      <span>{mod.name}</span>
+                    </div>
+                    <span style={{ fontSize: '0.65rem', color: 'var(--text-dim)', background: 'rgba(255,255,255,0.05)', padding: '1px 5px', borderRadius: 4 }}>
+                      v{mod.version}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
 
             {/* SECAO FIXADA */}
             <div className="sidebar-section">
@@ -5372,6 +5440,34 @@ export default function App() {
             </button>
           </div>
         </div>
+      )}
+
+      {/* TELA: AI APP BUILDER (CRIAR COM IA) */}
+      {activeView === 'builder' && (
+        <AIBuilderView 
+          apiBase={API_BASE}
+          onOpenModule={(mod) => {
+            setCurrentDynamicModule(mod);
+            setActiveView('dynamic_module');
+            loadSidebarModules();
+          }}
+        />
+      )}
+
+      {/* TELA: MÓDULO DINÂMICO CONSTRUÍDO POR IA */}
+      {activeView === 'dynamic_module' && currentDynamicModule && (
+        <DynamicModuleView 
+          module={currentDynamicModule}
+          apiBase={API_BASE}
+          onBack={() => {
+            setActiveView('builder');
+            loadSidebarModules();
+          }}
+          onModuleUpdated={(updated) => {
+            setCurrentDynamicModule(updated);
+            loadSidebarModules();
+          }}
+        />
       )}
 
       {/* MODAL PRINCIPAL DE PERFIL E CONTA COM PLANO E MENSALIDADE */}

@@ -64,11 +64,14 @@ export interface Product {
   id: string;
   company_id: string;
   category_id?: string;
+  category?: string;
   name: string;
   description: string;
   price: number;
   image_url?: string;
   available: boolean;
+  active?: boolean;
+  stock?: number;
   ingredients: string[];
   preparation_time_minutes?: number;
   variations?: ProductVariation[];
@@ -99,10 +102,12 @@ export interface Customer {
   phone?: string;
   email?: string;
   avatar_url?: string;
-  address?: Record<string, any>;
+  address?: Record<string, any> | string;
   notes?: string;
-  total_orders: number;
-  lifetime_value: number;
+  total_orders?: number;
+  lifetime_value?: number;
+  created_at?: string;
+  last_order_at?: string;
 }
 
 export interface Conversation {
@@ -157,15 +162,18 @@ export interface Order {
   company_id: string;
   customer_id: string;
   conversation_id?: string;
-  status: 'PENDING' | 'CONFIRMED' | 'PREPARING' | 'DELIVERING' | 'COMPLETED' | 'CANCELLED';
-  subtotal: number;
-  delivery_fee: number;
-  total: number;
-  delivery_address: Record<string, any>;
-  payment_method: string;
+  status: 'PENDING' | 'CONFIRMED' | 'PREPARING' | 'DELIVERING' | 'COMPLETED' | 'CANCELLED' | 'delivered' | 'pending' | 'confirmed' | string;
+  subtotal?: number;
+  delivery_fee?: number;
+  total?: number;
+  total_amount?: number;
+  payment_status?: string;
+  delivery_address?: Record<string, any> | string;
+  payment_method?: string;
   notes?: string;
   items?: OrderItem[];
   created_at?: string;
+  updated_at?: string;
 }
 
 export interface OrderItem {
@@ -346,5 +354,113 @@ export interface NormalizedCatalogItem {
   last_synced_at?: string;
   created_at?: string;
   updated_at?: string;
+}
+
+// =========================================================================
+// AI APP BUILDER — CONSTRUTOR DE FUNCIONALIDADES COM IA
+// =========================================================================
+
+export type UIComponentType = 
+  | 'metric' 
+  | 'kpi' 
+  | 'chart' 
+  | 'table' 
+  | 'filter' 
+  | 'form' 
+  | 'card' 
+  | 'section' 
+  | 'divider';
+
+export type ChartType = 'line' | 'bar' | 'area' | 'pie' | 'donut';
+
+export interface UIComponent {
+  id: string;
+  type: UIComponentType;
+  title: string;
+  description?: string;
+  dataSource?: 'orders' | 'payments' | 'expenses' | 'customers' | 'products' | 'conversations' | string;
+  aggregation?: 'sum' | 'count' | 'avg' | 'min' | 'max';
+  field?: string;
+  format?: 'currency' | 'number' | 'percentage' | 'date';
+  currency?: string;
+  chartType?: ChartType;
+  groupBy?: string;
+  filter?: Record<string, any>;
+  columns?: Array<{ key: string; label: string; format?: string }>;
+  fields?: Array<{ name: string; label: string; type: string; required?: boolean }>;
+  actions?: Array<{ label: string; action: string }>;
+  badge?: string;
+  data?: any; // preloaded or static fallback
+}
+
+export interface UISection {
+  id: string;
+  title?: string;
+  description?: string;
+  columns?: number; // 1, 2, 3, 4
+  components: UIComponent[];
+}
+
+export interface UISchema {
+  title: string;
+  description?: string;
+  icon?: string;
+  layout?: 'dashboard' | 'crud' | 'report' | 'custom';
+  period_filter_enabled?: boolean;
+  sections: UISection[];
+}
+
+export interface AIBuilderModule {
+  id: string;
+  company_id: string;
+  agent_id?: string;
+  name: string;
+  slug: string;
+  description: string;
+  icon: string;
+  category?: string;
+  status: 'active' | 'draft' | 'archived';
+  schema: UISchema;
+  version: number;
+  created_by?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AIBuilderModuleVersion {
+  id: string;
+  module_id: string;
+  version: number;
+  schema: UISchema;
+  prompt: string;
+  build_plan?: any;
+  created_by: string;
+  created_at: string;
+}
+
+export interface AIBuildPlan {
+  action: 'create_module' | 'patch_module' | 'delete_module' | 'query_data';
+  target_module?: {
+    id?: string;
+    name: string;
+    slug: string;
+  };
+  summary: string;
+  components_summary: string[];
+  data_sources: string[];
+  risk_level: 'LOW_RISK' | 'MEDIUM_RISK' | 'HIGH_RISK';
+  suggested_schema: UISchema;
+}
+
+export interface Expense {
+  id: string;
+  company_id: string;
+  title: string;
+  category: string;
+  amount: number;
+  status: 'paid' | 'pending';
+  due_date: string;
+  paid_at?: string;
+  created_at: string;
 }
 

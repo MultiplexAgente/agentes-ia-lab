@@ -13,6 +13,7 @@ import { logsRouter } from './routes/logs.js';
 import { billingRouter } from './routes/billing.js';
 import { authRouter } from './routes/auth.js';
 import sourcesRouter from './routes/sources.js';
+import { builderRouter } from './routes/builder.js';
 
 dotenv.config();
 
@@ -47,6 +48,7 @@ app.use('/api/logs', logsRouter);
 app.use('/api/billing', billingRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/sources', sourcesRouter);
+app.use('/api/builder', builderRouter);
 
 
 // Inicialização do Servidor
