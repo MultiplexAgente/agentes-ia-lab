@@ -114,9 +114,10 @@ export interface Conversation {
   status: ConversationStatus;
   last_message_text?: string;
   last_message_at?: string;
-  tags: string[];
+  tags?: string[];
   metadata?: Record<string, any>;
   customer?: Customer;
+  external_chat_id?: string;
 }
 
 export interface Message {

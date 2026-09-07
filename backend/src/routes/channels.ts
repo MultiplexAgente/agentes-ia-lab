@@ -135,23 +135,25 @@ channelsRouter.get('/', (req: Request, res: Response) => {
 
 // Atualizar canal
 channelsRouter.put('/:type', (req: Request, res: Response) => {
-  const { type } = req.params;
-  if (!channelStates[type]) {
+  const type = req.params.type as string;
+  const states = channelStates as Record<string, any>;
+  if (!states[type]) {
     return res.status(404).json({ error: 'Canal inválido.' });
   }
 
-  channelStates[type] = {
-    ...channelStates[type],
+  states[type] = {
+    ...states[type],
     ...req.body
   };
 
-  return res.json(channelStates[type]);
+  return res.json(states[type]);
 });
 
 // Testar conexão de canal
 channelsRouter.post('/:type/test', (req: Request, res: Response) => {
-  const { type } = req.params;
-  const channel = channelStates[type];
+  const type = req.params.type as string;
+  const states = channelStates as Record<string, any>;
+  const channel = states[type];
   if (!channel) {
     return res.status(404).json({ error: 'Canal inválido.' });
   }
@@ -171,9 +173,10 @@ channelsRouter.post('/:type/test', (req: Request, res: Response) => {
 
 // Assistente de Conexão com IA (Tira-dúvidas e orientações passo a passo)
 channelsRouter.post('/:type/ai-guide', async (req: Request, res: Response) => {
-  const { type } = req.params;
+  const type = req.params.type as string;
   const { question } = req.body;
-  const channel = channelStates[type];
+  const states = channelStates as Record<string, any>;
+  const channel = states[type];
 
   if (!channel) {
     return res.status(404).json({ error: 'Canal inválido.' });
@@ -213,7 +216,7 @@ Instruções para sua resposta:
 
     if (!aiResponse) {
       aiResponse = `Guia de conexão rápida para ${channel.name}:\n\n` +
-        channel.setupInstructions.map((s, i) => `${i + 1}. ${s}`).join('\n') +
+        channel.setupInstructions.map((s: any, i: number) => `${i + 1}. ${s}`).join('\n') +
         `\n\nURL do Webhook para colar no painel: ${channel.webhookUrl}`;
     }
 

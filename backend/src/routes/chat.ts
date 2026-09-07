@@ -49,7 +49,7 @@ chatRouter.get('/conversations', (req: Request, res: Response) => {
  * Retorna o histórico de mensagens de uma conversa
  */
 chatRouter.get('/conversations/:id/messages', async (req: Request, res: Response) => {
-  const conversationId = req.params.id;
+  const conversationId = req.params.id as string;
   const messages = store.messages.get(conversationId) || [];
   return res.json(messages);
 });
@@ -58,7 +58,7 @@ chatRouter.get('/conversations/:id/messages', async (req: Request, res: Response
  * Atendente humano envia mensagem direta para o cliente
  */
 chatRouter.post('/conversations/:id/messages', async (req: Request, res: Response) => {
-  const conversationId = req.params.id;
+  const conversationId = req.params.id as string;
   const { text } = req.body;
 
   if (!text) {
@@ -95,7 +95,7 @@ chatRouter.post('/conversations/:id/messages', async (req: Request, res: Respons
  * Handoff Humano: Alterna entre Assumir Conversa (Humano) e Devolver para IA
  */
 chatRouter.post('/conversations/:id/handoff', async (req: Request, res: Response) => {
-  const conversationId = req.params.id;
+  const conversationId = req.params.id as string;
   const { action } = req.body; // 'takeover' (humano assume) ou 'release' (devolve para IA)
 
   const conversation = store.conversations.get(conversationId);

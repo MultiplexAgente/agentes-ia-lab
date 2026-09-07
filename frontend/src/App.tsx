@@ -7,7 +7,8 @@ import {
   Edit3, Check, X, ArrowUp, PlayCircle, LayoutDashboard,
   Globe, Facebook, Twitter, Copy, ExternalLink, HelpCircle, CheckCircle2,
   User, Shield, Bell, CreditCard, LogOut, ChevronRight, Settings,
-  Lock, Mail, Phone, Building2, UserPlus, LogIn, ArrowRight, ArrowLeft, Zap, Star, ShieldCheck, Key
+  Lock, Mail, Phone, Building2, UserPlus, LogIn, ArrowRight, ArrowLeft, Zap, Star, ShieldCheck, Key,
+  Mic, MicOff, Volume2, VolumeX, ThumbsUp, ThumbsDown, FileText, Paperclip, ChevronDown, Bot, Cpu, ShoppingBag, Truck, Calendar, Clock, DollarSign, Share2, Download, Terminal, Layers
 } from 'lucide-react';
 import atomLogo from './assets/multiplex-atom.jpg';
 
@@ -127,6 +128,15 @@ const DEFAULT_PLANS = [
       'Gerente de sucesso do cliente dedicado'
     ]
   }
+];
+
+const SLASH_COMMANDS = [
+  { cmd: '/cardapio', desc: 'Consultar todos os produtos e precos', prompt: 'Quais sao todos os produtos cadastrados no cardapio e os seus precos?' },
+  { cmd: '/frete', desc: 'Calcular taxa de entrega e raio', prompt: 'Qual e a taxa de entrega, raio de atendimento e tempo estimado de entrega?' },
+  { cmd: '/horarios', desc: 'Verificar horario de funcionamento', prompt: 'Qual o horario de funcionamento e atendimento da loja hoje?' },
+  { cmd: '/agendar', desc: 'Simular agendamento de cliente', prompt: 'Gostaria de agendar um atendimento para amanha a tarde.' },
+  { cmd: '/promocao', desc: 'Criar promocao ou combo especial', prompt: 'Sugira um combo promocional com desconto e sobremesa para hoje.' },
+  { cmd: '/regras', desc: 'Listar regras de negocio ativas', prompt: 'Quais regras de negocio e diretrizes de atendimento voce segue obrigatoriamente?' }
 ];
 
 export default function App() {
@@ -306,6 +316,19 @@ export default function App() {
       billing_cycle: 'monthly'
     };
   });
+
+  // Estados da IA Mais Completa (Multiplex IA)
+  const [selectedModel, setSelectedModel] = useState<'gpt-4o' | 'claude-3.5-sonnet' | 'deepseek-v3' | 'gemini-1.5-pro'>('gpt-4o');
+  const [showModelDropdown, setShowModelDropdown] = useState(false);
+  const [selectedAIMode, setSelectedAIMode] = useState<'geral' | 'cardapio' | 'logistica' | 'agendamento' | 'vendas' | 'suporte'>('geral');
+  const [promptCategory, setPromptCategory] = useState<'destaques' | 'cardapio' | 'frete' | 'horarios' | 'agendamento' | 'promocoes'>('destaques');
+  const [isRecordingVoice, setIsRecordingVoice] = useState(false);
+  const [speakingMsgId, setSpeakingMsgId] = useState<string | null>(null);
+  const [copiedMsgId, setCopiedMsgId] = useState<string | null>(null);
+  const [feedbackMap, setFeedbackMap] = useState<Record<string, 'liked' | 'disliked'>>({});
+  const [showSlashMenu, setShowSlashMenu] = useState(false);
+  const [showAttachModal, setShowAttachModal] = useState(false);
+  const [attachedFile, setAttachedFile] = useState<{ name: string; size: string } | null>(null);
 
   const [metrics, setMetrics] = useState<any>({
     conversations_today: 0,
@@ -703,6 +726,109 @@ export default function App() {
       } : c));
     } finally {
       setIsSendingMessage(false);
+    }
+  };
+
+  // Funcoes Avancadas de Interacao com a Multiplex IA
+  const handleSpeakMessage = (msgId: string, text: string) => {
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
+      alert('Sintese de voz nao suportada neste navegador.');
+      return;
+    }
+    if (speakingMsgId === msgId) {
+      window.speechSynthesis.cancel();
+      setSpeakingMsgId(null);
+      return;
+    }
+    window.speechSynthesis.cancel();
+    const cleanText = text.replace(/[*_#`]/g, '');
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    utterance.lang = 'pt-BR';
+    utterance.rate = 1.05;
+    utterance.onend = () => setSpeakingMsgId(null);
+    utterance.onerror = () => setSpeakingMsgId(null);
+    setSpeakingMsgId(msgId);
+    window.speechSynthesis.speak(utterance);
+  };
+
+  const handleCopyMessage = (msgId: string, text: string) => {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(text);
+      setCopiedMsgId(msgId);
+      setTimeout(() => setCopiedMsgId(null), 2000);
+    }
+  };
+
+  const handleFeedback = (msgId: string, type: 'liked' | 'disliked') => {
+    setFeedbackMap(prev => ({ ...prev, [msgId]: type }));
+  };
+
+  const handleToggleVoiceRecording = () => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      if (!isRecordingVoice) {
+        try {
+          const recognition = new SpeechRecognition();
+          recognition.lang = 'pt-BR';
+          recognition.continuous = false;
+          recognition.interimResults = false;
+          recognition.onstart = () => setIsRecordingVoice(true);
+          recognition.onresult = (event: any) => {
+            const transcript = event.results[0][0].transcript;
+            setChatInput(prev => prev ? `${prev} ${transcript}` : transcript);
+            setIsRecordingVoice(false);
+          };
+          recognition.onerror = () => setIsRecordingVoice(false);
+          recognition.onend = () => setIsRecordingVoice(false);
+          recognition.start();
+        } catch (e) {
+          setIsRecordingVoice(false);
+        }
+      } else {
+        setIsRecordingVoice(false);
+      }
+    } else {
+      if (!isRecordingVoice) {
+        setIsRecordingVoice(true);
+        setTimeout(() => {
+          setChatInput('Quais sao as opcoes de cardapio e a taxa de entrega para o Centro?');
+          setIsRecordingVoice(false);
+        }, 1600);
+      } else {
+        setIsRecordingVoice(false);
+      }
+    }
+  };
+
+  const handleSelectSlash = (promptText: string) => {
+    setChatInput(promptText);
+    setShowSlashMenu(false);
+  };
+
+  const handleExportConversation = () => {
+    if (!currentChat || currentChat.messages.length === 0) {
+      alert('Esta conversa ainda nao possui mensagens para exportar.');
+      return;
+    }
+    const transcript = currentChat.messages.map(m => {
+      const author = m.role === 'user' ? 'USUARIO' : 'MULTIPLEX IA (BONASOFT)';
+      return `[${new Date(m.timestamp).toLocaleTimeString('pt-BR')}] ${author}:\n${m.content}\n`;
+    }).join('\n----------------------------------------\n\n');
+
+    const blob = new Blob([transcript], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `multiplex-ia-chat-${currentChat.id}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleRegenerateLastMessage = () => {
+    if (!currentChat || currentChat.messages.length === 0) return;
+    const lastUserMsg = [...currentChat.messages].reverse().find(m => m.role === 'user');
+    if (lastUserMsg) {
+      handleSendMessage(lastUserMsg.content);
     }
   };
 
@@ -1116,7 +1242,7 @@ export default function App() {
                 <span>Multiplex IA</span>
                 <span style={{ fontSize: '0.68rem', color: '#06b6d4', background: 'rgba(6, 182, 212, 0.12)', border: '1px solid rgba(6, 182, 212, 0.3)', padding: '2px 8px', borderRadius: 10, fontWeight: 700 }}>v1.2 GPT-4o</span>
               </div>
-              <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Plataforma de Agentes Multicanal</div>
+              <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Plataforma de Agentes Multicanal | BONASOFT</div>
             </div>
           </div>
 
@@ -1801,6 +1927,11 @@ export default function App() {
             </div>
           </div>
         )}
+
+        {/* ── BONASOFT Watermark ── */}
+        <div className="bonasoft-watermark-container" style={{ padding: '24px 0 16px 0' }}>
+          <p className="bonasoft-watermark">BONASOFT</p>
+        </div>
       </div>
     );
   }
@@ -2431,8 +2562,8 @@ export default function App() {
       {/* AREA PRINCIPAL: CHAT OU TELAS */}
       {activeView === 'chat' && (
         <main className="chatgpt-main">
-          {/* Top Bar */}
-          <div className="chatgpt-top-bar">
+          {/* Top Bar com Seletor de Modelo e Indicadores */}
+          <div className="chatgpt-top-bar" style={{ position: 'relative' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
               {sidebarCollapsed && (
                 <button 
@@ -2444,16 +2575,108 @@ export default function App() {
                 </button>
               )}
 
-              <div className="model-selector" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <img src={atomLogo} alt="Multiplex IA" style={{ width: 22, height: 22, borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(0, 210, 255, 0.4)' }} />
-                <span>Multiplex IA (GPT-4o)</span>
+              {/* Seletor Interativo de Modelos IA */}
+              <div 
+                className="model-selector" 
+                style={{ display: 'flex', alignItems: 'center', gap: 8, position: 'relative' }}
+                onClick={() => setShowModelDropdown(!showModelDropdown)}
+                title="Clique para alternar o modelo de inteligência artificial"
+              >
+                <img src={atomLogo} alt="Multiplex IA" style={{ width: 22, height: 22, borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(0, 210, 255, 0.5)' }} />
+                <span>
+                  {selectedModel === 'gpt-4o' && 'Multiplex IA (GPT-4o)'}
+                  {selectedModel === 'claude-3.5-sonnet' && 'Multiplex IA (Claude 3.5 Sonnet)'}
+                  {selectedModel === 'deepseek-v3' && 'Multiplex IA (DeepSeek V3/R1)'}
+                  {selectedModel === 'gemini-1.5-pro' && 'Multiplex IA (Gemini 1.5 Pro)'}
+                </span>
+                <ChevronDown size={14} style={{ transform: showModelDropdown ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
                 <span className="badge" style={{ fontSize: '0.68rem', padding: '2px 6px', background: 'rgba(16,185,129,0.15)', color: '#10b981' }}>
                   Funcoes Ativas
                 </span>
+                <span className="badge" style={{ fontSize: '0.68rem', padding: '2px 6px', background: 'rgba(99,102,241,0.15)', color: '#818cf8' }}>
+                  RAG & Memoria
+                </span>
               </div>
+
+              {/* Dropdown de Escolha de Modelos */}
+              {showModelDropdown && (
+                <div className="model-dropdown-menu" onClick={(e) => e.stopPropagation()}>
+                  <div style={{ fontSize: '0.72rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--text-dim)', padding: '6px 10px' }}>
+                    Selecione o Motor de IA
+                  </div>
+                  
+                  <div 
+                    className={`model-option-card ${selectedModel === 'gpt-4o' ? 'selected' : ''}`}
+                    onClick={() => { setSelectedModel('gpt-4o'); setShowModelDropdown(false); }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--text-main)' }}>OpenAI GPT-4o</span>
+                      <span className="badge" style={{ background: 'rgba(16,185,129,0.2)', color: '#10b981', fontSize: '0.65rem' }}>Padrao Oficial</span>
+                    </div>
+                    <span style={{ fontSize: '0.76rem', color: 'var(--text-muted)' }}>Multimodal rápido com Function Calling nativo e raciocínio de alta precisão.</span>
+                  </div>
+
+                  <div 
+                    className={`model-option-card ${selectedModel === 'claude-3.5-sonnet' ? 'selected' : ''}`}
+                    onClick={() => { setSelectedModel('claude-3.5-sonnet'); setShowModelDropdown(false); }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--text-main)' }}>Claude 3.5 Sonnet</span>
+                      <span className="badge" style={{ background: 'rgba(245,158,11,0.2)', color: '#f59e0b', fontSize: '0.65rem' }}>Alta Redacao</span>
+                    </div>
+                    <span style={{ fontSize: '0.76rem', color: 'var(--text-muted)' }}>Excelente para diálogos consultivos, fechamento de vendas e redação humanizada.</span>
+                  </div>
+
+                  <div 
+                    className={`model-option-card ${selectedModel === 'deepseek-v3' ? 'selected' : ''}`}
+                    onClick={() => { setSelectedModel('deepseek-v3'); setShowModelDropdown(false); }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--text-main)' }}>DeepSeek V3 / R1</span>
+                      <span className="badge" style={{ background: 'rgba(6,182,212,0.2)', color: '#06b6d4', fontSize: '0.65rem' }}>Logica & Precos</span>
+                    </div>
+                    <span style={{ fontSize: '0.76rem', color: 'var(--text-muted)' }}>Cálculos de frete complexos, regras condicionais e velocidade ultra-rápida.</span>
+                  </div>
+
+                  <div 
+                    className={`model-option-card ${selectedModel === 'gemini-1.5-pro' ? 'selected' : ''}`}
+                    onClick={() => { setSelectedModel('gemini-1.5-pro'); setShowModelDropdown(false); }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--text-main)' }}>Gemini 1.5 Pro</span>
+                      <span className="badge" style={{ background: 'rgba(139,92,246,0.2)', color: '#a78bfa', fontSize: '0.65rem' }}>Janela 1M</span>
+                    </div>
+                    <span style={{ fontSize: '0.76rem', color: 'var(--text-muted)' }}>Contexto massivo para leitura de catálogos gigantes e PDFs de regras.</span>
+                  </div>
+                </div>
+              )}
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              {/* Exportar conversa */}
+              <button 
+                className="icon-btn" 
+                title="Exportar conversa atual (.txt)"
+                onClick={handleExportConversation}
+              >
+                <Download size={17} />
+              </button>
+
+              {/* Limpar histórico deste chat */}
+              <button 
+                className="icon-btn" 
+                title="Limpar mensagens desta conversa"
+                onClick={() => {
+                  if (currentChat && currentChat.messages.length > 0) {
+                    if (confirm('Deseja limpar as mensagens desta conversa?')) {
+                      setChats(chats.map(c => c.id === currentChat.id ? { ...c, messages: [] } : c));
+                    }
+                  }
+                }}
+              >
+                <Trash2 size={17} />
+              </button>
+
               {/* Bolinha minimalista de tema */}
               <button 
                 className="theme-circle-btn"
@@ -2473,77 +2696,440 @@ export default function App() {
             </div>
           </div>
 
+          {/* Barra de Modos de Operação do Agente de IA */}
+          <div className="ai-modes-container">
+            <button 
+              className={`ai-mode-pill ${selectedAIMode === 'geral' ? 'active' : ''}`}
+              onClick={() => setSelectedAIMode('geral')}
+            >
+              <Sparkles size={13} />
+              <span>Geral & Assistente</span>
+            </button>
+
+            <button 
+              className={`ai-mode-pill ${selectedAIMode === 'cardapio' ? 'active' : ''}`}
+              onClick={() => { setSelectedAIMode('cardapio'); setPromptCategory('cardapio'); }}
+            >
+              <ShoppingBag size={13} />
+              <span>Cardápio & Delivery</span>
+            </button>
+
+            <button 
+              className={`ai-mode-pill ${selectedAIMode === 'logistica' ? 'active' : ''}`}
+              onClick={() => { setSelectedAIMode('logistica'); setPromptCategory('frete'); }}
+            >
+              <Truck size={13} />
+              <span>Logística & Frete</span>
+            </button>
+
+            <button 
+              className={`ai-mode-pill ${selectedAIMode === 'agendamento' ? 'active' : ''}`}
+              onClick={() => { setSelectedAIMode('agendamento'); setPromptCategory('agendamento'); }}
+            >
+              <Calendar size={13} />
+              <span>Agendamentos</span>
+            </button>
+
+            <button 
+              className={`ai-mode-pill ${selectedAIMode === 'vendas' ? 'active' : ''}`}
+              onClick={() => { setSelectedAIMode('vendas'); setPromptCategory('promocoes'); }}
+            >
+              <DollarSign size={13} />
+              <span>Vendas & Cupons</span>
+            </button>
+
+            <button 
+              className={`ai-mode-pill ${selectedAIMode === 'suporte' ? 'active' : ''}`}
+              onClick={() => setSelectedAIMode('suporte')}
+            >
+              <MessageCircle size={13} />
+              <span>Suporte & SAC</span>
+            </button>
+          </div>
+
           {/* Feed de Mensagens */}
-          <div className="chat-feed-container">
+          <div className="chat-feed-container" onClick={() => setShowModelDropdown(false)}>
             <div className="chat-thread-inner">
               {currentChat && currentChat.messages.length === 0 ? (
-                <div className="chat-welcome-container">
-                  <div className="chat-welcome-icon" style={{ padding: 0, overflow: 'hidden', background: 'transparent', border: '2px solid rgba(0, 210, 255, 0.5)', boxShadow: '0 0 30px rgba(0, 210, 255, 0.3)', width: 56, height: 56, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div className="chat-welcome-container" style={{ textAlign: 'center', maxWidth: 860, margin: '0 auto', width: '100%' }}>
+                  <div className="chat-welcome-icon" style={{ padding: 0, overflow: 'hidden', background: 'transparent', border: '2px solid rgba(0, 210, 255, 0.5)', boxShadow: '0 0 32px rgba(0, 210, 255, 0.35)', width: 62, height: 62, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px auto' }}>
                     <img src={atomLogo} alt="Multiplex IA" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
                   </div>
-                  <h1 className="chat-welcome-title">Como posso ajudar voce hoje?</h1>
-                  <p style={{ color: 'var(--text-dim)', fontSize: '0.9rem' }}>
-                    Multiplex IA integrado com cardapio, frete, agendamentos e regras.
+                  <h1 className="chat-welcome-title" style={{ fontSize: '1.75rem', fontWeight: 800, letterSpacing: '-0.5px' }}>
+                    Como posso ajudar você hoje?
+                  </h1>
+                  <p style={{ color: 'var(--text-dim)', fontSize: '0.92rem', maxWidth: 620, margin: '0 auto 12px auto', lineHeight: 1.5 }}>
+                    Multiplex IA integrado com cardápio ({products.length} itens), frete por raio, agendamentos automáticos e regras de atendimento.
                   </p>
 
-                  <div className="chat-welcome-suggestions">
-                    <div 
-                      className="chat-suggestion-card"
-                      onClick={() => handleSendMessage('Quais sao os produtos do cardapio e os precos?')}
-                    >
-                      <div className="chat-suggestion-title">Consultar Cardapio</div>
-                      <div className="chat-suggestion-desc">Mostre todos os produtos e precos cadastrados</div>
-                    </div>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, margin: '0 auto 18px auto' }}>
+                    <span className="bonasoft-badge-tag">Tecnologia BONASOFT</span>
+                    <span className="badge" style={{ background: 'rgba(16,185,129,0.12)', color: '#10b981', fontSize: '0.72rem' }}>
+                      ● Online & Sincronizado
+                    </span>
+                  </div>
 
-                    <div 
-                      className="chat-suggestion-card"
-                      onClick={() => handleSendMessage('Qual e a taxa de entrega e o frete?')}
+                  {/* Abas de Categorias de Sugestões Rápidas */}
+                  <div className="suggestion-category-bar">
+                    <button 
+                      className={`suggestion-cat-btn ${promptCategory === 'destaques' ? 'active' : ''}`}
+                      onClick={() => setPromptCategory('destaques')}
                     >
-                      <div className="chat-suggestion-title">Calcular Frete</div>
-                      <div className="chat-suggestion-desc">Consulte as regras de entrega e raio de atendimento</div>
-                    </div>
+                      <Star size={13} /> Destaques
+                    </button>
+                    <button 
+                      className={`suggestion-cat-btn ${promptCategory === 'cardapio' ? 'active' : ''}`}
+                      onClick={() => setPromptCategory('cardapio')}
+                    >
+                      <ShoppingBag size={13} /> Cardápio & Itens
+                    </button>
+                    <button 
+                      className={`suggestion-cat-btn ${promptCategory === 'frete' ? 'active' : ''}`}
+                      onClick={() => setPromptCategory('frete')}
+                    >
+                      <Truck size={13} /> Frete & Logística
+                    </button>
+                    <button 
+                      className={`suggestion-cat-btn ${promptCategory === 'horarios' ? 'active' : ''}`}
+                      onClick={() => setPromptCategory('horarios')}
+                    >
+                      <Clock size={13} /> Horários & Regras
+                    </button>
+                    <button 
+                      className={`suggestion-cat-btn ${promptCategory === 'agendamento' ? 'active' : ''}`}
+                      onClick={() => setPromptCategory('agendamento')}
+                    >
+                      <Calendar size={13} /> Agendamentos
+                    </button>
+                    <button 
+                      className={`suggestion-cat-btn ${promptCategory === 'promocoes' ? 'active' : ''}`}
+                      onClick={() => setPromptCategory('promocoes')}
+                    >
+                      <DollarSign size={13} /> Vendas & Promoções
+                    </button>
+                  </div>
 
-                    <div 
-                      className="chat-suggestion-card"
-                      onClick={() => handleSendMessage('Qual o horario de funcionamento de voces?')}
-                    >
-                      <div className="chat-suggestion-title">Horario de Atendimento</div>
-                      <div className="chat-suggestion-desc">Verifique horarios e funcionamento</div>
-                    </div>
+                  {/* Grid Rico de Sugestões por Categoria */}
+                  <div className="rich-suggestions-grid" style={{ margin: '0 auto' }}>
+                    {promptCategory === 'destaques' && (
+                      <>
+                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Quais sao todos os produtos do cardapio e os precos?')}>
+                          <div className="rich-suggestion-header">
+                            <span className="rich-suggestion-badge">Cardapio</span>
+                            <ShoppingBag size={14} color="var(--accent-cyan)" />
+                          </div>
+                          <div className="rich-suggestion-title">Consultar Cardapio Completo</div>
+                          <div className="rich-suggestion-desc">Mostre todos os produtos, precos e itens ativos cadastrados.</div>
+                        </div>
 
-                    <div 
-                      className="chat-suggestion-card"
-                      onClick={() => handleSendMessage('Quero agendar um atendimento para amanha')}
-                    >
-                      <div className="chat-suggestion-title">Agendar Atendimento</div>
-                      <div className="chat-suggestion-desc">Teste a funcao de agendamento de servicos</div>
-                    </div>
+                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Qual e a taxa de entrega e as regras de frete da loja?')}>
+                          <div className="rich-suggestion-header">
+                            <span className="rich-suggestion-badge">Logistica</span>
+                            <Truck size={14} color="var(--accent-cyan)" />
+                          </div>
+                          <div className="rich-suggestion-title">Calcular Frete & Raio</div>
+                          <div className="rich-suggestion-desc">Consulte as regras de entrega, raio de atendimento e taxa estimada.</div>
+                        </div>
+
+                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Qual o horario de funcionamento de voces hoje?')}>
+                          <div className="rich-suggestion-header">
+                            <span className="rich-suggestion-badge">Horarios</span>
+                            <Clock size={14} color="var(--accent-cyan)" />
+                          </div>
+                          <div className="rich-suggestion-title">Horario de Atendimento</div>
+                          <div className="rich-suggestion-desc">Verifique horarios de funcionamento, abertura e dias de atendimento.</div>
+                        </div>
+
+                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Quero agendar um atendimento para amanha a tarde')}>
+                          <div className="rich-suggestion-header">
+                            <span className="rich-suggestion-badge">Agendamento</span>
+                            <Calendar size={14} color="var(--accent-cyan)" />
+                          </div>
+                          <div className="rich-suggestion-title">Agendar Atendimento VIP</div>
+                          <div className="rich-suggestion-desc">Teste a funcao de agendamento de servico ou reserva de mesa.</div>
+                        </div>
+                      </>
+                    )}
+
+                    {promptCategory === 'cardapio' && (
+                      <>
+                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Quais sao os pratos e produtos mais vendidos da casa?')}>
+                          <div className="rich-suggestion-header">
+                            <span className="rich-suggestion-badge">Mais Pedidos</span>
+                            <Star size={14} color="var(--accent-cyan)" />
+                          </div>
+                          <div className="rich-suggestion-title">Itens Populares & Carros-chefe</div>
+                          <div className="rich-suggestion-desc">Descubra os produtos recomendados pela IA para clientes.</div>
+                        </div>
+
+                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Sugira um combo promocional com prato principal e bebida')}>
+                          <div className="rich-suggestion-header">
+                            <span className="rich-suggestion-badge">Combos</span>
+                            <Zap size={14} color="var(--accent-cyan)" />
+                          </div>
+                          <div className="rich-suggestion-title">Sugerir Combo com Bebida</div>
+                          <div className="rich-suggestion-desc">Monte uma sugestão atrativa de lanche/refeição completa.</div>
+                        </div>
+
+                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Quais sobremesas e adicionais voces tem disponiveis?')}>
+                          <div className="rich-suggestion-header">
+                            <span className="rich-suggestion-badge">Sobremesas</span>
+                            <ShoppingBag size={14} color="var(--accent-cyan)" />
+                          </div>
+                          <div className="rich-suggestion-title">Sobremesas & Acompanhamentos</div>
+                          <div className="rich-suggestion-desc">Veja os doces, batatas, molhos e adicionais do catálogo.</div>
+                        </div>
+
+                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Voces tem opcoes vegetarianas ou sem lactose?')}>
+                          <div className="rich-suggestion-header">
+                            <span className="rich-suggestion-badge">Especial</span>
+                            <CheckCircle2 size={14} color="var(--accent-cyan)" />
+                          </div>
+                          <div className="rich-suggestion-title">Restricoes & Vegetarianos</div>
+                          <div className="rich-suggestion-desc">Consulte itens adequados a restrições alimentares.</div>
+                        </div>
+                      </>
+                    )}
+
+                    {promptCategory === 'frete' && (
+                      <>
+                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Qual o raio maximo de atendimento e taxa para 5km?')}>
+                          <div className="rich-suggestion-header">
+                            <span className="rich-suggestion-badge">Raio de Entrega</span>
+                            <Truck size={14} color="var(--accent-cyan)" />
+                          </div>
+                          <div className="rich-suggestion-title">Raio Máximo de Entrega</div>
+                          <div className="rich-suggestion-desc">Veja até onde a entrega atende e os valores por quilômetro.</div>
+                        </div>
+
+                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Quanto tempo demora para meu pedido chegar?')}>
+                          <div className="rich-suggestion-header">
+                            <span className="rich-suggestion-badge">Tempo</span>
+                            <Clock size={14} color="var(--accent-cyan)" />
+                          </div>
+                          <div className="rich-suggestion-title">Tempo Estimado de Entrega</div>
+                          <div className="rich-suggestion-desc">Consulte o tempo médio de preparo e rota do motoboy.</div>
+                        </div>
+
+                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Existe valor minimo para entrega gratis?')}>
+                          <div className="rich-suggestion-header">
+                            <span className="rich-suggestion-badge">Gratuidade</span>
+                            <DollarSign size={14} color="var(--accent-cyan)" />
+                          </div>
+                          <div className="rich-suggestion-title">Regra de Frete Grátis</div>
+                          <div className="rich-suggestion-desc">Condições para isenção da taxa de entrega.</div>
+                        </div>
+
+                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Posso retirar meu pedido diretamente no balcao?')}>
+                          <div className="rich-suggestion-header">
+                            <span className="rich-suggestion-badge">Balcao</span>
+                            <Building2 size={14} color="var(--accent-cyan)" />
+                          </div>
+                          <div className="rich-suggestion-title">Retirada no Estabelecimento</div>
+                          <div className="rich-suggestion-desc">Como funciona o take-away sem custo de frete.</div>
+                        </div>
+                      </>
+                    )}
+
+                    {promptCategory === 'horarios' && (
+                      <>
+                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Quais sao os dias e horarios de funcionamento da loja?')}>
+                          <div className="rich-suggestion-header">
+                            <span className="rich-suggestion-badge">Agenda</span>
+                            <Clock size={14} color="var(--accent-cyan)" />
+                          </div>
+                          <div className="rich-suggestion-title">Horários da Semana</div>
+                          <div className="rich-suggestion-desc">Abertura e fechamento de segunda a domingo.</div>
+                        </div>
+
+                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Voces atendem em feriados e fins de semana?')}>
+                          <div className="rich-suggestion-header">
+                            <span className="rich-suggestion-badge">Feriados</span>
+                            <Calendar size={14} color="var(--accent-cyan)" />
+                          </div>
+                          <div className="rich-suggestion-title">Funcionamento em Feriados</div>
+                          <div className="rich-suggestion-desc">Plantão de atendimento em datas especiais.</div>
+                        </div>
+
+                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Existe atendimento noturno ou plantao de delivery 24 horas?')}>
+                          <div className="rich-suggestion-header">
+                            <span className="rich-suggestion-badge">Plantao</span>
+                            <Moon size={14} color="var(--accent-cyan)" />
+                          </div>
+                          <div className="rich-suggestion-title">Plantão Noturno / MT 24 Horas</div>
+                          <div className="rich-suggestion-desc">Verifique se o delivery opera durante a madrugada.</div>
+                        </div>
+
+                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Quais sao as regras obrigatorias que voce segue no atendimento?')}>
+                          <div className="rich-suggestion-header">
+                            <span className="rich-suggestion-badge">Diretrizes</span>
+                            <Sliders size={14} color="var(--accent-cyan)" />
+                          </div>
+                          <div className="rich-suggestion-title">Regras Comerciais Ativas</div>
+                          <div className="rich-suggestion-desc">Políticas de desconto, cordialidade e tom de voz da IA.</div>
+                        </div>
+                      </>
+                    )}
+
+                    {promptCategory === 'agendamento' && (
+                      <>
+                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Quero reservar uma mesa para 4 pessoas nesta sexta-feira')}>
+                          <div className="rich-suggestion-header">
+                            <span className="rich-suggestion-badge">Reserva</span>
+                            <Calendar size={14} color="var(--accent-cyan)" />
+                          </div>
+                          <div className="rich-suggestion-title">Reserva de Mesa ou Salão</div>
+                          <div className="rich-suggestion-desc">Agende data, horário e número de pessoas com a IA.</div>
+                        </div>
+
+                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Quais horarios estao disponiveis para agendamento esta semana?')}>
+                          <div className="rich-suggestion-header">
+                            <span className="rich-suggestion-badge">Vagas</span>
+                            <Clock size={14} color="var(--accent-cyan)" />
+                          </div>
+                          <div className="rich-suggestion-title">Consultar Horários Livres</div>
+                          <div className="rich-suggestion-desc">Verifique a agenda de atendimento sem conflitos.</div>
+                        </div>
+
+                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Como faco para reagendar ou cancelar meu horario marcado?')}>
+                          <div className="rich-suggestion-header">
+                            <span className="rich-suggestion-badge">Alteracao</span>
+                            <AlertCircle size={14} color="var(--accent-cyan)" />
+                          </div>
+                          <div className="rich-suggestion-title">Reagendamento Fácil</div>
+                          <div className="rich-suggestion-desc">Como o cliente altera a data diretamente pelo WhatsApp.</div>
+                        </div>
+
+                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('A IA envia lembrete automatico de confirmacao antes do horario?')}>
+                          <div className="rich-suggestion-header">
+                            <span className="rich-suggestion-badge">Lembretes</span>
+                            <Bell size={14} color="var(--accent-cyan)" />
+                          </div>
+                          <div className="rich-suggestion-title">Lembretes Automáticos</div>
+                          <div className="rich-suggestion-desc">Notificações preventivas para reduzir faltas de clientes.</div>
+                        </div>
+                      </>
+                    )}
+
+                    {promptCategory === 'promocoes' && (
+                      <>
+                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Tem algum cupom de desconto para minha primeira compra?')}>
+                          <div className="rich-suggestion-header">
+                            <span className="rich-suggestion-badge">Boas-vindas</span>
+                            <Zap size={14} color="var(--accent-cyan)" />
+                          </div>
+                          <div className="rich-suggestion-title">Cupom de Primeira Compra</div>
+                          <div className="rich-suggestion-desc">Consulte se há código promocional para novos clientes.</div>
+                        </div>
+
+                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Qual e a promocao especial ou oferta do dia de hoje?')}>
+                          <div className="rich-suggestion-header">
+                            <span className="rich-suggestion-badge">Oferta do Dia</span>
+                            <DollarSign size={14} color="var(--accent-cyan)" />
+                          </div>
+                          <div className="rich-suggestion-title">Prato / Oferta do Dia</div>
+                          <div className="rich-suggestion-desc">Itens com preço promocional para hoje.</div>
+                        </div>
+
+                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Crie uma mensagem persuasiva para divulgar nossa promocao de pizza no WhatsApp')}>
+                          <div className="rich-suggestion-header">
+                            <span className="rich-suggestion-badge">Copywriting</span>
+                            <Share2 size={14} color="var(--accent-cyan)" />
+                          </div>
+                          <div className="rich-suggestion-title">Gerador de Copy para WhatsApp</div>
+                          <div className="rich-suggestion-desc">Texto magnético para envio em massa ou lista VIP.</div>
+                        </div>
+
+                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Como funciona nosso programa de pontos e fidelidade?')}>
+                          <div className="rich-suggestion-header">
+                            <span className="rich-suggestion-badge">Fidelidade</span>
+                            <Star size={14} color="var(--accent-cyan)" />
+                          </div>
+                          <div className="rich-suggestion-title">Fidelização de Clientes</div>
+                          <div className="rich-suggestion-desc">Como incentivar compras recorrentes e reter compradores.</div>
+                        </div>
+                      </>
+                    )}
                   </div>
                 </div>
               ) : (
                 currentChat && currentChat.messages.map(msg => (
                   <div key={msg.id} className={`message-row ${msg.role}`}>
                     {msg.role === 'assistant' && (
-                      <div className="message-avatar-ai" style={{ padding: 0, overflow: 'hidden', background: 'transparent', border: '1px solid rgba(0, 210, 255, 0.35)', width: 28, height: 28, minWidth: 28, borderRadius: '50%' }}>
+                      <div className="message-avatar-ai" style={{ padding: 0, overflow: 'hidden', background: 'transparent', border: '1px solid rgba(0, 210, 255, 0.45)', width: 32, height: 32, minWidth: 32, borderRadius: '50%', boxShadow: '0 0 14px rgba(0, 210, 255, 0.25)' }}>
                         <img src={atomLogo} alt="Multiplex IA" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
                       </div>
                     )}
 
                     <div className={msg.role === 'user' ? 'message-bubble-user' : 'message-body-ai'}>
                       {msg.toolsUsed && msg.toolsUsed.length > 0 && (
-                        <div style={{ marginBottom: 8 }}>
+                        <div style={{ marginBottom: 10 }}>
                           {msg.toolsUsed.map((toolCall, idx) => (
                             <div key={idx} className="tool-badge-chip">
                               <Sliders size={12} />
-                              <span>Executou a funcao: <strong>{toolCall.tool}</strong></span>
+                              <span>Executou funcao: <strong>{toolCall.tool}</strong></span>
+                              <span style={{ opacity: 0.6, fontSize: '0.68rem' }}>● Concluído</span>
                             </div>
                           ))}
                         </div>
                       )}
 
-                      <div style={{ whiteSpace: 'pre-wrap' }}>
+                      <div style={{ whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>
                         {msg.content}
                       </div>
+
+                      {/* Barra de Acoes na Resposta da IA */}
+                      {msg.role === 'assistant' && (
+                        <div className="message-actions-bar">
+                          <button 
+                            className={`msg-action-btn ${copiedMsgId === msg.id ? 'active' : ''}`}
+                            onClick={() => handleCopyMessage(msg.id, msg.content)}
+                            title="Copiar resposta"
+                          >
+                            {copiedMsgId === msg.id ? <Check size={13} color="#10b981" /> : <Copy size={13} />}
+                            <span>{copiedMsgId === msg.id ? 'Copiado!' : 'Copiar'}</span>
+                          </button>
+
+                          <button 
+                            className={`msg-action-btn ${speakingMsgId === msg.id ? 'active' : ''}`}
+                            onClick={() => handleSpeakMessage(msg.id, msg.content)}
+                            title={speakingMsgId === msg.id ? "Parar leitura" : "Ouvir em voz alta"}
+                          >
+                            {speakingMsgId === msg.id ? <VolumeX size={13} color="#f87171" /> : <Volume2 size={13} />}
+                            <span>{speakingMsgId === msg.id ? 'Parar Voz' : 'Ouvir'}</span>
+                          </button>
+
+                          <button 
+                            className={`msg-action-btn ${feedbackMap[msg.id] === 'liked' ? 'active' : ''}`}
+                            onClick={() => handleFeedback(msg.id, 'liked')}
+                            title="Resposta útil"
+                          >
+                            <ThumbsUp size={13} />
+                            <span>{feedbackMap[msg.id] === 'liked' ? 'Útil 👍' : ''}</span>
+                          </button>
+
+                          <button 
+                            className={`msg-action-btn ${feedbackMap[msg.id] === 'disliked' ? 'active' : ''}`}
+                            onClick={() => handleFeedback(msg.id, 'disliked')}
+                            title="Precisa melhorar"
+                          >
+                            <ThumbsDown size={13} />
+                          </button>
+
+                          <button 
+                            className="msg-action-btn"
+                            onClick={handleRegenerateLastMessage}
+                            title="Regenerar resposta"
+                          >
+                            <RefreshCw size={13} />
+                            <span>Regenerar</span>
+                          </button>
+
+                          <span style={{ marginLeft: 'auto', fontSize: '0.7rem', color: 'var(--text-dim)' }}>
+                            {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))
@@ -2551,33 +3137,97 @@ export default function App() {
 
               {isSendingMessage && (
                 <div className="message-row assistant">
-                  <div className="message-avatar-ai" style={{ padding: 0, overflow: 'hidden', background: 'transparent', border: '1px solid rgba(0, 210, 255, 0.35)', width: 28, height: 28, minWidth: 28, borderRadius: '50%' }}>
+                  <div className="message-avatar-ai" style={{ padding: 0, overflow: 'hidden', background: 'transparent', border: '1px solid rgba(0, 210, 255, 0.45)', width: 32, height: 32, minWidth: 32, borderRadius: '50%' }}>
                     <img src={atomLogo} alt="Multiplex IA" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
                   </div>
-                  <div className="message-body-ai" style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--text-dim)' }}>
-                    <RefreshCw size={16} className="animate-spin" />
-                    <span>Multiplex IA pensando e executando funcoes...</span>
+                  <div className="message-body-ai" style={{ display: 'flex', alignItems: 'center', gap: 10, color: 'var(--text-dim)', padding: '6px 0' }}>
+                    <RefreshCw size={16} className="animate-spin" color="var(--accent-cyan)" />
+                    <span style={{ fontSize: '0.9rem' }}>
+                      Multiplex IA consultando base, executando regras e gerando resposta...
+                    </span>
                   </div>
                 </div>
               )}
             </div>
           </div>
 
-          {/* Capsula Flutuante de Prompt */}
+          {/* Capsula Flutuante de Prompt Inteligente */}
           <div className="chatgpt-bottom-wrapper">
-            <div className="chatgpt-capsule-box">
+            {/* Popover de Atalhos Rápidos (Slash Commands) */}
+            {showSlashMenu && (
+              <div className="slash-commands-popup">
+                <div style={{ fontSize: '0.72rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.6px', color: 'var(--text-dim)', padding: '6px 10px' }}>
+                  Comandos Rápidos do Multiplex IA
+                </div>
+                {SLASH_COMMANDS.map((item, idx) => (
+                  <div key={idx} className="slash-item" onClick={() => handleSelectSlash(item.prompt)}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <Terminal size={14} color="var(--accent-cyan)" />
+                      <span style={{ fontWeight: 700, fontSize: '0.84rem', color: 'var(--text-main)', fontFamily: 'monospace' }}>{item.cmd}</span>
+                    </div>
+                    <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{item.desc}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Banner de Gravação por Voz Ativa */}
+            {isRecordingVoice && (
+              <div style={{ marginBottom: 8 }}>
+                <span className="audio-recording-indicator">
+                  <Mic size={14} /> Gravando sua voz... Fale agora para ditar sua pergunta
+                </span>
+              </div>
+            )}
+
+            {/* Arquivo Anexado Preview */}
+            {attachedFile && (
+              <div style={{ width: '100%', maxWidth: 780, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 14px', borderRadius: 8, background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.3)', marginBottom: 8 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.8rem', color: 'var(--accent-cyan)' }}>
+                  <Paperclip size={14} />
+                  <span>Anexado: <strong>{attachedFile.name}</strong> ({attachedFile.size})</span>
+                </div>
+                <button 
+                  onClick={() => setAttachedFile(null)} 
+                  style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
+                >
+                  <X size={14} />
+                </button>
+              </div>
+            )}
+
+            <div className="chatgpt-capsule-box" style={{ position: 'relative' }}>
+              {/* Botão Anexar Cardápio ou Documento */}
               <button 
                 className="icon-btn" 
-                title="Cadastrar novo produto ou regra"
-                onClick={() => setActiveView('menu')}
+                title="Anexar foto do cardapio ou documento"
+                onClick={() => setShowAttachModal(true)}
               >
-                <Plus size={20} />
+                <Paperclip size={18} />
+              </button>
+
+              {/* Botão de Comandos Rápidos */}
+              <button 
+                className={`icon-btn ${showSlashMenu ? 'active' : ''}`}
+                title="Comandos rapidos (/)"
+                onClick={() => setShowSlashMenu(!showSlashMenu)}
+                style={{ fontSize: '0.9rem', fontWeight: 800, fontFamily: 'monospace' }}
+              >
+                /
               </button>
 
               <input 
                 type="text"
                 className="capsule-input"
-                placeholder="Pergunte qualquer coisa ao Multiplex IA..."
+                placeholder={
+                  selectedAIMode === 'cardapio' 
+                    ? "Pergunte sobre pratos, ingredientes, precos e combos..." 
+                    : selectedAIMode === 'logistica' 
+                    ? "Calcule frete, consulte raio de entrega e tempo..." 
+                    : selectedAIMode === 'agendamento' 
+                    ? "Simule reservas de mesa e agendamento de servicos..." 
+                    : `Pergunte qualquer coisa ao Multiplex IA (${selectedModel.toUpperCase()})...`
+                }
                 value={chatInput}
                 onChange={(e) => setChatInput(e.target.value)}
                 onKeyDown={(e) => {
@@ -2585,34 +3235,113 @@ export default function App() {
                     e.preventDefault();
                     handleSendMessage();
                   }
+                  if (e.key === '/' && chatInput === '') {
+                    setShowSlashMenu(true);
+                  }
                 }}
                 disabled={isSendingMessage}
                 autoFocus
               />
 
+              {/* Botão de Ditado por Voz / Microfone */}
+              <button 
+                className={`icon-btn ${isRecordingVoice ? 'active' : ''}`}
+                title={isRecordingVoice ? "Gravando voz..." : "Ditar por voz (microfone)"}
+                onClick={handleToggleVoiceRecording}
+                style={{ color: isRecordingVoice ? '#f87171' : 'inherit' }}
+              >
+                <Mic size={18} />
+              </button>
+
+              {/* Botão de Regras */}
               <button 
                 className="icon-btn" 
-                title="Configurar regras"
+                title="Configurar regras de negocio e personalidade"
                 onClick={() => setActiveView('personality')}
               >
                 <Sliders size={18} />
               </button>
 
+              {/* Botão Enviar */}
               <button 
                 className="btn-send-circular"
                 disabled={!chatInput.trim() || isSendingMessage}
                 onClick={() => handleSendMessage()}
-                title="Enviar mensagem"
+                title="Enviar mensagem (Enter)"
               >
                 <ArrowUp size={18} />
               </button>
             </div>
-            <div className="chatgpt-disclaimer">
-              O Multiplex IA executa as funcoes personalizadas adicionadas por voce.
+
+            <div className="chatgpt-disclaimer" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, flexWrap: 'wrap' }}>
+              <span>Multiplex IA • Tecnologia BONASOFT — Respostas geradas com regras de negócio e catálogo integrado.</span>
+            </div>
+
+            {/* ── BONASOFT Watermark ── */}
+            <div className="bonasoft-watermark-container">
+              <p className="bonasoft-watermark">BONASOFT</p>
             </div>
           </div>
         </main>
       )}
+
+      {/* MODAL: ANEXAR DOCUMENTO OU CARDAPIO (SIMULADOR INTELIGENTE) */}
+      {showAttachModal && (
+        <div className="modal-backdrop" onClick={() => setShowAttachModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 520 }}>
+            <div className="modal-header">
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <Paperclip size={20} color="var(--accent-cyan)" />
+                <h2 style={{ fontSize: '1.15rem', fontWeight: 700, margin: 0 }}>Anexar Arquivo para o Multiplex IA</h2>
+              </div>
+              <button onClick={() => setShowAttachModal(false)} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                <X size={20} />
+              </button>
+            </div>
+            <div className="modal-body" style={{ padding: 20 }}>
+              <p style={{ fontSize: '0.86rem', color: 'var(--text-muted)', marginBottom: 16, lineHeight: 1.5 }}>
+                Envie fotos de cardápios impressos, tabelas de preços ou documentos em PDF para que o Multiplex IA analise e integre automaticamente.
+              </p>
+
+              <div 
+                style={{ 
+                  border: '2px dashed var(--border-subtle)', 
+                  borderRadius: 12, 
+                  padding: 32, 
+                  textAlign: 'center', 
+                  background: 'rgba(255,255,255,0.02)',
+                  cursor: 'pointer',
+                  marginBottom: 16
+                }}
+                onClick={() => {
+                  setAttachedFile({ name: 'cardapio_completo_atualizado.pdf', size: '1.4 MB' });
+                  setChatInput('Analise este cardapio anexo e me informe os itens de maior margem de lucro.');
+                  setShowAttachModal(false);
+                }}
+              >
+                <FileText size={36} color="var(--accent-primary)" style={{ margin: '0 auto 12px auto' }} />
+                <div style={{ fontWeight: 700, fontSize: '0.95rem', marginBottom: 4 }}>Clique para carregar cardápio ou PDF</div>
+                <div style={{ fontSize: '0.78rem', color: 'var(--text-dim)' }}>Suporta imagens (PNG, JPG) e documentos (PDF, XLSX)</div>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
+                <button className="btn-secondary" onClick={() => setShowAttachModal(false)}>Cancelar</button>
+                <button 
+                  className="btn-primary" 
+                  onClick={() => {
+                    setAttachedFile({ name: 'tabela_precos_2026.png', size: '820 KB' });
+                    setChatInput('Extraia os precos e produtos desta foto.');
+                    setShowAttachModal(false);
+                  }}
+                >
+                  <Check size={16} /> Simular Anexo Rápido
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
 
       {/* TELA: ENSINAR IA */}
       {activeView === 'teach' && (
@@ -2987,6 +3716,11 @@ export default function App() {
               </div>
             )}
           </div>
+
+          {/* ── BONASOFT Watermark ── */}
+          <div className="bonasoft-watermark-container" style={{ marginTop: 28 }}>
+            <p className="bonasoft-watermark">BONASOFT</p>
+          </div>
         </div>
       )}
 
@@ -3168,6 +3902,11 @@ export default function App() {
                 </div>
               );
             })}
+          </div>
+
+          {/* ── BONASOFT Watermark ── */}
+          <div className="bonasoft-watermark-container" style={{ marginTop: 32 }}>
+            <p className="bonasoft-watermark">BONASOFT</p>
           </div>
 
           {/* MODAL INTERATIVO: ASSISTENTE DE CONEXAO GUIADO PELA MULTIPLEX IA */}
@@ -4170,6 +4909,11 @@ export default function App() {
                     </div>
                   </div>
                 )}
+
+                {/* ── BONASOFT Watermark ── */}
+                <div className="bonasoft-watermark-container" style={{ marginTop: 28 }}>
+                  <p className="bonasoft-watermark">BONASOFT</p>
+                </div>
               </div>
             </div>
           </div>
