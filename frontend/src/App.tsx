@@ -31,6 +31,8 @@ interface ChatSession {
   updatedAt: string;
 }
 
+const API_BASE = typeof window !== 'undefined' && window.location.port === '5173' ? 'http://localhost:3000' : '';
+
 export default function App() {
   // Limpeza de residuos mockados anteriores
   useEffect(() => {
@@ -175,13 +177,13 @@ export default function App() {
   const loadData = async () => {
     try {
       const [resProd, resAgent, resKb, resChan, resDash, resHist, resLogs] = await Promise.all([
-        fetch('/api/products').catch(() => null),
-        fetch('/api/agent/config').catch(() => null),
-        fetch('/api/knowledge').catch(() => null),
-        fetch('/api/channels').catch(() => null),
-        fetch('/api/dashboard').catch(() => null),
-        fetch('/api/teach/history').catch(() => null),
-        fetch('/api/logs').catch(() => null)
+        fetch(`${API_BASE}/api/products`).catch(() => null),
+        fetch(`${API_BASE}/api/agent/config`).catch(() => null),
+        fetch(`${API_BASE}/api/knowledge`).catch(() => null),
+        fetch(`${API_BASE}/api/channels`).catch(() => null),
+        fetch(`${API_BASE}/api/dashboard`).catch(() => null),
+        fetch(`${API_BASE}/api/teach/history`).catch(() => null),
+        fetch(`${API_BASE}/api/logs`).catch(() => null)
       ]);
 
       if (resProd?.ok) setProducts(await resProd.json());
@@ -336,7 +338,7 @@ export default function App() {
     setIsSendingMessage(true);
 
     try {
-      const res = await fetch('/api/chat/message', {
+      const res = await fetch(`${API_BASE}/api/chat/message`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: prompt })
@@ -393,7 +395,7 @@ export default function App() {
     setTeachChat(prev => [...prev, { sender: 'user', text: userMsg }]);
 
     try {
-      const res = await fetch('/api/teach', {
+      const res = await fetch(`${API_BASE}/api/teach`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: userMsg })
@@ -416,7 +418,7 @@ export default function App() {
     setPlaygroundMessages(prev => [...prev, { role: 'user', content: text }]);
 
     try {
-      const res = await fetch('/api/chat/message', {
+      const res = await fetch(`${API_BASE}/api/chat/message`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: text })
@@ -440,7 +442,7 @@ export default function App() {
   const handleAddProduct = async () => {
     if (!newProductName.trim() || !newProductPrice) return;
     try {
-      const res = await fetch('/api/products', {
+      const res = await fetch(`${API_BASE}/api/products`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -466,7 +468,7 @@ export default function App() {
   const handleAddRule = async () => {
     if (!newRuleText.trim()) return;
     try {
-      const res = await fetch('/api/agent/rules', {
+      const res = await fetch(`${API_BASE}/api/agent/rules`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ rule_text: newRuleText, priority: newRulePriority })
@@ -485,7 +487,7 @@ export default function App() {
   const handleAddKnowledge = async () => {
     if (!newKbSubject.trim() || !newKbContent.trim()) return;
     try {
-      const res = await fetch('/api/knowledge', {
+      const res = await fetch(`${API_BASE}/api/knowledge`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

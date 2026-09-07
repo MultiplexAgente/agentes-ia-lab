@@ -132,10 +132,18 @@ chatRouter.post('/message', async (req: Request, res: Response) => {
   const targetCompanyId = companyId || DEFAULT_COMPANY_ID;
   let targetConvId = conversationId;
 
-  // Se não foi fornecida conversa (ex: Playground), cria ou usa conversa teste
-  if (!targetConvId) {
-    const defaultConv = Array.from(store.conversations.values()).find(c => c.company_id === targetCompanyId);
-    targetConvId = defaultConv ? defaultConv.id : '66666666-6666-6666-6666-666666666666';
+  // Se não foi fornecida conversa ou ela não existir no store, cria automaticamente
+  if (!targetConvId || !store.conversations.has(targetConvId)) {
+    targetConvId = targetConvId || 'conv-chat-padrao';
+    store.conversations.set(targetConvId, {
+      id: targetConvId,
+      company_id: targetCompanyId,
+      customer_id: 'cust-padrao',
+      channel_type: (channel as any) || 'WHATSAPP',
+      external_chat_id: 'chat-user',
+      status: 'ACTIVE',
+      last_message_at: new Date().toISOString()
+    });
   }
 
   try {

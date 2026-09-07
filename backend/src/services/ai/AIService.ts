@@ -1,4 +1,5 @@
 import OpenAI from 'openai';
+import axios from 'axios';
 import dotenv from 'dotenv';
 import { store } from '../../config/database.js';
 import { memoryService } from '../memory/MemoryService.js';
@@ -141,15 +142,45 @@ export class AIService {
           responseText = choice.message.content || '';
         }
       } catch (err) {
-        console.warn('OpenAI API falhou ou indisponível, usando fallback inteligente:', err);
-        responseText = await this.executeLocalAgentEngine(incomingText, retrievedKnowledge, rules, {
-          companyId,
-          conversationId,
-          customerId: conversation.customer_id,
-          agentId: agent?.id || '',
-          toolsCalled,
-          rulesApplied
-        });
+        // Tenta a API oficial de Respostas da OpenAI (disponivel para planos Free)
+        let responsesSucceeded = false;
+        if (process.env.OPENAI_API_KEY) {
+          try {
+            const respRes = await axios.post('https://api.openai.com/v1/responses', {
+              model: 'gpt-5.6-luna',
+              instructions: systemPrompt,
+              input: incomingText,
+              store: false
+            }, {
+              headers: {
+                Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+                'Content-Type': 'application/json'
+              },
+              timeout: 12000
+            });
+
+            const msg = respRes.data.output?.find((o: any) => o.type === 'message');
+            const generatedText = msg?.content?.find((c: any) => c.type === 'output_text')?.text;
+            if (generatedText) {
+              responseText = generatedText;
+              rulesApplied.push('openai_responses_api_free_tier');
+              responsesSucceeded = true;
+            }
+          } catch (respErr) {
+            // Segue para o motor local seguro
+          }
+        }
+
+        if (!responsesSucceeded) {
+          responseText = await this.executeLocalAgentEngine(incomingText, retrievedKnowledge, rules, {
+            companyId,
+            conversationId,
+            customerId: conversation.customer_id,
+            agentId: agent?.id || '',
+            toolsCalled,
+            rulesApplied
+          });
+        }
       }
     } else {
       // Mecanismo Autônomo Local com Raciocínio Rigoroso e Anti-Alucinação
@@ -205,7 +236,7 @@ Memórias registradas: ${memories.length > 0 ? memories.map(m => `${m.key}: ${m.
 # PERSONALIDADE & TOM DE VOZ
 - Tom: ${personality?.tone || 'amigável'}
 - Formalidade: ${personality?.formality || 'informal'}
-- Uso de Emojis: ${personality?.use_emojis ? 'Sim, use emojis com moderação' : 'Não use emojis'}
+- Uso de Emojis: PROIBIDO. NUNCA USE EMOJIS NAS RESPOSTAS.
 - Tamanho das respostas: ${personality?.response_length || 'conciso'}
 - Estilo Comercial: ${personality?.commercial_style || 'consultivo'}
 ${personality?.custom_instructions ? `- Instruções adicionais: ${personality.custom_instructions}` : ''}
@@ -222,6 +253,7 @@ ${knowledge.length > 0 ? JSON.stringify(knowledge, null, 2) : 'Nenhum conhecimen
 3. Respeite as regras da empresa. Quando o cliente pedir hambúrguer, ofereça batata frita.
 4. Nunca conceda descontos.
 5. Se o cliente solicitar atendimento humano ou fizer reclamação, execute a ferramenta transfer_to_human.
+6. PROIBIÇÃO TOTAL DE EMOJIS: Nunca use nenhum emoji ou símbolo figurativo na sua resposta.
 `;
   }
 
@@ -263,7 +295,7 @@ ${knowledge.length > 0 ? JSON.stringify(knowledge, null, 2) : 'Nenhum conhecimen
       ctx.rulesApplied.push('offer_fries_on_burger');
 
       if (product) {
-        return `Olá! 🍔 O nosso ${product.name} custa R$ ${product.price.toFixed(2).replace('.', ',')}. Ele é feito com ${product.ingredients.slice(0, 3).join(', ')} e nosso molho especial. Que tal adicionar uma Batata Frita Rústica Média por apenas R$ 12,00 para acompanhar?`;
+        return `Olá! O nosso ${product.name} custa R$ ${product.price.toFixed(2).replace('.', ',')}. Ele é feito com ${product.ingredients.slice(0, 3).join(', ')} e nosso molho especial. Que tal adicionar uma Batata Frita Rústica Média por apenas R$ 12,00 para acompanhar?`;
       }
     }
 
@@ -290,7 +322,7 @@ ${knowledge.length > 0 ? JSON.stringify(knowledge, null, 2) : 'Nenhum conhecimen
         notes: 'Sem cebola'
       }, ctx);
       ctx.toolsCalled.push(orderTool);
-      return `Pedido anotado com sucesso! 📝\n- 1x X-Bacon Artesanal (R$ 25,00)\n- 1x Batata Frita Rústica Média (R$ 12,00)\n- Taxa de entrega Centro (R$ 5,00)\nTotal: R$ ${orderTool.result.total.toFixed(2)}.\nPagamento via PIX. Deseja que eu confirme o envio para a cozinha?`;
+      return `Pedido anotado com sucesso!\n- 1x X-Bacon Artesanal (R$ 25,00)\n- 1x Batata Frita Rústica Média (R$ 12,00)\n- Taxa de entrega Centro (R$ 5,00)\nTotal: R$ ${orderTool.result.total.toFixed(2)}.\nPagamento via PIX. Deseja que eu confirme o envio para a cozinha?`;
     }
 
     // Fallback seguro contra alucinação
