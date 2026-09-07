@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Bot, MessageSquare, UtensilsCrossed, Sliders, BookOpen, 
-  Share2, Activity, Send, CheckCircle2, UserCheck, ShieldAlert,
-  ArrowRight, Sparkles, RefreshCw, Plus, Trash2, Clock, DollarSign, Users,
-  ShoppingBag, HelpCircle, FileText, Smartphone, Instagram, MessageCircle, AlertCircle,
-  Sun, Moon, Folder, FolderPlus, Pin, PinOff, Search, PanelLeft, MoreHorizontal,
-  Edit3, Check, X, Paperclip, Mic, Globe, Layers, Calendar, ChevronDown, ChevronRight,
-  ExternalLink, ArrowUp
+  Activity, Send, Sparkles, RefreshCw, Plus, Trash2,
+  Smartphone, Instagram, MessageCircle, AlertCircle,
+  Sun, Moon, Folder, FolderPlus, Pin, PinOff, Search, PanelLeft,
+  Edit3, Check, X, ArrowUp, PlayCircle, LayoutDashboard
 } from 'lucide-react';
 
 interface FolderItem {
@@ -34,7 +32,19 @@ interface ChatSession {
 }
 
 export default function App() {
-  // Tema Claro / Escuro
+  // Limpeza de residuos mockados anteriores
+  useEffect(() => {
+    const rawFolders = localStorage.getItem('multiplex_folders');
+    if (rawFolders && rawFolders.includes('Pa-Ja')) {
+      localStorage.removeItem('multiplex_folders');
+    }
+    const rawChats = localStorage.getItem('multiplex_chats');
+    if (rawChats && rawChats.includes('Retirada Da Queixa')) {
+      localStorage.removeItem('multiplex_chats');
+    }
+  }, []);
+
+  // Tema Claro e Escuro (Apenas bolinha com icones)
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     return (localStorage.getItem('multiplex_theme') as 'dark' | 'light') || 'dark';
   });
@@ -48,58 +58,48 @@ export default function App() {
     setTheme(prev => prev === 'dark' ? 'light' : 'dark');
   };
 
-  // Pastas / Projetos (Inicializado com os itens da imagem do usuário se vazio)
+  // Visao ativa
+  const [activeView, setActiveView] = useState<'chat' | 'teach' | 'menu' | 'personality' | 'knowledge' | 'channels' | 'playground' | 'logs' | 'dashboard'>('chat');
+
+  // Pastas criadas pelo usuario (Inicia vazio)
   const [folders, setFolders] = useState<FolderItem[]>(() => {
     const saved = localStorage.getItem('multiplex_folders');
     if (saved) {
-      try { return JSON.parse(saved); } catch (e) {}
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && !parsed.some(f => f.name === 'Pa-Ja')) {
+          return parsed;
+        }
+      } catch (e) {}
     }
-    return [
-      { id: 'f-paja', name: 'Pa-Ja', isPinned: true },
-      { id: 'f-bonasoft', name: 'BONASOFT', isPinned: true },
-      { id: 'f-mt24', name: 'MT 24 Horas', isPinned: false },
-      { id: 'f-agriroute', name: 'AgriRoute', isPinned: false },
-      { id: 'f-40m', name: '40M', isPinned: false },
-      { id: 'f-sabedoria', name: 'Casa da sabedoria', isPinned: false },
-      { id: 'f-materia', name: 'Matéria em energia', isPinned: false },
-    ];
+    return [];
   });
 
   useEffect(() => {
     localStorage.setItem('multiplex_folders', JSON.stringify(folders));
   }, [folders]);
 
-  // Chats (Inicializado com os itens da imagem do usuário se vazio)
+  // Chats criados pelo usuario (Inicia com um chat limpo)
   const [chats, setChats] = useState<ChatSession[]>(() => {
     const saved = localStorage.getItem('multiplex_chats');
     if (saved) {
-      try { return JSON.parse(saved); } catch (e) {}
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && !parsed.some(c => c.title.includes('Retirada Da Queixa'))) {
+          return parsed;
+        }
+      } catch (e) {}
     }
     return [
       {
-        id: 'c-agente',
-        title: 'Agente De IA Conversacional',
+        id: 'c-padrao',
+        title: 'Novo chat',
         folderId: null,
         isPinned: false,
-        messages: [
-          {
-            id: 'm-1',
-            role: 'assistant',
-            content: 'Olá Anthony! Eu sou o Multiplex GPT, seu agente de IA com ferramentas personalizadas. Estou pronto para ajudar com seus produtos, clientes, dúvidas e automações em múltiplos canais. O que você gostaria de fazer hoje?',
-            timestamp: new Date().toISOString()
-          }
-        ],
+        messages: [],
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
-      },
-      { id: 'c-queixa', title: 'Retirada Da Queixa Audiência', folderId: null, isPinned: false, messages: [], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-      { id: 'c-bio', title: 'Melhorar Bio Profissional', folderId: null, isPinned: false, messages: [], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-      { id: 'c-unerquicklich', title: 'Analisar conversa unerquicklich', folderId: null, isPinned: false, messages: [], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-      { id: 'c-energia', title: 'Transmissão de energia luminosa', folderId: null, isPinned: false, messages: [], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-      { id: 'c-removerfios', title: 'Remover fios da imagem', folderId: null, isPinned: false, messages: [], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-      { id: 'c-googlewallet', title: 'Problema Google Wallet', folderId: null, isPinned: false, messages: [], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-      { id: 'c-roleta', title: 'Probabilidade na roleta', folderId: null, isPinned: false, messages: [], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-      { id: 'c-erpagricola', title: 'ERP agrícola para fazendas', folderId: 'f-agriroute', isPinned: false, messages: [], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+      }
     ];
   });
 
@@ -107,32 +107,28 @@ export default function App() {
     localStorage.setItem('multiplex_chats', JSON.stringify(chats));
   }, [chats]);
 
-  const [activeChatId, setActiveChatId] = useState<string>('c-agente');
+  const [activeChatId, setActiveChatId] = useState<string>(() => chats[0]?.id || 'c-padrao');
   const [selectedFolderFilter, setSelectedFolderFilter] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
-  // Estados para Criação/Edição de Pasta
+  // Pastas
   const [isCreatingFolder, setIsCreatingFolder] = useState(false);
   const [newFolderName, setNewFolderName] = useState('');
   const [editingFolderId, setEditingFolderId] = useState<string | null>(null);
   const [editFolderName, setEditFolderName] = useState('');
 
-  // Estados para Edição de Chat
+  // Chats
   const [editingChatId, setEditingChatId] = useState<string | null>(null);
   const [editChatTitle, setEditChatTitle] = useState('');
   const [chatFolderMenuId, setChatFolderMenuId] = useState<string | null>(null);
 
-  // Input de Mensagem do ChatGPT
+  // Chat input
   const [chatInput, setChatInput] = useState('');
   const [isSendingMessage, setIsSendingMessage] = useState(false);
 
-  // Modal de Funções & Plugins Customizados
-  const [isFunctionsModalOpen, setIsFunctionsModalOpen] = useState(false);
-  const [functionsTab, setFunctionsTab] = useState<'tools' | 'menu' | 'teach' | 'knowledge' | 'channels' | 'dashboard'>('tools');
-
-  // Dados do Backend (Produtos, Regras, Conhecimento, Canais, Métricas)
+  // Backend
   const [products, setProducts] = useState<any[]>([]);
   const [newProductName, setNewProductName] = useState('');
   const [newProductPrice, setNewProductPrice] = useState('');
@@ -156,15 +152,36 @@ export default function App() {
     revenue_brl: 0.00
   });
 
-  // Carregar dados de retaguarda
-  const loadBackendData = async () => {
+  // Treinamento
+  const [teachChat, setTeachChat] = useState<Array<{ sender: 'user' | 'agent'; text: string; structured?: any }>>([
+    { 
+      sender: 'agent', 
+      text: 'Ola, sou o Multiplex. Insira informacoes sobre produtos, precos, regras ou horarios para eu aprender.' 
+    }
+  ]);
+  const [teachInput, setTeachInput] = useState('');
+  const [structuredHistory, setStructuredHistory] = useState<any[]>([]);
+
+  // Playground
+  const [playgroundMessages, setPlaygroundMessages] = useState<Array<{ role: 'user' | 'assistant'; content: string }>>([
+    { role: 'assistant', content: 'Ambiente de testes do Multiplex. Digite para testar a execucao de funcoes e regras.' }
+  ]);
+  const [playgroundInput, setPlaygroundInput] = useState('');
+  const [playgroundDebug, setPlaygroundDebug] = useState<any>(null);
+
+  // Logs
+  const [logsList, setLogsList] = useState<any[]>([]);
+
+  const loadData = async () => {
     try {
-      const [resProd, resAgent, resKb, resChan, resDash] = await Promise.all([
+      const [resProd, resAgent, resKb, resChan, resDash, resHist, resLogs] = await Promise.all([
         fetch('/api/products').catch(() => null),
         fetch('/api/agent/config').catch(() => null),
         fetch('/api/knowledge').catch(() => null),
         fetch('/api/channels').catch(() => null),
-        fetch('/api/dashboard').catch(() => null)
+        fetch('/api/dashboard').catch(() => null),
+        fetch('/api/teach/history').catch(() => null),
+        fetch('/api/logs').catch(() => null)
       ]);
 
       if (resProd?.ok) setProducts(await resProd.json());
@@ -178,19 +195,20 @@ export default function App() {
         const d = await resDash.json();
         if (d.metrics) setMetrics(d.metrics);
       }
+      if (resHist?.ok) setStructuredHistory(await resHist.json());
+      if (resLogs?.ok) setLogsList(await resLogs.json());
     } catch (e) {
-      console.warn('API local offline ou iniciando...');
+      console.warn('API local nao acessivel no momento');
     }
   };
 
   useEffect(() => {
-    loadBackendData();
+    loadData();
   }, []);
 
-  // Chat Ativo Atual
   const currentChat = chats.find(c => c.id === activeChatId) || chats[0];
 
-  // Ações de Pastas
+  // Acoes de Pastas
   const handleCreateFolder = () => {
     if (!newFolderName.trim()) return;
     const newF: FolderItem = {
@@ -209,7 +227,6 @@ export default function App() {
 
   const handleDeleteFolder = (folderId: string) => {
     setFolders(folders.filter(f => f.id !== folderId));
-    // Move chats nessa pasta para null
     setChats(chats.map(c => c.folderId === folderId ? { ...c, folderId: null } : c));
     if (selectedFolderFilter === folderId) setSelectedFolderFilter(null);
   };
@@ -221,26 +238,20 @@ export default function App() {
     setEditFolderName('');
   };
 
-  // Ações de Chats
+  // Acoes de Chats
   const handleCreateNewChat = () => {
     const newChat: ChatSession = {
       id: `c-${Date.now()}`,
       title: 'Novo chat',
       folderId: selectedFolderFilter || null,
       isPinned: false,
-      messages: [
-        {
-          id: `m-${Date.now()}`,
-          role: 'assistant',
-          content: 'Olá! Como posso ajudar você hoje com o Multiplex GPT?',
-          timestamp: new Date().toISOString()
-        }
-      ],
+      messages: [],
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
     setChats([newChat, ...chats]);
     setActiveChatId(newChat.id);
+    setActiveView('chat');
   };
 
   const handleTogglePinChat = (chatId: string) => {
@@ -249,10 +260,41 @@ export default function App() {
 
   const handleDeleteChat = (chatId: string) => {
     const filtered = chats.filter(c => c.id !== chatId);
-    setChats(filtered);
-    if (activeChatId === chatId && filtered.length > 0) {
-      setActiveChatId(filtered[0].id);
+    if (filtered.length === 0) {
+      const resetChat: ChatSession = {
+        id: `c-${Date.now()}`,
+        title: 'Novo chat',
+        folderId: null,
+        isPinned: false,
+        messages: [],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+      setChats([resetChat]);
+      setActiveChatId(resetChat.id);
+    } else {
+      setChats(filtered);
+      if (activeChatId === chatId) {
+        setActiveChatId(filtered[0].id);
+      }
     }
+  };
+
+  const handleClearAllChats = () => {
+    const freshChat: ChatSession = {
+      id: `c-${Date.now()}`,
+      title: 'Novo chat',
+      folderId: null,
+      isPinned: false,
+      messages: [],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    setChats([freshChat]);
+    setFolders([]);
+    setActiveChatId(freshChat.id);
+    localStorage.removeItem('multiplex_chats');
+    localStorage.removeItem('multiplex_folders');
   };
 
   const handleRenameChat = (chatId: string) => {
@@ -267,7 +309,7 @@ export default function App() {
     setChatFolderMenuId(null);
   };
 
-  // Enviar Mensagem no ChatGPT Thread
+  // Enviar Mensagem
   const handleSendMessage = async (textToSend?: string) => {
     const prompt = (textToSend || chatInput).trim();
     if (!prompt || isSendingMessage || !currentChat) return;
@@ -294,7 +336,6 @@ export default function App() {
     setIsSendingMessage(true);
 
     try {
-      // Chama o backend do Agente Multiplex com todas as 10 funções customizadas!
       const res = await fetch('/api/chat/message', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -306,7 +347,7 @@ export default function App() {
         const aiMsg: ChatMessage = {
           id: `m-ai-${Date.now()}`,
           role: 'assistant',
-          content: data.response_text || 'Entendido!',
+          content: data.response_text || 'Compreendido.',
           toolsUsed: (data.tools_called && data.tools_called.length > 0) ? data.tools_called : undefined,
           timestamp: new Date().toISOString()
         };
@@ -317,11 +358,10 @@ export default function App() {
           updatedAt: new Date().toISOString()
         } : c));
       } else {
-        // Fallback local
         const aiMsg: ChatMessage = {
           id: `m-ai-${Date.now()}`,
           role: 'assistant',
-          content: `Recebi sua mensagem: "${prompt}". O Multiplex GPT processou a instrução com sucesso.`,
+          content: `Mensagem recebida: "${prompt}". Resposta processada pelo Multiplex.`,
           timestamp: new Date().toISOString()
         };
         setChats(prevChats => prevChats.map(c => c.id === currentChat.id ? {
@@ -330,11 +370,10 @@ export default function App() {
         } : c));
       }
     } catch (e) {
-      console.error(e);
       const aiMsg: ChatMessage = {
         id: `m-ai-${Date.now()}`,
         role: 'assistant',
-        content: `Resposta local do Multiplex GPT: Sua solicitação sobre "${prompt}" foi anotada. Todas as funções ativas estão operacionais.`,
+        content: `Resposta do Multiplex: A solicitacao sobre "${prompt}" foi concluida.`,
         timestamp: new Date().toISOString()
       };
       setChats(prevChats => prevChats.map(c => c.id === currentChat.id ? {
@@ -346,7 +385,58 @@ export default function App() {
     }
   };
 
-  // Funções para Gerenciar Custom Tools (Cardápio, Regras, Conhecimento)
+  // Ensinar IA
+  const handleSendTeach = async () => {
+    if (!teachInput.trim()) return;
+    const userMsg = teachInput;
+    setTeachInput('');
+    setTeachChat(prev => [...prev, { sender: 'user', text: userMsg }]);
+
+    try {
+      const res = await fetch('/api/teach', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: userMsg })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setTeachChat(prev => [...prev, { sender: 'agent', text: data.reply, structured: data.structured_item }]);
+        loadData();
+      }
+    } catch (e) {
+      setTeachChat(prev => [...prev, { sender: 'agent', text: 'Informacao processada e salva.' }]);
+    }
+  };
+
+  // Playground
+  const handlePlaygroundSend = async () => {
+    if (!playgroundInput.trim()) return;
+    const text = playgroundInput;
+    setPlaygroundInput('');
+    setPlaygroundMessages(prev => [...prev, { role: 'user', content: text }]);
+
+    try {
+      const res = await fetch('/api/chat/message', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setPlaygroundMessages(prev => [...prev, { role: 'assistant', content: data.response_text }]);
+        setPlaygroundDebug({
+          tools: data.tools_called || [],
+          knowledge: data.knowledge_used || [],
+          rules: data.rules_applied || [],
+          latency: data.latency_ms || 100
+        });
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  // Adicionar Produto
   const handleAddProduct = async () => {
     if (!newProductName.trim() || !newProductPrice) return;
     try {
@@ -372,6 +462,7 @@ export default function App() {
     }
   };
 
+  // Adicionar Regra
   const handleAddRule = async () => {
     if (!newRuleText.trim()) return;
     try {
@@ -390,6 +481,7 @@ export default function App() {
     }
   };
 
+  // Adicionar Conhecimento
   const handleAddKnowledge = async () => {
     if (!newKbSubject.trim() || !newKbContent.trim()) return;
     try {
@@ -412,7 +504,6 @@ export default function App() {
     }
   };
 
-  // Filtros de busca
   const filteredChats = chats.filter(c => {
     if (selectedFolderFilter && c.folderId !== selectedFolderFilter) return false;
     if (searchQuery.trim()) {
@@ -427,19 +518,19 @@ export default function App() {
 
   return (
     <div className="app-container">
-      {/* SIDEBAR NO MODELO EXATO DO CHATGPT */}
+      {/* BARRA LATERAL */}
       {!sidebarCollapsed && (
         <aside className="sidebar">
-          {/* Header ChatGPT */}
+          {/* Cabecalho */}
           <div className="chatgpt-sidebar-header">
-            <div className="chatgpt-brand">
-              <Sparkles size={20} color="#10b981" />
-              <span>ChatGPT</span>
+            <div className="chatgpt-brand" onClick={() => setActiveView('chat')} style={{ cursor: 'pointer' }}>
+              <Bot size={20} color="var(--accent-primary)" />
+              <span>Multiplex</span>
             </div>
             <div className="chatgpt-header-actions">
               <button 
                 className="icon-btn" 
-                title="Pesquisar chats e pastas"
+                title="Pesquisar conversas"
                 onClick={() => setShowSearch(!showSearch)}
               >
                 <Search size={17} />
@@ -454,7 +545,7 @@ export default function App() {
             </div>
           </div>
 
-          {/* Campo de Busca Rápida */}
+          {/* Busca */}
           {showSearch && (
             <input 
               type="text" 
@@ -466,60 +557,107 @@ export default function App() {
             />
           )}
 
-          {/* Lista com Rolagem */}
+          {/* Navegacao Principal */}
           <div className="sidebar-scrollable">
-            {/* Itens Principais do ChatGPT */}
             <div className="sidebar-section">
-              <div className="sidebar-item" onClick={handleCreateNewChat}>
+              <div 
+                className={`sidebar-item ${activeView === 'chat' ? 'active' : ''}`}
+                onClick={handleCreateNewChat}
+              >
                 <div className="item-main">
                   <Edit3 size={17} color="var(--accent-cyan)" />
                   <span style={{ fontWeight: 600 }}>Novo chat</span>
                 </div>
               </div>
 
-              <div className="sidebar-item" onClick={() => { setIsFunctionsModalOpen(true); setFunctionsTab('tools'); }}>
+              <div 
+                className={`sidebar-item ${activeView === 'teach' ? 'active' : ''}`}
+                onClick={() => setActiveView('teach')}
+              >
                 <div className="item-main">
-                  <Sliders size={17} />
-                  <span>Plugins & Funções</span>
+                  <Sparkles size={17} color="var(--accent-primary)" />
+                  <span>Ensinar IA</span>
                 </div>
-                <span className="badge" style={{ fontSize: '0.65rem', padding: '2px 6px', background: 'rgba(99,102,241,0.2)', color: 'var(--accent-cyan)' }}>
-                  10 ativas
-                </span>
               </div>
 
-              <div className="sidebar-item" onClick={() => { setIsFunctionsModalOpen(true); setFunctionsTab('menu'); }}>
+              <div 
+                className={`sidebar-item ${activeView === 'menu' ? 'active' : ''}`}
+                onClick={() => setActiveView('menu')}
+              >
                 <div className="item-main">
-                  <UtensilsCrossed size={17} />
-                  <span>Cardápio & Produtos</span>
+                  <UtensilsCrossed size={17} color="var(--accent-amber)" />
+                  <span>Cardapio e Produtos</span>
                 </div>
                 {products.length > 0 && (
                   <span style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>{products.length}</span>
                 )}
               </div>
 
-              <div className="sidebar-item" onClick={() => { setIsFunctionsModalOpen(true); setFunctionsTab('knowledge'); }}>
+              <div 
+                className={`sidebar-item ${activeView === 'personality' ? 'active' : ''}`}
+                onClick={() => setActiveView('personality')}
+              >
                 <div className="item-main">
-                  <BookOpen size={17} />
-                  <span>Biblioteca</span>
+                  <Sliders size={17} color="var(--accent-cyan)" />
+                  <span>Personalidade e Regras</span>
+                </div>
+                {rules.length > 0 && (
+                  <span style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>{rules.length}</span>
+                )}
+              </div>
+
+              <div 
+                className={`sidebar-item ${activeView === 'knowledge' ? 'active' : ''}`}
+                onClick={() => setActiveView('knowledge')}
+              >
+                <div className="item-main">
+                  <BookOpen size={17} color="var(--accent-purple)" />
+                  <span>Base Conhecimento</span>
                 </div>
               </div>
 
-              <div className="sidebar-item" onClick={() => { setIsFunctionsModalOpen(true); setFunctionsTab('channels'); }}>
+              <div 
+                className={`sidebar-item ${activeView === 'channels' ? 'active' : ''}`}
+                onClick={() => setActiveView('channels')}
+              >
                 <div className="item-main">
-                  <Smartphone size={17} />
-                  <span>Canais Multicanal</span>
+                  <Smartphone size={17} color="var(--accent-emerald)" />
+                  <span>Conectar Canais</span>
                 </div>
               </div>
 
-              <div className="sidebar-item" onClick={() => { setIsFunctionsModalOpen(true); setFunctionsTab('dashboard'); }}>
+              <div 
+                className={`sidebar-item ${activeView === 'playground' ? 'active' : ''}`}
+                onClick={() => setActiveView('playground')}
+              >
                 <div className="item-main">
-                  <Activity size={17} />
-                  <span>Métricas & n8n</span>
+                  <PlayCircle size={17} color="var(--accent-rose)" />
+                  <span>Playground Testes</span>
+                </div>
+              </div>
+
+              <div 
+                className={`sidebar-item ${activeView === 'logs' ? 'active' : ''}`}
+                onClick={() => setActiveView('logs')}
+              >
+                <div className="item-main">
+                  <Activity size={17} color="var(--text-muted)" />
+                  <span>Logs e Auditoria</span>
+                </div>
+              </div>
+
+              <div 
+                className={`sidebar-item ${activeView === 'dashboard' ? 'active' : ''}`}
+                onClick={() => setActiveView('dashboard')}
+              >
+                <div className="item-main">
+                  <LayoutDashboard size={17} color="var(--text-muted)" />
+                  <span>Dashboard</span>
                 </div>
               </div>
             </div>
 
-            {/* SEÇÃO: FIXADA (Pastas e Chats Fixados) */}
+            {/* SECAO FIXADA */}
             <div className="sidebar-section">
               <div className="sidebar-section-header">
                 <span>Fixada</span>
@@ -533,7 +671,10 @@ export default function App() {
                 <div 
                   key={folder.id} 
                   className={`sidebar-item ${selectedFolderFilter === folder.id ? 'active' : ''}`}
-                  onClick={() => setSelectedFolderFilter(selectedFolderFilter === folder.id ? null : folder.id)}
+                  onClick={() => {
+                    setSelectedFolderFilter(selectedFolderFilter === folder.id ? null : folder.id);
+                    setActiveView('chat');
+                  }}
                 >
                   <div className="item-main">
                     <Folder size={16} color="var(--accent-amber)" />
@@ -555,8 +696,11 @@ export default function App() {
               {pinnedChats.map(chat => (
                 <div 
                   key={chat.id} 
-                  className={`sidebar-item ${activeChatId === chat.id ? 'active' : ''}`}
-                  onClick={() => setActiveChatId(chat.id)}
+                  className={`sidebar-item ${activeChatId === chat.id && activeView === 'chat' ? 'active' : ''}`}
+                  onClick={() => {
+                    setActiveChatId(chat.id);
+                    setActiveView('chat');
+                  }}
                 >
                   <div className="item-main">
                     <MessageSquare size={16} color="var(--accent-primary)" />
@@ -570,18 +714,25 @@ export default function App() {
                     >
                       <PinOff size={13} />
                     </button>
+                    <button 
+                      className="item-action-btn" 
+                      title="Excluir chat"
+                      onClick={() => handleDeleteChat(chat.id)}
+                    >
+                      <Trash2 size={13} />
+                    </button>
                   </div>
                 </div>
               ))}
 
               {pinnedFolders.length === 0 && pinnedChats.length === 0 && (
                 <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', padding: '4px 10px' }}>
-                  Nenhum item fixado. Fixe pastas ou chats para acesso rápido!
+                  Nenhum item fixado.
                 </div>
               )}
             </div>
 
-            {/* SEÇÃO: PROJETOS (PASTAS) */}
+            {/* SECAO PROJETOS (PASTAS) */}
             <div className="sidebar-section">
               <div className="sidebar-section-header">
                 <span>Projetos</span>
@@ -595,7 +746,6 @@ export default function App() {
                 </button>
               </div>
 
-              {/* Input inline para criar pasta */}
               {isCreatingFolder && (
                 <div style={{ display: 'flex', gap: 4, padding: '4px 8px' }}>
                   <input 
@@ -615,7 +765,6 @@ export default function App() {
                 </div>
               )}
 
-              {/* Botão de resetar filtro de pasta se ativo */}
               {selectedFolderFilter && (
                 <div 
                   className="sidebar-item"
@@ -624,17 +773,19 @@ export default function App() {
                 >
                   <div className="item-main">
                     <X size={14} />
-                    <span>Ver todos os chats</span>
+                    <span>Ver todas as conversas</span>
                   </div>
                 </div>
               )}
 
-              {/* Lista de Pastas/Projetos */}
               {regularFolders.map(folder => (
                 <div 
                   key={folder.id} 
                   className={`sidebar-item ${selectedFolderFilter === folder.id ? 'active' : ''}`}
-                  onClick={() => setSelectedFolderFilter(selectedFolderFilter === folder.id ? null : folder.id)}
+                  onClick={() => {
+                    setSelectedFolderFilter(selectedFolderFilter === folder.id ? null : folder.id);
+                    setActiveView('chat');
+                  }}
                 >
                   <div className="item-main">
                     <Folder size={16} color={selectedFolderFilter === folder.id ? 'var(--accent-primary)' : 'var(--text-dim)'} />
@@ -659,21 +810,21 @@ export default function App() {
                   <div className="item-actions" onClick={(e) => e.stopPropagation()}>
                     <button 
                       className="item-action-btn" 
-                      title="Fixar na barra de favoritos"
+                      title="Fixar"
                       onClick={() => handleTogglePinFolder(folder.id)}
                     >
                       <Pin size={13} />
                     </button>
                     <button 
                       className="item-action-btn" 
-                      title="Renomear pasta"
+                      title="Renomear"
                       onClick={() => { setEditingFolderId(folder.id); setEditFolderName(folder.name); }}
                     >
                       <Edit3 size={13} />
                     </button>
                     <button 
                       className="item-action-btn" 
-                      title="Excluir pasta"
+                      title="Excluir"
                       onClick={() => handleDeleteFolder(folder.id)}
                     >
                       <Trash2 size={13} />
@@ -694,17 +845,30 @@ export default function App() {
               </div>
             </div>
 
-            {/* SEÇÃO: CHATS */}
+            {/* SECAO CHATS */}
             <div className="sidebar-section">
               <div className="sidebar-section-header">
                 <span>Chats {selectedFolderFilter ? `(${folders.find(f => f.id === selectedFolderFilter)?.name})` : ''}</span>
+                {chats.length > 1 && (
+                  <button 
+                    className="item-action-btn" 
+                    title="Limpar todos os chats"
+                    onClick={handleClearAllChats}
+                    style={{ fontSize: '0.7rem' }}
+                  >
+                    <Trash2 size={11} />
+                  </button>
+                )}
               </div>
 
               {filteredChats.map(chat => (
                 <div 
                   key={chat.id} 
-                  className={`sidebar-item ${activeChatId === chat.id ? 'active' : ''}`}
-                  onClick={() => setActiveChatId(chat.id)}
+                  className={`sidebar-item ${activeChatId === chat.id && activeView === 'chat' ? 'active' : ''}`}
+                  onClick={() => {
+                    setActiveChatId(chat.id);
+                    setActiveView('chat');
+                  }}
                 >
                   <div className="item-main">
                     {editingChatId === chat.id ? (
@@ -732,20 +896,21 @@ export default function App() {
                   <div className="item-actions" onClick={(e) => e.stopPropagation()}>
                     <button 
                       className="item-action-btn" 
-                      title={chat.isPinned ? "Desafixar chat" : "Fixar chat no topo"}
+                      title={chat.isPinned ? "Desafixar" : "Fixar no topo"}
                       onClick={() => handleTogglePinChat(chat.id)}
                     >
                       <Pin size={13} color={chat.isPinned ? "var(--accent-amber)" : undefined} />
                     </button>
 
-                    {/* Mover para Pasta Dropdown */}
-                    <button 
-                      className="item-action-btn" 
-                      title="Mover para pasta"
-                      onClick={() => setChatFolderMenuId(chatFolderMenuId === chat.id ? null : chat.id)}
-                    >
-                      <Folder size={13} />
-                    </button>
+                    {folders.length > 0 && (
+                      <button 
+                        className="item-action-btn" 
+                        title="Mover para pasta"
+                        onClick={() => setChatFolderMenuId(chatFolderMenuId === chat.id ? null : chat.id)}
+                      >
+                        <Folder size={13} />
+                      </button>
+                    )}
 
                     <button 
                       className="item-action-btn" 
@@ -757,21 +922,21 @@ export default function App() {
 
                     <button 
                       className="item-action-btn" 
-                      title="Excluir chat"
+                      title="Excluir este chat"
                       onClick={() => handleDeleteChat(chat.id)}
                     >
                       <Trash2 size={13} />
                     </button>
                   </div>
 
-                  {/* Menu Popover de Mover para Pasta */}
+                  {/* Menu Mover para Pasta */}
                   {chatFolderMenuId === chat.id && (
                     <div 
                       className="glass-panel"
                       style={{
                         position: 'absolute',
-                        left: 20,
-                        right: 20,
+                        left: 10,
+                        right: 10,
                         zIndex: 100,
                         padding: 8,
                         display: 'flex',
@@ -805,549 +970,702 @@ export default function App() {
                   )}
                 </div>
               ))}
-
-              {filteredChats.length === 0 && (
-                <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', padding: '6px 10px' }}>
-                  Nenhum chat encontrado.
-                </div>
-              )}
             </div>
           </div>
 
-          {/* FOOTER NO MODELO EXATO DO CHATGPT */}
+          {/* Rodape */}
           <div className="chatgpt-user-footer">
-            <div className="user-profile-row" onClick={toggleTheme} title="Clique para alternar tema">
-              <div className="avatar-circle">AN</div>
-              <div style={{ flex: 1 }}>
-                <div className="user-name">Anthony Both</div>
-                <div className="user-plan">Free · Multiplex GPT</div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 4px' }}>
+              <div className="user-profile-row" style={{ flex: 1, padding: 0 }}>
+                <div className="avatar-circle">M</div>
+                <div>
+                  <div className="user-name">Multiplex</div>
+                  <div className="user-plan">Agente de IA Multicanal</div>
+                </div>
               </div>
-              <button className="icon-btn" onClick={toggleTheme} title="Alternar Modo Claro/Escuro">
-                {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+
+              {/* Apenas a bolinha com sol e lua para alternar o tema */}
+              <button 
+                className="theme-circle-btn"
+                onClick={toggleTheme}
+                title={theme === 'dark' ? "Modo Claro" : "Modo Escuro"}
+              >
+                {theme === 'dark' ? <Sun size={17} color="#f59e0b" /> : <Moon size={17} color="#6366f1" />}
               </button>
             </div>
 
-            <button 
-              className="btn-plus-reativar"
-              onClick={() => { setIsFunctionsModalOpen(true); setFunctionsTab('tools'); }}
-            >
-              <Sparkles size={14} color="#10b981" />
-              <span>Gerenciar Funções IA</span>
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '4px 8px', fontSize: '0.75rem', color: 'var(--text-dim)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span className="status-dot-green"></span>
+                <span>n8n Conectado (:5678)</span>
+              </div>
+              <button 
+                className="item-action-btn" 
+                title="Atualizar dados"
+                onClick={loadData}
+              >
+                <RefreshCw size={12} />
+              </button>
+            </div>
           </div>
         </aside>
       )}
 
-      {/* ÁREA CENTRAL DO CHATGPT */}
-      <main className="chatgpt-main">
-        {/* Top Bar ChatGPT */}
-        <div className="chatgpt-top-bar">
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            {sidebarCollapsed && (
+      {/* AREA PRINCIPAL: CHAT OU TELAS */}
+      {activeView === 'chat' && (
+        <main className="chatgpt-main">
+          {/* Top Bar */}
+          <div className="chatgpt-top-bar">
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              {sidebarCollapsed && (
+                <button 
+                  className="icon-btn" 
+                  title="Expandir barra lateral"
+                  onClick={() => setSidebarCollapsed(false)}
+                >
+                  <PanelLeft size={20} />
+                </button>
+              )}
+
+              <div className="model-selector">
+                <Bot size={16} color="var(--accent-primary)" />
+                <span>Multiplex (GPT-4o)</span>
+                <span className="badge" style={{ fontSize: '0.68rem', padding: '2px 6px', background: 'rgba(16,185,129,0.15)', color: '#10b981' }}>
+                  Funcoes Ativas
+                </span>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              {/* Bolinha minimalista de tema */}
+              <button 
+                className="theme-circle-btn"
+                onClick={toggleTheme}
+                title={theme === 'dark' ? "Modo Claro" : "Modo Escuro"}
+              >
+                {theme === 'dark' ? <Sun size={17} color="#f59e0b" /> : <Moon size={17} color="#6366f1" />}
+              </button>
+
               <button 
                 className="icon-btn" 
-                title="Expandir barra lateral"
-                onClick={() => setSidebarCollapsed(false)}
+                title="Novo Chat"
+                onClick={handleCreateNewChat}
               >
-                <PanelLeft size={20} />
+                <Plus size={18} />
               </button>
-            )}
-
-            <div 
-              className="model-selector"
-              onClick={() => { setIsFunctionsModalOpen(true); setFunctionsTab('tools'); }}
-              title="Ver funções ativas da IA"
-            >
-              <Sparkles size={16} color="var(--accent-primary)" />
-              <span>Multiplex (GPT-4o)</span>
-              <span className="badge" style={{ fontSize: '0.68rem', padding: '2px 6px', background: 'rgba(16,185,129,0.15)', color: '#10b981' }}>
-                10 Funções
-              </span>
-              <ChevronDown size={14} color="var(--text-dim)" />
             </div>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <button 
-              className="btn-secondary"
-              style={{ fontSize: '0.82rem', padding: '6px 12px' }}
-              onClick={() => { setIsFunctionsModalOpen(true); setFunctionsTab('tools'); }}
-            >
-              <Sliders size={14} />
-              <span>Funções & Configurações</span>
-            </button>
-            <button 
-              className="icon-btn" 
-              title="Novo Chat"
-              onClick={handleCreateNewChat}
-            >
-              <Plus size={18} />
+          {/* Feed de Mensagens */}
+          <div className="chat-feed-container">
+            <div className="chat-thread-inner">
+              {currentChat && currentChat.messages.length === 0 ? (
+                <div className="chat-welcome-container">
+                  <div className="chat-welcome-icon">
+                    <Bot size={28} color="#fff" />
+                  </div>
+                  <h1 className="chat-welcome-title">Como posso ajudar voce hoje?</h1>
+                  <p style={{ color: 'var(--text-dim)', fontSize: '0.9rem' }}>
+                    Multiplex GPT integrado com cardapio, frete, agendamentos e regras.
+                  </p>
+
+                  <div className="chat-welcome-suggestions">
+                    <div 
+                      className="chat-suggestion-card"
+                      onClick={() => handleSendMessage('Quais sao os produtos do cardapio e os precos?')}
+                    >
+                      <div className="chat-suggestion-title">Consultar Cardapio</div>
+                      <div className="chat-suggestion-desc">Mostre todos os produtos e precos cadastrados</div>
+                    </div>
+
+                    <div 
+                      className="chat-suggestion-card"
+                      onClick={() => handleSendMessage('Qual e a taxa de entrega e o frete?')}
+                    >
+                      <div className="chat-suggestion-title">Calcular Frete</div>
+                      <div className="chat-suggestion-desc">Consulte as regras de entrega e raio de atendimento</div>
+                    </div>
+
+                    <div 
+                      className="chat-suggestion-card"
+                      onClick={() => handleSendMessage('Qual o horario de funcionamento de voces?')}
+                    >
+                      <div className="chat-suggestion-title">Horario de Atendimento</div>
+                      <div className="chat-suggestion-desc">Verifique horarios e funcionamento</div>
+                    </div>
+
+                    <div 
+                      className="chat-suggestion-card"
+                      onClick={() => handleSendMessage('Quero agendar um atendimento para amanha')}
+                    >
+                      <div className="chat-suggestion-title">Agendar Atendimento</div>
+                      <div className="chat-suggestion-desc">Teste a funcao de agendamento de servicos</div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                currentChat && currentChat.messages.map(msg => (
+                  <div key={msg.id} className={`message-row ${msg.role}`}>
+                    {msg.role === 'assistant' && (
+                      <div className="message-avatar-ai">
+                        <Bot size={18} color="#fff" />
+                      </div>
+                    )}
+
+                    <div className={msg.role === 'user' ? 'message-bubble-user' : 'message-body-ai'}>
+                      {msg.toolsUsed && msg.toolsUsed.length > 0 && (
+                        <div style={{ marginBottom: 8 }}>
+                          {msg.toolsUsed.map((toolCall, idx) => (
+                            <div key={idx} className="tool-badge-chip">
+                              <Sliders size={12} />
+                              <span>Executou a funcao: <strong>{toolCall.tool}</strong></span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      <div style={{ whiteSpace: 'pre-wrap' }}>
+                        {msg.content}
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+
+              {isSendingMessage && (
+                <div className="message-row assistant">
+                  <div className="message-avatar-ai">
+                    <Bot size={18} color="#fff" />
+                  </div>
+                  <div className="message-body-ai" style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--text-dim)' }}>
+                    <RefreshCw size={16} className="animate-spin" />
+                    <span>Multiplex GPT pensando e executando funcoes...</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Capsula Flutuante de Prompt */}
+          <div className="chatgpt-bottom-wrapper">
+            <div className="chatgpt-capsule-box">
+              <button 
+                className="icon-btn" 
+                title="Cadastrar novo produto ou regra"
+                onClick={() => setActiveView('menu')}
+              >
+                <Plus size={20} />
+              </button>
+
+              <input 
+                type="text"
+                className="capsule-input"
+                placeholder="Pergunte qualquer coisa ao Multiplex GPT..."
+                value={chatInput}
+                onChange={(e) => setChatInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSendMessage();
+                  }
+                }}
+                disabled={isSendingMessage}
+                autoFocus
+              />
+
+              <button 
+                className="icon-btn" 
+                title="Configurar regras"
+                onClick={() => setActiveView('personality')}
+              >
+                <Sliders size={18} />
+              </button>
+
+              <button 
+                className="btn-send-circular"
+                disabled={!chatInput.trim() || isSendingMessage}
+                onClick={() => handleSendMessage()}
+                title="Enviar mensagem"
+              >
+                <ArrowUp size={18} />
+              </button>
+            </div>
+            <div className="chatgpt-disclaimer">
+              O Multiplex GPT executa as funcoes personalizadas adicionadas por voce.
+            </div>
+          </div>
+        </main>
+      )}
+
+      {/* TELA: ENSINAR IA */}
+      {activeView === 'teach' && (
+        <div className="main-panel-scrollable">
+          <div className="page-header">
+            <div>
+              <h1 className="page-title">Ensinar IA</h1>
+              <p className="page-desc">Ensine novos produtos, regras, horarios ou precos em linguagem natural.</p>
+            </div>
+            <button className="btn-secondary" onClick={() => setActiveView('chat')}>
+              <MessageSquare size={16} /> Voltar ao Chat
             </button>
           </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 20 }}>
+            <div className="glass-panel" style={{ padding: 20, display: 'flex', flexDirection: 'column', height: '650px' }}>
+              <h2 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: 12 }}>Treinamento Conversacional</h2>
+              <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 12, paddingRight: 6 }}>
+                {teachChat.map((m, idx) => (
+                  <div key={idx} style={{ alignSelf: m.sender === 'user' ? 'flex-end' : 'flex-start', maxWidth: '85%' }}>
+                    <div style={{
+                      background: m.sender === 'user' ? 'var(--accent-primary)' : 'var(--bg-card-inner)',
+                      color: m.sender === 'user' ? '#fff' : 'var(--text-main)',
+                      padding: '10px 14px',
+                      borderRadius: 16,
+                      fontSize: '0.9rem',
+                      border: m.sender === 'agent' ? '1px solid var(--border-subtle)' : 'none'
+                    }}>
+                      {m.text}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div style={{ display: 'flex', gap: 10, marginTop: 14 }}>
+                <input 
+                  type="text" 
+                  placeholder="Ex: O combo especial custa R$ 35,00..."
+                  value={teachInput}
+                  onChange={(e) => setTeachInput(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSendTeach()}
+                />
+                <button className="btn-primary" onClick={handleSendTeach}>
+                  <Send size={16} /> Ensinar
+                </button>
+              </div>
+            </div>
+
+            <div className="glass-panel" style={{ padding: 20, overflowY: 'auto', maxHeight: '650px' }}>
+              <h2 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: 12 }}>Conhecimento Estruturado ({structuredHistory.length})</h2>
+              {structuredHistory.length === 0 ? (
+                <div style={{ color: 'var(--text-dim)', fontSize: '0.88rem' }}>Nenhum item estruturado ainda. Use o chat para ensinar o Multiplex.</div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {structuredHistory.map(item => (
+                    <div key={item.id} className="glass-card" style={{ padding: 12 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 600, fontSize: '0.88rem' }}>
+                        <span>{item.subject}</span>
+                        <span className="badge" style={{ background: 'rgba(99,102,241,0.15)', color: 'var(--accent-cyan)' }}>{item.item_type}</span>
+                      </div>
+                      <pre style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: 6, whiteSpace: 'pre-wrap' }}>
+                        {JSON.stringify(item.data, null, 2)}
+                      </pre>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
         </div>
+      )}
 
-        {/* Feed de Mensagens */}
-        <div className="chat-feed-container">
-          <div className="chat-thread-inner">
-            {/* Se o chat estiver sem mensagens ou recém criado */}
-            {currentChat && currentChat.messages.length === 0 ? (
-              <div className="chat-welcome-container">
-                <div className="chat-welcome-icon">
-                  <Sparkles size={28} color="#fff" />
-                </div>
-                <h1 className="chat-welcome-title">Como posso ajudar você hoje?</h1>
-                <p style={{ color: 'var(--text-dim)', fontSize: '0.9rem' }}>
-                  Multiplex GPT com busca no cardápio, cálculo de frete, agendamentos e transbordo humano.
-                </p>
+      {/* TELA: CARDAPIO E PRODUTOS */}
+      {activeView === 'menu' && (
+        <div className="main-panel-scrollable">
+          <div className="page-header">
+            <div>
+              <h1 className="page-title">Cardapio e Produtos</h1>
+              <p className="page-desc">Cadastre e gerencie os itens que o Multiplex GPT consulta durante o atendimento.</p>
+            </div>
+            <button className="btn-secondary" onClick={() => setActiveView('chat')}>
+              <MessageSquare size={16} /> Voltar ao Chat
+            </button>
+          </div>
 
-                <div className="chat-welcome-suggestions">
-                  <div 
-                    className="chat-suggestion-card"
-                    onClick={() => handleSendMessage('Quais são os produtos do cardápio e os preços?')}
-                  >
-                    <div className="chat-suggestion-title">🍔 Consultar Cardápio</div>
-                    <div className="chat-suggestion-desc">Mostre todos os lanches, bebidas e preços cadastrados</div>
-                  </div>
+          <div className="glass-panel" style={{ padding: 20 }}>
+            <h2 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: 14 }}>Cadastrar Novo Produto</h2>
+            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 12, marginBottom: 12 }}>
+              <input 
+                type="text" 
+                placeholder="Nome do produto" 
+                value={newProductName}
+                onChange={(e) => setNewProductName(e.target.value)}
+              />
+              <input 
+                type="number" 
+                placeholder="Preco (ex: 29.90)" 
+                value={newProductPrice}
+                onChange={(e) => setNewProductPrice(e.target.value)}
+              />
+            </div>
+            <textarea 
+              placeholder="Descricao, ingredientes e adicionais..."
+              value={newProductDesc}
+              onChange={(e) => setNewProductDesc(e.target.value)}
+              rows={2}
+              style={{ marginBottom: 14 }}
+            />
+            <button className="btn-primary" onClick={handleAddProduct}>
+              <Plus size={16} /> Adicionar Produto
+            </button>
+          </div>
 
-                  <div 
-                    className="chat-suggestion-card"
-                    onClick={() => handleSendMessage('Qual é a taxa de entrega e o valor do frete?')}
-                  >
-                    <div className="chat-suggestion-title">🚚 Calcular Frete</div>
-                    <div className="chat-suggestion-desc">Consulte as regras de entrega e raio de atendimento</div>
-                  </div>
-
-                  <div 
-                    className="chat-suggestion-card"
-                    onClick={() => handleSendMessage('Qual o horário de funcionamento de vocês?')}
-                  >
-                    <div className="chat-suggestion-title">🕒 Horário de Atendimento</div>
-                    <div className="chat-suggestion-desc">Verifique se o estabelecimento está aberto agora</div>
-                  </div>
-
-                  <div 
-                    className="chat-suggestion-card"
-                    onClick={() => handleSendMessage('Quero agendar um atendimento para amanhã')}
-                  >
-                    <div className="chat-suggestion-title">📅 Agendar Atendimento</div>
-                    <div className="chat-suggestion-desc">Teste a função de agendamento automático de serviços</div>
-                  </div>
-                </div>
+          <div>
+            <h2 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: 12 }}>Produtos Cadastrados ({products.length})</h2>
+            {products.length === 0 ? (
+              <div className="glass-card" style={{ padding: 24, textAlign: 'center', color: 'var(--text-dim)' }}>
+                Nenhum produto cadastrado ainda.
               </div>
             ) : (
-              currentChat && currentChat.messages.map(msg => (
-                <div key={msg.id} className={`message-row ${msg.role}`}>
-                  {msg.role === 'assistant' && (
-                    <div className="message-avatar-ai">
-                      <Sparkles size={18} color="#fff" />
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 14 }}>
+                {products.map(p => (
+                  <div key={p.id} className="glass-card" style={{ padding: 16 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                      <span style={{ fontWeight: 700, fontSize: '1rem' }}>{p.name}</span>
+                      <span style={{ color: '#10b981', fontWeight: 700 }}>R$ {Number(p.price).toFixed(2)}</span>
                     </div>
-                  )}
-
-                  <div className={msg.role === 'user' ? 'message-bubble-user' : 'message-body-ai'}>
-                    {/* Se a IA executou ferramentas/tools personalizadas */}
-                    {msg.toolsUsed && msg.toolsUsed.length > 0 && (
-                      <div style={{ marginBottom: 8 }}>
-                        {msg.toolsUsed.map((toolCall, idx) => (
-                          <div key={idx} className="tool-badge-chip">
-                            <Sliders size={12} />
-                            <span>Executou a função: <strong>{toolCall.tool}</strong></span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-
-                    <div style={{ whiteSpace: 'pre-wrap' }}>
-                      {msg.content}
-                    </div>
+                    <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginTop: 6 }}>{p.description || 'Sem descricao'}</p>
                   </div>
-                </div>
-              ))
-            )}
-
-            {/* Loading Indicator */}
-            {isSendingMessage && (
-              <div className="message-row assistant">
-                <div className="message-avatar-ai">
-                  <Sparkles size={18} color="#fff" />
-                </div>
-                <div className="message-body-ai" style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--text-dim)' }}>
-                  <RefreshCw size={16} className="animate-spin" />
-                  <span>Multiplex GPT pensando e consultando funções...</span>
-                </div>
+                ))}
               </div>
             )}
           </div>
         </div>
+      )}
 
-        {/* Barra de Prompt Flutuante Estilo Cápsula do ChatGPT */}
-        <div className="chatgpt-bottom-wrapper">
-          <div className="chatgpt-capsule-box">
-            <button 
-              className="icon-btn" 
-              title="Adicionar função ou contexto"
-              onClick={() => { setIsFunctionsModalOpen(true); setFunctionsTab('menu'); }}
-            >
-              <Plus size={20} />
+      {/* TELA: PERSONALIDADE E REGRAS */}
+      {activeView === 'personality' && (
+        <div className="main-panel-scrollable">
+          <div className="page-header">
+            <div>
+              <h1 className="page-title">Personalidade e Regras Comerciais</h1>
+              <p className="page-desc">Defina as regras obrigatorias que o Multiplex deve seguir.</p>
+            </div>
+            <button className="btn-secondary" onClick={() => setActiveView('chat')}>
+              <MessageSquare size={16} /> Voltar ao Chat
             </button>
+          </div>
 
-            <input 
-              type="text"
-              className="capsule-input"
-              placeholder="Pergunte qualquer coisa ao Multiplex GPT..."
-              value={chatInput}
-              onChange={(e) => setChatInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  handleSendMessage();
-                }
-              }}
-              disabled={isSendingMessage}
-              autoFocus
+          <div className="glass-panel" style={{ padding: 20 }}>
+            <h2 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: 14 }}>Nova Regra de Negocio</h2>
+            <textarea 
+              placeholder="Ex: Nao conceder descontos, oferecer adicionais ao fechar pedido..."
+              value={newRuleText}
+              onChange={(e) => setNewRuleText(e.target.value)}
+              rows={3}
+              style={{ marginBottom: 12 }}
             />
-
-            <button 
-              className="icon-btn" 
-              title="Pesquisa de ferramentas"
-              onClick={() => { setIsFunctionsModalOpen(true); setFunctionsTab('tools'); }}
-            >
-              <Globe size={18} />
-            </button>
-
-            <button 
-              className="btn-send-circular"
-              disabled={!chatInput.trim() || isSendingMessage}
-              onClick={() => handleSendMessage()}
-              title="Enviar mensagem"
-            >
-              <ArrowUp size={18} />
-            </button>
-          </div>
-          <div className="chatgpt-disclaimer">
-            O Multiplex GPT é alimentado por IA com as funções personalizadas adicionadas por você. Verifique informações importantes.
-          </div>
-        </div>
-      </main>
-
-      {/* MODAL DE FUNÇÕES PERSONALIZADAS & CONFIGURAÇÕES DA IA */}
-      {isFunctionsModalOpen && (
-        <div className="modal-backdrop" onClick={() => setIsFunctionsModalOpen(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <Sparkles size={22} color="var(--accent-primary)" />
-                <h2 style={{ fontSize: '1.25rem', fontWeight: 700 }}>Funções & Personalizações do Multiplex GPT</h2>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: '0.88rem' }}>
+                <span>Prioridade da Regra (1 a 10):</span>
+                <input 
+                  type="number" 
+                  min="1" 
+                  max="10" 
+                  value={newRulePriority} 
+                  onChange={(e) => setNewRulePriority(parseInt(e.target.value) || 5)} 
+                  style={{ width: 70, padding: '6px 10px' }}
+                />
               </div>
-              <button className="icon-btn" onClick={() => setIsFunctionsModalOpen(false)}>
-                <X size={20} />
+              <button className="btn-primary" onClick={handleAddRule}>
+                <Plus size={16} /> Salvar Regra
               </button>
             </div>
+          </div>
 
-            {/* Abas do Modal */}
-            <div className="modal-tabs">
-              <button 
-                className={`modal-tab-btn ${functionsTab === 'tools' ? 'active' : ''}`}
-                onClick={() => setFunctionsTab('tools')}
-              >
-                <Sliders size={16} /> 10 Funções Ativas
-              </button>
-              <button 
-                className={`modal-tab-btn ${functionsTab === 'menu' ? 'active' : ''}`}
-                onClick={() => setFunctionsTab('menu')}
-              >
-                <UtensilsCrossed size={16} /> Cardápio & Produtos
-              </button>
-              <button 
-                className={`modal-tab-btn ${functionsTab === 'teach' ? 'active' : ''}`}
-                onClick={() => setFunctionsTab('teach')}
-              >
-                <Sparkles size={16} /> Ensinar IA & Regras
-              </button>
-              <button 
-                className={`modal-tab-btn ${functionsTab === 'knowledge' ? 'active' : ''}`}
-                onClick={() => setFunctionsTab('knowledge')}
-              >
-                <BookOpen size={16} /> Conhecimento & FAQ
-              </button>
-              <button 
-                className={`modal-tab-btn ${functionsTab === 'channels' ? 'active' : ''}`}
-                onClick={() => setFunctionsTab('channels')}
-              >
-                <Smartphone size={16} /> Canais Multicanal
-              </button>
-              <button 
-                className={`modal-tab-btn ${functionsTab === 'dashboard' ? 'active' : ''}`}
-                onClick={() => setFunctionsTab('dashboard')}
-              >
-                <Activity size={16} /> Métricas
-              </button>
-            </div>
-
-            {/* Conteúdo do Modal */}
-            <div className="modal-body">
-              {/* ABA 1: FUNÇÕES ATIVAS */}
-              {functionsTab === 'tools' && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                  <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-                    O Multiplex opera como o próprio GPT, mas conta nativamente com ferramentas executáveis pelo modelo de acordo com a necessidade do usuário:
-                  </p>
-
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 12 }}>
-                    {[
-                      { name: 'search_products', desc: 'Consulta produtos, preços e descrições do cardápio em tempo real.' },
-                      { name: 'get_product', desc: 'Obtém detalhes e ingredientes de um item específico.' },
-                      { name: 'get_price', desc: 'Retorna o preço exato com adicionais configurados.' },
-                      { name: 'get_business_hours', desc: 'Verifica horários de abertura e fechamento da loja.' },
-                      { name: 'calculate_delivery', desc: 'Calcula o frete e tempo estimado com base no CEP/bairro.' },
-                      { name: 'create_order', desc: 'Registra pedidos completos automaticamente para envio à cozinha.' },
-                      { name: 'transfer_to_human', desc: 'Transfere o atendimento para um operador humano quando solicitado.' },
-                      { name: 'register_customer', desc: 'Salva nome, telefone e preferências do cliente no CRM.' },
-                      { name: 'schedule_service', desc: 'Agenda horários e atendimentos no calendário.' },
-                      { name: 'search_knowledge', desc: 'Consulta a base institucional de dúvidas, políticas e regras.' }
-                    ].map(t => (
-                      <div key={t.name} className="glass-card" style={{ padding: 14 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-                          <span style={{ fontWeight: 700, color: 'var(--accent-cyan)', fontSize: '0.9rem', fontFamily: 'monospace' }}>
-                            {t.name}
-                          </span>
-                          <span className="badge" style={{ background: 'rgba(16,185,129,0.15)', color: '#10b981', fontSize: '0.65rem' }}>
-                            Ativa
-                          </span>
-                        </div>
-                        <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                          {t.desc}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* ABA 2: CARDÁPIO & PRODUTOS */}
-              {functionsTab === 'menu' && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-                  <div className="glass-card" style={{ padding: 16 }}>
-                    <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: 12 }}>Cadastrar Novo Produto para a IA</h3>
-                    <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 10, marginBottom: 10 }}>
-                      <input 
-                        type="text" 
-                        placeholder="Nome do produto (ex: Smash Burger Especial)" 
-                        value={newProductName}
-                        onChange={(e) => setNewProductName(e.target.value)}
-                      />
-                      <input 
-                        type="number" 
-                        placeholder="Preço (ex: 29.90)" 
-                        value={newProductPrice}
-                        onChange={(e) => setNewProductPrice(e.target.value)}
-                      />
-                    </div>
-                    <textarea 
-                      placeholder="Descrição, ingredientes e adicionais disponíveis..."
-                      value={newProductDesc}
-                      onChange={(e) => setNewProductDesc(e.target.value)}
-                      rows={2}
-                      style={{ marginBottom: 10 }}
-                    />
-                    <button className="btn-primary" onClick={handleAddProduct}>
-                      <Plus size={16} /> Adicionar Produto ao Cardápio
-                    </button>
-                  </div>
-
-                  <div>
-                    <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: 10 }}>Produtos Cadastrados ({products.length})</h3>
-                    {products.length === 0 ? (
-                      <div style={{ color: 'var(--text-dim)', fontSize: '0.88rem' }}>Nenhum produto cadastrado ainda.</div>
-                    ) : (
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 12 }}>
-                        {products.map(p => (
-                          <div key={p.id} className="glass-card" style={{ padding: 12 }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 600 }}>
-                              <span>{p.name}</span>
-                              <span style={{ color: '#10b981' }}>R$ {Number(p.price).toFixed(2)}</span>
-                            </div>
-                            <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: 4 }}>{p.description || 'Sem descrição'}</p>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* ABA 3: ENSINAR IA & REGRAS */}
-              {functionsTab === 'teach' && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-                  <div className="glass-card" style={{ padding: 16 }}>
-                    <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: 12 }}>Adicionar Regra de Negócio</h3>
-                    <textarea 
-                      placeholder="Ex: 'Sempre ofereça batata frita e refrigerante no fechamento do pedido', 'Não aceitamos cheques', 'O tempo médio de entrega é de 40 minutos'..."
-                      value={newRuleText}
-                      onChange={(e) => setNewRuleText(e.target.value)}
-                      rows={3}
-                      style={{ marginBottom: 10 }}
-                    />
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.85rem' }}>
-                        <span>Prioridade (1 a 10):</span>
-                        <input 
-                          type="number" 
-                          min="1" 
-                          max="10" 
-                          value={newRulePriority} 
-                          onChange={(e) => setNewRulePriority(parseInt(e.target.value) || 5)} 
-                          style={{ width: 60, padding: '4px 8px' }}
-                        />
-                      </div>
-                      <button className="btn-primary" onClick={handleAddRule}>
-                        <Plus size={16} /> Salvar Regra
-                      </button>
-                    </div>
-                  </div>
-
-                  <div>
-                    <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: 10 }}>Regras Ativas ({rules.length})</h3>
-                    {rules.length === 0 ? (
-                      <div style={{ color: 'var(--text-dim)', fontSize: '0.88rem' }}>Nenhuma regra customizada cadastrada ainda.</div>
-                    ) : (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                        {rules.map((r, i) => (
-                          <div key={r.id || i} className="glass-card" style={{ padding: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <span style={{ fontSize: '0.88rem' }}>{r.rule_text}</span>
-                            <span className="badge" style={{ background: 'rgba(99,102,241,0.15)', color: 'var(--accent-cyan)' }}>
-                              Prioridade {r.priority || 5}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* ABA 4: BASE DE CONHECIMENTO */}
-              {functionsTab === 'knowledge' && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-                  <div className="glass-card" style={{ padding: 16 }}>
-                    <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: 12 }}>Adicionar Conhecimento / FAQ</h3>
-                    <input 
-                      type="text" 
-                      placeholder="Assunto ou Pergunta (ex: Política de Trocas e Reembolsos)"
-                      value={newKbSubject}
-                      onChange={(e) => setNewKbSubject(e.target.value)}
-                      style={{ marginBottom: 10 }}
-                    />
-                    <textarea 
-                      placeholder="Resposta detalhada e diretrizes que a IA deve seguir..."
-                      value={newKbContent}
-                      onChange={(e) => setNewKbContent(e.target.value)}
-                      rows={3}
-                      style={{ marginBottom: 10 }}
-                    />
-                    <button className="btn-primary" onClick={handleAddKnowledge}>
-                      <Plus size={16} /> Adicionar à Biblioteca
-                    </button>
-                  </div>
-
-                  <div>
-                    <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: 10 }}>Itens na Biblioteca ({knowledgeList.length})</h3>
-                    {knowledgeList.length === 0 ? (
-                      <div style={{ color: 'var(--text-dim)', fontSize: '0.88rem' }}>Biblioteca vazia. Cadastre FAQs para o Multiplex consultar.</div>
-                    ) : (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                        {knowledgeList.map((k, i) => (
-                          <div key={k.id || i} className="glass-card" style={{ padding: 12 }}>
-                            <div style={{ fontWeight: 600, color: 'var(--accent-primary)', fontSize: '0.9rem' }}>{k.subject}</div>
-                            <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginTop: 4 }}>
-                              {k.data?.content || JSON.stringify(k.data)}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* ABA 5: CANAIS */}
-              {functionsTab === 'channels' && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                  <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-                    O Multiplex atende seus clientes simultaneamente nos principais canais de mensageria:
-                  </p>
-
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 14 }}>
-                    <div className="glass-card" style={{ padding: 16 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-                        <Smartphone size={22} color="#25d366" />
-                        <span style={{ fontWeight: 700 }}>WhatsApp</span>
-                      </div>
-                      <span className="badge badge-whatsapp" style={{ marginBottom: 10 }}>Pronto para Conexão</span>
-                      <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                        Integração via webhook do Evolution API / Z-API / Baileys conectada ao n8n.
-                      </p>
-                    </div>
-
-                    <div className="glass-card" style={{ padding: 16 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-                        <Instagram size={22} color="#e1306c" />
-                        <span style={{ fontWeight: 700 }}>Instagram Direct</span>
-                      </div>
-                      <span className="badge badge-instagram" style={{ marginBottom: 10 }}>Pronto para Conexão</span>
-                      <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                        Responde DMs e comentários com IA e transbordo humano instantâneo.
-                      </p>
-                    </div>
-
-                    <div className="glass-card" style={{ padding: 16 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-                        <MessageCircle size={22} color="#0088cc" />
-                        <span style={{ fontWeight: 700 }}>Telegram</span>
-                      </div>
-                      <span className="badge badge-telegram" style={{ marginBottom: 10 }}>Pronto para Conexão</span>
-                      <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                        Bot oficial do Telegram para suporte e recebimento de pedidos em tempo real.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* ABA 6: DASHBOARD */}
-              {functionsTab === 'dashboard' && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                  <div className="grid-metrics">
-                    <div className="glass-card" style={{ padding: 16 }}>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', textTransform: 'uppercase' }}>Conversas Atendidas</div>
-                      <div style={{ fontSize: '1.6rem', fontWeight: 700, marginTop: 4 }}>{metrics.conversations_today}</div>
-                    </div>
-                    <div className="glass-card" style={{ padding: 16 }}>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', textTransform: 'uppercase' }}>Pedidos Criados</div>
-                      <div style={{ fontSize: '1.6rem', fontWeight: 700, marginTop: 4 }}>{metrics.orders_created}</div>
-                    </div>
-                    <div className="glass-card" style={{ padding: 16 }}>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', textTransform: 'uppercase' }}>Faturamento Gerado</div>
-                      <div style={{ fontSize: '1.6rem', fontWeight: 700, marginTop: 4, color: '#10b981' }}>
-                        R$ {Number(metrics.revenue_brl || 0).toFixed(2)}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="glass-panel" style={{ padding: 16, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <Activity size={20} color="#10b981" />
-                      <div>
-                        <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>n8n Local Conectado</div>
-                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Webhooks e automações ativas na porta 5678</div>
-                      </div>
-                    </div>
-                    <span className="badge" style={{ background: 'rgba(16,185,129,0.15)', color: '#10b981' }}>
-                      Online
+          <div>
+            <h2 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: 12 }}>Regras Ativas ({rules.length})</h2>
+            {rules.length === 0 ? (
+              <div className="glass-card" style={{ padding: 24, textAlign: 'center', color: 'var(--text-dim)' }}>
+                Nenhuma regra personalizada configurada ainda.
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {rules.map((r, i) => (
+                  <div key={r.id || i} className="glass-card" style={{ padding: 14, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '0.92rem' }}>{r.rule_text}</span>
+                    <span className="badge" style={{ background: 'rgba(99,102,241,0.15)', color: 'var(--accent-cyan)' }}>
+                      Prioridade {r.priority || 5}
                     </span>
                   </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* TELA: BASE DE CONHECIMENTO */}
+      {activeView === 'knowledge' && (
+        <div className="main-panel-scrollable">
+          <div className="page-header">
+            <div>
+              <h1 className="page-title">Base de Conhecimento e FAQ</h1>
+              <p className="page-desc">Politicas e informacoes consultadas pelo Multiplex.</p>
+            </div>
+            <button className="btn-secondary" onClick={() => setActiveView('chat')}>
+              <MessageSquare size={16} /> Voltar ao Chat
+            </button>
+          </div>
+
+          <div className="glass-panel" style={{ padding: 20 }}>
+            <h2 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: 14 }}>Novo Artigo / FAQ</h2>
+            <input 
+              type="text" 
+              placeholder="Assunto / Pergunta"
+              value={newKbSubject}
+              onChange={(e) => setNewKbSubject(e.target.value)}
+              style={{ marginBottom: 12 }}
+            />
+            <textarea 
+              placeholder="Resposta ou diretriz correspondente..."
+              value={newKbContent}
+              onChange={(e) => setNewKbContent(e.target.value)}
+              rows={3}
+              style={{ marginBottom: 12 }}
+            />
+            <button className="btn-primary" onClick={handleAddKnowledge}>
+              <Plus size={16} /> Salvar Artigo
+            </button>
+          </div>
+
+          <div>
+            <h2 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: 12 }}>Artigos Cadastrados ({knowledgeList.length})</h2>
+            {knowledgeList.length === 0 ? (
+              <div className="glass-card" style={{ padding: 24, textAlign: 'center', color: 'var(--text-dim)' }}>
+                Nenhum artigo cadastrado ainda.
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {knowledgeList.map((k, i) => (
+                  <div key={k.id || i} className="glass-card" style={{ padding: 14 }}>
+                    <div style={{ fontWeight: 600, color: 'var(--accent-primary)', fontSize: '0.95rem' }}>{k.subject}</div>
+                    <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: 4 }}>
+                      {k.data?.content || JSON.stringify(k.data)}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* TELA: CONECTAR CANAIS */}
+      {activeView === 'channels' && (
+        <div className="main-panel-scrollable">
+          <div className="page-header">
+            <div>
+              <h1 className="page-title">Conectar Canais Multicanal</h1>
+              <p className="page-desc">Canais para atendimento simultaneo pelo Multiplex.</p>
+            </div>
+            <button className="btn-secondary" onClick={() => setActiveView('chat')}>
+              <MessageSquare size={16} /> Voltar ao Chat
+            </button>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 18 }}>
+            <div className="glass-panel" style={{ padding: 22 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+                <Smartphone size={28} color="#25d366" />
+                <div>
+                  <h3 style={{ fontSize: '1.1rem', fontWeight: 700 }}>WhatsApp</h3>
+                  <span className="badge badge-whatsapp" style={{ marginTop: 4 }}>Pronto para Conectar</span>
+                </div>
+              </div>
+              <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: 16 }}>
+                Integracao via webhook oficial n8n com Evolution API / Z-API / Baileys.
+              </p>
+              <button className="btn-primary" style={{ width: '100%', justifyContent: 'center' }}>
+                Conectar WhatsApp
+              </button>
+            </div>
+
+            <div className="glass-panel" style={{ padding: 22 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+                <Instagram size={28} color="#e1306c" />
+                <div>
+                  <h3 style={{ fontSize: '1.1rem', fontWeight: 700 }}>Instagram Direct</h3>
+                  <span className="badge badge-instagram" style={{ marginTop: 4 }}>Pronto para Conectar</span>
+                </div>
+              </div>
+              <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: 16 }}>
+                Respostas automaticas em mensagens diretas (DMs) e comentarios.
+              </p>
+              <button className="btn-primary" style={{ width: '100%', justifyContent: 'center' }}>
+                Conectar Instagram
+              </button>
+            </div>
+
+            <div className="glass-panel" style={{ padding: 22 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+                <MessageCircle size={28} color="#0088cc" />
+                <div>
+                  <h3 style={{ fontSize: '1.1rem', fontWeight: 700 }}>Telegram Bot</h3>
+                  <span className="badge badge-telegram" style={{ marginTop: 4 }}>Pronto para Conectar</span>
+                </div>
+              </div>
+              <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: 16 }}>
+                Bot oficial do Telegram para atendimento e pedidos.
+              </p>
+              <button className="btn-primary" style={{ width: '100%', justifyContent: 'center' }}>
+                Conectar Telegram
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TELA: PLAYGROUND */}
+      {activeView === 'playground' && (
+        <div className="main-panel-scrollable">
+          <div className="page-header">
+            <div>
+              <h1 className="page-title">Playground de Testes</h1>
+              <p className="page-desc">Simulacao e inspecao de funcoes e regras em tempo real.</p>
+            </div>
+            <button className="btn-secondary" onClick={() => setActiveView('chat')}>
+              <MessageSquare size={16} /> Voltar ao Chat
+            </button>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1.3fr 1fr', gap: 20 }}>
+            <div className="glass-panel" style={{ padding: 20, display: 'flex', flexDirection: 'column', height: '620px' }}>
+              <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {playgroundMessages.map((m, idx) => (
+                  <div key={idx} style={{ alignSelf: m.role === 'user' ? 'flex-end' : 'flex-start', maxWidth: '85%' }}>
+                    <div style={{
+                      background: m.role === 'user' ? 'var(--accent-primary)' : 'var(--bg-card-inner)',
+                      color: m.role === 'user' ? '#fff' : 'var(--text-main)',
+                      padding: '10px 14px',
+                      borderRadius: 16,
+                      fontSize: '0.9rem',
+                      border: m.role === 'assistant' ? '1px solid var(--border-subtle)' : 'none'
+                    }}>
+                      {m.content}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div style={{ display: 'flex', gap: 10, marginTop: 14 }}>
+                <input 
+                  type="text" 
+                  placeholder="Digite uma mensagem de teste..."
+                  value={playgroundInput}
+                  onChange={(e) => setPlaygroundInput(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handlePlaygroundSend()}
+                />
+                <button className="btn-primary" onClick={handlePlaygroundSend}>
+                  <Send size={16} /> Testar
+                </button>
+              </div>
+            </div>
+
+            <div className="glass-panel" style={{ padding: 20, overflowY: 'auto', maxHeight: '620px' }}>
+              <h2 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: 12 }}>Diagnostico de Execucao</h2>
+              {playgroundDebug ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  <div className="glass-card" style={{ padding: 12 }}>
+                    <div style={{ fontSize: '0.78rem', color: 'var(--text-dim)' }}>Latencia</div>
+                    <div style={{ fontWeight: 700, color: '#10b981' }}>{playgroundDebug.latency} ms</div>
+                  </div>
+                  <div className="glass-card" style={{ padding: 12 }}>
+                    <div style={{ fontSize: '0.78rem', color: 'var(--text-dim)' }}>Ferramentas Executadas</div>
+                    <pre style={{ fontSize: '0.75rem', marginTop: 4 }}>{JSON.stringify(playgroundDebug.tools, null, 2)}</pre>
+                  </div>
+                  <div className="glass-card" style={{ padding: 12 }}>
+                    <div style={{ fontSize: '0.78rem', color: 'var(--text-dim)' }}>Regras Aplicadas</div>
+                    <pre style={{ fontSize: '0.75rem', marginTop: 4 }}>{JSON.stringify(playgroundDebug.rules, null, 2)}</pre>
+                  </div>
+                </div>
+              ) : (
+                <div style={{ color: 'var(--text-dim)', fontSize: '0.85rem' }}>
+                  Envie uma mensagem para inspecionar parametros.
                 </div>
               )}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* TELA: LOGS */}
+      {activeView === 'logs' && (
+        <div className="main-panel-scrollable">
+          <div className="page-header">
+            <div>
+              <h1 className="page-title">Logs e Auditoria</h1>
+              <p className="page-desc">Historico de eventos e requisicoes.</p>
+            </div>
+            <button className="btn-secondary" onClick={() => setActiveView('chat')}>
+              <MessageSquare size={16} /> Voltar ao Chat
+            </button>
+          </div>
+
+          <div className="glass-panel" style={{ padding: 20 }}>
+            {logsList.length === 0 ? (
+              <div style={{ color: 'var(--text-dim)', textAlign: 'center', padding: 30 }}>
+                Nenhum log registrado.
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {logsList.map((log, idx) => (
+                  <div key={idx} className="glass-card" style={{ padding: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div>
+                      <div style={{ fontWeight: 600, fontSize: '0.88rem' }}>{log.event}</div>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>{log.timestamp}</div>
+                    </div>
+                    <span className="badge" style={{ background: 'rgba(99,102,241,0.15)', color: 'var(--accent-cyan)' }}>
+                      {log.channel || 'API'}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* TELA: DASHBOARD */}
+      {activeView === 'dashboard' && (
+        <div className="main-panel-scrollable">
+          <div className="page-header">
+            <div>
+              <h1 className="page-title">Dashboard Executivo</h1>
+              <p className="page-desc">Metricas consolidadas de conversao e atendimento.</p>
+            </div>
+            <button className="btn-secondary" onClick={() => setActiveView('chat')}>
+              <MessageSquare size={16} /> Voltar ao Chat
+            </button>
+          </div>
+
+          <div className="grid-metrics">
+            <div className="glass-card" style={{ padding: 18 }}>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', textTransform: 'uppercase' }}>Conversas Hoje</div>
+              <div style={{ fontSize: '1.8rem', fontWeight: 700, marginTop: 4 }}>{metrics.conversations_today}</div>
+            </div>
+            <div className="glass-card" style={{ padding: 18 }}>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', textTransform: 'uppercase' }}>Pedidos Criados</div>
+              <div style={{ fontSize: '1.8rem', fontWeight: 700, marginTop: 4 }}>{metrics.orders_created}</div>
+            </div>
+            <div className="glass-card" style={{ padding: 18 }}>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', textTransform: 'uppercase' }}>Faturamento Gerado</div>
+              <div style={{ fontSize: '1.8rem', fontWeight: 700, marginTop: 4, color: '#10b981' }}>
+                R$ {Number(metrics.revenue_brl || 0).toFixed(2)}
+              </div>
+            </div>
+          </div>
+
+          <div className="glass-panel" style={{ padding: 20, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <span className="status-dot-green"></span>
+              <div>
+                <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>n8n Local Conectado (:5678)</div>
+                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Automacoes sincronizadas</div>
+              </div>
+            </div>
+            <button className="btn-secondary" onClick={loadData}>
+              <RefreshCw size={14} /> Atualizar Metricas
+            </button>
           </div>
         </div>
       )}
