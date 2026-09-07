@@ -3023,22 +3023,12 @@ export default function App() {
             <div className="chat-thread-inner">
               {currentChat && currentChat.messages.length === 0 ? (
                 <div className="chat-welcome-container" style={{ textAlign: 'center', maxWidth: 860, margin: '0 auto', width: '100%' }}>
-                  <div className="chat-welcome-icon" style={{ padding: 0, overflow: 'hidden', background: 'transparent', border: '2px solid rgba(0, 210, 255, 0.5)', boxShadow: '0 0 32px rgba(0, 210, 255, 0.35)', width: 62, height: 62, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px auto' }}>
+                  <div className="chat-welcome-icon" style={{ padding: 0, overflow: 'hidden', background: 'transparent', border: '2px solid rgba(0, 210, 255, 0.5)', boxShadow: '0 0 32px rgba(0, 210, 255, 0.35)', width: 62, height: 62, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px auto' }}>
                     <img src={atomLogo} alt="Multiplex IA" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
                   </div>
-                  <h1 className="chat-welcome-title" style={{ fontSize: '1.75rem', fontWeight: 800, letterSpacing: '-0.5px' }}>
+                  <h1 className="chat-welcome-title" style={{ fontSize: '1.85rem', fontWeight: 800, letterSpacing: '-0.5px', marginBottom: 24 }}>
                     Como posso ajudar você hoje?
                   </h1>
-                  <p style={{ color: 'var(--text-dim)', fontSize: '0.92rem', maxWidth: 620, margin: '0 auto 12px auto', lineHeight: 1.5 }}>
-                    Multiplex IA integrado com cardápio ({products.length} itens), frete por raio, agendamentos automáticos e regras de atendimento.
-                  </p>
-
-                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, margin: '0 auto 18px auto' }}>
-                    <span className="bonasoft-badge-tag">Tecnologia BONASOFT</span>
-                    <span className="badge" style={{ background: 'rgba(16,185,129,0.12)', color: '#10b981', fontSize: '0.72rem' }}>
-                      ● Online & Sincronizado
-                    </span>
-                  </div>
 
                   {/* Abas de Categorias de Sugestões Rápidas */}
                   <div className="suggestion-category-bar">
@@ -3544,15 +3534,6 @@ export default function App() {
               >
                 <ArrowUp size={18} />
               </button>
-            </div>
-
-            <div className="chatgpt-disclaimer" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, flexWrap: 'wrap' }}>
-              <span>Multiplex IA • Tecnologia BONASOFT — Respostas geradas com regras de negócio e catálogo integrado.</span>
-            </div>
-
-            {/* ── BONASOFT Watermark ── */}
-            <div className="bonasoft-watermark-container">
-              <p className="bonasoft-watermark">BONASOFT</p>
             </div>
           </div>
         </main>
