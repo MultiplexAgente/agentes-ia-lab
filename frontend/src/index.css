@@ -1391,33 +1391,32 @@ body.light .n8n-badge {
 .ai-modes-container {
   display: flex;
   align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
   gap: 8px;
-  overflow-x: auto;
   padding: 8px 16px;
-  max-width: 920px;
+  max-width: 1040px;
   width: 100%;
   margin: 0 auto;
-  scrollbar-width: none;
-}
-.ai-modes-container::-webkit-scrollbar {
-  display: none;
 }
 
 .ai-mode-pill {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 14px;
+  padding: 6px 13px;
   border-radius: 20px;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid var(--border-subtle);
   color: var(--text-muted);
-  font-size: 0.78rem;
+  font-size: 0.77rem;
   font-weight: 600;
   white-space: nowrap;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  flex-shrink: 0;
 }
+
 
 .ai-mode-pill:hover {
   color: var(--text-main);

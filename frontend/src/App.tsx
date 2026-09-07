@@ -131,13 +131,14 @@ const DEFAULT_PLANS = [
 ];
 
 const SLASH_COMMANDS = [
-  { cmd: '/cardapio', desc: 'Consultar todos os produtos e precos', prompt: 'Quais sao todos os produtos cadastrados no cardapio e os seus precos?' },
-  { cmd: '/frete', desc: 'Calcular taxa de entrega e raio', prompt: 'Qual e a taxa de entrega, raio de atendimento e tempo estimado de entrega?' },
-  { cmd: '/horarios', desc: 'Verificar horario de funcionamento', prompt: 'Qual o horario de funcionamento e atendimento da loja hoje?' },
-  { cmd: '/agendar', desc: 'Simular agendamento de cliente', prompt: 'Gostaria de agendar um atendimento para amanha a tarde.' },
-  { cmd: '/promocao', desc: 'Criar promocao ou combo especial', prompt: 'Sugira um combo promocional com desconto e sobremesa para hoje.' },
-  { cmd: '/regras', desc: 'Listar regras de negocio ativas', prompt: 'Quais regras de negocio e diretrizes de atendimento voce segue obrigatoriamente?' }
+  { cmd: '/cardapio', desc: 'Consultar todos os produtos e preços', prompt: 'Quais são todos os produtos cadastrados no cardápio e os seus preços?' },
+  { cmd: '/frete', desc: 'Calcular taxa de entrega e raio', prompt: 'Qual é a taxa de entrega, raio de atendimento e tempo estimado de entrega?' },
+  { cmd: '/horarios', desc: 'Verificar horário de funcionamento', prompt: 'Qual é o horário de funcionamento e atendimento da loja hoje?' },
+  { cmd: '/agendar', desc: 'Simular agendamento de cliente', prompt: 'Gostaria de agendar um atendimento para amanhã à tarde.' },
+  { cmd: '/promocao', desc: 'Criar promoção ou combo especial', prompt: 'Sugira um combo promocional com desconto e sobremesa para hoje.' },
+  { cmd: '/regras', desc: 'Listar regras de negócio ativas', prompt: 'Quais regras de negócio e diretrizes de atendimento você segue obrigatoriamente?' }
 ];
+
 
 export default function App() {
   // Limpeza de residuos mockados anteriores
@@ -368,7 +369,7 @@ export default function App() {
   const [teachChat, setTeachChat] = useState<Array<{ sender: 'user' | 'agent'; text: string; structured?: any }>>([
     { 
       sender: 'agent', 
-      text: 'Ola, sou o Multiplex IA. Insira informacoes sobre produtos, precos, regras ou horarios para eu aprender.' 
+      text: 'Olá, sou o Multiplex IA. Insira informações sobre produtos, preços, regras ou horários para eu aprender.' 
     }
   ]);
   const [teachInput, setTeachInput] = useState('');
@@ -376,7 +377,7 @@ export default function App() {
 
   // Playground
   const [playgroundMessages, setPlaygroundMessages] = useState<Array<{ role: 'user' | 'assistant'; content: string }>>([
-    { role: 'assistant', content: 'Ambiente de testes do Multiplex IA. Digite para testar a execucao de funcoes e regras.' }
+    { role: 'assistant', content: 'Ambiente de testes do Multiplex IA. Digite para testar a execução de funções e regras.' }
   ]);
   const [playgroundInput, setPlaygroundInput] = useState('');
   const [playgroundDebug, setPlaygroundDebug] = useState<any>(null);
@@ -827,7 +828,7 @@ export default function App() {
       if (!isRecordingVoice) {
         setIsRecordingVoice(true);
         setTimeout(() => {
-          setChatInput('Quais sao as opcoes de cardapio e a taxa de entrega para o Centro?');
+          setChatInput('Quais são as opções de cardápio e a taxa de entrega para o Centro?');
           setIsRecordingVoice(false);
         }, 1600);
       } else {
@@ -843,11 +844,11 @@ export default function App() {
 
   const handleExportConversation = () => {
     if (!currentChat || currentChat.messages.length === 0) {
-      alert('Esta conversa ainda nao possui mensagens para exportar.');
+      alert('Esta conversa ainda não possui mensagens para exportar.');
       return;
     }
     const transcript = currentChat.messages.map(m => {
-      const author = m.role === 'user' ? 'USUARIO' : 'MULTIPLEX IA (BONASOFT)';
+      const author = m.role === 'user' ? 'USUÁRIO' : 'MULTIPLEX IA (BONASOFT)';
       return `[${new Date(m.timestamp).toLocaleTimeString('pt-BR')}] ${author}:\n${m.content}\n`;
     }).join('\n----------------------------------------\n\n');
 
@@ -960,11 +961,11 @@ export default function App() {
       if (res.ok && Array.isArray(data.products) && data.products.length > 0) {
         setParsedProducts(data.products);
       } else {
-        alert(data.error || 'Nenhum produto identificado. Certifique-se de incluir nomes e precos no texto.');
+        alert(data.error || 'Nenhum produto identificado. Certifique-se de incluir nomes e preços no texto.');
       }
     } catch (e) {
       console.error(e);
-      alert('Erro de comunicacao com a API da Multiplex IA.');
+      alert('Erro de comunicação com a API da Multiplex IA.');
     } finally {
       setIsParsingMenu(false);
     }
@@ -983,15 +984,15 @@ export default function App() {
       const data = await res.json();
       if (res.ok && data.products) {
         setProducts([...products, ...data.products]);
-        setBatchSuccessMsg(`${data.count} produtos cadastrados com sucesso no cardapio.`);
+        setBatchSuccessMsg(`${data.count} produtos cadastrados com sucesso no cardápio.`);
         setParsedProducts([]);
         setRawMenuText('');
       } else {
-        alert(data.error || 'Falha ao salvar produtos no catalogo.');
+        alert(data.error || 'Falha ao salvar produtos no catálogo.');
       }
     } catch (e) {
       console.error(e);
-      alert('Erro ao salvar produtos no catalogo.');
+      alert('Erro ao salvar produtos no catálogo.');
     } finally {
       setIsSavingBatch(false);
     }
@@ -1564,7 +1565,7 @@ export default function App() {
             <div className="auth-hero-showcase">
               <div className="auth-hero-pill">
                 <Sparkles size={13} />
-                <span>Atendimento Automatizado de Alta Conversao</span>
+                <span>Atendimento Automatizado de Alta Conversão</span>
               </div>
 
               <h1 className="auth-hero-title">
@@ -1654,7 +1655,7 @@ export default function App() {
                     <label style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-main)' }}>
                       Senha de Acesso
                     </label>
-                    <a href="#recuperar" onClick={(e) => { e.preventDefault(); alert('Instrucoes enviadas para o email cadastrado.'); }} style={{ fontSize: '0.78rem', color: 'var(--accent-primary)', textDecoration: 'none' }}>
+                    <a href="#recuperar" onClick={(e) => { e.preventDefault(); alert('Instruções enviadas para o e-mail cadastrado.'); }} style={{ fontSize: '0.78rem', color: 'var(--accent-primary)', textDecoration: 'none' }}>
                       Esqueceu a senha?
                     </a>
                   </div>
@@ -1699,7 +1700,7 @@ export default function App() {
 
               <div style={{ margin: '20px 0', display: 'flex', alignItems: 'center', gap: 12 }}>
                 <div style={{ flex: 1, height: 1, background: 'var(--border-subtle)' }} />
-                <span style={{ fontSize: '0.72rem', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: 0.5 }}>Acesso Rapido de Testes</span>
+                <span style={{ fontSize: '0.72rem', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: 0.5 }}>Acesso Rápido de Testes</span>
                 <div style={{ flex: 1, height: 1, background: 'var(--border-subtle)' }} />
               </div>
 
@@ -2283,7 +2284,7 @@ export default function App() {
               >
                 <div className="item-main">
                   <UtensilsCrossed size={17} color="var(--accent-amber)" />
-                  <span>Cardapio e Produtos</span>
+                  <span>Cardápio e Produtos</span>
                 </div>
                 {products.length > 0 && (
                   <span style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>{products.length}</span>
@@ -2309,7 +2310,7 @@ export default function App() {
               >
                 <div className="item-main">
                   <BookOpen size={17} color="var(--accent-purple)" />
-                  <span>Base Conhecimento</span>
+                  <span>Base de Conhecimento</span>
                 </div>
               </div>
 
@@ -2329,9 +2330,10 @@ export default function App() {
               >
                 <div className="item-main">
                   <PlayCircle size={17} color="var(--accent-rose)" />
-                  <span>Playground Testes</span>
+                  <span>Playground de Testes</span>
                 </div>
               </div>
+
 
               <div 
                 className={`sidebar-item ${activeView === 'logs' ? 'active' : ''}`}
@@ -2868,10 +2870,10 @@ export default function App() {
                 </span>
                 <ChevronDown size={14} style={{ transform: showModelDropdown ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
                 <span className="badge" style={{ fontSize: '0.68rem', padding: '2px 6px', background: 'rgba(16,185,129,0.15)', color: '#10b981' }}>
-                  Funcoes Ativas
+                  Funções Ativas
                 </span>
                 <span className="badge" style={{ fontSize: '0.68rem', padding: '2px 6px', background: 'rgba(99,102,241,0.15)', color: '#818cf8' }}>
-                  RAG & Memoria
+                  RAG & Memória
                 </span>
               </div>
 
@@ -2888,7 +2890,7 @@ export default function App() {
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <span style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--text-main)' }}>OpenAI GPT-4o</span>
-                      <span className="badge" style={{ background: 'rgba(16,185,129,0.2)', color: '#10b981', fontSize: '0.65rem' }}>Padrao Oficial</span>
+                      <span className="badge" style={{ background: 'rgba(16,185,129,0.2)', color: '#10b981', fontSize: '0.65rem' }}>Padrão Oficial</span>
                     </div>
                     <span style={{ fontSize: '0.76rem', color: 'var(--text-muted)' }}>Multimodal rápido com Function Calling nativo e raciocínio de alta precisão.</span>
                   </div>
@@ -2899,7 +2901,7 @@ export default function App() {
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <span style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--text-main)' }}>Claude 3.5 Sonnet</span>
-                      <span className="badge" style={{ background: 'rgba(245,158,11,0.2)', color: '#f59e0b', fontSize: '0.65rem' }}>Alta Redacao</span>
+                      <span className="badge" style={{ background: 'rgba(245,158,11,0.2)', color: '#f59e0b', fontSize: '0.65rem' }}>Alta Redação</span>
                     </div>
                     <span style={{ fontSize: '0.76rem', color: 'var(--text-muted)' }}>Excelente para diálogos consultivos, fechamento de vendas e redação humanizada.</span>
                   </div>
@@ -2910,7 +2912,7 @@ export default function App() {
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <span style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--text-main)' }}>DeepSeek V3 / R1</span>
-                      <span className="badge" style={{ background: 'rgba(6,182,212,0.2)', color: '#06b6d4', fontSize: '0.65rem' }}>Logica & Precos</span>
+                      <span className="badge" style={{ background: 'rgba(6,182,212,0.2)', color: '#06b6d4', fontSize: '0.65rem' }}>Lógica & Preços</span>
                     </div>
                     <span style={{ fontSize: '0.76rem', color: 'var(--text-muted)' }}>Cálculos de frete complexos, regras condicionais e velocidade ultra-rápida.</span>
                   </div>
@@ -2954,15 +2956,6 @@ export default function App() {
                 <Trash2 size={17} />
               </button>
 
-              {/* Bolinha minimalista de tema */}
-              <button 
-                className="theme-circle-btn"
-                onClick={toggleTheme}
-                title={theme === 'dark' ? "Modo Claro" : "Modo Escuro"}
-              >
-                {theme === 'dark' ? <Sun size={17} color="#f59e0b" /> : <Moon size={17} color="#6366f1" />}
-              </button>
-
               <button 
                 className="icon-btn" 
                 title="Novo Chat"
@@ -2972,6 +2965,7 @@ export default function App() {
               </button>
             </div>
           </div>
+
 
           {/* Barra de Modos de Operação do Agente de IA */}
           <div className="ai-modes-container">
@@ -3090,47 +3084,47 @@ export default function App() {
                   <div className="rich-suggestions-grid" style={{ margin: '0 auto' }}>
                     {promptCategory === 'destaques' && (
                       <>
-                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Quais sao todos os produtos do cardapio e os precos?')}>
+                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Quais são todos os produtos do cardápio e os preços?')}>
                           <div className="rich-suggestion-header">
-                            <span className="rich-suggestion-badge">Cardapio</span>
+                            <span className="rich-suggestion-badge">Cardápio</span>
                             <ShoppingBag size={14} color="var(--accent-cyan)" />
                           </div>
-                          <div className="rich-suggestion-title">Consultar Cardapio Completo</div>
-                          <div className="rich-suggestion-desc">Mostre todos os produtos, precos e itens ativos cadastrados.</div>
+                          <div className="rich-suggestion-title">Consultar Cardápio Completo</div>
+                          <div className="rich-suggestion-desc">Mostre todos os produtos, preços e itens ativos cadastrados.</div>
                         </div>
 
-                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Qual e a taxa de entrega e as regras de frete da loja?')}>
+                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Qual é a taxa de entrega e as regras de frete da loja?')}>
                           <div className="rich-suggestion-header">
-                            <span className="rich-suggestion-badge">Logistica</span>
+                            <span className="rich-suggestion-badge">Logística</span>
                             <Truck size={14} color="var(--accent-cyan)" />
                           </div>
                           <div className="rich-suggestion-title">Calcular Frete & Raio</div>
                           <div className="rich-suggestion-desc">Consulte as regras de entrega, raio de atendimento e taxa estimada.</div>
                         </div>
 
-                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Qual o horario de funcionamento de voces hoje?')}>
+                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Qual é o horário de funcionamento de vocês hoje?')}>
                           <div className="rich-suggestion-header">
-                            <span className="rich-suggestion-badge">Horarios</span>
+                            <span className="rich-suggestion-badge">Horários</span>
                             <Clock size={14} color="var(--accent-cyan)" />
                           </div>
-                          <div className="rich-suggestion-title">Horario de Atendimento</div>
-                          <div className="rich-suggestion-desc">Verifique horarios de funcionamento, abertura e dias de atendimento.</div>
+                          <div className="rich-suggestion-title">Horário de Atendimento</div>
+                          <div className="rich-suggestion-desc">Verifique horários de funcionamento, abertura e dias de atendimento.</div>
                         </div>
 
-                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Quero agendar um atendimento para amanha a tarde')}>
+                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Quero agendar um atendimento para amanhã à tarde.')}>
                           <div className="rich-suggestion-header">
                             <span className="rich-suggestion-badge">Agendamento</span>
                             <Calendar size={14} color="var(--accent-cyan)" />
                           </div>
                           <div className="rich-suggestion-title">Agendar Atendimento VIP</div>
-                          <div className="rich-suggestion-desc">Teste a funcao de agendamento de servico ou reserva de mesa.</div>
+                          <div className="rich-suggestion-desc">Teste a função de agendamento de serviço ou reserva de mesa.</div>
                         </div>
                       </>
                     )}
 
                     {promptCategory === 'cardapio' && (
                       <>
-                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Quais sao os pratos e produtos mais vendidos da casa?')}>
+                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Quais são os pratos e produtos mais vendidos da casa?')}>
                           <div className="rich-suggestion-header">
                             <span className="rich-suggestion-badge">Mais Pedidos</span>
                             <Star size={14} color="var(--accent-cyan)" />
@@ -3139,7 +3133,7 @@ export default function App() {
                           <div className="rich-suggestion-desc">Descubra os produtos recomendados pela IA para clientes.</div>
                         </div>
 
-                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Sugira um combo promocional com prato principal e bebida')}>
+                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Sugira um combo promocional com prato principal e bebida.')}>
                           <div className="rich-suggestion-header">
                             <span className="rich-suggestion-badge">Combos</span>
                             <Zap size={14} color="var(--accent-cyan)" />
@@ -3148,7 +3142,7 @@ export default function App() {
                           <div className="rich-suggestion-desc">Monte uma sugestão atrativa de lanche/refeição completa.</div>
                         </div>
 
-                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Quais sobremesas e adicionais voces tem disponiveis?')}>
+                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Quais sobremesas e adicionais vocês têm disponíveis?')}>
                           <div className="rich-suggestion-header">
                             <span className="rich-suggestion-badge">Sobremesas</span>
                             <ShoppingBag size={14} color="var(--accent-cyan)" />
@@ -3157,12 +3151,12 @@ export default function App() {
                           <div className="rich-suggestion-desc">Veja os doces, batatas, molhos e adicionais do catálogo.</div>
                         </div>
 
-                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Voces tem opcoes vegetarianas ou sem lactose?')}>
+                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Vocês têm opções vegetarianas ou sem lactose?')}>
                           <div className="rich-suggestion-header">
                             <span className="rich-suggestion-badge">Especial</span>
                             <CheckCircle2 size={14} color="var(--accent-cyan)" />
                           </div>
-                          <div className="rich-suggestion-title">Restricoes & Vegetarianos</div>
+                          <div className="rich-suggestion-title">Restrições & Opções Vegetarianas</div>
                           <div className="rich-suggestion-desc">Consulte itens adequados a restrições alimentares.</div>
                         </div>
                       </>
@@ -3170,7 +3164,7 @@ export default function App() {
 
                     {promptCategory === 'frete' && (
                       <>
-                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Qual o raio maximo de atendimento e taxa para 5km?')}>
+                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Qual é o raio máximo de atendimento e a taxa para 5 km?')}>
                           <div className="rich-suggestion-header">
                             <span className="rich-suggestion-badge">Raio de Entrega</span>
                             <Truck size={14} color="var(--accent-cyan)" />
@@ -3188,7 +3182,7 @@ export default function App() {
                           <div className="rich-suggestion-desc">Consulte o tempo médio de preparo e rota do motoboy.</div>
                         </div>
 
-                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Existe valor minimo para entrega gratis?')}>
+                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Existe valor mínimo para entrega grátis?')}>
                           <div className="rich-suggestion-header">
                             <span className="rich-suggestion-badge">Gratuidade</span>
                             <DollarSign size={14} color="var(--accent-cyan)" />
@@ -3197,9 +3191,9 @@ export default function App() {
                           <div className="rich-suggestion-desc">Condições para isenção da taxa de entrega.</div>
                         </div>
 
-                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Posso retirar meu pedido diretamente no balcao?')}>
+                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Posso retirar meu pedido diretamente no balcão?')}>
                           <div className="rich-suggestion-header">
-                            <span className="rich-suggestion-badge">Balcao</span>
+                            <span className="rich-suggestion-badge">Balcão</span>
                             <Building2 size={14} color="var(--accent-cyan)" />
                           </div>
                           <div className="rich-suggestion-title">Retirada no Estabelecimento</div>
@@ -3210,7 +3204,7 @@ export default function App() {
 
                     {promptCategory === 'horarios' && (
                       <>
-                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Quais sao os dias e horarios de funcionamento da loja?')}>
+                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Quais são os dias e horários de funcionamento da loja?')}>
                           <div className="rich-suggestion-header">
                             <span className="rich-suggestion-badge">Agenda</span>
                             <Clock size={14} color="var(--accent-cyan)" />
@@ -3219,7 +3213,7 @@ export default function App() {
                           <div className="rich-suggestion-desc">Abertura e fechamento de segunda a domingo.</div>
                         </div>
 
-                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Voces atendem em feriados e fins de semana?')}>
+                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Vocês atendem em feriados e fins de semana?')}>
                           <div className="rich-suggestion-header">
                             <span className="rich-suggestion-badge">Feriados</span>
                             <Calendar size={14} color="var(--accent-cyan)" />
@@ -3228,16 +3222,16 @@ export default function App() {
                           <div className="rich-suggestion-desc">Plantão de atendimento em datas especiais.</div>
                         </div>
 
-                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Existe atendimento noturno ou plantao de delivery 24 horas?')}>
+                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Existe atendimento noturno ou plantão de delivery 24 horas?')}>
                           <div className="rich-suggestion-header">
-                            <span className="rich-suggestion-badge">Plantao</span>
+                            <span className="rich-suggestion-badge">Plantão</span>
                             <Moon size={14} color="var(--accent-cyan)" />
                           </div>
                           <div className="rich-suggestion-title">Plantão Noturno / MT 24 Horas</div>
                           <div className="rich-suggestion-desc">Verifique se o delivery opera durante a madrugada.</div>
                         </div>
 
-                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Quais sao as regras obrigatorias que voce segue no atendimento?')}>
+                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Quais são as regras obrigatórias que você segue no atendimento?')}>
                           <div className="rich-suggestion-header">
                             <span className="rich-suggestion-badge">Diretrizes</span>
                             <Sliders size={14} color="var(--accent-cyan)" />
@@ -3250,7 +3244,7 @@ export default function App() {
 
                     {promptCategory === 'agendamento' && (
                       <>
-                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Quero reservar uma mesa para 4 pessoas nesta sexta-feira')}>
+                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Quero reservar uma mesa para 4 pessoas nesta sexta-feira.')}>
                           <div className="rich-suggestion-header">
                             <span className="rich-suggestion-badge">Reserva</span>
                             <Calendar size={14} color="var(--accent-cyan)" />
@@ -3259,7 +3253,7 @@ export default function App() {
                           <div className="rich-suggestion-desc">Agende data, horário e número de pessoas com a IA.</div>
                         </div>
 
-                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Quais horarios estao disponiveis para agendamento esta semana?')}>
+                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Quais horários estão disponíveis para agendamento esta semana?')}>
                           <div className="rich-suggestion-header">
                             <span className="rich-suggestion-badge">Vagas</span>
                             <Clock size={14} color="var(--accent-cyan)" />
@@ -3268,16 +3262,16 @@ export default function App() {
                           <div className="rich-suggestion-desc">Verifique a agenda de atendimento sem conflitos.</div>
                         </div>
 
-                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Como faco para reagendar ou cancelar meu horario marcado?')}>
+                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Como faço para reagendar ou cancelar meu horário marcado?')}>
                           <div className="rich-suggestion-header">
-                            <span className="rich-suggestion-badge">Alteracao</span>
+                            <span className="rich-suggestion-badge">Alteração</span>
                             <AlertCircle size={14} color="var(--accent-cyan)" />
                           </div>
                           <div className="rich-suggestion-title">Reagendamento Fácil</div>
                           <div className="rich-suggestion-desc">Como o cliente altera a data diretamente pelo WhatsApp.</div>
                         </div>
 
-                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('A IA envia lembrete automatico de confirmacao antes do horario?')}>
+                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('A IA envia lembrete automático de confirmação antes do horário?')}>
                           <div className="rich-suggestion-header">
                             <span className="rich-suggestion-badge">Lembretes</span>
                             <Bell size={14} color="var(--accent-cyan)" />
@@ -3299,7 +3293,7 @@ export default function App() {
                           <div className="rich-suggestion-desc">Consulte se há código promocional para novos clientes.</div>
                         </div>
 
-                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Qual e a promocao especial ou oferta do dia de hoje?')}>
+                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Qual é a promoção especial ou oferta do dia de hoje?')}>
                           <div className="rich-suggestion-header">
                             <span className="rich-suggestion-badge">Oferta do Dia</span>
                             <DollarSign size={14} color="var(--accent-cyan)" />
@@ -3308,7 +3302,7 @@ export default function App() {
                           <div className="rich-suggestion-desc">Itens com preço promocional para hoje.</div>
                         </div>
 
-                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Crie uma mensagem persuasiva para divulgar nossa promocao de pizza no WhatsApp')}>
+                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Crie uma mensagem persuasiva para divulgar nossa promoção de pizza no WhatsApp.')}>
                           <div className="rich-suggestion-header">
                             <span className="rich-suggestion-badge">Copywriting</span>
                             <Share2 size={14} color="var(--accent-cyan)" />
@@ -3327,6 +3321,7 @@ export default function App() {
                         </div>
                       </>
                     )}
+
                   </div>
                 </div>
               ) : (
@@ -3344,7 +3339,7 @@ export default function App() {
                           {msg.toolsUsed.map((toolCall, idx) => (
                             <div key={idx} className="tool-badge-chip">
                               <Sliders size={12} />
-                              <span>Executou funcao: <strong>{toolCall.tool}</strong></span>
+                              <span>Executou função: <strong>{toolCall.tool}</strong></span>
                               <span style={{ opacity: 0.6, fontSize: '0.68rem' }}>● Concluído</span>
                             </div>
                           ))}
@@ -3477,7 +3472,7 @@ export default function App() {
               {/* Botão Anexar Cardápio ou Documento */}
               <button 
                 className="icon-btn" 
-                title="Anexar foto do cardapio ou documento"
+                title="Anexar foto do cardápio ou documento"
                 onClick={() => setShowAttachModal(true)}
               >
                 <Paperclip size={18} />
@@ -3486,7 +3481,7 @@ export default function App() {
               {/* Botão de Comandos Rápidos */}
               <button 
                 className={`icon-btn ${showSlashMenu ? 'active' : ''}`}
-                title="Comandos rapidos (/)"
+                title="Comandos rápidos (/)"
                 onClick={() => setShowSlashMenu(!showSlashMenu)}
                 style={{ fontSize: '0.9rem', fontWeight: 800, fontFamily: 'monospace' }}
               >
@@ -3498,11 +3493,11 @@ export default function App() {
                 className="capsule-input"
                 placeholder={
                   selectedAIMode === 'cardapio' 
-                    ? "Pergunte sobre pratos, ingredientes, precos e combos..." 
+                    ? "Pergunte sobre pratos, ingredientes, preços e combos..." 
                     : selectedAIMode === 'logistica' 
-                    ? "Calcule frete, consulte raio de entrega e tempo..." 
+                    ? "Calcule frete, consulte raio de entrega e tempo estimado..." 
                     : selectedAIMode === 'agendamento' 
-                    ? "Simule reservas de mesa e agendamento de servicos..." 
+                    ? "Simule reservas de mesa e agendamento de serviços..." 
                     : `Pergunte qualquer coisa ao Multiplex IA (${selectedModel.toUpperCase()})...`
                 }
                 value={chatInput}
@@ -3533,11 +3528,12 @@ export default function App() {
               {/* Botão de Regras */}
               <button 
                 className="icon-btn" 
-                title="Configurar regras de negocio e personalidade"
+                title="Configurar regras de negócio e personalidade"
                 onClick={() => setActiveView('personality')}
               >
                 <Sliders size={18} />
               </button>
+
 
               {/* Botão Enviar */}
               <button 
@@ -3592,7 +3588,7 @@ export default function App() {
                 }}
                 onClick={() => {
                   setAttachedFile({ name: 'cardapio_completo_atualizado.pdf', size: '1.4 MB' });
-                  setChatInput('Analise este cardapio anexo e me informe os itens de maior margem de lucro.');
+                  setChatInput('Analise este cardápio anexo e me informe os itens de maior margem de lucro.');
                   setShowAttachModal(false);
                 }}
               >
@@ -3607,7 +3603,7 @@ export default function App() {
                   className="btn-primary" 
                   onClick={() => {
                     setAttachedFile({ name: 'tabela_precos_2026.png', size: '820 KB' });
-                    setChatInput('Extraia os precos e produtos desta foto.');
+                    setChatInput('Extraia os preços e produtos desta foto.');
                     setShowAttachModal(false);
                   }}
                 >
@@ -3626,7 +3622,7 @@ export default function App() {
           <div className="page-header" style={{ marginBottom: 0 }}>
             <div>
               <h1 className="page-title" style={{ fontSize: '1.3rem' }}>Ensinar IA</h1>
-              <p className="page-desc" style={{ fontSize: '0.8rem' }}>Ensine novos produtos, regras, horarios ou precos em linguagem natural.</p>
+              <p className="page-desc" style={{ fontSize: '0.8rem' }}>Ensine novos produtos, regras, horários ou preços em linguagem natural.</p>
             </div>
             <button className="btn-secondary" style={{ padding: '6px 12px', fontSize: '0.8rem' }} onClick={() => setActiveView('chat')}>
               <MessageSquare size={14} /> Voltar ao Chat
@@ -3692,20 +3688,20 @@ export default function App() {
         </div>
       )}
 
-      {/* TELA: CARDAPIO E PRODUTOS */}
+      {/* TELA: CARDÁPIO E PRODUTOS */}
       {activeView === 'menu' && (
         <div className="main-panel-scrollable">
           <div className="page-header" style={{ marginBottom: 16 }}>
             <div>
-              <h1 className="page-title">Cardapio e Produtos</h1>
-              <p className="page-desc">Copie e cole listas de produtos do seu site ou cardapio. A Multiplex IA separa e organiza tudo automaticamente.</p>
+              <h1 className="page-title">Cardápio e Produtos</h1>
+              <p className="page-desc">Copie e cole listas de produtos do seu site ou cardápio. A Multiplex IA separa e organiza tudo automaticamente.</p>
             </div>
             <button className="btn-secondary" onClick={() => setActiveView('chat')}>
               <MessageSquare size={16} /> Voltar ao Chat
             </button>
           </div>
 
-          {/* PAINEL PRINCIPAL: IMPORTACAO INTELIGENTE COM MULTIPLEX IA */}
+          {/* PAINEL PRINCIPAL: IMPORTAÇÃO INTELIGENTE COM MULTIPLEX IA */}
           <div className="glass-panel" style={{ padding: 22, marginBottom: 20, border: '1px solid rgba(0, 210, 255, 0.3)', background: 'linear-gradient(180deg, rgba(15, 23, 42, 0.75), rgba(10, 15, 30, 0.85))' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -3713,8 +3709,8 @@ export default function App() {
                   <img src={atomLogo} alt="Multiplex IA" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 </div>
                 <div>
-                  <h2 style={{ fontSize: '1.15rem', fontWeight: 700, margin: 0 }}>Importar Cardapio em Massa com Multiplex IA</h2>
-                  <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>Cole texto corrido, lista de precos, descricoes do site ou cardapio em texto</span>
+                  <h2 style={{ fontSize: '1.15rem', fontWeight: 700, margin: 0 }}>Importar Cardápio em Massa com Multiplex IA</h2>
+                  <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>Cole texto corrido, lista de preços, descrições do site ou cardápio em texto</span>
                 </div>
               </div>
 
@@ -3724,7 +3720,7 @@ export default function App() {
             </div>
 
             <textarea 
-              placeholder="Cole aqui os produtos copiados do seu site, cardapio ou mensagem...&#10;&#10;Exemplo:&#10;Pizza Calabresa Especial - R$ 48,00 - Molho caseiro, mussarela, calabresa e cebola&#10;Pizza Quatro Queijos - R$ 56,90 - Mussarela, provolone, gorgonzola e catupiry&#10;Coca-Cola 2L - R$ 14,00&#10;Cerveja Long Neck - R$ 11,50"
+              placeholder="Cole aqui os produtos copiados do seu site, cardápio ou mensagem...&#10;&#10;Exemplo:&#10;Pizza Calabresa Especial - R$ 48,00 - Molho caseiro, mussarela, calabresa e cebola&#10;Pizza Quatro Queijos - R$ 56,90 - Mussarela, provolone, gorgonzola e catupiry&#10;Coca-Cola 2L - R$ 14,00&#10;Cerveja Long Neck - R$ 11,50"
               value={rawMenuText}
               onChange={(e) => setRawMenuText(e.target.value)}
               rows={5}
@@ -3791,7 +3787,7 @@ export default function App() {
                   <h3 style={{ fontSize: '1.05rem', fontWeight: 700, margin: 0 }}>
                     {parsedProducts.length} Produtos Identificados pela Multiplex IA
                   </h3>
-                  <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Confira os itens abaixo antes de adicionar ao catalogo</span>
+                  <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Confira os itens abaixo antes de adicionar ao catálogo</span>
                 </div>
 
                 <div style={{ display: 'flex', gap: 10 }}>
@@ -3870,13 +3866,13 @@ export default function App() {
                   />
                   <input 
                     type="number" 
-                    placeholder="Preco (ex: 29.90)" 
+                    placeholder="Preço (ex: 29.90)" 
                     value={newProductPrice}
                     onChange={(e) => setNewProductPrice(e.target.value)}
                   />
                 </div>
                 <textarea 
-                  placeholder="Descricao, ingredientes e adicionais..."
+                  placeholder="Descrição, ingredientes e adicionais..."
                   value={newProductDesc}
                   onChange={(e) => setNewProductDesc(e.target.value)}
                   rows={2}
@@ -3893,7 +3889,7 @@ export default function App() {
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
               <h2 style={{ fontSize: '1.1rem', fontWeight: 600, margin: 0 }}>
-                Produtos Cadastrados no Catalogo ({products.length})
+                Produtos Cadastrados no Catálogo ({products.length})
               </h2>
               {products.length > 0 && (
                 <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
@@ -3904,7 +3900,7 @@ export default function App() {
 
             {products.length === 0 ? (
               <div className="glass-card" style={{ padding: 28, textAlign: 'center', color: 'var(--text-dim)' }}>
-                Nenhum produto cadastrado ainda. Cole a lista do seu cardapio acima para que a Multiplex IA organize tudo em segundos.
+                Nenhum produto cadastrado ainda. Cole a lista do seu cardápio acima para que a Multiplex IA organize tudo em segundos.
               </div>
             ) : (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 14 }}>
@@ -4827,11 +4823,11 @@ export default function App() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 18 }}>
             {(channels && channels.length > 0 ? channels : [
               { name: 'WhatsApp Business', type: 'whatsapp', connected: false, description: 'Evolution API, Z-API, Baileys ou Meta Cloud API com QR Code.' },
-              { name: 'Instagram Direct', type: 'instagram', connected: false, description: 'Respostas automaticas em mensagens diretas (DMs) e comentarios.' },
-              { name: 'Facebook Messenger', type: 'facebook', connected: false, description: 'Atendimento automatico em Paginas do Facebook e Messenger.' },
-              { name: 'Telegram Bot', type: 'telegram', connected: false, description: 'Bot oficial do Telegram para consultas de cardapio, suporte e pedidos.' },
-              { name: 'X (Twitter) DMs', type: 'x', connected: false, description: 'Respostas automaticas em mensagens diretas no seu perfil do X.' },
-              { name: 'Webchat / Widget para Site', type: 'webchat', connected: true, accountName: 'Widget Ativo', description: 'Balao flutuante de chat com script facil para colar no site.' }
+              { name: 'Instagram Direct', type: 'instagram', connected: false, description: 'Respostas automáticas em mensagens diretas (DMs) e comentários.' },
+              { name: 'Facebook Messenger', type: 'facebook', connected: false, description: 'Atendimento automático em Páginas do Facebook e Messenger.' },
+              { name: 'Telegram Bot', type: 'telegram', connected: false, description: 'Bot oficial do Telegram para consultas de cardápio, suporte e pedidos.' },
+              { name: 'X (Twitter) DMs', type: 'x', connected: false, description: 'Respostas automáticas em mensagens diretas no seu perfil do X.' },
+              { name: 'Webchat / Widget para Site', type: 'webchat', connected: true, accountName: 'Widget Ativo', description: 'Balão flutuante de chat com script fácil para colar no site.' }
             ]).map((channel: any) => {
               const getChannelIcon = (type: string) => {
                 switch (type) {
@@ -5217,7 +5213,7 @@ export default function App() {
                           </span>
                         </div>
                         <p style={{ fontSize: '0.82rem', color: 'var(--text-dim)', margin: 0 }}>
-                          Quando ativo, todas as mensagens recebidas neste canal sao respondidas automaticamente pelo Multiplex IA respeitando o cardapio e regras cadastradas.
+                          Quando ativo, todas as mensagens recebidas neste canal são respondidas automaticamente pelo Multiplex IA respeitando o cardápio e regras cadastradas.
                         </p>
                       </div>
 
@@ -5247,7 +5243,7 @@ export default function App() {
           <div className="page-header" style={{ marginBottom: 0 }}>
             <div>
               <h1 className="page-title" style={{ fontSize: '1.3rem' }}>Playground de Testes</h1>
-              <p className="page-desc" style={{ fontSize: '0.8rem' }}>Simulacao e inspecao de funcoes e regras em tempo real.</p>
+              <p className="page-desc" style={{ fontSize: '0.8rem' }}>Simulação e inspeção de funções e regras em tempo real.</p>
             </div>
             <button className="btn-secondary" style={{ padding: '6px 12px', fontSize: '0.8rem' }} onClick={() => setActiveView('chat')}>
               <MessageSquare size={14} /> Voltar ao Chat
@@ -5358,7 +5354,7 @@ export default function App() {
           <div className="page-header">
             <div>
               <h1 className="page-title">Dashboard Executivo</h1>
-              <p className="page-desc">Metricas consolidadas de conversao e atendimento.</p>
+              <p className="page-desc">Métricas consolidadas de conversão e atendimento.</p>
             </div>
             <button className="btn-secondary" onClick={() => setActiveView('chat')}>
               <MessageSquare size={16} /> Voltar ao Chat
@@ -5386,12 +5382,12 @@ export default function App() {
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
               <span className="status-dot-green"></span>
               <div>
-                <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>Automacoes e Webhooks Ativos</div>
+                <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>Automações e Webhooks Ativos</div>
                 <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Fluxos omnichannel sincronizados</div>
               </div>
             </div>
             <button className="btn-secondary" onClick={loadData}>
-              <RefreshCw size={14} /> Atualizar Metricas
+              <RefreshCw size={14} /> Atualizar Métricas
             </button>
           </div>
         </div>
@@ -5432,7 +5428,7 @@ export default function App() {
                   onClick={() => setProfileActiveTab('personal')}
                 >
                   <User size={16} />
-                  <span>Informacoes pessoais</span>
+                  <span>Informações pessoais</span>
                 </button>
 
                 <button 
@@ -5440,7 +5436,7 @@ export default function App() {
                   onClick={() => setProfileActiveTab('security')}
                 >
                   <Shield size={16} />
-                  <span>Seguranca</span>
+                  <span>Segurança</span>
                 </button>
 
                 <button 
@@ -5448,7 +5444,7 @@ export default function App() {
                   onClick={() => setProfileActiveTab('notifications')}
                 >
                   <Bell size={16} />
-                  <span>Notificacoes</span>
+                  <span>Notificações</span>
                 </button>
 
                 <button 
@@ -5576,7 +5572,7 @@ export default function App() {
                       <div style={{ padding: '10px 14px', borderRadius: 8, background: 'rgba(245, 158, 11, 0.12)', border: '1px solid rgba(245, 158, 11, 0.25)', color: '#f59e0b', fontSize: '0.85rem', marginBottom: 16, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                           <AlertCircle size={16} />
-                          <span>Voce utilizou 84% do limite de mensagens de IA deste mes.</span>
+                          <span>Você utilizou 84% do limite de mensagens de IA deste mês.</span>
                         </div>
                         <button 
                           className="btn-secondary"
@@ -5650,22 +5646,22 @@ export default function App() {
                             <td style={{ padding: '10px' }}>Mensagens IA</td>
                             <td style={{ padding: '10px', textAlign: 'right', fontWeight: 600 }}>8.420</td>
                             <td style={{ padding: '10px', textAlign: 'right' }}>10.000</td>
-                            <td style={{ padding: '10px', textAlign: 'right', color: '#f59e0b', fontWeight: 600 }}>84% (Atencao)</td>
+                            <td style={{ padding: '10px', textAlign: 'right', color: '#f59e0b', fontWeight: 600 }}>84% (Atenção)</td>
                           </tr>
                           <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}>
                             <td style={{ padding: '10px' }}>Agentes Ativos</td>
                             <td style={{ padding: '10px', textAlign: 'right', fontWeight: 600 }}>1</td>
                             <td style={{ padding: '10px', textAlign: 'right' }}>1</td>
-                            <td style={{ padding: '10px', textAlign: 'right', color: 'var(--text-muted)' }}>Capacidade max.</td>
+                            <td style={{ padding: '10px', textAlign: 'right', color: 'var(--text-muted)' }}>Capacidade máx.</td>
                           </tr>
                           <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}>
                             <td style={{ padding: '10px' }}>Canais Conectados</td>
                             <td style={{ padding: '10px', textAlign: 'right', fontWeight: 600 }}>2</td>
                             <td style={{ padding: '10px', textAlign: 'right' }}>3</td>
-                            <td style={{ padding: '10px', textAlign: 'right', color: '#10b981' }}>Disponivel (1 livre)</td>
+                            <td style={{ padding: '10px', textAlign: 'right', color: '#10b981' }}>Disponível (1 livre)</td>
                           </tr>
                           <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}>
-                            <td style={{ padding: '10px' }}>Usuarios / Atendentes</td>
+                            <td style={{ padding: '10px' }}>Usuários / Atendentes</td>
                             <td style={{ padding: '10px', textAlign: 'right', fontWeight: 600 }}>3</td>
                             <td style={{ padding: '10px', textAlign: 'right' }}>5</td>
                             <td style={{ padding: '10px', textAlign: 'right', color: '#10b981' }}>Normal</td>
@@ -5692,8 +5688,8 @@ export default function App() {
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 10 }}>
                         {[
                           'WhatsApp Business', 'Instagram Direct', 'Facebook Messenger', 'Telegram Bot',
-                          '1 Agente de IA', 'Memoria de Clientes', 'Base de Conhecimento RAG',
-                          'Handoff Humano', 'Analytics e Relatorios', 'Suporte Prioritario'
+                          '1 Agente de IA', 'Memória de Clientes', 'Base de Conhecimento RAG',
+                          'Handoff Humano', 'Analytics e Relatórios', 'Suporte Prioritário'
                         ].map((b, idx) => (
                           <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.84rem' }}>
                             <Check size={15} color="#10b981" />
@@ -5852,12 +5848,12 @@ export default function App() {
                   </div>
                 )}
 
-                {/* ABA: INFORMACOES PESSOAIS */}
+                {/* ABA: INFORMAÇÕES PESSOAIS */}
                 {profileActiveTab === 'personal' && (
                   <div>
-                    <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: 4 }}>Informacoes Pessoais</h2>
+                    <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: 4 }}>Informações Pessoais</h2>
                     <p style={{ fontSize: '0.84rem', color: 'var(--text-muted)', marginBottom: 20 }}>
-                      Atualize seus dados cadastrais e informacoes de perfil.
+                      Atualize seus dados cadastrais e informações de perfil.
                     </p>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 14, maxWidth: 500 }}>
@@ -5867,7 +5863,7 @@ export default function App() {
                       </div>
 
                       <div>
-                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, marginBottom: 4, color: 'var(--text-muted)' }}>Nome de Usuario</label>
+                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, marginBottom: 4, color: 'var(--text-muted)' }}>Nome de Usuário</label>
                         <input type="text" defaultValue="anthony_both" style={{ width: '100%' }} />
                       </div>
 
@@ -5877,29 +5873,29 @@ export default function App() {
                       </div>
 
                       <div>
-                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, marginBottom: 4, color: 'var(--text-muted)' }}>Empresa / Organizacao</label>
+                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, marginBottom: 4, color: 'var(--text-muted)' }}>Empresa / Organização</label>
                         <input type="text" defaultValue="Anthony Burgers & Delivery" style={{ width: '100%' }} />
                       </div>
 
                       <button className="btn-primary" style={{ alignSelf: 'flex-start', marginTop: 10 }} onClick={() => alert('Dados cadastrais atualizados com sucesso.')}>
-                        Salvar Alteracoes
+                        Salvar Alterações
                       </button>
                     </div>
                   </div>
                 )}
 
-                {/* ABA: SEGURANCA */}
+                {/* ABA: SEGURANÇA */}
                 {profileActiveTab === 'security' && (
                   <div>
-                    <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: 4 }}>Seguranca & Acesso</h2>
+                    <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: 4 }}>Segurança & Acesso</h2>
                     <p style={{ fontSize: '0.84rem', color: 'var(--text-muted)', marginBottom: 20 }}>
-                      Configuracoes de autenticacao, senha e sessoes ativas.
+                      Configurações de autenticação, senha e sessões ativas.
                     </p>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 18, maxWidth: 500 }}>
                       <div className="glass-card" style={{ padding: 16 }}>
-                        <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>Autenticacao em Duas Etapas (2FA)</div>
-                        <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: 4 }}>Proteja sua conta solicitando um codigo adicional ao fazer login.</p>
+                        <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>Autenticação em Duas Etapas (2FA)</div>
+                        <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: 4 }}>Proteja sua conta solicitando um código adicional ao fazer login.</p>
                         <button className="btn-secondary" style={{ marginTop: 8 }} onClick={() => alert('Autenticação em duas etapas configurada.')}>Ativar 2FA</button>
                       </div>
 
@@ -5915,12 +5911,12 @@ export default function App() {
                   </div>
                 )}
 
-                {/* ABA: NOTIFICACOES */}
+                {/* ABA: NOTIFICAÇÕES */}
                 {profileActiveTab === 'notifications' && (
                   <div>
-                    <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: 4 }}>Notificacoes & Alertas</h2>
+                    <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: 4 }}>Notificações & Alertas</h2>
                     <p style={{ fontSize: '0.84rem', color: 'var(--text-muted)', marginBottom: 20 }}>
-                      Escolha quais alertas voce deseja receber no e-mail e nos canais.
+                      Escolha quais alertas você deseja receber no e-mail e nos canais.
                     </p>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 12, maxWidth: 500 }}>
@@ -5930,11 +5926,11 @@ export default function App() {
                       </label>
                       <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
                         <input type="checkbox" defaultChecked />
-                        <span style={{ fontSize: '0.88rem' }}>Notificacao de solicitacao de atendimento humano (Handoff)</span>
+                        <span style={{ fontSize: '0.88rem' }}>Notificação de solicitação de atendimento humano (Handoff)</span>
                       </label>
                       <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
                         <input type="checkbox" defaultChecked />
-                        <span style={{ fontSize: '0.88rem' }}>Relatorio semanal de conversao e conversas</span>
+                        <span style={{ fontSize: '0.88rem' }}>Relatório semanal de conversão e conversas</span>
                       </label>
                     </div>
                   </div>
@@ -5950,7 +5946,7 @@ export default function App() {
         </div>
       )}
 
-      {/* MODAL DE CONFIRMACAO (CANCELAMENTO, DOWNGRADE, UPGRADE, LOGOUT) */}
+      {/* MODAL DE CONFIRMAÇÃO (CANCELAMENTO, DOWNGRADE, UPGRADE, LOGOUT) */}
       {confirmModal && (
         <div className="modal-backdrop" onClick={() => setConfirmModal(null)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 480, padding: 24 }}>
@@ -5961,9 +5957,9 @@ export default function App() {
                   Ao confirmar o cancelamento:
                 </p>
                 <ul style={{ fontSize: '0.82rem', color: 'var(--text-muted)', paddingLeft: 18, lineHeight: '1.5' }}>
-                  <li>Seu acesso permanecera ativo ate <strong>07 de outubro de 2026</strong>.</li>
-                  <li>Apos esta data, o agente Multiplex IA sera pausado em todos os canais.</li>
-                  <li>Voce perdera o historico de conversas e integracoes ativas.</li>
+                  <li>Seu acesso permanecerá ativo até <strong>07 de outubro de 2026</strong>.</li>
+                  <li>Após esta data, o agente Multiplex IA será pausado em todos os canais.</li>
+                  <li>Você perderá o histórico de conversas e integrações ativas.</li>
                 </ul>
 
                 <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 20 }}>
@@ -5986,14 +5982,14 @@ export default function App() {
               <div>
                 <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0 }}>Alterar para o Plano {confirmModal.plan?.name}?</h3>
                 <p style={{ fontSize: '0.88rem', color: 'var(--text-main)', marginTop: 10 }}>
-                  Seu plano atual possui recursos que nao estarao disponiveis no novo plano:
+                  Seu plano atual possui recursos que não estarão disponíveis no novo plano:
                 </p>
                 <div style={{ padding: 12, borderRadius: 8, background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.25)', color: '#ef4444', fontSize: '0.82rem', marginBottom: 14 }}>
-                  <strong>Voce perdera:</strong>
+                  <strong>Você perderá:</strong>
                   <ul style={{ margin: '6px 0 0 16px', padding: 0 }}>
                     <li>Canais adicionais conectados (apenas 1 canal suportado)</li>
                     <li>Limite maior de mensagens de IA</li>
-                    <li>Suporte prioritario e automacoes avancadas</li>
+                    <li>Suporte prioritário e automações avançadas</li>
                   </ul>
                 </div>
 
@@ -6002,11 +5998,11 @@ export default function App() {
                     Voltar
                   </button>
                   <button 
-                    className="btn-primary"
+                    className="btn-primary" 
                     onClick={() => handleChangePlan(confirmModal.plan?.id)}
                     disabled={isChangingPlan}
                   >
-                    Confirmar Mudanca
+                    Confirmar Mudança
                   </button>
                 </div>
               </div>
@@ -6016,10 +6012,10 @@ export default function App() {
               <div>
                 <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0 }}>Fazer Upgrade para {confirmModal.plan?.name}?</h3>
                 <p style={{ fontSize: '0.88rem', color: 'var(--text-main)', marginTop: 10 }}>
-                  Novo valor: <strong>R$ {confirmModal.plan?.price_monthly} / mes</strong>.
+                  Novo valor: <strong>R$ {confirmModal.plan?.price_monthly} / mês</strong>.
                 </p>
                 <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
-                  Seus novos limites e recursos serao liberados imediatamente.
+                  Seus novos limites e recursos serão liberados imediatamente.
                 </p>
 
                 <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 20 }}>
@@ -6027,7 +6023,7 @@ export default function App() {
                     Cancelar
                   </button>
                   <button 
-                    className="btn-primary"
+                    className="btn-primary" 
                     onClick={() => handleChangePlan(confirmModal.plan?.id)}
                     disabled={isChangingPlan}
                     style={{ background: 'linear-gradient(135deg, #059669, #10b981)' }}
@@ -6042,7 +6038,7 @@ export default function App() {
               <div>
                 <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0 }}>Deseja sair da sua conta?</h3>
                 <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: 8 }}>
-                  Voce precisara fazer login novamente para acessar o painel do Multiplex IA.
+                  Você precisará fazer login novamente para acessar o painel do Multiplex IA.
                 </p>
                 <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 20 }}>
                   <button className="btn-secondary" onClick={() => setConfirmModal(null)}>
