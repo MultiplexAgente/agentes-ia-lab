@@ -4,7 +4,8 @@ import {
   Activity, Send, Sparkles, RefreshCw, Plus, Trash2,
   Smartphone, Instagram, MessageCircle, AlertCircle,
   Sun, Moon, Folder, FolderPlus, Pin, PinOff, Search, PanelLeft,
-  Edit3, Check, X, ArrowUp, PlayCircle, LayoutDashboard
+  Edit3, Check, X, ArrowUp, PlayCircle, LayoutDashboard,
+  Globe, Facebook, Twitter, Copy, ExternalLink, HelpCircle, CheckCircle2
 } from 'lucide-react';
 import atomLogo from './assets/multiplex-atom.jpg';
 
@@ -154,6 +155,17 @@ export default function App() {
   const [newKbContent, setNewKbContent] = useState('');
 
   const [channels, setChannels] = useState<any[]>([]);
+  // Assistente de Conexao de Canais com IA
+  const [selectedChannel, setSelectedChannel] = useState<any | null>(null);
+  const [channelModalTab, setChannelModalTab] = useState<'guide' | 'ai_chat' | 'credentials'>('guide');
+  const [channelCreds, setChannelCreds] = useState<Record<string, string>>({});
+  const [channelAiPrompt, setChannelAiPrompt] = useState('');
+  const [channelAiReply, setChannelAiReply] = useState('');
+  const [isAskingChannelAi, setIsAskingChannelAi] = useState(false);
+  const [isTestingChannel, setIsTestingChannel] = useState(false);
+  const [channelTestSuccess, setChannelTestSuccess] = useState<string | null>(null);
+  const [copiedUrl, setCopiedUrl] = useState(false);
+
   const [metrics, setMetrics] = useState<any>({
     conversations_today: 0,
     messages_today: 0,
@@ -576,6 +588,99 @@ export default function App() {
   // Remover item especifico da pre-visualizacao
   const handleRemoveParsedItem = (index: number) => {
     setParsedProducts(parsedProducts.filter((_, idx) => idx !== index));
+  };
+
+  // Abrir Assistente de Conexao do Canal
+  const handleOpenChannel = (channel: any) => {
+    setSelectedChannel(channel);
+    setChannelModalTab('guide');
+    setChannelCreds({
+      accountName: channel.accountName || '',
+      ...channel.fields?.reduce((acc: any, f: any) => ({ ...acc, [f.key]: '' }), {})
+    });
+    setChannelAiPrompt('');
+    setChannelAiReply('');
+    setChannelTestSuccess(null);
+    setCopiedUrl(false);
+  };
+
+  // Copiar URL do Webhook
+  const handleCopyWebhook = (url: string) => {
+    navigator.clipboard.writeText(url);
+    setCopiedUrl(true);
+    setTimeout(() => setCopiedUrl(false), 2500);
+  };
+
+  // Consultar Assistente de IA para Canal
+  const handleAskChannelAi = async (customQuestion?: string) => {
+    const q = customQuestion || channelAiPrompt;
+    if (!q.trim() || !selectedChannel) return;
+    setIsAskingChannelAi(true);
+    try {
+      const res = await fetch(`${API_BASE}/api/channels/${selectedChannel.type}/ai-guide`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question: q })
+      });
+      const data = await res.json();
+      if (res.ok && data.answer) {
+        setChannelAiReply(data.answer);
+      } else {
+        alert(data.error || 'Erro ao consultar assistente de IA');
+      }
+    } catch (e) {
+      console.error(e);
+      alert('Erro de conexao com o assistente');
+    } finally {
+      setIsAskingChannelAi(false);
+    }
+  };
+
+  // Testar e Ativar Canal
+  const handleTestAndActivateChannel = async () => {
+    if (!selectedChannel) return;
+    setIsTestingChannel(true);
+    setChannelTestSuccess(null);
+    try {
+      const res = await fetch(`${API_BASE}/api/channels/${selectedChannel.type}/test`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(channelCreds)
+      });
+      const data = await res.json();
+      if (res.ok && data.channel) {
+        setChannels(channels.map(c => c.type === selectedChannel.type ? data.channel : c));
+        setSelectedChannel(data.channel);
+        setChannelTestSuccess(data.message || 'Canal conectado e ativado com sucesso!');
+      } else {
+        alert(data.error || 'Falha ao testar conexao');
+      }
+    } catch (e) {
+      console.error(e);
+      alert('Erro ao testar o webhook');
+    } finally {
+      setIsTestingChannel(false);
+    }
+  };
+
+  // Desconectar Canal
+  const handleDisconnectChannel = async (type: string) => {
+    try {
+      const res = await fetch(`${API_BASE}/api/channels/${type}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ connected: false, accountName: '' })
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        setChannels(channels.map(c => c.type === type ? updated : c));
+        if (selectedChannel?.type === type) {
+          setSelectedChannel(updated);
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   // Adicionar Regra
@@ -1745,68 +1850,429 @@ export default function App() {
         </div>
       )}
 
-      {/* TELA: CONECTAR CANAIS */}
+      {/* TELA: CONECTAR CANAIS MULTICANAL COM ASSISTENTE DE IA */}
       {activeView === 'channels' && (
         <div className="main-panel-scrollable">
-          <div className="page-header">
+          <div className="page-header" style={{ marginBottom: 18 }}>
             <div>
-              <h1 className="page-title">Conectar Canais Multicanal</h1>
-              <p className="page-desc">Canais para atendimento simultaneo pelo Multiplex.</p>
+              <h1 className="page-title">Conectar Redes Sociais e Canais</h1>
+              <p className="page-desc">Atendimento simultaneo pelo Multiplex IA no WhatsApp, Instagram, Facebook, Telegram, X e Site. A IA auxilia você passo a passo na conexão.</p>
             </div>
             <button className="btn-secondary" onClick={() => setActiveView('chat')}>
               <MessageSquare size={16} /> Voltar ao Chat
             </button>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 18 }}>
-            <div className="glass-panel" style={{ padding: 22 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
-                <Smartphone size={28} color="#25d366" />
-                <div>
-                  <h3 style={{ fontSize: '1.1rem', fontWeight: 700 }}>WhatsApp</h3>
-                  <span className="badge badge-whatsapp" style={{ marginTop: 4 }}>Pronto para Conectar</span>
-                </div>
-              </div>
-              <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: 16 }}>
-                Integracao via webhook oficial n8n com Evolution API / Z-API / Baileys.
-              </p>
-              <button className="btn-primary" style={{ width: '100%', justifyContent: 'center' }}>
-                Conectar WhatsApp
-              </button>
-            </div>
+          {/* GRID COM TODOS OS CANAIS */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 18 }}>
+            {(channels && channels.length > 0 ? channels : [
+              { name: 'WhatsApp Business', type: 'whatsapp', connected: false, description: 'Evolution API, Z-API, Baileys ou Meta Cloud API com QR Code.' },
+              { name: 'Instagram Direct', type: 'instagram', connected: false, description: 'Respostas automaticas em mensagens diretas (DMs) e comentarios.' },
+              { name: 'Facebook Messenger', type: 'facebook', connected: false, description: 'Atendimento automatico em Paginas do Facebook e Messenger.' },
+              { name: 'Telegram Bot', type: 'telegram', connected: false, description: 'Bot oficial do Telegram para consultas de cardapio, suporte e pedidos.' },
+              { name: 'X (Twitter) DMs', type: 'x', connected: false, description: 'Respostas automaticas em mensagens diretas no seu perfil do X.' },
+              { name: 'Webchat / Widget para Site', type: 'webchat', connected: true, accountName: 'Widget Ativo', description: 'Balao flutuante de chat com script facil para colar no site.' }
+            ]).map((channel: any) => {
+              const getChannelIcon = (type: string) => {
+                switch (type) {
+                  case 'whatsapp': return <Smartphone size={28} color="#25d366" />;
+                  case 'instagram': return <Instagram size={28} color="#e1306c" />;
+                  case 'facebook': return <Facebook size={28} color="#1877f2" />;
+                  case 'telegram': return <Send size={28} color="#0088cc" />;
+                  case 'x': return <Twitter size={28} color="#ffffff" />;
+                  default: return <Globe size={28} color="#00d2ff" />;
+                }
+              };
 
-            <div className="glass-panel" style={{ padding: 22 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
-                <Instagram size={28} color="#e1306c" />
-                <div>
-                  <h3 style={{ fontSize: '1.1rem', fontWeight: 700 }}>Instagram Direct</h3>
-                  <span className="badge badge-instagram" style={{ marginTop: 4 }}>Pronto para Conectar</span>
-                </div>
-              </div>
-              <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: 16 }}>
-                Respostas automaticas em mensagens diretas (DMs) e comentarios.
-              </p>
-              <button className="btn-primary" style={{ width: '100%', justifyContent: 'center' }}>
-                Conectar Instagram
-              </button>
-            </div>
+              return (
+                <div 
+                  key={channel.type} 
+                  className="glass-panel" 
+                  style={{ 
+                    padding: 22, 
+                    display: 'flex', 
+                    flexDirection: 'column', 
+                    justifyContent: 'space-between',
+                    border: channel.connected ? '1px solid rgba(16, 185, 129, 0.4)' : '1px solid var(--border-subtle)',
+                    boxShadow: channel.connected ? '0 0 20px rgba(16, 185, 129, 0.08)' : 'none'
+                  }}
+                >
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 10, marginBottom: 12 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                        <div style={{ 
+                          width: 46, 
+                          height: 46, 
+                          borderRadius: 12, 
+                          background: 'rgba(255, 255, 255, 0.04)', 
+                          border: '1px solid var(--border-subtle)', 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          justifyContent: 'center' 
+                        }}>
+                          {getChannelIcon(channel.type)}
+                        </div>
+                        <div>
+                          <h3 style={{ fontSize: '1.05rem', fontWeight: 700, margin: 0 }}>{channel.name}</h3>
+                          {channel.accountName && (
+                            <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{channel.accountName}</span>
+                          )}
+                        </div>
+                      </div>
 
-            <div className="glass-panel" style={{ padding: 22 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
-                <MessageCircle size={28} color="#0088cc" />
-                <div>
-                  <h3 style={{ fontSize: '1.1rem', fontWeight: 700 }}>Telegram Bot</h3>
-                  <span className="badge badge-telegram" style={{ marginTop: 4 }}>Pronto para Conectar</span>
+                      {channel.connected ? (
+                        <span className="badge" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#10b981', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
+                          ● Conectado
+                        </span>
+                      ) : (
+                        <span className="badge" style={{ background: 'rgba(245, 158, 11, 0.12)', color: '#f59e0b', border: '1px solid rgba(245, 158, 11, 0.3)' }}>
+                          Pronto para Conectar
+                        </span>
+                      )}
+                    </div>
+
+                    <p style={{ fontSize: '0.84rem', color: 'var(--text-muted)', lineHeight: '1.45', marginBottom: 16 }}>
+                      {channel.description || 'Integracao multicanal com respostas do Multiplex IA.'}
+                    </p>
+                  </div>
+
+                  <div>
+                    {channel.webhookUrl && (
+                      <div style={{ marginBottom: 12, display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(0, 0, 0, 0.25)', padding: '6px 10px', borderRadius: 6, border: '1px solid var(--border-subtle)' }}>
+                        <span style={{ fontSize: '0.72rem', color: 'var(--text-dim)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>
+                          {channel.webhookUrl}
+                        </span>
+                        <button 
+                          onClick={() => handleCopyWebhook(channel.webhookUrl)} 
+                          style={{ background: 'transparent', border: 'none', color: 'var(--accent-cyan)', cursor: 'pointer', padding: 2, display: 'flex', alignItems: 'center' }}
+                          title="Copiar URL do Webhook"
+                        >
+                          <Copy size={13} />
+                        </button>
+                      </div>
+                    )}
+
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      <button 
+                        className="btn-primary" 
+                        onClick={() => handleOpenChannel(channel)}
+                        style={{ 
+                          flex: 1, 
+                          justifyContent: 'center',
+                          background: channel.connected 
+                            ? 'linear-gradient(135deg, #059669, #10b981)' 
+                            : 'linear-gradient(135deg, var(--accent-primary), var(--accent-purple))'
+                        }}
+                      >
+                        <Sparkles size={15} />
+                        <span>{channel.connected ? 'Gerenciar Conexao' : 'Conectar com Guia IA'}</span>
+                      </button>
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: 16 }}>
-                Bot oficial do Telegram para atendimento e pedidos.
-              </p>
-              <button className="btn-primary" style={{ width: '100%', justifyContent: 'center' }}>
-                Conectar Telegram
-              </button>
-            </div>
+              );
+            })}
           </div>
+
+          {/* MODAL INTERATIVO: ASSISTENTE DE CONEXAO GUIADO PELA MULTIPLEX IA */}
+          {selectedChannel && (
+            <div className="modal-backdrop" onClick={() => setSelectedChannel(null)}>
+              <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 840, width: '92%' }}>
+                {/* Cabecalho do Modal */}
+                <div className="modal-header">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <div style={{ width: 34, height: 34, borderRadius: '50%', overflow: 'hidden', border: '1px solid rgba(0, 210, 255, 0.4)', minWidth: 34 }}>
+                      <img src={atomLogo} alt="Multiplex IA" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    </div>
+                    <div>
+                      <h2 style={{ fontSize: '1.15rem', fontWeight: 700, margin: 0 }}>
+                        Assistente de Conexao: {selectedChannel.name}
+                      </h2>
+                      <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                        Multiplex IA orienta você no passo a passo exato da integracao
+                      </span>
+                    </div>
+                  </div>
+
+                  <button 
+                    onClick={() => setSelectedChannel(null)}
+                    style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: 4 }}
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+
+                {/* Abas do Modal */}
+                <div className="modal-tabs">
+                  <button 
+                    className={`modal-tab-btn ${channelModalTab === 'guide' ? 'active' : ''}`}
+                    onClick={() => setChannelModalTab('guide')}
+                  >
+                    <Sliders size={15} /> Passo a Passo Ilustrado
+                  </button>
+
+                  <button 
+                    className={`modal-tab-btn ${channelModalTab === 'ai_chat' ? 'active' : ''}`}
+                    onClick={() => setChannelModalTab('ai_chat')}
+                  >
+                    <Sparkles size={15} /> Tira-Duvidas com IA (GPT-4o)
+                  </button>
+
+                  <button 
+                    className={`modal-tab-btn ${channelModalTab === 'credentials' ? 'active' : ''}`}
+                    onClick={() => setChannelModalTab('credentials')}
+                  >
+                    <CheckCircle2 size={15} /> Status e Desconectar
+                  </button>
+                </div>
+
+                {/* Corpo do Modal */}
+                <div className="modal-body" style={{ padding: 22 }}>
+                  {/* ABA 1: GUIA PASSO A PASSO */}
+                  {channelModalTab === 'guide' && (
+                    <div>
+                      {/* Box do Webhook oficial com botao de copiar */}
+                      <div style={{ padding: 16, borderRadius: 10, background: 'rgba(0, 210, 255, 0.05)', border: '1px solid rgba(0, 210, 255, 0.25)', marginBottom: 20 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                          <span style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--accent-cyan)' }}>
+                            URL DO WEBHOOK OFICIAL DO SEU MULTIPLEX IA
+                          </span>
+                          {copiedUrl && (
+                            <span style={{ fontSize: '0.78rem', color: '#10b981', fontWeight: 600 }}>Copiado para a area de transferencia!</span>
+                          )}
+                        </div>
+                        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                          <input 
+                            type="text" 
+                            readOnly 
+                            value={selectedChannel.webhookUrl} 
+                            style={{ flex: 1, fontFamily: 'monospace', fontSize: '0.84rem', background: 'rgba(0, 0, 0, 0.4)' }}
+                          />
+                          <button 
+                            className="btn-secondary" 
+                            onClick={() => handleCopyWebhook(selectedChannel.webhookUrl)}
+                            style={{ whiteSpace: 'nowrap' }}
+                          >
+                            <Copy size={15} /> Copiar Webhook URL
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Se for Webchat, mostra o script para embed */}
+                      {selectedChannel.type === 'webchat' && (
+                        <div style={{ padding: 14, borderRadius: 10, background: 'rgba(99, 102, 241, 0.06)', border: '1px solid rgba(99, 102, 241, 0.25)', marginBottom: 20 }}>
+                          <div style={{ fontWeight: 600, fontSize: '0.85rem', marginBottom: 6 }}>Codigo do Script para colar no seu site:</div>
+                          <pre style={{ fontSize: '0.75rem', background: 'rgba(0,0,0,0.5)', padding: 10, borderRadius: 6, overflowX: 'auto' }}>
+{`<script src="http://localhost:3000/widget/multiplex-chat.js" data-agent="multiplex-ia" defer></script>`}
+                          </pre>
+                        </div>
+                      )}
+
+                      {/* Lista numerada de passos */}
+                      <div style={{ marginBottom: 22 }}>
+                        <h4 style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: 12 }}>
+                          Como Conectar em Poucos Passos:
+                        </h4>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                          {(selectedChannel.setupInstructions || [
+                            'Acesse o painel oficial da plataforma.',
+                            'Cole a URL do Webhook acima no campo correspondente.',
+                            'Gere seu Token de Acesso da API.',
+                            'Informe os dados abaixo e clique em Testar Conexao.'
+                          ]).map((instruction: string, idx: number) => (
+                            <div key={idx} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: '10px 14px', borderRadius: 8, background: 'rgba(255, 255, 255, 0.03)', border: '1px solid var(--border-subtle)' }}>
+                              <div style={{ width: 24, height: 24, borderRadius: '50%', background: 'linear-gradient(135deg, var(--accent-primary), var(--accent-purple))', color: '#fff', fontSize: '0.78rem', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: 24 }}>
+                                {idx + 1}
+                              </div>
+                              <span style={{ fontSize: '0.86rem', lineHeight: '1.4' }}>{instruction}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Campos de Credenciais do Canal */}
+                      <div style={{ padding: 16, borderRadius: 10, background: 'rgba(255, 255, 255, 0.02)', border: '1px solid var(--border-subtle)', marginBottom: 18 }}>
+                        <h4 style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: 12 }}>
+                          Credenciais e Identificacao da Conta
+                        </h4>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                          {(selectedChannel.fields || [
+                            { key: 'accountName', label: 'Nome ou Identificador da Conta', placeholder: 'ex: Minha Empresa Oficial' }
+                          ]).map((f: any) => (
+                            <div key={f.key}>
+                              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, marginBottom: 4, color: 'var(--text-muted)' }}>
+                                {f.label}
+                              </label>
+                              <input 
+                                type={f.type || 'text'}
+                                placeholder={f.placeholder}
+                                value={channelCreds[f.key] || ''}
+                                onChange={(e) => setChannelCreds({ ...channelCreds, [f.key]: e.target.value })}
+                                style={{ width: '100%', fontSize: '0.88rem' }}
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Feedback de Teste */}
+                      {channelTestSuccess && (
+                        <div style={{ padding: '12px 16px', borderRadius: 8, background: 'rgba(16, 185, 129, 0.15)', border: '1px solid rgba(16, 185, 129, 0.3)', color: '#10b981', fontSize: '0.9rem', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 10 }}>
+                          <CheckCircle2 size={18} />
+                          <span>{channelTestSuccess}</span>
+                        </div>
+                      )}
+
+                      {/* Botao de Acao */}
+                      <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
+                        <button 
+                          className="btn-secondary" 
+                          onClick={() => setChannelModalTab('ai_chat')}
+                        >
+                          <HelpCircle size={15} /> Preciso de Ajuda com Este Canal
+                        </button>
+
+                        <button 
+                          className="btn-primary" 
+                          onClick={handleTestAndActivateChannel}
+                          disabled={isTestingChannel}
+                          style={{ background: 'linear-gradient(135deg, #059669, #10b981)' }}
+                        >
+                          {isTestingChannel ? (
+                            <>
+                              <RefreshCw size={16} className="animate-spin" />
+                              <span>Validando Webhook...</span>
+                            </>
+                          ) : (
+                            <>
+                              <Check size={16} />
+                              <span>Testar e Ativar Conexao Agora</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* ABA 2: TIRA-DUVIDAS COM MULTIPLEX IA (GPT-4o) */}
+                  {channelModalTab === 'ai_chat' && (
+                    <div>
+                      <div style={{ marginBottom: 14 }}>
+                        <h4 style={{ fontSize: '1rem', fontWeight: 700, margin: 0 }}>
+                          Assistente Tecnico Multiplex IA (GPT-4o)
+                        </h4>
+                        <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginTop: 4 }}>
+                          Pergunte qualquer duvida sobre onde clicar, como achar os tokens ou solucionar erros na conexao deste canal.
+                        </p>
+                      </div>
+
+                      {/* Sugestoes de perguntas rapidas */}
+                      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 14 }}>
+                        <button 
+                          className="btn-secondary" 
+                          style={{ fontSize: '0.78rem', padding: '5px 10px' }}
+                          onClick={() => handleAskChannelAi('Onde exatamente eu consigo o token de acesso neste canal?')}
+                        >
+                          Onde acho o Token?
+                        </button>
+                        <button 
+                          className="btn-secondary" 
+                          style={{ fontSize: '0.78rem', padding: '5px 10px' }}
+                          onClick={() => handleAskChannelAi('Qual e o passo a passo para configurar o webhook sem erros?')}
+                        >
+                          Passo a passo do Webhook
+                        </button>
+                        <button 
+                          className="btn-secondary" 
+                          style={{ fontSize: '0.78rem', padding: '5px 10px' }}
+                          onClick={() => handleAskChannelAi('Como faco para testar se as mensagens estao chegando ao Multiplex IA?')}
+                        >
+                          Como testar mensagens?
+                        </button>
+                      </div>
+
+                      <div style={{ display: 'flex', gap: 10, marginBottom: 16 }}>
+                        <input 
+                          type="text" 
+                          placeholder="Digite sua duvida sobre a conexao deste canal..."
+                          value={channelAiPrompt}
+                          onChange={(e) => setChannelAiPrompt(e.target.value)}
+                          onKeyDown={(e) => e.key === 'Enter' && handleAskChannelAi()}
+                          style={{ flex: 1 }}
+                        />
+                        <button 
+                          className="btn-primary" 
+                          onClick={() => handleAskChannelAi()}
+                          disabled={isAskingChannelAi || !channelAiPrompt.trim()}
+                        >
+                          {isAskingChannelAi ? (
+                            <RefreshCw size={16} className="animate-spin" />
+                          ) : (
+                            <Sparkles size={16} />
+                          )}
+                          <span>Perguntar</span>
+                        </button>
+                      </div>
+
+                      {channelAiReply ? (
+                        <div style={{ padding: 18, borderRadius: 10, background: 'rgba(0, 0, 0, 0.4)', border: '1px solid rgba(0, 210, 255, 0.3)', whiteSpace: 'pre-wrap', fontSize: '0.88rem', lineHeight: '1.55' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10, color: 'var(--accent-cyan)', fontWeight: 700 }}>
+                            <div style={{ width: 22, height: 22, borderRadius: '50%', overflow: 'hidden' }}>
+                              <img src={atomLogo} alt="Multiplex IA" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            </div>
+                            <span>Instrucoes da Multiplex IA:</span>
+                          </div>
+                          {channelAiReply}
+                        </div>
+                      ) : (
+                        <div style={{ padding: 24, textAlign: 'center', color: 'var(--text-dim)', border: '1px dashed var(--border-subtle)', borderRadius: 10 }}>
+                          Clique em uma das perguntas acima ou digite sua duvida para receber instrucoes passo a passo geradas pela IA.
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* ABA 3: STATUS E DESCONECTAR */}
+                  {channelModalTab === 'credentials' && (
+                    <div>
+                      <div style={{ padding: 18, borderRadius: 10, background: 'rgba(255, 255, 255, 0.02)', border: '1px solid var(--border-subtle)', marginBottom: 20 }}>
+                        <h4 style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: 8 }}>Status da Integracao</h4>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+                          {selectedChannel.connected ? (
+                            <span className="badge" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#10b981', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
+                              ● Conectado e Ativo
+                            </span>
+                          ) : (
+                            <span className="badge" style={{ background: 'rgba(245, 158, 11, 0.12)', color: '#f59e0b', border: '1px solid rgba(245, 158, 11, 0.3)' }}>
+                              Desconectado
+                            </span>
+                          )}
+                          <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+                            {selectedChannel.accountName || 'Nenhuma conta vinculada no momento'}
+                          </span>
+                        </div>
+                        <p style={{ fontSize: '0.82rem', color: 'var(--text-dim)', margin: 0 }}>
+                          Quando ativo, todas as mensagens recebidas neste canal sao respondidas automaticamente pelo Multiplex IA respeitando o cardapio e regras cadastradas.
+                        </p>
+                      </div>
+
+                      {selectedChannel.connected && (
+                        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                          <button 
+                            className="btn-secondary" 
+                            onClick={() => handleDisconnectChannel(selectedChannel.type)}
+                            style={{ color: '#ef4444', borderColor: 'rgba(239, 68, 68, 0.3)' }}
+                          >
+                            <Trash2 size={15} /> Desconectar Este Canal
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
