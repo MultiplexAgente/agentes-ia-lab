@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Bot, MessageSquare, UtensilsCrossed, Sliders, BookOpen, 
+  MessageSquare, UtensilsCrossed, Sliders, BookOpen, 
   Activity, Send, Sparkles, RefreshCw, Plus, Trash2,
   Smartphone, Instagram, MessageCircle, AlertCircle,
   Sun, Moon, Folder, FolderPlus, Pin, PinOff, Search, PanelLeft,
   Edit3, Check, X, ArrowUp, PlayCircle, LayoutDashboard
 } from 'lucide-react';
+import atomLogo from './assets/multiplex-atom.jpg';
 
 interface FolderItem {
   id: string;
@@ -525,8 +526,8 @@ export default function App() {
         <aside className="sidebar">
           {/* Cabecalho */}
           <div className="chatgpt-sidebar-header">
-            <div className="chatgpt-brand" onClick={() => setActiveView('chat')} style={{ cursor: 'pointer' }}>
-              <Bot size={20} color="var(--accent-primary)" />
+            <div className="chatgpt-brand" onClick={() => setActiveView('chat')} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10 }}>
+              <img src={atomLogo} alt="Multiplex IA" style={{ width: 26, height: 26, borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(0, 210, 255, 0.4)' }} />
               <span>Multiplex IA</span>
             </div>
             <div className="chatgpt-header-actions">
@@ -1029,8 +1030,8 @@ export default function App() {
                 </button>
               )}
 
-              <div className="model-selector">
-                <Bot size={16} color="var(--accent-primary)" />
+              <div className="model-selector" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <img src={atomLogo} alt="Multiplex IA" style={{ width: 22, height: 22, borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(0, 210, 255, 0.4)' }} />
                 <span>Multiplex IA (GPT-4o)</span>
                 <span className="badge" style={{ fontSize: '0.68rem', padding: '2px 6px', background: 'rgba(16,185,129,0.15)', color: '#10b981' }}>
                   Funcoes Ativas
@@ -1063,8 +1064,8 @@ export default function App() {
             <div className="chat-thread-inner">
               {currentChat && currentChat.messages.length === 0 ? (
                 <div className="chat-welcome-container">
-                  <div className="chat-welcome-icon">
-                    <Bot size={28} color="#fff" />
+                  <div className="chat-welcome-icon" style={{ padding: 0, overflow: 'hidden', background: 'transparent', border: '2px solid rgba(0, 210, 255, 0.5)', boxShadow: '0 0 30px rgba(0, 210, 255, 0.3)', width: 56, height: 56, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <img src={atomLogo} alt="Multiplex IA" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
                   </div>
                   <h1 className="chat-welcome-title">Como posso ajudar voce hoje?</h1>
                   <p style={{ color: 'var(--text-dim)', fontSize: '0.9rem' }}>
@@ -1109,8 +1110,8 @@ export default function App() {
                 currentChat && currentChat.messages.map(msg => (
                   <div key={msg.id} className={`message-row ${msg.role}`}>
                     {msg.role === 'assistant' && (
-                      <div className="message-avatar-ai">
-                        <Bot size={18} color="#fff" />
+                      <div className="message-avatar-ai" style={{ padding: 0, overflow: 'hidden', background: 'transparent', border: '1px solid rgba(0, 210, 255, 0.35)', width: 28, height: 28, minWidth: 28, borderRadius: '50%' }}>
+                        <img src={atomLogo} alt="Multiplex IA" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
                       </div>
                     )}
 
@@ -1136,8 +1137,8 @@ export default function App() {
 
               {isSendingMessage && (
                 <div className="message-row assistant">
-                  <div className="message-avatar-ai">
-                    <Bot size={18} color="#fff" />
+                  <div className="message-avatar-ai" style={{ padding: 0, overflow: 'hidden', background: 'transparent', border: '1px solid rgba(0, 210, 255, 0.35)', width: 28, height: 28, minWidth: 28, borderRadius: '50%' }}>
+                    <img src={atomLogo} alt="Multiplex IA" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
                   </div>
                   <div className="message-body-ai" style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--text-dim)' }}>
                     <RefreshCw size={16} className="animate-spin" />
