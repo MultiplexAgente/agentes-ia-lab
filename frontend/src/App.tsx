@@ -264,7 +264,12 @@ export default function App() {
   const [newProductPrice, setNewProductPrice] = useState('');
   const [newProductDesc, setNewProductDesc] = useState('');
 
-  // Importacao de Cardapio em Massa com Multiplex IA
+  // Importacao de Cardapio e Catalogo com Multiplex IA (Texto e Web Scraper de URL)
+  const [catalogImportMode, setCatalogImportMode] = useState<'url' | 'text'>('url');
+  const [clientWebsiteUrl, setClientWebsiteUrl] = useState('');
+  const [isScrapingWebsite, setIsScrapingWebsite] = useState(false);
+  const [scrapeStatusText, setScrapeStatusText] = useState('');
+  const [scrapedSiteTitle, setScrapedSiteTitle] = useState('');
   const [rawMenuText, setRawMenuText] = useState('');
   const [isParsingMenu, setIsParsingMenu] = useState(false);
   const [parsedProducts, setParsedProducts] = useState<Array<{ name: string; price: number; description: string; category?: string; ingredients?: string[] }>>([]);
@@ -964,6 +969,48 @@ export default function App() {
       }
     } catch (e) {
       console.error(e);
+    }
+  };
+
+  // Extrair produtos, imóveis e catálogo completo direto de um site/link com Multiplex IA
+  const handleScrapeWebsite = async (autoSave = false) => {
+    if (!clientWebsiteUrl.trim()) {
+      alert('Por favor, informe a URL ou link do site do cliente (ex: https://sualoja.com.br, https://imobiliaria.com.br, etc.)');
+      return;
+    }
+    setIsScrapingWebsite(true);
+    setScrapeStatusText('Acessando o site do cliente, mapeando páginas e extraindo catálogo com Multiplex IA...');
+    setBatchSuccessMsg('');
+    try {
+      const res = await fetch(`${API_BASE}/api/products/scrape-website`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          url: clientWebsiteUrl.trim(),
+          autoSave: autoSave
+        })
+      });
+      const data = await res.json();
+      if (res.ok && Array.isArray(data.products) && data.products.length > 0) {
+        setScrapedSiteTitle(data.site_title || clientWebsiteUrl);
+        if (autoSave && data.savedProducts) {
+          setProducts(prev => [...prev, ...data.savedProducts]);
+          setBatchSuccessMsg(`Sucesso! ${data.count} itens (produtos/imóveis) extraídos de "${data.site_title || clientWebsiteUrl}" e cadastrados no catálogo.`);
+          setParsedProducts([]);
+          setClientWebsiteUrl('');
+        } else {
+          setParsedProducts(data.products);
+          setBatchSuccessMsg(`${data.count} itens identificados no site "${data.site_title || clientWebsiteUrl}". Confira os itens abaixo antes de salvar.`);
+        }
+      } else {
+        alert(data.error || 'Nenhum produto ou imóvel foi identificado automaticamente neste site. Verifique se o endereço está correto e com acesso público.');
+      }
+    } catch (e: any) {
+      console.error(e);
+      alert('Erro ao conectar com o site ou servidor da Multiplex IA.');
+    } finally {
+      setIsScrapingWebsite(false);
+      setScrapeStatusText('');
     }
   };
 
@@ -2323,7 +2370,7 @@ export default function App() {
               >
                 <div className="item-main">
                   <UtensilsCrossed size={17} color="var(--accent-amber)" />
-                  <span>Cardápio e Produtos</span>
+                  <span>Catálogo, Produtos e Imóveis</span>
                 </div>
                 {products.length > 0 && (
                   <span style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>{products.length}</span>
@@ -3710,128 +3757,337 @@ export default function App() {
         </div>
       )}
 
-      {/* TELA: CARDÁPIO E PRODUTOS */}
+      {/* TELA: CATÁLOGO, PRODUTOS E IMÓVEIS */}
       {activeView === 'menu' && (
         <div className="main-panel-scrollable">
           <div className="page-header" style={{ marginBottom: 16 }}>
             <div>
-              <h1 className="page-title">Cardápio e Produtos</h1>
-              <p className="page-desc">Copie e cole listas de produtos do seu site ou cardápio. A Multiplex IA separa e organiza tudo automaticamente.</p>
+              <h1 className="page-title">Catálogo, Produtos e Imóveis</h1>
+              <p className="page-desc">Importe produtos, imóveis e catálogo completo direto do site do cliente via URL ou colando texto. A Multiplex IA extrai e cadastra tudo automaticamente.</p>
             </div>
             <button className="btn-secondary" onClick={() => setActiveView('chat')}>
               <MessageSquare size={16} /> Voltar ao Chat
             </button>
           </div>
 
-          {/* PAINEL PRINCIPAL: IMPORTAÇÃO INTELIGENTE COM MULTIPLEX IA */}
-          <div 
-            className="glass-panel" 
-            style={{ 
-              padding: 22, 
-              marginBottom: 20, 
-              border: theme === 'dark' ? '1px solid rgba(0, 210, 255, 0.3)' : '1.5px solid #cbd5e1', 
-              background: theme === 'dark' ? 'linear-gradient(180deg, rgba(15, 23, 42, 0.75), rgba(10, 15, 30, 0.85))' : '#ffffff',
-              boxShadow: theme === 'light' ? '0 4px 20px rgba(0, 0, 0, 0.05)' : undefined
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <div style={{ width: 32, height: 32, borderRadius: '50%', overflow: 'hidden', border: theme === 'dark' ? '1px solid rgba(0, 210, 255, 0.4)' : '1px solid #cbd5e1', minWidth: 32 }}>
-                  <img src={atomLogo} alt="Multiplex IA" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          {/* ABAS DE MODO: IMPORTAR POR SITE / LINK (URL) OU TEXTO */}
+          <div style={{ display: 'flex', gap: 10, marginBottom: 16 }}>
+            <button 
+              type="button"
+              className={catalogImportMode === 'url' ? 'btn-primary' : 'btn-secondary'}
+              onClick={() => setCatalogImportMode('url')}
+              style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 18px', fontWeight: 600 }}
+            >
+              <Globe size={18} />
+              <span>Importar Direto do Site do Cliente (URL)</span>
+              <span className="badge" style={{ background: 'rgba(0, 210, 255, 0.2)', color: '#00d2ff', fontSize: '0.65rem' }}>IA Web Scraper</span>
+            </button>
+
+            <button 
+              type="button"
+              className={catalogImportMode === 'text' ? 'btn-primary' : 'btn-secondary'}
+              onClick={() => setCatalogImportMode('text')}
+              style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 18px', fontWeight: 600 }}
+            >
+              <FileText size={18} />
+              <span>Colar Texto ou Lista Manualmente</span>
+            </button>
+          </div>
+
+          {/* PAINEL MODO 1: IMPORTAR DIRETO DO SITE / LINK DO CLIENTE */}
+          {catalogImportMode === 'url' && (
+            <div 
+              className="glass-panel" 
+              style={{ 
+                padding: 22, 
+                marginBottom: 20, 
+                border: theme === 'dark' ? '1px solid rgba(0, 210, 255, 0.3)' : '1.5px solid #cbd5e1', 
+                background: theme === 'dark' ? 'linear-gradient(180deg, rgba(15, 23, 42, 0.75), rgba(10, 15, 30, 0.85))' : '#ffffff',
+                boxShadow: theme === 'light' ? '0 4px 20px rgba(0, 0, 0, 0.05)' : undefined
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <div style={{ width: 34, height: 34, borderRadius: '50%', overflow: 'hidden', border: theme === 'dark' ? '1px solid rgba(0, 210, 255, 0.5)' : '1px solid #cbd5e1', minWidth: 34 }}>
+                    <img src={atomLogo} alt="Multiplex IA" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  </div>
+                  <div>
+                    <h2 style={{ fontSize: '1.15rem', fontWeight: 700, margin: 0, color: theme === 'light' ? '#0f172a' : '#f8fafc' }}>
+                      Extrair Catálogo Completo Direto do Site do Cliente
+                    </h2>
+                    <span style={{ fontSize: '0.84rem', color: theme === 'light' ? '#334155' : 'var(--text-muted)', fontWeight: 500 }}>
+                      Cole o link da loja virtual, imobiliária, cardápio digital ou catálogo. A Multiplex IA acessa e extrai todos os itens automaticamente.
+                    </span>
+                  </div>
                 </div>
-                <div>
-                  <h2 style={{ fontSize: '1.15rem', fontWeight: 700, margin: 0, color: theme === 'light' ? '#0f172a' : '#f8fafc' }}>
-                    Importar Cardápio em Massa com Multiplex IA
-                  </h2>
-                  <span style={{ fontSize: '0.84rem', color: theme === 'light' ? '#334155' : 'var(--text-muted)', fontWeight: 500 }}>
-                    Cole texto corrido, lista de preços, descrições do site ou cardápio em texto
-                  </span>
-                </div>
+
+                <span className="badge" style={{ background: theme === 'dark' ? 'rgba(0, 210, 255, 0.15)' : 'rgba(2, 132, 199, 0.12)', color: theme === 'dark' ? '#00d2ff' : '#0284c7', border: theme === 'dark' ? '1px solid rgba(0, 210, 255, 0.3)' : '1px solid rgba(2, 132, 199, 0.3)', fontWeight: 700 }}>
+                  Web Scraping + GPT-4o
+                </span>
               </div>
 
-              <span className="badge" style={{ background: theme === 'dark' ? 'rgba(0, 210, 255, 0.15)' : 'rgba(2, 132, 199, 0.12)', color: theme === 'dark' ? '#00d2ff' : '#0284c7', border: theme === 'dark' ? '1px solid rgba(0, 210, 255, 0.3)' : '1px solid rgba(2, 132, 199, 0.3)', fontWeight: 700 }}>
-                GPT-4o Extrator
-              </span>
-            </div>
+              {/* CAMPO DE URL */}
+              <div style={{ position: 'relative', marginBottom: 12 }}>
+                <div style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: 'var(--accent-cyan)', display: 'flex', alignItems: 'center' }}>
+                  <Globe size={20} />
+                </div>
+                <input 
+                  type="url"
+                  placeholder="Cole aqui o link do site do cliente (ex: https://sualoja.com.br, https://imobiliariaexemplo.com.br/imoveis, https://cardapio.site/meu-restaurante)"
+                  value={clientWebsiteUrl}
+                  onChange={(e) => setClientWebsiteUrl(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleScrapeWebsite(false)}
+                  style={{ 
+                    width: '100%', 
+                    paddingLeft: 44, 
+                    paddingRight: 14, 
+                    paddingTop: 14, 
+                    paddingBottom: 14, 
+                    fontSize: '0.95rem',
+                    borderRadius: 10,
+                    background: theme === 'light' ? '#ffffff' : undefined,
+                    color: theme === 'light' ? '#0f172a' : undefined,
+                    border: theme === 'light' ? '1.5px solid #cbd5e1' : '1px solid rgba(0, 210, 255, 0.3)'
+                  }}
+                />
+              </div>
 
-            <textarea 
-              placeholder="Cole aqui os produtos copiados do seu site, cardápio ou mensagem...&#10;&#10;Exemplo:&#10;Pizza Calabresa Especial - R$ 48,00 - Molho caseiro, mussarela, calabresa e cebola&#10;Pizza Quatro Queijos - R$ 56,90 - Mussarela, provolone, gorgonzola e catupiry&#10;Coca-Cola 2L - R$ 14,00&#10;Cerveja Long Neck - R$ 11,50"
-              value={rawMenuText}
-              onChange={(e) => setRawMenuText(e.target.value)}
-              rows={5}
-              style={{ 
-                width: '100%', 
-                fontSize: '0.9rem', 
-                lineHeight: '1.45', 
-                marginBottom: 14, 
-                resize: 'vertical',
-                background: theme === 'light' ? '#ffffff' : undefined,
-                color: theme === 'light' ? '#0f172a' : undefined,
-                border: theme === 'light' ? '1.5px solid #cbd5e1' : undefined
-              }}
-            />
+              {/* CHIPS DE SUPORTE E EXEMPLOS */}
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 16, alignItems: 'center' }}>
+                <span style={{ fontSize: '0.78rem', color: theme === 'light' ? '#64748b' : 'var(--text-muted)', fontWeight: 600 }}>
+                  Tipos de catálogo suportados:
+                </span>
+                <span className="badge" style={{ fontSize: '0.74rem', background: 'rgba(99, 102, 241, 0.12)', color: '#818cf8' }}>
+                  Lojas & E-commerces (Shopify, Nuvemshop, WooCommerce)
+                </span>
+                <span className="badge" style={{ fontSize: '0.74rem', background: 'rgba(16, 185, 129, 0.12)', color: '#34d399' }}>
+                  Imobiliárias (Casas, Apartamentos, Aluguel, Venda)
+                </span>
+                <span className="badge" style={{ fontSize: '0.74rem', background: 'rgba(245, 158, 11, 0.12)', color: '#fbbf24' }}>
+                  Restaurantes & Pizzarias (Cardápio Digital, iFood)
+                </span>
+                <span className="badge" style={{ fontSize: '0.74rem', background: 'rgba(236, 72, 153, 0.12)', color: '#f472b6' }}>
+                  Serviços & Catálogos Comerciais
+                </span>
+              </div>
 
-            <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
-              <button 
-                className="btn-primary" 
-                onClick={handleParseMenuWithAI}
-                disabled={isParsingMenu || !rawMenuText.trim()}
-                style={{ background: 'linear-gradient(135deg, #0284c7, #2563eb)' }}
-              >
-                {isParsingMenu ? (
-                  <>
-                    <RefreshCw size={16} className="animate-spin" />
-                    <span>Multiplex IA separando produtos...</span>
-                  </>
-                ) : (
-                  <>
-                    <Sparkles size={16} />
-                    <span>Analisar e Separar Produtos</span>
-                  </>
-                )}
-              </button>
-
-              <button 
-                className="btn-primary" 
-                onClick={handleDirectImportAI}
-                disabled={isParsingMenu || !rawMenuText.trim()}
-                style={{ background: 'linear-gradient(135deg, #059669, #10b981)' }}
-              >
-                {isParsingMenu ? (
-                  <RefreshCw size={16} className="animate-spin" />
-                ) : (
-                  <Check size={16} />
-                )}
-                <span>Importar e Cadastrar Tudo em 1 Clique</span>
-              </button>
-
-              {rawMenuText.trim().length > 0 && (
+              {/* BOTÕES DE AÇÃO DO MODO URL */}
+              <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
                 <button 
-                  className="btn-secondary" 
-                  onClick={() => { setRawMenuText(''); setParsedProducts([]); setBatchSuccessMsg(''); }}
+                  className="btn-primary" 
+                  onClick={() => handleScrapeWebsite(false)}
+                  disabled={isScrapingWebsite || !clientWebsiteUrl.trim()}
+                  style={{ background: 'linear-gradient(135deg, #0284c7, #2563eb)', display: 'flex', alignItems: 'center', gap: 8 }}
                 >
-                  Limpar
+                  {isScrapingWebsite ? (
+                    <>
+                      <RefreshCw size={16} className="animate-spin" />
+                      <span>Multiplex IA rastreando site...</span>
+                    </>
+                  ) : (
+                    <>
+                      <div style={{ width: 18, height: 18, borderRadius: '50%', overflow: 'hidden', border: '1px solid rgba(0, 210, 255, 0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <img src={atomLogo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      </div>
+                      <span>Rastrear Site e Extrair Tudo com Multiplex IA</span>
+                    </>
+                  )}
                 </button>
+
+                <button 
+                  className="btn-primary" 
+                  onClick={() => handleScrapeWebsite(true)}
+                  disabled={isScrapingWebsite || !clientWebsiteUrl.trim()}
+                  style={{ background: 'linear-gradient(135deg, #059669, #10b981)', display: 'flex', alignItems: 'center', gap: 8 }}
+                >
+                  {isScrapingWebsite ? (
+                    <RefreshCw size={16} className="animate-spin" />
+                  ) : (
+                    <Check size={16} />
+                  )}
+                  <span>Importar e Cadastrar Tudo no Catálogo em 1 Clique</span>
+                </button>
+
+                {clientWebsiteUrl.trim().length > 0 && (
+                  <button 
+                    className="btn-secondary" 
+                    onClick={() => { setClientWebsiteUrl(''); setParsedProducts([]); setBatchSuccessMsg(''); }}
+                  >
+                    Limpar
+                  </button>
+                )}
+              </div>
+
+              {/* FEEDBACK DE CARREGAMENTO INTELIGENTE */}
+              {isScrapingWebsite && (
+                <div style={{ marginTop: 16, padding: '14px 18px', borderRadius: 10, background: 'rgba(2, 132, 199, 0.12)', border: '1px solid rgba(2, 132, 199, 0.3)', display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div style={{ width: 28, height: 28, borderRadius: '50%', overflow: 'hidden', border: '1px solid #00d2ff', animation: 'spin 3s linear infinite' }}>
+                    <img src={atomLogo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  </div>
+                  <div>
+                    <div style={{ fontWeight: 700, fontSize: '0.9rem', color: theme === 'light' ? '#0f172a' : '#f8fafc' }}>
+                      Multiplex IA acessando e processando o site do cliente...
+                    </div>
+                    <div style={{ fontSize: '0.8rem', color: theme === 'light' ? '#334155' : 'var(--text-muted)' }}>
+                      {scrapeStatusText}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {batchSuccessMsg && (
+                <div style={{ marginTop: 14, padding: '10px 14px', borderRadius: 8, background: 'rgba(16, 185, 129, 0.15)', border: '1px solid rgba(16, 185, 129, 0.3)', color: '#10b981', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <Check size={16} />
+                  <span>{batchSuccessMsg}</span>
+                </div>
               )}
             </div>
+          )}
 
-            {batchSuccessMsg && (
-              <div style={{ marginTop: 14, padding: '10px 14px', borderRadius: 8, background: 'rgba(16, 185, 129, 0.15)', border: '1px solid rgba(16, 185, 129, 0.3)', color: '#10b981', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: 8 }}>
-                <Check size={16} />
-                <span>{batchSuccessMsg}</span>
+          {/* PAINEL MODO 2: COLAR TEXTO OU LISTA MANUALMENTE */}
+          {catalogImportMode === 'text' && (
+            <div 
+              className="glass-panel" 
+              style={{ 
+                padding: 22, 
+                marginBottom: 20, 
+                border: theme === 'dark' ? '1px solid rgba(0, 210, 255, 0.3)' : '1.5px solid #cbd5e1', 
+                background: theme === 'dark' ? 'linear-gradient(180deg, rgba(15, 23, 42, 0.75), rgba(10, 15, 30, 0.85))' : '#ffffff',
+                boxShadow: theme === 'light' ? '0 4px 20px rgba(0, 0, 0, 0.05)' : undefined
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <div style={{ width: 32, height: 32, borderRadius: '50%', overflow: 'hidden', border: theme === 'dark' ? '1px solid rgba(0, 210, 255, 0.4)' : '1px solid #cbd5e1', minWidth: 32 }}>
+                    <img src={atomLogo} alt="Multiplex IA" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  </div>
+                  <div>
+                    <h2 style={{ fontSize: '1.15rem', fontWeight: 700, margin: 0, color: theme === 'light' ? '#0f172a' : '#f8fafc' }}>
+                      Importar Texto ou Lista de Produtos com Multiplex IA
+                    </h2>
+                    <span style={{ fontSize: '0.84rem', color: theme === 'light' ? '#334155' : 'var(--text-muted)', fontWeight: 500 }}>
+                      Cole texto corrido, lista de preços, descrições ou mensagens
+                    </span>
+                  </div>
+                </div>
+
+                <span className="badge" style={{ background: theme === 'dark' ? 'rgba(0, 210, 255, 0.15)' : 'rgba(2, 132, 199, 0.12)', color: theme === 'dark' ? '#00d2ff' : '#0284c7', border: theme === 'dark' ? '1px solid rgba(0, 210, 255, 0.3)' : '1px solid rgba(2, 132, 199, 0.3)', fontWeight: 700 }}>
+                  GPT-4o Extrator
+                </span>
               </div>
-            )}
-          </div>
+
+              {/* DETECTOR DE URL NO TEXTO */}
+              {/(?:https?:\/\/|www\.)[^\s]+/i.test(rawMenuText) && (
+                <div style={{ marginBottom: 12, padding: '10px 14px', borderRadius: 8, background: 'rgba(0, 210, 255, 0.12)', border: '1px solid rgba(0, 210, 255, 0.3)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
+                  <span style={{ fontSize: '0.85rem', color: theme === 'light' ? '#0f172a' : '#f8fafc' }}>
+                    🔗 Detectamos um link de site no seu texto! Deseja que a Multiplex IA rastreie e copie todos os produtos/imóveis do site automaticamente?
+                  </span>
+                  <button 
+                    className="btn-primary"
+                    style={{ padding: '6px 12px', fontSize: '0.8rem', whiteSpace: 'nowrap' }}
+                    onClick={() => {
+                      const match = rawMenuText.match(/(?:https?:\/\/|www\.)[^\s]+/i);
+                      if (match) {
+                        setClientWebsiteUrl(match[0]);
+                        setCatalogImportMode('url');
+                      }
+                    }}
+                  >
+                    Importar Direto pelo Site (URL)
+                  </button>
+                </div>
+              )}
+
+              <textarea 
+                placeholder="Cole aqui os produtos copiados do seu site, cardápio ou mensagem...&#10;&#10;Exemplo:&#10;Pizza Calabresa Especial - R$ 48,00 - Molho caseiro, mussarela, calabresa e cebola&#10;Pizza Quatro Queijos - R$ 56,90 - Mussarela, provolone, gorgonzola e catupiry&#10;Coca-Cola 2L - R$ 14,00&#10;Cerveja Long Neck - R$ 11,50"
+                value={rawMenuText}
+                onChange={(e) => setRawMenuText(e.target.value)}
+                rows={5}
+                style={{ 
+                  width: '100%', 
+                  fontSize: '0.9rem', 
+                  lineHeight: '1.45', 
+                  marginBottom: 14, 
+                  resize: 'vertical',
+                  background: theme === 'light' ? '#ffffff' : undefined,
+                  color: theme === 'light' ? '#0f172a' : undefined,
+                  border: theme === 'light' ? '1.5px solid #cbd5e1' : undefined
+                }}
+              />
+
+              <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+                <button 
+                  className="btn-primary" 
+                  onClick={handleParseMenuWithAI}
+                  disabled={isParsingMenu || !rawMenuText.trim()}
+                  style={{ background: 'linear-gradient(135deg, #0284c7, #2563eb)' }}
+                >
+                  {isParsingMenu ? (
+                    <>
+                      <RefreshCw size={16} className="animate-spin" />
+                      <span>Multiplex IA separando produtos...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles size={16} />
+                      <span>Analisar e Separar Produtos</span>
+                    </>
+                  )}
+                </button>
+
+                <button 
+                  className="btn-primary" 
+                  onClick={handleDirectImportAI}
+                  disabled={isParsingMenu || !rawMenuText.trim()}
+                  style={{ background: 'linear-gradient(135deg, #059669, #10b981)' }}
+                >
+                  {isParsingMenu ? (
+                    <RefreshCw size={16} className="animate-spin" />
+                  ) : (
+                    <Check size={16} />
+                  )}
+                  <span>Importar e Cadastrar Tudo em 1 Clique</span>
+                </button>
+
+                {rawMenuText.trim().length > 0 && (
+                  <button 
+                    className="btn-secondary" 
+                    onClick={() => { setRawMenuText(''); setParsedProducts([]); setBatchSuccessMsg(''); }}
+                  >
+                    Limpar
+                  </button>
+                )}
+              </div>
+
+              {batchSuccessMsg && (
+                <div style={{ marginTop: 14, padding: '10px 14px', borderRadius: 8, background: 'rgba(16, 185, 129, 0.15)', border: '1px solid rgba(16, 185, 129, 0.3)', color: '#10b981', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <Check size={16} />
+                  <span>{batchSuccessMsg}</span>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* PRE-VISUALIZACAO DOS PRODUTOS IDENTIFICADOS PELA IA */}
           {parsedProducts.length > 0 && (
-            <div className="glass-panel" style={{ padding: 20, marginBottom: 20, border: '1px solid rgba(16, 185, 129, 0.4)', background: 'rgba(16, 185, 129, 0.04)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+            <div 
+              className="glass-panel" 
+              style={{ 
+                padding: 20, 
+                marginBottom: 20, 
+                border: theme === 'dark' ? '1px solid rgba(16, 185, 129, 0.4)' : '1.5px solid #10b981', 
+                background: theme === 'dark' ? 'rgba(16, 185, 129, 0.04)' : '#ffffff',
+                boxShadow: theme === 'light' ? '0 4px 20px rgba(16, 185, 129, 0.08)' : undefined
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14, flexWrap: 'wrap', gap: 10 }}>
                 <div>
-                  <h3 style={{ fontSize: '1.05rem', fontWeight: 700, margin: 0 }}>
-                    {parsedProducts.length} Produtos Identificados pela Multiplex IA
+                  <h3 style={{ fontSize: '1.05rem', fontWeight: 700, margin: 0, color: theme === 'light' ? '#0f172a' : '#f8fafc' }}>
+                    {parsedProducts.length} Itens (Produtos / Imóveis) Identificados pela Multiplex IA
                   </h3>
-                  <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Confira os itens abaixo antes de adicionar ao catálogo</span>
+                  <span style={{ fontSize: '0.82rem', color: theme === 'light' ? '#334155' : 'var(--text-muted)' }}>
+                    Confira os dados extraídos do site do cliente antes de confirmar a gravação no catálogo
+                  </span>
                 </div>
 
                 <div style={{ display: 'flex', gap: 10 }}>
@@ -3846,7 +4102,7 @@ export default function App() {
                     ) : (
                       <Check size={16} />
                     )}
-                    <span>Confirmar e Salvar Todos ({parsedProducts.length})</span>
+                    <span>Confirmar e Cadastrar Todos ({parsedProducts.length})</span>
                   </button>
 
                   <button 
@@ -3858,29 +4114,51 @@ export default function App() {
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 12 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 14 }}>
                 {parsedProducts.map((p, idx) => (
-                  <div key={idx} className="glass-card" style={{ padding: 14, position: 'relative' }}>
+                  <div 
+                    key={idx} 
+                    className="glass-card" 
+                    style={{ 
+                      padding: 16, 
+                      position: 'relative',
+                      border: theme === 'light' ? '1.5px solid #cbd5e1' : undefined,
+                      background: theme === 'light' ? '#ffffff' : undefined
+                    }}
+                  >
                     <button 
                       onClick={() => handleRemoveParsedItem(idx)}
-                      style={{ position: 'absolute', top: 8, right: 8, background: 'transparent', border: 'none', color: 'var(--text-dim)', cursor: 'pointer' }}
+                      style={{ position: 'absolute', top: 10, right: 10, background: 'transparent', border: 'none', color: theme === 'light' ? '#64748b' : 'var(--text-dim)', cursor: 'pointer' }}
                       title="Remover este item da lista"
                     >
-                      <X size={14} />
+                      <X size={16} />
                     </button>
-                    <div style={{ fontWeight: 700, fontSize: '0.95rem', paddingRight: 20 }}>{p.name}</div>
-                    <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 4 }}>
-                      <span style={{ color: '#10b981', fontWeight: 700, fontSize: '0.9rem' }}>R$ {Number(p.price).toFixed(2)}</span>
+                    <div style={{ fontWeight: 700, fontSize: '0.98rem', paddingRight: 24, color: theme === 'light' ? '#0f172a' : '#f8fafc' }}>
+                      {p.name}
+                    </div>
+                    <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 6, flexWrap: 'wrap' }}>
+                      <span style={{ color: '#059669', fontWeight: 800, fontSize: '0.95rem' }}>
+                        {Number(p.price) > 0 ? `R$ ${Number(p.price).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : 'Sob consulta'}
+                      </span>
                       {p.category && (
-                        <span className="badge" style={{ fontSize: '0.68rem', padding: '1px 6px', background: 'rgba(255,255,255,0.08)' }}>
+                        <span className="badge" style={{ fontSize: '0.72rem', padding: '2px 8px', background: theme === 'light' ? 'rgba(99, 102, 241, 0.12)' : 'rgba(255,255,255,0.08)', color: theme === 'light' ? '#4338ca' : 'var(--accent-cyan)' }}>
                           {p.category}
                         </span>
                       )}
                     </div>
                     {p.description && (
-                      <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: 6, marginBottom: 0 }}>
+                      <p style={{ fontSize: '0.82rem', color: theme === 'light' ? '#334155' : 'var(--text-muted)', marginTop: 8, marginBottom: 8, lineHeight: 1.4 }}>
                         {p.description}
                       </p>
+                    )}
+                    {Array.isArray(p.ingredients) && p.ingredients.length > 0 && (
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 4 }}>
+                        {p.ingredients.map((tag: string, tIdx: number) => (
+                          <span key={tIdx} style={{ fontSize: '0.7rem', padding: '1px 6px', borderRadius: 4, background: theme === 'light' ? '#f1f5f9' : 'rgba(255,255,255,0.06)', color: theme === 'light' ? '#475569' : '#94a3b8' }}>
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
                     )}
                   </div>
                 ))}
