@@ -5,7 +5,8 @@ import {
   Smartphone, Instagram, MessageCircle, AlertCircle,
   Sun, Moon, Folder, FolderPlus, Pin, PinOff, Search, PanelLeft,
   Edit3, Check, X, ArrowUp, PlayCircle, LayoutDashboard,
-  Globe, Facebook, Twitter, Copy, ExternalLink, HelpCircle, CheckCircle2
+  Globe, Facebook, Twitter, Copy, ExternalLink, HelpCircle, CheckCircle2,
+  User, Shield, Bell, CreditCard, LogOut, ChevronRight, Settings
 } from 'lucide-react';
 import atomLogo from './assets/multiplex-atom.jpg';
 
@@ -166,6 +167,17 @@ export default function App() {
   const [channelTestSuccess, setChannelTestSuccess] = useState<string | null>(null);
   const [copiedUrl, setCopiedUrl] = useState(false);
 
+  // Perfil e Assinatura (Plano e Mensalidade)
+  const [showUserPopup, setShowUserPopup] = useState(false);
+  const [showHelpSubmenu, setShowHelpSubmenu] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [profileActiveTab, setProfileActiveTab] = useState<'personal' | 'security' | 'notifications' | 'plan'>('plan');
+  const [billingData, setBillingData] = useState<any>(null);
+  const [billingPlans, setBillingPlans] = useState<any[]>([]);
+  const [confirmModal, setConfirmModal] = useState<{ type: 'cancel' | 'downgrade' | 'upgrade' | 'logout'; plan?: any } | null>(null);
+  const [isChangingPlan, setIsChangingPlan] = useState(false);
+  const [planActionMessage, setPlanActionMessage] = useState<string | null>(null);
+
   const [metrics, setMetrics] = useState<any>({
     conversations_today: 0,
     messages_today: 0,
@@ -197,14 +209,16 @@ export default function App() {
 
   const loadData = async () => {
     try {
-      const [resProd, resAgent, resKb, resChan, resDash, resHist, resLogs] = await Promise.all([
+      const [resProd, resAgent, resKb, resChan, resDash, resHist, resLogs, resBill, resPlans] = await Promise.all([
         fetch(`${API_BASE}/api/products`).catch(() => null),
         fetch(`${API_BASE}/api/agent/config`).catch(() => null),
         fetch(`${API_BASE}/api/knowledge`).catch(() => null),
         fetch(`${API_BASE}/api/channels`).catch(() => null),
         fetch(`${API_BASE}/api/dashboard`).catch(() => null),
         fetch(`${API_BASE}/api/teach/history`).catch(() => null),
-        fetch(`${API_BASE}/api/logs`).catch(() => null)
+        fetch(`${API_BASE}/api/logs`).catch(() => null),
+        fetch(`${API_BASE}/api/billing/current`).catch(() => null),
+        fetch(`${API_BASE}/api/billing/plans`).catch(() => null)
       ]);
 
       if (resProd?.ok) setProducts(await resProd.json());
@@ -220,6 +234,8 @@ export default function App() {
       }
       if (resHist?.ok) setStructuredHistory(await resHist.json());
       if (resLogs?.ok) setLogsList(await resLogs.json());
+      if (resBill?.ok) setBillingData(await resBill.json());
+      if (resPlans?.ok) setBillingPlans(await resPlans.json());
     } catch (e) {
       console.warn('API local nao acessivel no momento');
     }
@@ -677,6 +693,71 @@ export default function App() {
         if (selectedChannel?.type === type) {
           setSelectedChannel(updated);
         }
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  // Trocar Plano (Upgrade ou Downgrade)
+  const handleChangePlan = async (planId: string) => {
+    setIsChangingPlan(true);
+    try {
+      const res = await fetch(`${API_BASE}/api/billing/change-plan`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plan_id: planId })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setPlanActionMessage(`Plano alterado para ${data.plan.name} com sucesso.`);
+        const curRes = await fetch(`${API_BASE}/api/billing/current`);
+        if (curRes.ok) setBillingData(await curRes.json());
+        setConfirmModal(null);
+      } else {
+        alert(data.error || 'Erro ao alterar plano');
+      }
+    } catch (e) {
+      console.error(e);
+      alert('Falha na comunicação ao alterar plano');
+    } finally {
+      setIsChangingPlan(false);
+    }
+  };
+
+  // Cancelar Assinatura
+  const handleCancelSubscription = async () => {
+    setIsChangingPlan(true);
+    try {
+      const res = await fetch(`${API_BASE}/api/billing/cancel`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setPlanActionMessage('Cancelamento agendado. Seu plano permanecerá ativo até o final do período vigente.');
+        const curRes = await fetch(`${API_BASE}/api/billing/current`);
+        if (curRes.ok) setBillingData(await curRes.json());
+        setConfirmModal(null);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsChangingPlan(false);
+    }
+  };
+
+  // Reativar Assinatura
+  const handleReactivateSubscription = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/api/billing/reactivate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      if (res.ok) {
+        setPlanActionMessage('Assinatura reativada com sucesso.');
+        const curRes = await fetch(`${API_BASE}/api/billing/current`);
+        if (curRes.ok) setBillingData(await curRes.json());
       }
     } catch (e) {
       console.error(e);
@@ -1194,14 +1275,143 @@ export default function App() {
             </div>
           </div>
 
-          {/* Rodape */}
-          <div className="chatgpt-user-footer">
+          {/* Rodape com Perfil ChatGPT-style e sem informacao do n8n */}
+          <div className="chatgpt-user-footer" style={{ position: 'relative' }}>
+            {/* Popover flutuante estilo ChatGPT */}
+            {showUserPopup && (
+              <div className="user-popup-container" onClick={(e) => e.stopPropagation()}>
+                <div 
+                  className="user-popup-header"
+                  onClick={() => {
+                    setProfileActiveTab('personal');
+                    setShowProfileModal(true);
+                    setShowUserPopup(false);
+                  }}
+                >
+                  <div className="avatar-circle">AN</div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontWeight: 600, fontSize: '0.85rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>Anthony Both</div>
+                    <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{billingData?.plan?.name || 'Profissional'}</div>
+                  </div>
+                  <ChevronRight size={16} color="var(--text-muted)" />
+                </div>
+
+                <div className="user-popup-divider" />
+
+                <button 
+                  className="user-popup-item"
+                  onClick={() => {
+                    setProfileActiveTab('plan');
+                    setShowProfileModal(true);
+                    setShowUserPopup(false);
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <Sparkles size={16} color="var(--accent-primary)" />
+                    <span>Plano e Mensalidade</span>
+                  </div>
+                </button>
+
+                <button 
+                  className="user-popup-item"
+                  onClick={() => {
+                    setActiveView('personality');
+                    setShowUserPopup(false);
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <Sliders size={16} />
+                    <span>Personalização</span>
+                  </div>
+                </button>
+
+                <button 
+                  className="user-popup-item"
+                  onClick={() => {
+                    setProfileActiveTab('personal');
+                    setShowProfileModal(true);
+                    setShowUserPopup(false);
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <User size={16} />
+                    <span>Perfil</span>
+                  </div>
+                </button>
+
+                <button 
+                  className="user-popup-item"
+                  onClick={() => {
+                    setProfileActiveTab('security');
+                    setShowProfileModal(true);
+                    setShowUserPopup(false);
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <Settings size={16} />
+                    <span>Configurações</span>
+                  </div>
+                </button>
+
+                <div className="user-popup-divider" />
+
+                <div style={{ position: 'relative' }} onMouseEnter={() => setShowHelpSubmenu(true)} onMouseLeave={() => setShowHelpSubmenu(false)}>
+                  <button className="user-popup-item">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <HelpCircle size={16} />
+                      <span>Ajuda</span>
+                    </div>
+                    <ChevronRight size={14} color="var(--text-dim)" />
+                  </button>
+
+                  {showHelpSubmenu && (
+                    <div className="user-popup-submenu">
+                      <button className="user-popup-item" onClick={() => { setActiveView('chat'); setShowUserPopup(false); }}>
+                        <span>Central de ajuda</span>
+                      </button>
+                      <button className="user-popup-item" onClick={() => alert('Multiplex IA v1.2.0 - GPT-4o')}>
+                        <span>Notas de versão</span>
+                      </button>
+                      <button className="user-popup-item" onClick={() => alert('Termos de uso da plataforma')}>
+                        <span>Termos de uso</span>
+                      </button>
+                      <button className="user-popup-item" onClick={() => alert('Política de privacidade e proteção de dados')}>
+                        <span>Política de Privacidade</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                <button 
+                  className="user-popup-item"
+                  style={{ color: '#ef4444' }}
+                  onClick={() => {
+                    setConfirmModal({ type: 'logout' });
+                    setShowUserPopup(false);
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <LogOut size={16} />
+                    <span>Sair</span>
+                  </div>
+                </button>
+              </div>
+            )}
+
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 4px' }}>
-              <div className="user-profile-row" style={{ flex: 1, padding: 0 }}>
+              <div 
+                className="user-profile-row" 
+                style={{ flex: 1, padding: 0, cursor: 'pointer' }}
+                onClick={() => setShowUserPopup(!showUserPopup)}
+                title="Clique para abrir opções do Perfil e Assinatura"
+              >
                 <div className="avatar-circle">AN</div>
                 <div>
                   <div className="user-name">Anthony Both</div>
-                  <div className="user-plan">Free</div>
+                  <div className="user-plan" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <span>{billingData?.plan?.name || 'Profissional'}</span>
+                    <span style={{ fontSize: '0.65rem', color: '#10b981' }}>● Ativo</span>
+                  </div>
                 </div>
               </div>
 
@@ -1212,20 +1422,6 @@ export default function App() {
                 title={theme === 'dark' ? "Modo Claro" : "Modo Escuro"}
               >
                 {theme === 'dark' ? <Sun size={17} color="#f59e0b" /> : <Moon size={17} color="#6366f1" />}
-              </button>
-            </div>
-
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '4px 8px', fontSize: '0.75rem', color: 'var(--text-dim)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <span className="status-dot-green"></span>
-                <span>n8n Conectado (:5678)</span>
-              </div>
-              <button 
-                className="item-action-btn" 
-                title="Atualizar dados"
-                onClick={loadData}
-              >
-                <RefreshCw size={12} />
               </button>
             </div>
           </div>
@@ -2421,13 +2617,669 @@ export default function App() {
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
               <span className="status-dot-green"></span>
               <div>
-                <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>n8n Local Conectado (:5678)</div>
-                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Automacoes sincronizadas</div>
+                <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>Automacoes e Webhooks Ativos</div>
+                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Fluxos omnichannel sincronizados</div>
               </div>
             </div>
             <button className="btn-secondary" onClick={loadData}>
               <RefreshCw size={14} /> Atualizar Metricas
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL PRINCIPAL DE PERFIL E CONTA COM PLANO E MENSALIDADE */}
+      {showProfileModal && (
+        <div className="modal-backdrop" onClick={() => setShowProfileModal(false)}>
+          <div 
+            className="modal-content" 
+            onClick={(e) => e.stopPropagation()} 
+            style={{ maxWidth: 940, width: '95%', padding: 0, overflow: 'hidden' }}
+          >
+            {/* Cabecalho Unificado */}
+            <div className="modal-header" style={{ padding: '16px 22px', borderBottom: '1px solid var(--border-subtle)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div className="avatar-circle" style={{ width: 34, height: 34, fontSize: '0.85rem' }}>AN</div>
+                <div>
+                  <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0 }}>Conta & Perfil</h3>
+                  <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>anthony_both • {billingData?.plan?.name || 'Profissional'}</span>
+                </div>
+              </div>
+
+              <button 
+                onClick={() => setShowProfileModal(false)}
+                style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: 4 }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Layout em Grid: Menu Lateral a Esquerda + Conteudo a Direita */}
+            <div className="profile-modal-grid">
+              {/* Menu Lateral do Perfil */}
+              <nav className="profile-nav-sidebar">
+                <button 
+                  className={`profile-nav-item ${profileActiveTab === 'personal' ? 'active' : ''}`}
+                  onClick={() => setProfileActiveTab('personal')}
+                >
+                  <User size={16} />
+                  <span>Informacoes pessoais</span>
+                </button>
+
+                <button 
+                  className={`profile-nav-item ${profileActiveTab === 'security' ? 'active' : ''}`}
+                  onClick={() => setProfileActiveTab('security')}
+                >
+                  <Shield size={16} />
+                  <span>Seguranca</span>
+                </button>
+
+                <button 
+                  className={`profile-nav-item ${profileActiveTab === 'notifications' ? 'active' : ''}`}
+                  onClick={() => setProfileActiveTab('notifications')}
+                >
+                  <Bell size={16} />
+                  <span>Notificacoes</span>
+                </button>
+
+                <button 
+                  className={`profile-nav-item ${profileActiveTab === 'plan' ? 'active' : ''}`}
+                  onClick={() => setProfileActiveTab('plan')}
+                >
+                  <CreditCard size={16} />
+                  <span>Plano e Mensalidade</span>
+                </button>
+
+                <div style={{ flex: 1 }} />
+
+                <div className="user-popup-divider" />
+
+                <button 
+                  className="profile-nav-item"
+                  style={{ color: '#ef4444' }}
+                  onClick={() => {
+                    setShowProfileModal(false);
+                    setConfirmModal({ type: 'logout' });
+                  }}
+                >
+                  <LogOut size={16} />
+                  <span>Sair</span>
+                </button>
+              </nav>
+
+              {/* Conteudo da Aba Selecionada */}
+              <div className="profile-tab-content">
+                {/* NOTIFICACAO DE ACAO DO PLANO */}
+                {planActionMessage && (
+                  <div style={{ marginBottom: 16, padding: '12px 16px', borderRadius: 8, background: 'rgba(16, 185, 129, 0.15)', border: '1px solid rgba(16, 185, 129, 0.3)', color: '#10b981', fontSize: '0.88rem', display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <CheckCircle2 size={16} />
+                    <span>{planActionMessage}</span>
+                  </div>
+                )}
+
+                {/* ABA: PLANO E MENSALIDADE */}
+                {profileActiveTab === 'plan' && (
+                  <div>
+                    <div style={{ marginBottom: 20 }}>
+                      <h2 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0 }}>Plano e Mensalidade</h2>
+                      <p style={{ fontSize: '0.84rem', color: 'var(--text-muted)', marginTop: 4 }}>
+                        Gerencie sua assinatura, limites de uso, faturamento e upgrades da plataforma.
+                      </p>
+                    </div>
+
+                    {/* SECAO 1: SEU PLANO ATUAL */}
+                    <div className="glass-panel" style={{ padding: 22, marginBottom: 22, border: '1px solid rgba(0, 210, 255, 0.35)', background: 'linear-gradient(180deg, rgba(15, 23, 42, 0.75), rgba(10, 15, 30, 0.85))' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 14 }}>
+                        <div>
+                          <span style={{ fontSize: '0.78rem', textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--text-dim)' }}>
+                            Seu plano atual
+                          </span>
+                          <div style={{ fontSize: '1.6rem', fontWeight: 800, marginTop: 4, color: 'var(--text-main)', letterSpacing: '-0.5px' }}>
+                            {billingData?.plan?.name?.toUpperCase() || 'PROFISSIONAL'}
+                          </div>
+                          <div style={{ fontSize: '1.1rem', fontWeight: 600, color: '#10b981', marginTop: 2 }}>
+                            R$ {billingData?.subscription?.price || 299} / mes
+                          </div>
+                        </div>
+
+                        <div style={{ textAlign: 'right' }}>
+                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '4px 10px', borderRadius: 20, background: 'rgba(16, 185, 129, 0.15)', border: '1px solid rgba(16, 185, 129, 0.3)', color: '#10b981', fontSize: '0.78rem', fontWeight: 600 }}>
+                            {billingData?.subscription?.status === 'cancel_scheduled' ? (
+                              <span style={{ color: '#f59e0b' }}>● Cancelamento agendado</span>
+                            ) : (
+                              <span>● Ativa</span>
+                            )}
+                          </div>
+                          <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: 6 }}>
+                            Proxima cobranca: 07 de outubro de 2026
+                          </div>
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'flex', gap: 10, marginTop: 18, flexWrap: 'wrap' }}>
+                        <button 
+                          className="btn-primary"
+                          onClick={() => {
+                            const el = document.getElementById('available-plans-grid');
+                            if (el) el.scrollIntoView({ behavior: 'smooth' });
+                          }}
+                        >
+                          <Sparkles size={15} />
+                          <span>Fazer upgrade</span>
+                        </button>
+
+                        <button 
+                          className="btn-secondary"
+                          onClick={() => alert('Gerenciamento de faturamento e cartoes disponivel via Gateway Seguro.')}
+                        >
+                          <CreditCard size={15} />
+                          <span>Gerenciar assinatura</span>
+                        </button>
+
+                        {billingData?.subscription?.status === 'cancel_scheduled' ? (
+                          <button 
+                            className="btn-secondary"
+                            onClick={handleReactivateSubscription}
+                            style={{ color: '#10b981' }}
+                          >
+                            Reativar Assinatura
+                          </button>
+                        ) : (
+                          <button 
+                            className="btn-secondary"
+                            onClick={() => setConfirmModal({ type: 'cancel' })}
+                            style={{ color: 'var(--text-dim)', fontSize: '0.8rem' }}
+                          >
+                            Cancelar assinatura
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* SECAO 2: USO DO PLANO (BARRAS DE PROGRESSO E AVISOS) */}
+                    <div className="glass-panel" style={{ padding: 20, marginBottom: 22 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+                        <h3 style={{ fontSize: '1.05rem', fontWeight: 700, margin: 0 }}>Uso do plano</h3>
+                        <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Periodo vigente: 07/09/2026 - 07/10/2026</span>
+                      </div>
+
+                      {/* Alerta de 84% de limite conforme especificacao */}
+                      <div style={{ padding: '10px 14px', borderRadius: 8, background: 'rgba(245, 158, 11, 0.12)', border: '1px solid rgba(245, 158, 11, 0.25)', color: '#f59e0b', fontSize: '0.85rem', marginBottom: 16, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <AlertCircle size={16} />
+                          <span>Voce utilizou 84% do limite de mensagens de IA deste mes.</span>
+                        </div>
+                        <button 
+                          className="btn-secondary"
+                          style={{ padding: '4px 10px', fontSize: '0.78rem', background: 'rgba(0,0,0,0.3)' }}
+                          onClick={() => {
+                            const el = document.getElementById('available-plans-grid');
+                            if (el) el.scrollIntoView({ behavior: 'smooth' });
+                          }}
+                        >
+                          Ver planos
+                        </button>
+                      </div>
+
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
+                        <div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem' }}>
+                            <span style={{ fontWeight: 600 }}>Mensagens de IA</span>
+                            <span style={{ color: 'var(--text-muted)' }}>8.420 / 10.000 (84%)</span>
+                          </div>
+                          <div className="usage-track">
+                            <div className="usage-fill" style={{ width: '84%', background: 'linear-gradient(90deg, #f59e0b, #ef4444)' }} />
+                          </div>
+                        </div>
+
+                        <div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem' }}>
+                            <span style={{ fontWeight: 600 }}>Agentes de IA</span>
+                            <span style={{ color: 'var(--text-muted)' }}>1 / 1 (100%)</span>
+                          </div>
+                          <div className="usage-track">
+                            <div className="usage-fill" style={{ width: '100%', background: 'var(--accent-primary)' }} />
+                          </div>
+                        </div>
+
+                        <div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem' }}>
+                            <span style={{ fontWeight: 600 }}>Canais Conectados</span>
+                            <span style={{ color: 'var(--text-muted)' }}>2 / 3 (66%)</span>
+                          </div>
+                          <div className="usage-track">
+                            <div className="usage-fill" style={{ width: '66%', background: 'var(--accent-cyan)' }} />
+                          </div>
+                        </div>
+
+                        <div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem' }}>
+                            <span style={{ fontWeight: 600 }}>Armazenamento</span>
+                            <span style={{ color: 'var(--text-muted)' }}>3,2 GB / 10 GB (32%)</span>
+                          </div>
+                          <div className="usage-track">
+                            <div className="usage-fill" style={{ width: '32%', background: '#10b981' }} />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* SECAO 3: TABELA DE LIMITES */}
+                    <div className="glass-panel" style={{ padding: 20, marginBottom: 22 }}>
+                      <h3 style={{ fontSize: '1.05rem', fontWeight: 700, marginBottom: 12 }}>Tabela de Limites do Contrato</h3>
+                      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
+                        <thead>
+                          <tr style={{ borderBottom: '1px solid var(--border-subtle)', textAlign: 'left', color: 'var(--text-dim)' }}>
+                            <th style={{ padding: '8px 10px' }}>Recurso</th>
+                            <th style={{ padding: '8px 10px', textAlign: 'right' }}>Utilizado</th>
+                            <th style={{ padding: '8px 10px', textAlign: 'right' }}>Limite</th>
+                            <th style={{ padding: '8px 10px', textAlign: 'right' }}>Status</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                            <td style={{ padding: '10px' }}>Mensagens IA</td>
+                            <td style={{ padding: '10px', textAlign: 'right', fontWeight: 600 }}>8.420</td>
+                            <td style={{ padding: '10px', textAlign: 'right' }}>10.000</td>
+                            <td style={{ padding: '10px', textAlign: 'right', color: '#f59e0b', fontWeight: 600 }}>84% (Atencao)</td>
+                          </tr>
+                          <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                            <td style={{ padding: '10px' }}>Agentes Ativos</td>
+                            <td style={{ padding: '10px', textAlign: 'right', fontWeight: 600 }}>1</td>
+                            <td style={{ padding: '10px', textAlign: 'right' }}>1</td>
+                            <td style={{ padding: '10px', textAlign: 'right', color: 'var(--text-muted)' }}>Capacidade max.</td>
+                          </tr>
+                          <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                            <td style={{ padding: '10px' }}>Canais Conectados</td>
+                            <td style={{ padding: '10px', textAlign: 'right', fontWeight: 600 }}>2</td>
+                            <td style={{ padding: '10px', textAlign: 'right' }}>3</td>
+                            <td style={{ padding: '10px', textAlign: 'right', color: '#10b981' }}>Disponivel (1 livre)</td>
+                          </tr>
+                          <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                            <td style={{ padding: '10px' }}>Usuarios / Atendentes</td>
+                            <td style={{ padding: '10px', textAlign: 'right', fontWeight: 600 }}>3</td>
+                            <td style={{ padding: '10px', textAlign: 'right' }}>5</td>
+                            <td style={{ padding: '10px', textAlign: 'right', color: '#10b981' }}>Normal</td>
+                          </tr>
+                          <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                            <td style={{ padding: '10px' }}>Documentos na Base</td>
+                            <td style={{ padding: '10px', textAlign: 'right', fontWeight: 600 }}>28</td>
+                            <td style={{ padding: '10px', textAlign: 'right' }}>100</td>
+                            <td style={{ padding: '10px', textAlign: 'right', color: '#10b981' }}>Normal</td>
+                          </tr>
+                          <tr>
+                            <td style={{ padding: '10px' }}>Armazenamento</td>
+                            <td style={{ padding: '10px', textAlign: 'right', fontWeight: 600 }}>3,2 GB</td>
+                            <td style={{ padding: '10px', textAlign: 'right' }}>10 GB</td>
+                            <td style={{ padding: '10px', textAlign: 'right', color: '#10b981' }}>32% utilizado</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+
+                    {/* SECAO 4: SEU PLANO INCLUI (BENEFICIOS ATIVOS) */}
+                    <div className="glass-panel" style={{ padding: 20, marginBottom: 22 }}>
+                      <h3 style={{ fontSize: '1.05rem', fontWeight: 700, marginBottom: 12 }}>Seu plano inclui</h3>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 10 }}>
+                        {[
+                          'WhatsApp Business', 'Instagram Direct', 'Facebook Messenger', 'Telegram Bot',
+                          '1 Agente de IA', 'Memoria de Clientes', 'Base de Conhecimento RAG',
+                          'Handoff Humano', 'Analytics e Relatorios', 'Suporte Prioritario'
+                        ].map((b, idx) => (
+                          <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.84rem' }}>
+                            <Check size={15} color="#10b981" />
+                            <span>{b}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* SECAO 5: PLANOS DISPONIVEIS (UPGRADE E DOWNGRADE) */}
+                    <div id="available-plans-grid" className="glass-panel" style={{ padding: 22, marginBottom: 22 }}>
+                      <div style={{ marginBottom: 16 }}>
+                        <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0 }}>Planos Comerciais Disponiveis</h3>
+                        <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginTop: 2 }}>
+                          Escolha o plano ideal para a escala de atendimento do seu negocio.
+                        </p>
+                      </div>
+
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 14 }}>
+                        {(billingPlans && billingPlans.length > 0 ? billingPlans : [
+                          { id: 'plan_basic', name: 'Básico', price_monthly: 149, description: 'Para pequenos negócios.' },
+                          { id: 'plan_pro', name: 'Profissional', price_monthly: 299, popular: true, description: 'Para empresas omnichannel.' },
+                          { id: 'plan_business', name: 'Business', price_monthly: 599, description: 'Para maior volume e equipes.' },
+                          { id: 'plan_enterprise', name: 'Enterprise', price_monthly: 1000, is_custom: true, description: 'Para operações corporativas.' }
+                        ]).map((p: any) => {
+                          const isCurrent = billingData?.subscription?.plan_id === p.id || (!billingData && p.id === 'plan_pro');
+                          return (
+                            <div 
+                              key={p.id}
+                              className="glass-card"
+                              style={{ 
+                                padding: 16,
+                                display: 'flex',
+                                flexDirection: 'column',
+                                justifyContent: 'space-between',
+                                border: isCurrent ? '2px solid #10b981' : (p.popular ? '1px solid var(--accent-primary)' : '1px solid var(--border-subtle)'),
+                                position: 'relative'
+                              }}
+                            >
+                              {p.popular && !isCurrent && (
+                                <span className="badge" style={{ position: 'absolute', top: -10, right: 12, background: 'var(--accent-primary)', color: '#fff', fontSize: '0.65rem' }}>
+                                  MAIS POPULAR
+                                </span>
+                              )}
+                              {isCurrent && (
+                                <span className="badge" style={{ position: 'absolute', top: -10, right: 12, background: '#10b981', color: '#fff', fontSize: '0.65rem' }}>
+                                  PLANO ATUAL
+                                </span>
+                              )}
+
+                              <div>
+                                <div style={{ fontWeight: 700, fontSize: '1.05rem' }}>{p.name}</div>
+                                <div style={{ fontSize: '1.35rem', fontWeight: 800, marginTop: 6, color: 'var(--text-main)' }}>
+                                  {p.is_custom ? 'Sob consulta' : `R$ ${p.price_monthly}`}
+                                  {!p.is_custom && <span style={{ fontSize: '0.75rem', fontWeight: 400, color: 'var(--text-muted)' }}>/mes</span>}
+                                </div>
+                                <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: 6, marginBottom: 12 }}>
+                                  {p.description}
+                                </p>
+
+                                <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 6, fontSize: '0.78rem' }}>
+                                  {(p.features || [
+                                    'Agentes inteligentes',
+                                    'Canais multicanal',
+                                    'Base de conhecimento'
+                                  ]).slice(0, 5).map((f: string, idx: number) => (
+                                    <li key={idx} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                      <Check size={12} color="#10b981" />
+                                      <span>{f}</span>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+
+                              <div style={{ marginTop: 16 }}>
+                                {isCurrent ? (
+                                  <button 
+                                    className="btn-secondary" 
+                                    disabled 
+                                    style={{ width: '100%', justifyContent: 'center', opacity: 0.7, fontSize: '0.82rem' }}
+                                  >
+                                    Plano Atual
+                                  </button>
+                                ) : p.is_custom ? (
+                                  <button 
+                                    className="btn-secondary"
+                                    onClick={() => alert('Entre em contato com nossa equipe corporativa: contato@multiplexia.com')}
+                                    style={{ width: '100%', justifyContent: 'center', fontSize: '0.82rem' }}
+                                  >
+                                    Falar com vendas
+                                  </button>
+                                ) : (
+                                  <button 
+                                    className="btn-primary"
+                                    onClick={() => {
+                                      const isDowngrade = p.price_monthly < (billingData?.subscription?.price || 299);
+                                      setConfirmModal({
+                                        type: isDowngrade ? 'downgrade' : 'upgrade',
+                                        plan: p
+                                      });
+                                    }}
+                                    style={{ width: '100%', justifyContent: 'center', fontSize: '0.82rem' }}
+                                  >
+                                    {p.price_monthly > (billingData?.subscription?.price || 299) ? 'Fazer upgrade' : 'Mudar para este plano'}
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* SECAO 6: HISTORICO DE COBRANCA */}
+                    <div className="glass-panel" style={{ padding: 20 }}>
+                      <h3 style={{ fontSize: '1.05rem', fontWeight: 700, marginBottom: 12 }}>Historico de cobranca</h3>
+                      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
+                        <thead>
+                          <tr style={{ borderBottom: '1px solid var(--border-subtle)', textAlign: 'left', color: 'var(--text-dim)' }}>
+                            <th style={{ padding: '8px 10px' }}>Data</th>
+                            <th style={{ padding: '8px 10px' }}>Plano</th>
+                            <th style={{ padding: '8px 10px' }}>Valor</th>
+                            <th style={{ padding: '8px 10px' }}>Status</th>
+                            <th style={{ padding: '8px 10px', textAlign: 'right' }}>Acao</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {(billingData?.history || [
+                            { date: '07/09/2026', plan_name: 'Profissional', amount: 299, status: 'Pago' },
+                            { date: '07/08/2026', plan_name: 'Profissional', amount: 299, status: 'Pago' },
+                            { date: '07/07/2026', plan_name: 'Profissional', amount: 299, status: 'Pago' }
+                          ]).map((h: any, idx: number) => (
+                            <tr key={idx} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                              <td style={{ padding: '10px' }}>{h.date}</td>
+                              <td style={{ padding: '10px', fontWeight: 600 }}>{h.plan_name}</td>
+                              <td style={{ padding: '10px' }}>R$ {h.amount}</td>
+                              <td style={{ padding: '10px' }}>
+                                <span className="badge" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#10b981', fontSize: '0.72rem' }}>
+                                  {h.status}
+                                </span>
+                              </td>
+                              <td style={{ padding: '10px', textAlign: 'right' }}>
+                                <button 
+                                  className="btn-secondary" 
+                                  style={{ padding: '3px 8px', fontSize: '0.75rem' }}
+                                  onClick={() => alert(`Fatura de ${h.date} (R$ ${h.amount}) emitida com sucesso.`)}
+                                >
+                                  Visualizar
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+
+                {/* ABA: INFORMACOES PESSOAIS */}
+                {profileActiveTab === 'personal' && (
+                  <div>
+                    <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: 4 }}>Informacoes Pessoais</h2>
+                    <p style={{ fontSize: '0.84rem', color: 'var(--text-muted)', marginBottom: 20 }}>
+                      Atualize seus dados cadastrais e informacoes de perfil.
+                    </p>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 14, maxWidth: 500 }}>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, marginBottom: 4, color: 'var(--text-muted)' }}>Nome Completo</label>
+                        <input type="text" defaultValue="Anthony Both" style={{ width: '100%' }} />
+                      </div>
+
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, marginBottom: 4, color: 'var(--text-muted)' }}>Nome de Usuario</label>
+                        <input type="text" defaultValue="anthony_both" style={{ width: '100%' }} />
+                      </div>
+
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, marginBottom: 4, color: 'var(--text-muted)' }}>E-mail Comercial</label>
+                        <input type="email" defaultValue="anthony@amboth.com.br" style={{ width: '100%' }} />
+                      </div>
+
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, marginBottom: 4, color: 'var(--text-muted)' }}>Empresa / Organizacao</label>
+                        <input type="text" defaultValue="Anthony Burgers & Delivery" style={{ width: '100%' }} />
+                      </div>
+
+                      <button className="btn-primary" style={{ alignSelf: 'flex-start', marginTop: 10 }} onClick={() => alert('Dados cadastrais atualizados com sucesso.')}>
+                        Salvar Alteracoes
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* ABA: SEGURANCA */}
+                {profileActiveTab === 'security' && (
+                  <div>
+                    <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: 4 }}>Seguranca & Acesso</h2>
+                    <p style={{ fontSize: '0.84rem', color: 'var(--text-muted)', marginBottom: 20 }}>
+                      Configuracoes de autenticacao, senha e sessoes ativas.
+                    </p>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 18, maxWidth: 500 }}>
+                      <div className="glass-card" style={{ padding: 16 }}>
+                        <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>Autenticacao em Duas Etapas (2FA)</div>
+                        <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: 4 }}>Proteja sua conta solicitando um codigo adicional ao fazer login.</p>
+                        <button className="btn-secondary" style={{ marginTop: 8 }} onClick={() => alert('Autenticação em duas etapas configurada.')}>Ativar 2FA</button>
+                      </div>
+
+                      <div className="glass-card" style={{ padding: 16 }}>
+                        <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>Alterar Senha</div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 10 }}>
+                          <input type="password" placeholder="Senha atual" style={{ width: '100%' }} />
+                          <input type="password" placeholder="Nova senha" style={{ width: '100%' }} />
+                          <button className="btn-primary" style={{ alignSelf: 'flex-start' }} onClick={() => alert('Senha alterada com sucesso.')}>Atualizar Senha</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* ABA: NOTIFICACOES */}
+                {profileActiveTab === 'notifications' && (
+                  <div>
+                    <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: 4 }}>Notificacoes & Alertas</h2>
+                    <p style={{ fontSize: '0.84rem', color: 'var(--text-muted)', marginBottom: 20 }}>
+                      Escolha quais alertas voce deseja receber no e-mail e nos canais.
+                    </p>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 12, maxWidth: 500 }}>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
+                        <input type="checkbox" defaultChecked />
+                        <span style={{ fontSize: '0.88rem' }}>Alertas de limite de mensagens (80%, 90% e 100%)</span>
+                      </label>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
+                        <input type="checkbox" defaultChecked />
+                        <span style={{ fontSize: '0.88rem' }}>Notificacao de solicitacao de atendimento humano (Handoff)</span>
+                      </label>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
+                        <input type="checkbox" defaultChecked />
+                        <span style={{ fontSize: '0.88rem' }}>Relatorio semanal de conversao e conversas</span>
+                      </label>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL DE CONFIRMACAO (CANCELAMENTO, DOWNGRADE, UPGRADE, LOGOUT) */}
+      {confirmModal && (
+        <div className="modal-backdrop" onClick={() => setConfirmModal(null)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 480, padding: 24 }}>
+            {confirmModal.type === 'cancel' && (
+              <div>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#ef4444', margin: 0 }}>Tem certeza que deseja cancelar?</h3>
+                <p style={{ fontSize: '0.88rem', color: 'var(--text-main)', marginTop: 10 }}>
+                  Ao confirmar o cancelamento:
+                </p>
+                <ul style={{ fontSize: '0.82rem', color: 'var(--text-muted)', paddingLeft: 18, lineHeight: '1.5' }}>
+                  <li>Seu acesso permanecera ativo ate <strong>07 de outubro de 2026</strong>.</li>
+                  <li>Apos esta data, o agente Multiplex IA sera pausado em todos os canais.</li>
+                  <li>Voce perdera o historico de conversas e integracoes ativas.</li>
+                </ul>
+
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 20 }}>
+                  <button className="btn-secondary" onClick={() => setConfirmModal(null)}>
+                    Continuar assinatura
+                  </button>
+                  <button 
+                    className="btn-primary" 
+                    onClick={handleCancelSubscription}
+                    disabled={isChangingPlan}
+                    style={{ background: '#ef4444' }}
+                  >
+                    Confirmar cancelamento
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {confirmModal.type === 'downgrade' && (
+              <div>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0 }}>Alterar para o Plano {confirmModal.plan?.name}?</h3>
+                <p style={{ fontSize: '0.88rem', color: 'var(--text-main)', marginTop: 10 }}>
+                  Seu plano atual possui recursos que nao estarao disponiveis no novo plano:
+                </p>
+                <div style={{ padding: 12, borderRadius: 8, background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.25)', color: '#ef4444', fontSize: '0.82rem', marginBottom: 14 }}>
+                  <strong>Voce perdera:</strong>
+                  <ul style={{ margin: '6px 0 0 16px', padding: 0 }}>
+                    <li>Canais adicionais conectados (apenas 1 canal suportado)</li>
+                    <li>Limite maior de mensagens de IA</li>
+                    <li>Suporte prioritario e automacoes avancadas</li>
+                  </ul>
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 16 }}>
+                  <button className="btn-secondary" onClick={() => setConfirmModal(null)}>
+                    Voltar
+                  </button>
+                  <button 
+                    className="btn-primary"
+                    onClick={() => handleChangePlan(confirmModal.plan?.id)}
+                    disabled={isChangingPlan}
+                  >
+                    Confirmar Mudanca
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {confirmModal.type === 'upgrade' && (
+              <div>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0 }}>Fazer Upgrade para {confirmModal.plan?.name}?</h3>
+                <p style={{ fontSize: '0.88rem', color: 'var(--text-main)', marginTop: 10 }}>
+                  Novo valor: <strong>R$ {confirmModal.plan?.price_monthly} / mes</strong>.
+                </p>
+                <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+                  Seus novos limites e recursos serao liberados imediatamente.
+                </p>
+
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 20 }}>
+                  <button className="btn-secondary" onClick={() => setConfirmModal(null)}>
+                    Cancelar
+                  </button>
+                  <button 
+                    className="btn-primary"
+                    onClick={() => handleChangePlan(confirmModal.plan?.id)}
+                    disabled={isChangingPlan}
+                    style={{ background: 'linear-gradient(135deg, #059669, #10b981)' }}
+                  >
+                    Confirmar Upgrade
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {confirmModal.type === 'logout' && (
+              <div>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0 }}>Deseja sair da sua conta?</h3>
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: 8 }}>
+                  Voce precisara fazer login novamente para acessar o painel do Multiplex IA.
+                </p>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 20 }}>
+                  <button className="btn-secondary" onClick={() => setConfirmModal(null)}>
+                    Cancelar
+                  </button>
+                  <button className="btn-primary" style={{ background: '#ef4444' }} onClick={() => { setConfirmModal(null); alert('Sessão encerrada com sucesso.'); }}>
+                    Sair agora
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}

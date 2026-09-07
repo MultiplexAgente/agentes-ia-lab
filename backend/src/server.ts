@@ -10,6 +10,7 @@ import { knowledgeRouter } from './routes/knowledge.js';
 import { channelsRouter } from './routes/channels.js';
 import { dashboardRouter } from './routes/dashboard.js';
 import { logsRouter } from './routes/logs.js';
+import { billingRouter } from './routes/billing.js';
 
 dotenv.config();
 
@@ -27,8 +28,7 @@ app.get('/api/health', (req, res) => {
     status: 'online',
     timestamp: new Date().toISOString(),
     service: 'Agente de IA Multicanal - Multiplex',
-    version: '1.0.0',
-    n8n_connected: true
+    version: '1.0.0'
   });
 });
 
@@ -42,6 +42,7 @@ app.use('/api/knowledge', knowledgeRouter);
 app.use('/api/channels', channelsRouter);
 app.use('/api/dashboard', dashboardRouter);
 app.use('/api/logs', logsRouter);
+app.use('/api/billing', billingRouter);
 
 // Inicialização do Servidor
 if (process.env.NODE_ENV !== 'test') {
