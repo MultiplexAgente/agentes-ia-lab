@@ -11,12 +11,46 @@ describe('Suite de Testes Obrigatórios - Agente de IA Omnichannel', () => {
   const convId = '66666666-6666-6666-6666-666666666666';
 
   beforeEach(() => {
-    // Garante que o estado da conversa está ativo
-    const conv = store.conversations.get(convId);
-    if (conv) {
-      conv.status = 'ACTIVE';
-      store.conversations.set(convId, conv);
+    // Garante fixtures para testes isolados
+    if (!store.companies.has(companyId)) {
+      store.companies.set(companyId, { id: companyId, name: 'Empresa Teste', slug: 'empresa-teste', active: true });
     }
+    if (!store.agents.has('22222222-2222-2222-2222-222222222222')) {
+      store.agents.set('22222222-2222-2222-2222-222222222222', {
+        id: '22222222-2222-2222-2222-222222222222',
+        company_id: companyId,
+        name: 'Multiplex',
+        model: 'gpt-4o',
+        temperature: 0.2,
+        personality: { tone: 'friendly', formality: 'informal', use_emojis: true, response_length: 'concise', commercial_style: 'consultative' },
+        rules: [
+          { rule_text: 'Sempre ofereça batata frita como adicional quando o cliente pedir um hambúrguer', priority: 5, action: 'offer_fries_on_burger' },
+          { rule_text: 'Nunca conceda descontos sem autorização expressa', priority: 10, action: 'block_discount' }
+        ],
+        active: true
+      });
+    }
+    // Produto de teste para cálculo
+    store.products.set(companyId, [
+      {
+        id: 'prod-xbacon',
+        company_id: companyId,
+        name: 'X-Bacon Artesanal',
+        price: 25.00,
+        description: 'Hambúrguer artesanal 180g com bacon crocante e queijo cheddar',
+        ingredients: ['carne 180g', 'bacon', 'cheddar'],
+        available: true
+      }
+    ]);
+
+    store.conversations.set(convId, {
+      id: convId,
+      company_id: companyId,
+      customer_id: customerId,
+      channel: 'WHATSAPP',
+      external_chat_id: '5511999999999@c.us',
+      status: 'ACTIVE'
+    });
   });
 
   // 1. Consulta de Preços e Não Alucinação
