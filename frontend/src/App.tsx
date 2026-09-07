@@ -3034,58 +3034,6 @@ export default function App() {
             </div>
           </div>
 
-
-          {/* Barra de Modos de Operação do Agente de IA */}
-          <div className="ai-modes-container">
-            <button 
-              className={`ai-mode-pill ${selectedAIMode === 'geral' ? 'active' : ''}`}
-              onClick={() => setSelectedAIMode('geral')}
-            >
-              <Sparkles size={13} />
-              <span>Geral & Assistente</span>
-            </button>
-
-            <button 
-              className={`ai-mode-pill ${selectedAIMode === 'cardapio' ? 'active' : ''}`}
-              onClick={() => { setSelectedAIMode('cardapio'); setPromptCategory('cardapio'); }}
-            >
-              <ShoppingBag size={13} />
-              <span>Cardápio & Delivery</span>
-            </button>
-
-            <button 
-              className={`ai-mode-pill ${selectedAIMode === 'logistica' ? 'active' : ''}`}
-              onClick={() => { setSelectedAIMode('logistica'); setPromptCategory('frete'); }}
-            >
-              <Truck size={13} />
-              <span>Logística & Frete</span>
-            </button>
-
-            <button 
-              className={`ai-mode-pill ${selectedAIMode === 'agendamento' ? 'active' : ''}`}
-              onClick={() => { setSelectedAIMode('agendamento'); setPromptCategory('agendamento'); }}
-            >
-              <Calendar size={13} />
-              <span>Agendamentos</span>
-            </button>
-
-            <button 
-              className={`ai-mode-pill ${selectedAIMode === 'vendas' ? 'active' : ''}`}
-              onClick={() => { setSelectedAIMode('vendas'); setPromptCategory('promocoes'); }}
-            >
-              <DollarSign size={13} />
-              <span>Vendas & Cupons</span>
-            </button>
-
-            <button 
-              className={`ai-mode-pill ${selectedAIMode === 'suporte' ? 'active' : ''}`}
-              onClick={() => setSelectedAIMode('suporte')}
-            >
-              <MessageCircle size={13} />
-              <span>Suporte & SAC</span>
-            </button>
-          </div>
-
           {/* Feed de Mensagens */}
           <div className="chat-feed-container" onClick={() => setShowModelDropdown(false)}>
             <div className="chat-thread-inner">
@@ -3751,19 +3699,32 @@ export default function App() {
           </div>
 
           {/* PAINEL PRINCIPAL: IMPORTAÇÃO INTELIGENTE COM MULTIPLEX IA */}
-          <div className="glass-panel" style={{ padding: 22, marginBottom: 20, border: '1px solid rgba(0, 210, 255, 0.3)', background: 'linear-gradient(180deg, rgba(15, 23, 42, 0.75), rgba(10, 15, 30, 0.85))' }}>
+          <div 
+            className="glass-panel" 
+            style={{ 
+              padding: 22, 
+              marginBottom: 20, 
+              border: theme === 'dark' ? '1px solid rgba(0, 210, 255, 0.3)' : '1.5px solid #cbd5e1', 
+              background: theme === 'dark' ? 'linear-gradient(180deg, rgba(15, 23, 42, 0.75), rgba(10, 15, 30, 0.85))' : '#ffffff',
+              boxShadow: theme === 'light' ? '0 4px 20px rgba(0, 0, 0, 0.05)' : undefined
+            }}
+          >
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <div style={{ width: 32, height: 32, borderRadius: '50%', overflow: 'hidden', border: '1px solid rgba(0, 210, 255, 0.4)', minWidth: 32 }}>
+                <div style={{ width: 32, height: 32, borderRadius: '50%', overflow: 'hidden', border: theme === 'dark' ? '1px solid rgba(0, 210, 255, 0.4)' : '1px solid #cbd5e1', minWidth: 32 }}>
                   <img src={atomLogo} alt="Multiplex IA" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 </div>
                 <div>
-                  <h2 style={{ fontSize: '1.15rem', fontWeight: 700, margin: 0 }}>Importar Cardápio em Massa com Multiplex IA</h2>
-                  <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>Cole texto corrido, lista de preços, descrições do site ou cardápio em texto</span>
+                  <h2 style={{ fontSize: '1.15rem', fontWeight: 700, margin: 0, color: theme === 'light' ? '#0f172a' : '#f8fafc' }}>
+                    Importar Cardápio em Massa com Multiplex IA
+                  </h2>
+                  <span style={{ fontSize: '0.84rem', color: theme === 'light' ? '#334155' : 'var(--text-muted)', fontWeight: 500 }}>
+                    Cole texto corrido, lista de preços, descrições do site ou cardápio em texto
+                  </span>
                 </div>
               </div>
 
-              <span className="badge" style={{ background: 'rgba(0, 210, 255, 0.15)', color: '#00d2ff', border: '1px solid rgba(0, 210, 255, 0.3)' }}>
+              <span className="badge" style={{ background: theme === 'dark' ? 'rgba(0, 210, 255, 0.15)' : 'rgba(2, 132, 199, 0.12)', color: theme === 'dark' ? '#00d2ff' : '#0284c7', border: theme === 'dark' ? '1px solid rgba(0, 210, 255, 0.3)' : '1px solid rgba(2, 132, 199, 0.3)', fontWeight: 700 }}>
                 GPT-4o Extrator
               </span>
             </div>
@@ -3773,7 +3734,16 @@ export default function App() {
               value={rawMenuText}
               onChange={(e) => setRawMenuText(e.target.value)}
               rows={5}
-              style={{ width: '100%', fontSize: '0.88rem', lineHeight: '1.4', marginBottom: 14, resize: 'vertical' }}
+              style={{ 
+                width: '100%', 
+                fontSize: '0.9rem', 
+                lineHeight: '1.45', 
+                marginBottom: 14, 
+                resize: 'vertical',
+                background: theme === 'light' ? '#ffffff' : undefined,
+                color: theme === 'light' ? '#0f172a' : undefined,
+                border: theme === 'light' ? '1.5px solid #cbd5e1' : undefined
+              }}
             />
 
             <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
@@ -3948,7 +3918,19 @@ export default function App() {
             </div>
 
             {products.length === 0 ? (
-              <div className="glass-card" style={{ padding: 28, textAlign: 'center', color: 'var(--text-dim)' }}>
+              <div 
+                className="glass-card" 
+                style={{ 
+                  padding: 32, 
+                  textAlign: 'center', 
+                  color: theme === 'light' ? '#1e293b' : 'var(--text-dim)',
+                  background: theme === 'light' ? '#ffffff' : undefined,
+                  border: theme === 'light' ? '1.5px dashed #cbd5e1' : undefined,
+                  borderRadius: 14,
+                  fontWeight: theme === 'light' ? 500 : 400,
+                  fontSize: '0.92rem'
+                }}
+              >
                 Nenhum produto cadastrado ainda. Cole a lista do seu cardápio acima para que a Multiplex IA organize tudo em segundos.
               </div>
             ) : (

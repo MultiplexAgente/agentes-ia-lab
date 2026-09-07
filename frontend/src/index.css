@@ -36,16 +36,16 @@
 body.light {
   --bg-dark: #f1f5f9;
   --bg-sidebar: #ffffff;
-  --bg-card: rgba(255, 255, 255, 0.95);
+  --bg-card: #ffffff;
   --bg-card-hover: #f8fafc;
-  --bg-card-inner: #f8fafc;
+  --bg-card-inner: #ffffff;
   --bg-input: #ffffff;
-  --border-subtle: rgba(0, 0, 0, 0.08);
+  --border-subtle: #cbd5e1;
   --border-focus: rgba(99, 102, 241, 0.6);
 
   --text-main: #0f172a;
-  --text-muted: #475569;
-  --text-dim: #94a3b8;
+  --text-muted: #334155;
+  --text-dim: #475569;
 
   --shadow-glow: 0 4px 20px rgba(99, 102, 241, 0.12);
 
@@ -648,13 +648,53 @@ body.light .nav-item.active {
 
 body.light .btn-secondary {
   background: #ffffff;
-  color: var(--text-main);
-  border: 1px solid rgba(0, 0, 0, 0.12);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+  color: #0f172a;
+  border: 1.5px solid #cbd5e1;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
 }
 
 body.light .btn-secondary:hover {
   background: #f1f5f9;
+  border-color: #94a3b8;
+}
+
+body.light input:not([type="checkbox"]):not([type="radio"]), 
+body.light textarea, 
+body.light select {
+  background: #ffffff !important;
+  border: 1.5px solid #cbd5e1 !important;
+  color: #0f172a !important;
+}
+
+body.light textarea::placeholder,
+body.light input::placeholder {
+  color: #64748b !important;
+  opacity: 1 !important;
+}
+
+body.light .glass-panel {
+  background: #ffffff !important;
+  border: 1.5px solid #cbd5e1 !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06) !important;
+}
+
+body.light .glass-card {
+  background: #ffffff !important;
+  border: 1.5px solid #cbd5e1 !important;
+  color: #0f172a !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+}
+
+body.light .page-title,
+body.light h1,
+body.light h2,
+body.light h3,
+body.light h4 {
+  color: #0f172a !important;
+}
+
+body.light .page-desc {
+  color: #334155 !important;
 }
 
 body.light pre {
