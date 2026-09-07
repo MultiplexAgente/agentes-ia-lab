@@ -1,16 +1,18 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
-  Sparkles, RefreshCw, Calendar, History, ArrowLeft, 
-  DollarSign, Check, AlertTriangle, ShieldCheck, CheckCircle2 
+  RefreshCw, Calendar, History, ArrowLeft, 
+  DollarSign, Check, AlertTriangle, ShieldCheck, CheckCircle2, Trash2 
 } from 'lucide-react';
 import { AIBuilderModule, AIBuilderModuleVersion } from '../../types/builder';
 import { DynamicRenderer } from './DynamicRenderer';
 import { AIEditModuleModal } from './AIEditModuleModal';
+import atomLogo from '../../assets/multiplex-atom.jpg';
 
 interface DynamicModuleViewProps {
   module: AIBuilderModule;
   onBack: () => void;
   onModuleUpdated: (updatedModule: AIBuilderModule) => void;
+  onDeleteModule: (moduleId: string) => void;
   apiBase: string;
 }
 
@@ -18,6 +20,7 @@ export const DynamicModuleView: React.FC<DynamicModuleViewProps> = ({
   module: initialModule,
   onBack,
   onModuleUpdated,
+  onDeleteModule,
   apiBase
 }) => {
   const [currentModule, setCurrentModule] = useState<AIBuilderModule>(initialModule);
@@ -26,6 +29,8 @@ export const DynamicModuleView: React.FC<DynamicModuleViewProps> = ({
   const [loading, setLoading] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [versions, setVersions] = useState<AIBuilderModuleVersion[]>([]);
   const [loadingVersions, setLoadingVersions] = useState(false);
   const [rollbackSuccess, setRollbackSuccess] = useState<string | null>(null);
@@ -98,6 +103,23 @@ export const DynamicModuleView: React.FC<DynamicModuleViewProps> = ({
     }
   };
 
+  const handleDelete = async () => {
+    setIsDeleting(true);
+    try {
+      const res = await fetch(`${apiBase}/api/builder/modules/${currentModule.id}`, {
+        method: 'DELETE'
+      });
+      if (res.ok) {
+        setShowDeleteModal(false);
+        onDeleteModule(currentModule.id);
+      }
+    } catch (e) {
+      console.error('Erro ao excluir módulo:', e);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return (
     <div className="main-panel-scrollable" style={{ padding: '24px 32px' }}>
       {/* Topo / Cabecalho do Modulo */}
@@ -114,9 +136,12 @@ export const DynamicModuleView: React.FC<DynamicModuleViewProps> = ({
             <span style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: 8, background: 'rgba(99, 102, 241, 0.2)', color: '#818cf8', fontWeight: 700 }}>
               v{currentModule.version}
             </span>
-            <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>
-              Criado com Multiplex IA
-            </span>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: '0.75rem', color: 'var(--text-dim)' }}>
+              <div style={{ width: 14, height: 14, borderRadius: '50%', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <img src={atomLogo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              </div>
+              <span>Criado com Multiplex IA</span>
+            </div>
           </div>
 
           <h1 className="page-title" style={{ fontSize: '1.6rem', fontWeight: 800, margin: 0, color: 'var(--text-main)' }}>
@@ -210,22 +235,43 @@ export const DynamicModuleView: React.FC<DynamicModuleViewProps> = ({
             <History size={14} /> Histórico (v{currentModule.version})
           </button>
 
-          {/* BOTAO CONTEXTUAL OBRIGATORIO: EDITAR COM IA */}
+          {/* BOTAO CONTEXTUAL COM O ÍCONE DA MULTIPLEX IA (SEM EMOJI) */}
           <button 
             className="btn-primary" 
             onClick={() => setShowEditModal(true)}
             style={{ 
-              padding: '8px 16px', 
-              fontSize: '0.82rem', 
-              fontWeight: 700,
-              background: 'linear-gradient(135deg, #6366f1, #a855f7)',
+              padding: '8px 18px', 
+              fontSize: '0.85rem', 
+              fontWeight: 800,
+              background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
               display: 'flex', 
               alignItems: 'center', 
               gap: 8,
               boxShadow: '0 4px 14px rgba(99, 102, 241, 0.35)'
             }}
           >
-            <Sparkles size={15} /> Editar com IA
+            <div style={{ width: 18, height: 18, borderRadius: '50%', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <img src={atomLogo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            </div>
+            <span>Editar com IA</span>
+          </button>
+
+          {/* BOTAO OBRIGATORIO: EXCLUIR MODULO */}
+          <button 
+            onClick={() => setShowDeleteModal(true)}
+            className="btn-secondary"
+            style={{ 
+              padding: '8px 12px', 
+              fontSize: '0.8rem', 
+              color: '#ef4444', 
+              borderColor: 'rgba(239, 68, 68, 0.3)',
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: 6 
+            }}
+            title="Excluir este módulo do painel"
+          >
+            <Trash2 size={14} /> Excluir Módulo
           </button>
         </div>
       </div>
@@ -240,7 +286,7 @@ export const DynamicModuleView: React.FC<DynamicModuleViewProps> = ({
       {/* Renderizador de Componentes e Dados Reais */}
       <DynamicRenderer schema={currentModule.schema} data={data} onRefresh={loadData} />
 
-      {/* MODAL DE EDICAO CONTEXTUAL COM IA */}
+      {/* MODAL DE EDICAO CONTEXTUAL VIA CHAT DE IA */}
       {showEditModal && (
         <AIEditModuleModal
           module={currentModule}
@@ -251,6 +297,49 @@ export const DynamicModuleView: React.FC<DynamicModuleViewProps> = ({
           }}
           apiBase={apiBase}
         />
+      )}
+
+      {/* MODAL DE CONFIRMAÇÃO DE EXCLUSÃO DO MÓDULO */}
+      {showDeleteModal && (
+        <div className="modal-backdrop" onClick={() => setShowDeleteModal(false)} style={{ zIndex: 9999 }}>
+          <div 
+            className="modal-content" 
+            onClick={(e) => e.stopPropagation()} 
+            style={{ maxWidth: 480, width: '90%', padding: 24, borderRadius: 18 }}
+          >
+            <div style={{ width: 44, height: 44, borderRadius: 12, background: 'rgba(239, 68, 68, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ef4444', marginBottom: 14 }}>
+              <Trash2 size={22} />
+            </div>
+
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 800, margin: '0 0 8px 0', color: 'var(--text-main)' }}>
+              Excluir módulo "{currentModule.name}"?
+            </h3>
+
+            <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', lineHeight: 1.5, margin: '0 0 20px 0' }}>
+              Essa ação removerá o módulo <strong>{currentModule.name}</strong> do seu painel e do menu lateral.<br />
+              <span style={{ color: '#10b981', fontWeight: 700 }}>Seus dados de faturamento, pedidos e clientes NÃO serão apagados.</span>
+            </p>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
+              <button
+                className="btn-secondary"
+                onClick={() => setShowDeleteModal(false)}
+                disabled={isDeleting}
+                style={{ padding: '8px 16px', fontSize: '0.85rem' }}
+              >
+                Cancelar
+              </button>
+              <button
+                className="btn-primary"
+                onClick={handleDelete}
+                disabled={isDeleting}
+                style={{ padding: '8px 20px', fontSize: '0.85rem', background: '#ef4444', fontWeight: 700 }}
+              >
+                {isDeleting ? <RefreshCw size={15} className="spin-slow" /> : 'Confirmar e Excluir'}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* MODAL DE HISTORICO DE VERSOES E ROLLBACK */}

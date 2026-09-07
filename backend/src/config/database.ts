@@ -4,7 +4,7 @@ import {
   Company, Agent, AgentPersonality, AgentRule, Product, ProductCategory,
   Customer, Conversation, Message, StructuredKnowledgeItem, Order,
   AgentMemoryItem, KnowledgeSource, SourceSyncRun, SourceSyncChange, NormalizedCatalogItem,
-  AIBuilderModule, AIBuilderModuleVersion, Expense
+  AIBuilderModule, AIBuilderModuleVersion, Expense, UISchema
 } from '../types/index.js';
 
 dotenv.config();
@@ -173,6 +173,133 @@ export class InMemoryStore {
       { id: 'exp-05', company_id: companyId, title: 'Embalagens Térmicas para Delivery', category: 'Logística', amount: 350.00, status: 'paid', due_date: '2026-09-03', paid_at: '2026-09-03T16:00:00Z', created_at: '2026-09-01T12:00:00Z' }
     ];
     this.expenses.set(companyId, expensesList);
+
+    // 8. MÓDULO PADRÃO INICIAL: GESTÃO FINANCEIRA
+    const defaultFinanceId = 'mod-gestao-financeira';
+    const defaultFinanceSchema: UISchema = {
+      title: 'Gestão Financeira',
+      description: 'Acompanhamento consolidado de faturamento, despesas operacionais, lucro e pedidos pagos.',
+      icon: 'DollarSign',
+      layout: 'dashboard',
+      period_filter_enabled: true,
+      sections: [
+        {
+          id: 'sec-metrics',
+          title: 'Indicadores Principais',
+          columns: 4,
+          components: [
+            {
+              id: 'm-01',
+              type: 'metric',
+              title: 'Faturamento Total',
+              description: 'Total recebido de pedidos',
+              dataSource: 'payments',
+              aggregation: 'sum',
+              format: 'currency'
+            },
+            {
+              id: 'm-02',
+              type: 'metric',
+              title: 'Despesas Operacionais',
+              description: 'Custos lançados da empresa',
+              dataSource: 'expenses',
+              aggregation: 'sum',
+              format: 'currency'
+            },
+            {
+              id: 'm-03',
+              type: 'metric',
+              title: 'Lucro Líquido',
+              description: 'Receita líquida deduzida das despesas',
+              dataSource: 'payments',
+              aggregation: 'sum',
+              format: 'currency'
+            },
+            {
+              id: 'm-04',
+              type: 'metric',
+              title: 'Pedidos Pagos',
+              description: 'Volume de vendas concluídas',
+              dataSource: 'orders',
+              aggregation: 'count',
+              format: 'number'
+            }
+          ]
+        },
+        {
+          id: 'sec-charts',
+          title: 'Desempenho Financeiro e Canais',
+          columns: 2,
+          components: [
+            {
+              id: 'ch-01',
+              type: 'chart',
+              title: 'Faturamento x Despesas',
+              description: 'Evolução comparativa por período',
+              chartType: 'line',
+              dataSource: 'payments'
+            },
+            {
+              id: 'ch-02',
+              type: 'chart',
+              title: 'Distribuição por Método de Pagamento',
+              description: 'PIX, Cartão e Dinheiro',
+              chartType: 'donut',
+              dataSource: 'payments'
+            }
+          ]
+        },
+        {
+          id: 'sec-table',
+          title: 'Transações e Pedidos Pagos',
+          columns: 1,
+          components: [
+            {
+              id: 'tb-01',
+              type: 'table',
+              title: 'Extrato de Pedidos Concluídos',
+              dataSource: 'orders',
+              columns: [
+                { key: 'id', label: 'Cód. Pedido' },
+                { key: 'customer_name', label: 'Cliente' },
+                { key: 'total_amount', label: 'Valor' },
+                { key: 'payment_method', label: 'Método' },
+                { key: 'status', label: 'Status' },
+                { key: 'date', label: 'Data & Hora' }
+              ]
+            }
+          ]
+        }
+      ]
+    };
+
+    const defaultFinanceModule: AIBuilderModule = {
+      id: defaultFinanceId,
+      company_id: companyId,
+      name: 'Gestão Financeira',
+      slug: 'gestao-financeira',
+      description: 'Dashboard financeiro com faturamento, despesas, lucro e pedidos pagos.',
+      icon: 'DollarSign',
+      status: 'active',
+      schema: defaultFinanceSchema,
+      version: 1,
+      created_by: 'Multiplex IA',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+
+    this.builderModules.set(defaultFinanceId, defaultFinanceModule);
+    this.builderModuleVersions.set(defaultFinanceId, [
+      {
+        id: 'ver-default-01',
+        module_id: defaultFinanceId,
+        version: 1,
+        schema: defaultFinanceSchema,
+        prompt: 'Crie uma área financeira detalhada com faturamento, despesas, lucro e gráficos.',
+        created_by: 'Multiplex IA',
+        created_at: new Date().toISOString()
+      }
+    ]);
   }
 }
 

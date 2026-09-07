@@ -2309,7 +2309,9 @@ export default function App() {
                 }}
               >
                 <div className="item-main">
-                  <Wand2 size={17} color="#8b5cf6" />
+                  <div style={{ width: 18, height: 18, borderRadius: '50%', overflow: 'hidden', border: '1px solid rgba(0, 210, 255, 0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <img src={atomLogo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  </div>
                   <span style={{ fontWeight: 600, color: 'var(--text-main)' }}>Criar com IA</span>
                 </div>
                 <span style={{ fontSize: '0.62rem', padding: '2px 6px', borderRadius: 4, background: 'linear-gradient(135deg, #6366f1, #a855f7)', color: '#fff', fontWeight: 800 }}>NOVO</span>
@@ -2398,7 +2400,9 @@ export default function App() {
               <div className="sidebar-section">
                 <div className="sidebar-section-header">
                   <span>Módulos com IA ({sidebarModules.length})</span>
-                  <Sparkles size={12} color="#8b5cf6" />
+                  <div style={{ width: 14, height: 14, borderRadius: '50%', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <img src={atomLogo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  </div>
                 </div>
                 {sidebarModules.map(mod => (
                   <div 
@@ -2416,9 +2420,30 @@ export default function App() {
                       <LayoutDashboard size={16} color="#818cf8" />
                       <span>{mod.name}</span>
                     </div>
-                    <span style={{ fontSize: '0.65rem', color: 'var(--text-dim)', background: 'rgba(255,255,255,0.05)', padding: '1px 5px', borderRadius: 4 }}>
-                      v{mod.version}
-                    </span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <span style={{ fontSize: '0.65rem', color: 'var(--text-dim)', background: 'rgba(255,255,255,0.05)', padding: '1px 5px', borderRadius: 4 }}>
+                        v{mod.version}
+                      </span>
+                      <button
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          if (window.confirm(`Deseja remover o módulo "${mod.name}" do seu painel? (Seus dados não serão apagados)`)) {
+                            await fetch(`${API_BASE}/api/builder/modules/${mod.id}`, { method: 'DELETE' });
+                            if (currentDynamicModule?.id === mod.id) {
+                              setCurrentDynamicModule(null);
+                              setActiveView('builder');
+                            }
+                            loadSidebarModules();
+                          }
+                        }}
+                        style={{ background: 'transparent', border: 'none', color: 'var(--text-dim)', cursor: 'pointer', padding: 2, display: 'flex', alignItems: 'center' }}
+                        title="Excluir módulo"
+                        onMouseEnter={(e) => e.currentTarget.style.color = '#ef4444'}
+                        onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-dim)'}
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -5447,6 +5472,11 @@ export default function App() {
           }}
           onModuleUpdated={(updated) => {
             setCurrentDynamicModule(updated);
+            loadSidebarModules();
+          }}
+          onDeleteModule={(_id) => {
+            setCurrentDynamicModule(null);
+            setActiveView('builder');
             loadSidebarModules();
           }}
         />

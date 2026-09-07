@@ -7,6 +7,7 @@ import {
 import { AIBuilderModule, AIBuildPlan } from '../../types/builder';
 import { DynamicRenderer } from './DynamicRenderer';
 import { AIEditModuleModal } from './AIEditModuleModal';
+import atomLogo from '../../assets/multiplex-atom.jpg';
 
 interface AIBuilderViewProps {
   onOpenModule: (module: AIBuilderModule) => void;
@@ -32,22 +33,22 @@ export const AIBuilderView: React.FC<AIBuilderViewProps> = ({ onOpenModule, apiB
   // Sugestões Prontas de Alta Conversão
   const promptSuggestions = [
     {
-      title: '💰 Gestão Financeira Completa',
+      title: 'Gestão Financeira Completa',
       desc: 'Faturamento, despesas, lucro líquido, pedidos pagos e gráficos de evolução mensal.',
       prompt: 'Crie uma área financeira com faturamento, despesas, lucro líquido, pedidos pagos, gráficos de desempenho e extrato.'
     },
     {
-      title: '👥 Clientes & Relacionamento',
+      title: 'Clientes & Relacionamento',
       desc: 'Base de clientes cadastrados, pedidos totais, valor acumulado (LTV) e busca rápida.',
       prompt: 'Crie uma área para clientes cadastrados com total de clientes, novos clientes, tabela de clientes com telefone, email e total gasto.'
     },
     {
-      title: '📦 Pedidos Pagos & Vendas',
+      title: 'Pedidos Pagos & Vendas',
       desc: 'Visão de pedidos confirmados, ticket médio, método de pagamento (PIX/Cartão) e entregas.',
       prompt: 'Crie um dashboard com todos os pedidos pagos, faturamento, ticket médio e lista detalhada de pedidos concluídos.'
     },
     {
-      title: '📊 Desempenho de Produtos',
+      title: 'Desempenho de Produtos',
       desc: 'Cardápio, estoque e métricas de itens cadastrados no catálogo do estabelecimento.',
       prompt: 'Crie um dashboard mostrando meus produtos cadastrados, preços médios e distribuição por categorias.'
     }
@@ -172,8 +173,10 @@ export const AIBuilderView: React.FC<AIBuilderViewProps> = ({ onOpenModule, apiB
     <div className="main-panel-scrollable" style={{ padding: '24px 32px' }}>
       {/* Header Principal da Tela */}
       <div style={{ marginBottom: 28 }}>
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '4px 12px', borderRadius: 20, background: 'rgba(99, 102, 241, 0.15)', border: '1px solid rgba(99, 102, 241, 0.3)', color: '#818cf8', fontSize: '0.78rem', fontWeight: 700, marginBottom: 12 }}>
-          <Sparkles size={13} />
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '4px 12px', borderRadius: 20, background: 'rgba(99, 102, 241, 0.15)', border: '1px solid rgba(99, 102, 241, 0.3)', color: '#818cf8', fontSize: '0.78rem', fontWeight: 700, marginBottom: 12 }}>
+          <div style={{ width: 15, height: 15, borderRadius: '50%', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <img src={atomLogo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          </div>
           <span>AI APP BUILDER • ARQUITETURA CONTROLADA</span>
         </div>
         <h1 className="page-title" style={{ fontSize: '1.8rem', fontWeight: 800, margin: 0, color: 'var(--text-main)', letterSpacing: '-0.5px' }}>
@@ -255,7 +258,9 @@ export const AIBuilderView: React.FC<AIBuilderViewProps> = ({ onOpenModule, apiB
                 </>
               ) : (
                 <>
-                  <Sparkles size={17} />
+                  <div style={{ width: 18, height: 18, borderRadius: '50%', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <img src={atomLogo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  </div>
                   Criar com IA
                 </>
               )}
@@ -582,7 +587,10 @@ export const AIBuilderView: React.FC<AIBuilderViewProps> = ({ onOpenModule, apiB
                         onClick={() => setEditingModule(mod)}
                         style={{ padding: '6px 10px', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: 6 }}
                       >
-                        <Sparkles size={13} color="#818cf8" /> Editar com IA
+                        <div style={{ width: 14, height: 14, borderRadius: '50%', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <img src={atomLogo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        </div>
+                        <span>Editar com IA</span>
                       </button>
                     </div>
 
