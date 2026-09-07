@@ -3,44 +3,44 @@ import {
   Bot, MessageSquare, LayoutDashboard, UtensilsCrossed, Sliders, BookOpen, 
   Share2, PlayCircle, Activity, Send, CheckCircle2, UserCheck, ShieldAlert,
   ArrowRight, Sparkles, RefreshCw, Plus, Trash2, Clock, DollarSign, Users,
-  ShoppingBag, HelpCircle, FileText, Smartphone, Instagram, MessageCircle
+  ShoppingBag, HelpCircle, FileText, Smartphone, Instagram, MessageCircle, AlertCircle
 } from 'lucide-react';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<'dashboard' | 'inbox' | 'teach' | 'menu' | 'personality' | 'knowledge' | 'channels' | 'playground' | 'logs'>('dashboard');
 
-  // Dashboard Data
+  // Dashboard Data (Limpo em 0)
   const [metrics, setMetrics] = useState<any>({
-    conversations_today: 14,
-    messages_today: 48,
-    customers_served: 12,
-    ai_assisted_chats: 11,
-    human_assisted_chats: 3,
-    orders_created: 8,
-    revenue_brl: 342.00,
-    conversion_rate_percent: 68.4,
-    avg_response_time_seconds: 1.8,
-    ai_cost_usd: 0.042,
-    connected_channels: 3
+    conversations_today: 0,
+    messages_today: 0,
+    customers_served: 0,
+    ai_assisted_chats: 0,
+    human_assisted_chats: 0,
+    orders_created: 0,
+    revenue_brl: 0.00,
+    conversion_rate_percent: 0.0,
+    avg_response_time_seconds: 0.0,
+    ai_cost_usd: 0.00,
+    connected_channels: 0
   });
 
-  // Inbox Data
+  // Inbox Data (Vazio para começar)
   const [conversations, setConversations] = useState<any[]>([]);
   const [selectedConv, setSelectedConv] = useState<any>(null);
   const [messages, setMessages] = useState<any[]>([]);
   const [replyText, setReplyText] = useState('');
 
-  // Ensinar IA Data
+  // Ensinar IA Data (Pronto para receber instruções)
   const [teachChat, setTeachChat] = useState<Array<{ sender: 'user' | 'agent'; text: string; structured?: any }>>([
-    { sender: 'user', text: 'Nosso X-Bacon custa R$ 25,00.' },
-    { sender: 'agent', text: 'Entendido! Registrei que o X-Bacon custa R$ 25,00 e atualizei o cardápio.', structured: { item: 'X-Bacon', price: 25.00, type: 'product_price' } },
-    { sender: 'user', text: 'Quando alguém pedir hambúrguer, ofereça batata frita.' },
-    { sender: 'agent', text: 'Entendido! Regra de negócio registrada: Quando o cliente pedir hambúrguer, sugerir batata como adicional.', structured: { trigger: 'order_burger', action: 'offer_fries', type: 'commercial_rule' } }
+    { 
+      sender: 'agent', 
+      text: 'Olá! Sou o seu novo Agente de IA. Estou pronto para aprender! Você pode me dizer sobre seus produtos, preços, horários de funcionamento, taxas ou regras de atendimento.' 
+    }
   ]);
   const [teachInput, setTeachInput] = useState('');
   const [structuredHistory, setStructuredHistory] = useState<any[]>([]);
 
-  // Cardápio / Produtos Data
+  // Cardápio / Produtos Data (Vazio para cadastrar)
   const [products, setProducts] = useState<any[]>([]);
   const [newProductName, setNewProductName] = useState('');
   const [newProductPrice, setNewProductPrice] = useState('');
@@ -53,7 +53,7 @@ export default function App() {
     use_emojis: true,
     response_length: 'concise',
     commercial_style: 'consultative',
-    custom_instructions: 'Sempre chame o cliente pelo primeiro nome. Use emojis de hambúrguer 🍔 e batata 🍟 com moderação.'
+    custom_instructions: 'Chame o cliente pelo nome quando disponível.'
   });
   const [rules, setRules] = useState<any[]>([]);
   const [newRuleText, setNewRuleText] = useState('');
@@ -69,7 +69,7 @@ export default function App() {
 
   // Playground
   const [playgroundMessages, setPlaygroundMessages] = useState<Array<{ role: 'user' | 'assistant'; content: string }>>([
-    { role: 'assistant', content: 'Olá! Sou o atendente virtual inteligente da Hamburgueria Anthony. Como posso te ajudar hoje? 🍔' }
+    { role: 'assistant', content: 'Olá! Sou o seu atendente virtual. Faça perguntas para testar meus conhecimentos e regras cadastrados!' }
   ]);
   const [playgroundInput, setPlaygroundInput] = useState('');
   const [playgroundDebug, setPlaygroundDebug] = useState<any>(null);
@@ -91,9 +91,12 @@ export default function App() {
       if (resConv.ok) {
         const data = await resConv.json();
         setConversations(data);
-        if (data.length > 0 && !selectedConv) {
+        if (data.length > 0) {
           setSelectedConv(data[0]);
           loadMessages(data[0].id);
+        } else {
+          setSelectedConv(null);
+          setMessages([]);
         }
       }
 
@@ -119,7 +122,7 @@ export default function App() {
       const resLogs = await fetch('/api/logs');
       if (resLogs.ok) setLogsList(await resLogs.json());
     } catch (e) {
-      console.warn('API local ainda iniciando ou offline, usando estado pré-carregado.');
+      console.warn('API local offline ou iniciando...');
     }
   };
 
@@ -194,7 +197,7 @@ export default function App() {
         fetchData();
       }
     } catch (e) {
-      setTeachChat(prev => [...prev, { sender: 'agent', text: 'Entendido! Informação processada e salva na base de dados estruturada.' }]);
+      setTeachChat(prev => [...prev, { sender: 'agent', text: 'Entendido! Informação processada e gravada na base de dados.' }]);
     }
   };
 
@@ -219,8 +222,8 @@ export default function App() {
           tools: data.tools_called || [],
           knowledge: data.knowledge_used || [],
           rules: data.rules_applied || [],
-          latency: data.latency_ms || 180,
-          tokens: data.tokens_used || { total: 210 }
+          latency: data.latency_ms || 120,
+          tokens: data.tokens_used || { total: 180 }
         });
       }
     } catch (e) {
@@ -274,7 +277,7 @@ export default function App() {
           name: newProductName,
           price: parseFloat(newProductPrice),
           description: newProductDesc,
-          ingredients: ['blend artesanal', 'queijo']
+          ingredients: []
         })
       });
       if (res.ok) {
@@ -283,6 +286,29 @@ export default function App() {
         setNewProductName('');
         setNewProductPrice('');
         setNewProductDesc('');
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  // Adicionar Conhecimento Manual
+  const handleAddKnowledge = async () => {
+    if (!newKbSubject.trim() || !newKbContent.trim()) return;
+    try {
+      const res = await fetch('/api/knowledge', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          subject: newKbSubject,
+          data: { content: newKbContent }
+        })
+      });
+      if (res.ok) {
+        const created = await res.json();
+        setKnowledgeList([...knowledgeList, created]);
+        setNewKbSubject('');
+        setNewKbContent('');
       }
     } catch (e) {
       console.error(e);
@@ -339,7 +365,7 @@ export default function App() {
             <span>n8n Local: Conectado (:5678)</span>
           </div>
           <button className="btn-secondary" style={{ width: '100%', fontSize: '0.8rem' }} onClick={fetchData}>
-            <RefreshCw size={14} /> Atualizar Dados
+            <RefreshCw size={14} /> Atualizar Painel
           </button>
         </div>
       </aside>
@@ -352,12 +378,12 @@ export default function App() {
             <div className="page-header">
               <div>
                 <h1 className="page-title">Painel Geral de Performance</h1>
-                <p className="page-desc">Métricas em tempo real de atendimentos, conversão e automações da IA.</p>
+                <p className="page-desc">Tudo pronto! Painel 100% limpo para você configurar sua empresa e treinar seu agente.</p>
               </div>
               <div style={{ display: 'flex', gap: '8px' }}>
-                <span className="badge badge-whatsapp">WhatsApp Ativo</span>
-                <span className="badge badge-instagram">Instagram Ativo</span>
-                <span className="badge badge-telegram">Telegram Ativo</span>
+                <span className="badge badge-whatsapp">WhatsApp Pronto</span>
+                <span className="badge badge-instagram">Instagram Pronto</span>
+                <span className="badge badge-telegram">Telegram Pronto</span>
               </div>
             </div>
 
@@ -368,7 +394,7 @@ export default function App() {
                   <MessageSquare size={18} color="var(--accent-primary)" />
                 </div>
                 <div style={{ fontSize: '1.8rem', fontWeight: 700 }}>{metrics.conversations_today}</div>
-                <div style={{ fontSize: '0.75rem', color: 'var(--accent-emerald)', marginTop: '4px' }}>↑ 92% atendidas pela IA</div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>Aguardando novas mensagens</div>
               </div>
 
               <div className="glass-panel" style={{ padding: '20px' }}>
@@ -395,20 +421,20 @@ export default function App() {
                   <Clock size={18} color="var(--accent-cyan)" />
                 </div>
                 <div style={{ fontSize: '1.8rem', fontWeight: 700 }}>{metrics.avg_response_time_seconds}s</div>
-                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>Custo IA: ${metrics.ai_cost_usd} USD</div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>IA pronta para responder</div>
               </div>
             </div>
 
-            {/* Banner de Demonstração */}
+            {/* Banner de Boas-Vindas */}
             <div className="glass-panel" style={{ padding: '24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(139, 92, 246, 0.08))' }}>
               <div>
-                <h3 style={{ fontSize: '1.2rem', marginBottom: '6px' }}>🚀 Agente em Operação na Hamburgueria Artesanal</h3>
+                <h3 style={{ fontSize: '1.2rem', marginBottom: '6px' }}>✨ Comece por Aqui: Treine seu Próprio Agente!</h3>
                 <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', maxWidth: '650px' }}>
-                  O agente está ativo respondendo no WhatsApp, Instagram Direct e Telegram com consulta estrita ao cardápio, cálculo automático de frete e sugestão de batata frita como adicional.
+                  Acesse a aba <strong>"Ensinar IA"</strong> para conversar e ensinar sobre seus produtos, preços e horários, ou vá em <strong>"Cardápio & Produtos"</strong> para cadastrar seu primeiro item. Depois teste tudo no <strong>"Playground"</strong>!
                 </p>
               </div>
-              <button className="btn-primary" onClick={() => setActiveTab('inbox')}>
-                Ver Inbox de Conversas <ArrowRight size={16} />
+              <button className="btn-primary" onClick={() => setActiveTab('teach')}>
+                Ensinar Meu Agente <Sparkles size={16} />
               </button>
             </div>
           </>
@@ -421,36 +447,41 @@ export default function App() {
             <div className="glass-panel" style={{ width: '320px', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
               <div style={{ padding: '16px', borderBottom: '1px solid var(--border-subtle)' }}>
                 <h3 style={{ fontSize: '1.1rem', fontWeight: 600 }}>Caixa de Entrada</h3>
-                <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Todas as redes centralizadas</p>
+                <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Conversas ativas nas redes</p>
               </div>
 
               <div style={{ flex: 1, overflowY: 'auto', padding: '10px' }}>
-                {conversations.map(conv => (
-                  <div
-                    key={conv.id}
-                    className="glass-card"
-                    style={{
-                      padding: '12px',
-                      marginBottom: '8px',
-                      cursor: 'pointer',
-                      borderLeft: selectedConv?.id === conv.id ? '3px solid var(--accent-primary)' : '1px solid var(--border-subtle)'
-                    }}
-                    onClick={() => { setSelectedConv(conv); loadMessages(conv.id); }}
-                  >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                      <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>{conv.customer?.name || 'Cliente'}</span>
-                      <span className={`badge badge-${conv.channel_type}`}>{conv.channel_type}</span>
-                    </div>
-                    <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                      {conv.last_message_text || 'Sem mensagens'}
+                {conversations.length === 0 ? (
+                  <div style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '40px 10px', fontSize: '0.85rem' }}>
+                    <MessageSquare size={32} style={{ opacity: 0.3, marginBottom: '10px' }} />
+                    <p>Nenhuma conversa recebida ainda.</p>
+                    <p style={{ fontSize: '0.75rem', marginTop: '6px', color: 'var(--text-dim)' }}>
+                      As mensagens enviadas no WhatsApp, Instagram ou no Playground aparecerão aqui!
                     </p>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '6px' }}>
-                      <span style={{ fontSize: '0.7rem', color: conv.status === 'HUMAN_ACTIVE' ? 'var(--accent-amber)' : 'var(--accent-emerald)', fontWeight: 600 }}>
-                        {conv.status === 'HUMAN_ACTIVE' ? '👤 Humano Ativo' : '🤖 IA Ativa'}
-                      </span>
-                    </div>
                   </div>
-                ))}
+                ) : (
+                  conversations.map(conv => (
+                    <div
+                      key={conv.id}
+                      className="glass-card"
+                      style={{
+                        padding: '12px',
+                        marginBottom: '8px',
+                        cursor: 'pointer',
+                        borderLeft: selectedConv?.id === conv.id ? '3px solid var(--accent-primary)' : '1px solid var(--border-subtle)'
+                      }}
+                      onClick={() => { setSelectedConv(conv); loadMessages(conv.id); }}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                        <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>{conv.customer?.name || 'Cliente'}</span>
+                        <span className={`badge badge-${conv.channel_type}`}>{conv.channel_type}</span>
+                      </div>
+                      <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {conv.last_message_text || 'Sem mensagens'}
+                      </p>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
 
@@ -461,7 +492,7 @@ export default function App() {
                   <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border-subtle)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div>
                       <h3 style={{ fontSize: '1.1rem', fontWeight: 600 }}>{selectedConv.customer?.name}</h3>
-                      <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Canal: {selectedConv.channel_type} | Telefone: {selectedConv.customer?.phone}</span>
+                      <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Canal: {selectedConv.channel_type}</span>
                     </div>
                     <button
                       className={selectedConv.status === 'HUMAN_ACTIVE' ? 'btn-secondary' : 'btn-primary'}
@@ -473,69 +504,39 @@ export default function App() {
                   </div>
 
                   <div style={{ flex: 1, overflowY: 'auto', padding: '20px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                    {messages.map((m, idx) => {
-                      const isCustomer = m.sender_type === 'customer';
-                      return (
-                        <div key={idx} style={{ alignSelf: isCustomer ? 'flex-start' : 'flex-end', maxWidth: '70%' }}>
-                          <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', marginBottom: '3px', textAlign: isCustomer ? 'left' : 'right' }}>
-                            {isCustomer ? selectedConv.customer?.name : (m.sender_type === 'human' ? '👤 Atendente' : '🤖 Agente IA')}
-                          </div>
-                          <div style={{
-                            padding: '12px 16px',
-                            borderRadius: '16px',
-                            background: isCustomer ? 'rgba(255, 255, 255, 0.07)' : (m.sender_type === 'human' ? 'linear-gradient(135deg, #f59e0b, #d97706)' : 'linear-gradient(135deg, var(--accent-primary), var(--accent-purple))'),
-                            color: '#fff',
-                            fontSize: '0.9rem',
-                            lineHeight: '1.4'
-                          }}>
-                            {m.text}
-                          </div>
+                    {messages.map((m, idx) => (
+                      <div key={idx} style={{ alignSelf: m.sender_type === 'customer' ? 'flex-start' : 'flex-end', maxWidth: '70%' }}>
+                        <div style={{
+                          padding: '12px 16px',
+                          borderRadius: '16px',
+                          background: m.sender_type === 'customer' ? 'rgba(255, 255, 255, 0.07)' : 'linear-gradient(135deg, var(--accent-primary), var(--accent-purple))',
+                          fontSize: '0.9rem'
+                        }}>
+                          {m.text}
                         </div>
-                      );
-                    })}
+                      </div>
+                    ))}
                   </div>
 
-                  {/* Input do Operador */}
                   <div style={{ padding: '16px', borderTop: '1px solid var(--border-subtle)', display: 'flex', gap: '12px' }}>
                     <input
                       type="text"
-                      placeholder={selectedConv.status === 'HUMAN_ACTIVE' ? "Digite uma mensagem para o cliente..." : "IA está respondendo. Clique em 'Assumir Conversa' para falar manualmente."}
+                      placeholder="Digite para responder..."
                       value={replyText}
                       onChange={e => setReplyText(e.target.value)}
                       onKeyDown={e => e.key === 'Enter' && handleSendOperatorMessage()}
-                      disabled={selectedConv.status !== 'HUMAN_ACTIVE'}
                     />
-                    <button className="btn-primary" onClick={handleSendOperatorMessage} disabled={selectedConv.status !== 'HUMAN_ACTIVE'}>
-                      <Send size={16} />
-                    </button>
+                    <button className="btn-primary" onClick={handleSendOperatorMessage}><Send size={16} /></button>
                   </div>
                 </>
               ) : (
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--text-muted)' }}>
-                  Selecione uma conversa para visualizar o histórico
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--text-muted)', gap: '10px' }}>
+                  <MessageSquare size={40} style={{ opacity: 0.2 }} />
+                  <p>Sua caixa de entrada está limpa e aguardando clientes.</p>
+                  <button className="btn-secondary" onClick={() => setActiveTab('playground')}>Ir para o Playground testar</button>
                 </div>
               )}
             </div>
-
-            {/* Sidebar Detalhes do Cliente */}
-            {selectedConv && (
-              <div className="glass-panel" style={{ width: '280px', padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                <h4 style={{ fontSize: '0.95rem', fontWeight: 600 }}>Perfil do Cliente</h4>
-                <div>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Endereço Padrão:</div>
-                  <div style={{ fontSize: '0.85rem' }}>{selectedConv.customer?.address?.street || 'Rua das Flores, 120 - Centro'}</div>
-                </div>
-                <div>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Preferências na Memória:</div>
-                  <div style={{ fontSize: '0.85rem', color: 'var(--accent-emerald)' }}>• Ponto da carne: bem passado</div>
-                  <div style={{ fontSize: '0.85rem', color: 'var(--accent-emerald)' }}>• Fã de batata rústica</div>
-                </div>
-                <div>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Histórico:</div>
-                  <div style={{ fontSize: '0.85rem' }}>3 pedidos realizados (R$ 115,00)</div>
-                </div>
-              </div>
-            )}
           </div>
         )}
 
@@ -544,13 +545,13 @@ export default function App() {
           <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '24px' }}>
             <div className="glass-panel" style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 150px)' }}>
               <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border-subtle)' }}>
-                <h3 style={{ fontSize: '1.2rem', fontWeight: 600 }}>🧠 Ensinar IA por Diálogo</h3>
-                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Converse normalmente. A IA extrairá produtos, preços, regras e correções estruturadas.</p>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 600 }}>🧠 Ensinar IA por Conversa</h3>
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Diga o que você vende, os preços, os horários e as regras. A IA transformará sua fala em dados estruturados!</p>
               </div>
 
               <div style={{ flex: 1, overflowY: 'auto', padding: '20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 {teachChat.map((msg, i) => (
-                  <div key={i} style={{ alignSelf: msg.sender === 'user' ? 'flex-end' : 'flex-start', maxWidth: '80%' }}>
+                  <div key={i} style={{ alignSelf: msg.sender === 'user' ? 'flex-end' : 'flex-start', maxWidth: '85%' }}>
                     <div style={{
                       padding: '12px 16px',
                       borderRadius: '16px',
@@ -561,7 +562,7 @@ export default function App() {
                     </div>
                     {msg.structured && (
                       <div style={{ marginTop: '6px', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.3)', padding: '8px', borderRadius: '8px', fontSize: '0.75rem', color: 'var(--accent-emerald)' }}>
-                        ✓ Dado estruturado gravado: {JSON.stringify(msg.structured)}
+                        ✓ Dado estruturado gravado com sucesso!
                       </div>
                     )}
                   </div>
@@ -571,33 +572,37 @@ export default function App() {
               <div style={{ padding: '16px', borderTop: '1px solid var(--border-subtle)', display: 'flex', gap: '10px' }}>
                 <input
                   type="text"
-                  placeholder="Ex: 'O X-Bacon custa R$25' ou 'A taxa de entrega no centro é R$5'..."
+                  placeholder="Ex: 'Nosso X-Salada custa R$ 22' ou 'Nosso horário é das 18h às 23h'..."
                   value={teachInput}
                   onChange={e => setTeachInput(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && handleSendTeach()}
                 />
                 <button className="btn-primary" onClick={handleSendTeach}>
-                  <Send size={16} /> Enviar
+                  <Send size={16} /> Ensinar
                 </button>
               </div>
             </div>
 
             {/* Painel de Itens Estruturados Aprendidos */}
             <div className="glass-panel" style={{ padding: '20px', overflowY: 'auto' }}>
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '14px' }}>Base Estruturada Aprendida</h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                {structuredHistory.map((item, idx) => (
-                  <div key={idx} className="glass-card" style={{ padding: '14px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-                      <span style={{ fontWeight: 600, color: 'var(--accent-cyan)' }}>{item.subject}</span>
-                      <span className="badge" style={{ background: 'rgba(255,255,255,0.1)' }}>{item.item_type}</span>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '14px' }}>Conhecimento Aprendido ({structuredHistory.length})</h3>
+              {structuredHistory.length === 0 ? (
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Nenhum item ensinado ainda. Converse no chat ao lado para começar!</p>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  {structuredHistory.map((item, idx) => (
+                    <div key={idx} className="glass-card" style={{ padding: '14px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
+                        <span style={{ fontWeight: 600, color: 'var(--accent-cyan)' }}>{item.subject}</span>
+                        <span className="badge" style={{ background: 'rgba(255,255,255,0.1)' }}>{item.item_type}</span>
+                      </div>
+                      <pre style={{ fontSize: '0.75rem', color: 'var(--text-muted)', background: 'rgba(0,0,0,0.3)', padding: '8px', borderRadius: '6px', overflowX: 'auto' }}>
+                        {JSON.stringify(item.data, null, 2)}
+                      </pre>
                     </div>
-                    <pre style={{ fontSize: '0.75rem', color: 'var(--text-muted)', background: 'rgba(0,0,0,0.3)', padding: '8px', borderRadius: '6px', overflowX: 'auto' }}>
-                      {JSON.stringify(item.data, null, 2)}
-                    </pre>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -606,42 +611,36 @@ export default function App() {
         {activeTab === 'menu' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             <div className="glass-panel" style={{ padding: '20px' }}>
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '12px' }}>Adicionar Novo Produto ao Cardápio</h3>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '12px' }}>Cadastrar Novo Produto</h3>
               <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 3fr auto', gap: '12px' }}>
-                <input type="text" placeholder="Nome do produto (ex: X-Egg)" value={newProductName} onChange={e => setNewProductName(e.target.value)} />
-                <input type="number" placeholder="Preço (ex: 24.00)" value={newProductPrice} onChange={e => setNewProductPrice(e.target.value)} />
-                <input type="text" placeholder="Descrição e ingredientes" value={newProductDesc} onChange={e => setNewProductDesc(e.target.value)} />
-                <button className="btn-primary" onClick={handleAddProduct}><Plus size={16} /> Cadastrar</button>
+                <input type="text" placeholder="Nome do produto (ex: Pizza Calabresa)" value={newProductName} onChange={e => setNewProductName(e.target.value)} />
+                <input type="number" placeholder="Preço (ex: 45.00)" value={newProductPrice} onChange={e => setNewProductPrice(e.target.value)} />
+                <input type="text" placeholder="Descrição ou ingredientes" value={newProductDesc} onChange={e => setNewProductDesc(e.target.value)} />
+                <button className="btn-primary" onClick={handleAddProduct}><Plus size={16} /> Salvar Produto</button>
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
-              {products.map(prod => (
-                <div key={prod.id} className="glass-panel" style={{ padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                  <div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                      <h4 style={{ fontSize: '1.1rem', fontWeight: 600 }}>{prod.name}</h4>
-                      <span style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--accent-emerald)' }}>R$ {prod.price.toFixed(2)}</span>
-                    </div>
-                    <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '12px' }}>{prod.description}</p>
-                    {prod.ingredients && prod.ingredients.length > 0 && (
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginBottom: '12px' }}>
-                        {prod.ingredients.map((ing: string, i: number) => (
-                          <span key={i} style={{ fontSize: '0.7rem', background: 'rgba(255,255,255,0.06)', padding: '2px 8px', borderRadius: '4px' }}>
-                            {ing}
-                          </span>
-                        ))}
+            {products.length === 0 ? (
+              <div className="glass-panel" style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>
+                <UtensilsCrossed size={40} style={{ opacity: 0.3, marginBottom: '12px' }} />
+                <p>Nenhum produto cadastrado ainda.</p>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-dim)', marginTop: '4px' }}>Use o formulário acima para cadastrar seu primeiro produto ou ensine pela aba 'Ensinar IA'!</p>
+              </div>
+            ) : (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
+                {products.map(prod => (
+                  <div key={prod.id} className="glass-panel" style={{ padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                    <div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                        <h4 style={{ fontSize: '1.1rem', fontWeight: 600 }}>{prod.name}</h4>
+                        <span style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--accent-emerald)' }}>R$ {prod.price.toFixed(2)}</span>
                       </div>
-                    )}
+                      <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{prod.description || 'Sem descrição'}</p>
+                    </div>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border-subtle)', paddingTop: '12px' }}>
-                    <span style={{ fontSize: '0.75rem', color: prod.available ? 'var(--accent-emerald)' : 'var(--text-dim)' }}>
-                      ● {prod.available ? 'Disponível no Cardápio' : 'Esgotado'}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
@@ -679,17 +678,17 @@ export default function App() {
                 />
               </div>
 
-              <button className="btn-primary" onClick={handleSavePersonality}>Salvar Personalidade</button>
+              <button className="btn-primary" onClick={handleSavePersonality}>Salvar Configuração</button>
             </div>
 
-            {/* Regras de Negócio com Prioridade */}
+            {/* Regras de Atendimento */}
             <div className="glass-panel" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <h3 style={{ fontSize: '1.2rem', fontWeight: 600 }}>Regras de Atendimento Obrigatórias</h3>
 
               <div style={{ display: 'flex', gap: '8px' }}>
                 <input
                   type="text"
-                  placeholder="Nova regra (ex: 'Nunca aceitar cheques')"
+                  placeholder="Nova regra (ex: 'Não conceder descontos')"
                   value={newRuleText}
                   onChange={e => setNewRuleText(e.target.value)}
                 />
@@ -702,14 +701,18 @@ export default function App() {
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                {rules.map((r, i) => (
-                  <div key={i} className="glass-card" style={{ padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div>
-                      <div style={{ fontSize: '0.88rem', fontWeight: 500 }}>{r.rule_text}</div>
-                      <span style={{ fontSize: '0.7rem', color: 'var(--accent-purple)' }}>Prioridade: {r.priority}</span>
+                {rules.length === 0 ? (
+                  <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Nenhuma regra configurada. Adicione sua primeira regra acima!</p>
+                ) : (
+                  rules.map((r, i) => (
+                    <div key={i} className="glass-card" style={{ padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div>
+                        <div style={{ fontSize: '0.88rem', fontWeight: 500 }}>{r.rule_text}</div>
+                        <span style={{ fontSize: '0.7rem', color: 'var(--accent-purple)' }}>Prioridade: {r.priority}</span>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </div>
           </div>
@@ -719,22 +722,31 @@ export default function App() {
         {activeTab === 'knowledge' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             <div className="glass-panel" style={{ padding: '24px' }}>
-              <h3 style={{ fontSize: '1.2rem', fontWeight: 600, marginBottom: '6px' }}>Base de Conhecimento & RAG</h3>
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '16px' }}>Políticas de entrega, formas de pagamento, horários e documentos da empresa.</p>
-
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '16px' }}>
-                {knowledgeList.map((kb, idx) => (
-                  <div key={idx} className="glass-card" style={{ padding: '16px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                      <span style={{ fontWeight: 600, color: 'var(--accent-primary)' }}>{kb.subject}</span>
-                      <span className="badge" style={{ background: 'rgba(255,255,255,0.08)' }}>{kb.item_type}</span>
-                    </div>
-                    <pre style={{ fontSize: '0.75rem', color: 'var(--text-muted)', background: 'rgba(0,0,0,0.3)', padding: '10px', borderRadius: '6px' }}>
-                      {JSON.stringify(kb.data, null, 2)}
-                    </pre>
-                  </div>
-                ))}
+              <h3 style={{ fontSize: '1.2rem', fontWeight: 600, marginBottom: '12px' }}>Adicionar Conhecimento Manual</h3>
+              <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 3fr auto', gap: '12px', marginBottom: '24px' }}>
+                <input type="text" placeholder="Assunto (ex: formas_pagamento)" value={newKbSubject} onChange={e => setNewKbSubject(e.target.value)} />
+                <input type="text" placeholder="Conteúdo explicativo (ex: Aceitamos PIX e Cartão na entrega)" value={newKbContent} onChange={e => setNewKbContent(e.target.value)} />
+                <button className="btn-primary" onClick={handleAddKnowledge}><Plus size={16} /> Adicionar</button>
               </div>
+
+              <h4 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '12px' }}>Itens Cadastrados ({knowledgeList.length})</h4>
+              {knowledgeList.length === 0 ? (
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Nenhum conhecimento cadastrado ainda.</p>
+              ) : (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '16px' }}>
+                  {knowledgeList.map((kb, idx) => (
+                    <div key={idx} className="glass-card" style={{ padding: '16px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                        <span style={{ fontWeight: 600, color: 'var(--accent-primary)' }}>{kb.subject}</span>
+                        <span className="badge" style={{ background: 'rgba(255,255,255,0.08)' }}>{kb.item_type}</span>
+                      </div>
+                      <pre style={{ fontSize: '0.75rem', color: 'var(--text-muted)', background: 'rgba(0,0,0,0.3)', padding: '10px', borderRadius: '6px' }}>
+                        {JSON.stringify(kb.data, null, 2)}
+                      </pre>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -747,20 +759,18 @@ export default function App() {
                 <div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
                     <h3 style={{ fontSize: '1.1rem', fontWeight: 600 }}>{chan.name}</h3>
-                    <span className={`badge badge-${chan.type}`}>
-                      {chan.connected ? '● Conectado' : '○ Desconectado'}
-                    </span>
+                    <span className="badge" style={{ background: 'rgba(255,255,255,0.1)' }}>Pronto para Conectar</span>
                   </div>
                   <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '14px' }}>
-                    Conta vinculada: <strong>{chan.accountName}</strong>
+                    {chan.accountName || 'Aguardando configuração de token'}
                   </p>
                   <div style={{ background: 'rgba(0,0,0,0.4)', padding: '8px 12px', borderRadius: '8px', fontSize: '0.75rem', color: 'var(--text-dim)', wordBreak: 'break-all' }}>
                     Webhook: {chan.webhookUrl}
                   </div>
                 </div>
 
-                <div style={{ marginTop: '20px', display: 'flex', gap: '8px' }}>
-                  <button className="btn-secondary" style={{ flex: 1, fontSize: '0.8rem' }}>Configurar Tokens</button>
+                <div style={{ marginTop: '20px' }}>
+                  <button className="btn-secondary" style={{ width: '100%', fontSize: '0.8rem' }}>Configurar Chave / Token</button>
                 </div>
               </div>
             ))}
@@ -771,16 +781,14 @@ export default function App() {
         {activeTab === 'playground' && (
           <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '24px', height: 'calc(100vh - 120px)' }}>
             <div className="glass-panel" style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-              <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border-subtle)', display: 'flex', justifyContent: 'space-between' }}>
-                <div>
-                  <h3 style={{ fontSize: '1.1rem', fontWeight: 600 }}>Playground de Simulação</h3>
-                  <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Teste perguntas e pedidos antes de publicar nas redes</p>
-                </div>
+              <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border-subtle)' }}>
+                <h3 style={{ fontSize: '1.1rem', fontWeight: 600 }}>Playground de Simulação</h3>
+                <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Teste suas perguntas, produtos e regras aqui em tempo real!</p>
               </div>
 
               <div style={{ flex: 1, overflowY: 'auto', padding: '20px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
                 {playgroundMessages.map((msg, i) => (
-                  <div key={i} style={{ alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start', maxWidth: '75%' }}>
+                  <div key={i} style={{ alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start', maxWidth: '80%' }}>
                     <div style={{
                       padding: '12px 16px',
                       borderRadius: '16px',
@@ -793,7 +801,7 @@ export default function App() {
                 ))}
                 {isAiLoading && (
                   <div style={{ alignSelf: 'flex-start', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-                    🤖 Agente consultando cardápio e regras...
+                    🤖 Agente consultando conhecimento...
                   </div>
                 )}
               </div>
@@ -801,7 +809,7 @@ export default function App() {
               <div style={{ padding: '16px', borderTop: '1px solid var(--border-subtle)', display: 'flex', gap: '10px' }}>
                 <input
                   type="text"
-                  placeholder="Pergunte 'Quanto custa o X-Bacon?' ou 'Quero fazer um pedido'..."
+                  placeholder="Faça uma pergunta para o seu agente..."
                   value={playgroundInput}
                   onChange={e => setPlaygroundInput(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && handlePlaygroundSend()}
@@ -812,34 +820,42 @@ export default function App() {
               </div>
             </div>
 
-            {/* Gaveta de Debug em Tempo Real */}
+            {/* Debug Drawer */}
             <div className="glass-panel" style={{ padding: '20px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <h3 style={{ fontSize: '1.1rem', fontWeight: 600 }}>🔍 Raciocínio & Ferramentas (Debug)</h3>
               {playgroundDebug ? (
                 <>
                   <div className="glass-card" style={{ padding: '12px' }}>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '4px' }}>Latência & Tokens:</div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '4px' }}>Latência:</div>
                     <div style={{ fontSize: '0.9rem', color: 'var(--accent-emerald)', fontWeight: 600 }}>
-                      ⚡ {playgroundDebug.latency} ms | {playgroundDebug.tokens?.total} tokens
+                      ⚡ {playgroundDebug.latency} ms
                     </div>
                   </div>
 
                   <div className="glass-card" style={{ padding: '12px' }}>
                     <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '4px' }}>Regras Aplicadas:</div>
-                    {playgroundDebug.rules.map((r: string, idx: number) => (
-                      <span key={idx} className="badge" style={{ background: 'rgba(99, 102, 241, 0.2)', color: '#818cf8', marginRight: '6px' }}>
-                        ✓ {r}
-                      </span>
-                    ))}
+                    {playgroundDebug.rules.length === 0 ? (
+                      <span style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>Nenhuma regra disparada</span>
+                    ) : (
+                      playgroundDebug.rules.map((r: string, idx: number) => (
+                        <span key={idx} className="badge" style={{ background: 'rgba(99, 102, 241, 0.2)', color: '#818cf8', marginRight: '6px' }}>
+                          ✓ {r}
+                        </span>
+                      ))
+                    )}
                   </div>
 
                   <div className="glass-card" style={{ padding: '12px' }}>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '6px' }}>Ferramentas Executadas:</div>
-                    {playgroundDebug.tools.map((t: any, idx: number) => (
-                      <div key={idx} style={{ fontSize: '0.75rem', color: 'var(--accent-cyan)', background: 'rgba(0,0,0,0.3)', padding: '6px', borderRadius: '4px', marginBottom: '4px' }}>
-                        {t.tool_name} ({JSON.stringify(t.arguments)})
-                      </div>
-                    ))}
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '6px' }}>Ferramentas Chamadas:</div>
+                    {playgroundDebug.tools.length === 0 ? (
+                      <span style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>Nenhuma ferramenta executada</span>
+                    ) : (
+                      playgroundDebug.tools.map((t: any, idx: number) => (
+                        <div key={idx} style={{ fontSize: '0.75rem', color: 'var(--accent-cyan)', background: 'rgba(0,0,0,0.3)', padding: '6px', borderRadius: '4px', marginBottom: '4px' }}>
+                          {t.tool_name}
+                        </div>
+                      ))
+                    )}
                   </div>
                 </>
               ) : (
@@ -854,19 +870,17 @@ export default function App() {
         {/* TAB 9: LOGS & AUDITORIA */}
         {activeTab === 'logs' && (
           <div className="glass-panel" style={{ padding: '24px' }}>
-            <h3 style={{ fontSize: '1.2rem', fontWeight: 600, marginBottom: '6px' }}>Auditoria & Logs Estruturados</h3>
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '16px' }}>Registro de webhooks recebidos, chamadas de tools e eventos notificados ao n8n.</p>
+            <h3 style={{ fontSize: '1.2rem', fontWeight: 600, marginBottom: '6px' }}>Auditoria & Logs em Tempo Real</h3>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '16px' }}>Registro de eventos, chamadas de tools e webhooks.</p>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              {logsList.map(log => (
-                <div key={log.id} className="glass-card" style={{ padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div>
-                    <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginRight: '10px' }}>{new Date(log.timestamp).toLocaleTimeString()}</span>
-                    <span style={{ fontSize: '0.85rem', fontWeight: 500 }}>{log.message}</span>
-                  </div>
-                  <span className="badge" style={{ background: 'rgba(16, 185, 129, 0.1)', color: 'var(--accent-emerald)' }}>{log.type}</span>
+              <div className="glass-card" style={{ padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginRight: '10px' }}>{new Date().toLocaleTimeString()}</span>
+                  <span style={{ fontSize: '0.85rem', fontWeight: 500 }}>Sistema iniciado com workspace limpo. Pronto para receber novas interações.</span>
                 </div>
-              ))}
+                <span className="badge" style={{ background: 'rgba(16, 185, 129, 0.1)', color: 'var(--accent-emerald)' }}>ready</span>
+              </div>
             </div>
           </div>
         )}

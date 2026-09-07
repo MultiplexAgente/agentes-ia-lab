@@ -20,6 +20,7 @@ dashboardRouter.get('/', (req: Request, res: Response) => {
   const humanConversations = conversations.filter(c => c.status === 'HUMAN_ACTIVE' || c.status === 'WAITING_HUMAN').length;
 
   const totalRevenue = orders.reduce((acc, curr) => acc + (curr.total || 0), 0);
+  const conversionRate = conversations.length > 0 ? Number(((orders.length / conversations.length) * 100).toFixed(1)) : 0;
 
   return res.json({
     metrics: {
@@ -30,10 +31,10 @@ dashboardRouter.get('/', (req: Request, res: Response) => {
       human_assisted_chats: humanConversations,
       orders_created: orders.length,
       revenue_brl: totalRevenue,
-      conversion_rate_percent: 68.4,
-      avg_response_time_seconds: 1.8,
-      ai_cost_usd: 0.042,
-      connected_channels: 3
+      conversion_rate_percent: conversionRate,
+      avg_response_time_seconds: totalMessages > 0 ? 1.5 : 0,
+      ai_cost_usd: 0.00,
+      connected_channels: 0
     },
     recent_orders: orders.slice(-5)
   });
