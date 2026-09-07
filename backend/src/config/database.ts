@@ -4,7 +4,8 @@ import {
   Company, Agent, AgentPersonality, AgentRule, Product, ProductCategory,
   Customer, Conversation, Message, StructuredKnowledgeItem, Order,
   AgentMemoryItem, KnowledgeSource, SourceSyncRun, SourceSyncChange, NormalizedCatalogItem,
-  AIBuilderModule, AIBuilderModuleVersion, Expense, UISchema
+  AIBuilderModule, AIBuilderModuleVersion, Expense, UISchema,
+  SearchSession, CatalogConsultantSettings, CatalogSearchLog, CatalogClickLog
 } from '../types/index.js';
 
 dotenv.config();
@@ -53,6 +54,12 @@ export class InMemoryStore {
   public builderActions: any[] = [];
   public expenses: Map<string, Expense[]> = new Map(); // key = company_id
 
+  // AI Catalog Consultant Collections
+  public searchSessions: Map<string, SearchSession> = new Map(); // key = conversation_id
+  public catalogSettings: Map<string, CatalogConsultantSettings> = new Map(); // key = company_id
+  public catalogSearches: CatalogSearchLog[] = [];
+  public catalogClicks: CatalogClickLog[] = [];
+
   private constructor() {
     this.seedCleanWorkspace();
   }
@@ -86,6 +93,10 @@ export class InMemoryStore {
     this.builderModuleVersions.clear();
     this.builderActions = [];
     this.expenses.clear();
+    this.searchSessions.clear();
+    this.catalogSettings.clear();
+    this.catalogSearches = [];
+    this.catalogClicks = [];
     this.seedCleanWorkspace();
   }
 
@@ -137,6 +148,21 @@ export class InMemoryStore {
     this.categories.set(companyId, []);
     this.products.set(companyId, []);
     this.knowledgeItems.set(companyId, []);
+
+    // 4.1. Configurações Padrão do Consultor Inteligente de Catálogo
+    this.catalogSettings.set(companyId, {
+      company_id: companyId,
+      max_results: 3,
+      send_images: true,
+      send_prices: true,
+      send_descriptions: true,
+      send_links: true,
+      show_stock: true,
+      ask_before_search: true,
+      presentation_style: 'cards',
+      default_sort: 'relevance',
+      custom_consultant_rules: 'Aja como um vendedor e consultor especialista. Faça perguntas esclarecedoras pertinentes antes de despejar produtos. Apresente os itens com foto, preço real, detalhes e o link oficial verificado.'
+    });
 
     // 5. Clientes Reais da Empresa
     const customersList: Customer[] = [

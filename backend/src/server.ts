@@ -14,6 +14,7 @@ import { billingRouter } from './routes/billing.js';
 import { authRouter } from './routes/auth.js';
 import sourcesRouter from './routes/sources.js';
 import { builderRouter } from './routes/builder.js';
+import { catalogRouter } from './routes/catalog.js';
 
 dotenv.config();
 
@@ -49,6 +50,7 @@ app.use('/api/billing', billingRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/sources', sourcesRouter);
 app.use('/api/builder', builderRouter);
+app.use('/api/catalog', catalogRouter);
 
 
 // Inicialização do Servidor

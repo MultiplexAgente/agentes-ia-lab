@@ -24,6 +24,7 @@ export const AIBuilderView: React.FC<AIBuilderViewProps> = ({ onOpenModule, apiB
   const [modules, setModules] = useState<AIBuilderModule[]>([]);
   const [loadingModules, setLoadingModules] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [planExtended, setPlanExtended] = useState<any>(null);
 
   // Modais
   const [editingModule, setEditingModule] = useState<AIBuilderModule | null>(null);
@@ -80,6 +81,7 @@ export const AIBuilderView: React.FC<AIBuilderViewProps> = ({ onOpenModule, apiB
     setLoadingPlan(true);
     setError(null);
     setPlan(null);
+    setPlanExtended(null);
     try {
       const res = await fetch(`${apiBase}/api/builder/plan`, {
         method: 'POST',
@@ -91,8 +93,9 @@ export const AIBuilderView: React.FC<AIBuilderViewProps> = ({ onOpenModule, apiB
 
       const json = await res.json();
       setPlan(json.plan);
+      setPlanExtended(json.plan);
 
-      // Busca dados reais para a pré-visualização interativa
+      // Busca dados reais para a pré-visualização
       if (json.plan?.suggested_schema) {
         const queryRes = await fetch(`${apiBase}/api/builder/query`, {
           method: 'POST',
@@ -395,6 +398,29 @@ export const AIBuilderView: React.FC<AIBuilderViewProps> = ({ onOpenModule, apiB
               Fontes: {plan.data_sources.join(', ')}
             </span>
           </div>
+
+          {/* O QUE FOI ENCONTRADO NO SISTEMA (introspection results) */}
+          {planExtended?.entities_discovered && planExtended.entities_discovered.length > 0 && (
+            <div style={{ marginBottom: 20, padding: '14px 16px', borderRadius: 12, background: 'rgba(6, 182, 212, 0.07)', border: '1px solid rgba(6, 182, 212, 0.2)' }}>
+              <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#06b6d4', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 10 }}>
+                🔍 O que encontrei no sistema
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                {planExtended.entities_discovered.map((e: any, i: number) => (
+                  <div key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 10px', borderRadius: 8, background: e.hasData ? 'rgba(16, 185, 129, 0.12)' : 'rgba(255,255,255,0.04)', border: `1px solid ${e.hasData ? 'rgba(16, 185, 129, 0.3)' : 'rgba(255,255,255,0.08)'}` }}>
+                    <span style={{ width: 7, height: 7, borderRadius: '50%', background: e.hasData ? '#10b981' : 'rgba(255,255,255,0.2)' }} />
+                    <span style={{ fontSize: '0.78rem', fontWeight: 600, color: e.hasData ? '#10b981' : 'var(--text-dim)' }}>{e.name}</span>
+                    <span style={{ fontSize: '0.72rem', color: 'var(--text-dim)' }}>({e.count} reg.)</span>
+                  </div>
+                ))}
+              </div>
+              {planExtended.entities_discovered.every((e: any) => !e.hasData) && (
+                <p style={{ margin: '10px 0 0', fontSize: '0.78rem', color: '#f59e0b' }}>
+                  ⚠️ Nenhum dado real encontrado. A página será criada com estados vazios.
+                </p>
+              )}
+            </div>
+          )}
 
           {/* Tabs de Preview */}
           <div style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.08)', marginBottom: 16, display: 'flex', gap: 16 }}>

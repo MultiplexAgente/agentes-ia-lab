@@ -56,6 +56,22 @@ export class DataQueryEngine {
     const avgTicket = paidOrders.length > 0 ? totalRevenue / paidOrders.length : 0;
     const profitMargin = totalRevenue > 0 ? ((netProfit / totalRevenue) * 100) : 0;
 
+    // Helper: aggregate orders by date label (last N days)
+    const buildDailyChart = (orders: typeof paidOrders, expenses: typeof filteredExpenses, days = 7) => {
+      const points: Array<{ label: string; value: number; secondaryValue?: number }> = [];
+      for (let i = days - 1; i >= 0; i--) {
+        const d = new Date(now);
+        d.setDate(d.getDate() - i);
+        const label = d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+        const dayStart = new Date(d); dayStart.setHours(0,0,0,0);
+        const dayEnd = new Date(d); dayEnd.setHours(23,59,59,999);
+        const rev = orders.filter(o => { const t = new Date(o.created_at || ''); return t >= dayStart && t <= dayEnd; }).reduce((a, o) => a + Number(o.total_amount || 0), 0);
+        const exp = expenses.filter(e => { const t = new Date(e.due_date || e.created_at || ''); return t >= dayStart && t <= dayEnd; }).reduce((a, e) => a + Number(e.amount || 0), 0);
+        points.push({ label, value: rev, secondaryValue: exp });
+      }
+      return points;
+    };
+
     // 3. Processa cada componente individualmente
     for (const comp of components) {
       try {
@@ -65,13 +81,12 @@ export class DataQueryEngine {
         // ── COMPONENTE: METRIC / KPI ──
         if (comp.type === 'metric' || comp.type === 'kpi') {
           // FATURAMENTO
-          if (titleLower.includes('faturamento') || titleLower.includes('receita') || dataSource === 'payments') {
+          if (titleLower.includes('faturamento') || titleLower.includes('receita') || (dataSource === 'payments' && !titleLower.includes('metodo') && !titleLower.includes('pagamento'))) {
             results[comp.id] = {
               componentId: comp.id,
               value: totalRevenue,
-              formattedValue: `R$ ${totalRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
-              changePercentage: 14.8,
-              statusText: `${paidOrders.length} pagamentos confirmados`
+              formattedValue: totalRevenue > 0 ? `R$ ${totalRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : 'Sem dados',
+              statusText: paidOrders.length > 0 ? `${paidOrders.length} pagamentos confirmados` : 'Nenhum pagamento registrado'
             };
           }
           // DESPESAS
@@ -79,9 +94,8 @@ export class DataQueryEngine {
             results[comp.id] = {
               componentId: comp.id,
               value: totalExpenses,
-              formattedValue: `R$ ${totalExpenses.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
-              changePercentage: -3.2,
-              statusText: `${filteredExpenses.length} contas lançadas`
+              formattedValue: totalExpenses > 0 ? `R$ ${totalExpenses.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : 'Sem dados',
+              statusText: filteredExpenses.length > 0 ? `${filteredExpenses.length} contas lançadas` : 'Nenhuma despesa registrada'
             };
           }
           // LUCRO LÍQUIDO
@@ -89,29 +103,36 @@ export class DataQueryEngine {
             results[comp.id] = {
               componentId: comp.id,
               value: netProfit,
-              formattedValue: `R$ ${netProfit.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
-              changePercentage: profitMargin,
-              statusText: netProfit >= 0 ? `Margem líquida de ${profitMargin.toFixed(1)}%` : 'Prejuízo operacional'
+              formattedValue: (totalRevenue > 0 || totalExpenses > 0) ? `R$ ${netProfit.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : 'Sem dados',
+              statusText: totalRevenue > 0 ? (netProfit >= 0 ? `Margem líquida de ${profitMargin.toFixed(1)}%` : 'Prejuízo operacional') : 'Sem dados suficientes'
             };
           }
-          // PEDIDOS PAGOS / QUANTIDADE DE PEDIDOS
+          // PEDIDOS PAGOS
           else if (titleLower.includes('pedido') || dataSource === 'orders') {
-            results[comp.id] = {
-              componentId: comp.id,
-              value: paidOrders.length,
-              formattedValue: String(paidOrders.length),
-              changePercentage: 8.5,
-              statusText: `${filteredOrders.length - paidOrders.length} aguardando pagamento`
-            };
+            const aggType = comp.aggregation || 'count';
+            if (aggType === 'avg') {
+              results[comp.id] = {
+                componentId: comp.id,
+                value: avgTicket,
+                formattedValue: avgTicket > 0 ? `R$ ${avgTicket.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : 'Sem dados',
+                statusText: paidOrders.length > 0 ? `Média por pedido concluído` : 'Nenhum pedido pago'
+              };
+            } else {
+              results[comp.id] = {
+                componentId: comp.id,
+                value: paidOrders.length,
+                formattedValue: String(paidOrders.length),
+                statusText: filteredOrders.length - paidOrders.length > 0 ? `${filteredOrders.length - paidOrders.length} aguardando pagamento` : 'Todos os pedidos pagos'
+              };
+            }
           }
-          // TICKET MÉDIO
-          else if (titleLower.includes('ticket') || titleLower.includes('médio')) {
+          // TICKET MÉDIO (by title)
+          else if (titleLower.includes('ticket') || titleLower.includes('médio') || titleLower.includes('medio')) {
             results[comp.id] = {
               componentId: comp.id,
               value: avgTicket,
-              formattedValue: `R$ ${avgTicket.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
-              changePercentage: 4.2,
-              statusText: 'Média por pedido concluído'
+              formattedValue: avgTicket > 0 ? `R$ ${avgTicket.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : 'Sem dados',
+              statusText: paidOrders.length > 0 ? 'Média por pedido concluído' : 'Nenhum pedido pago'
             };
           }
           // CLIENTES
@@ -119,77 +140,67 @@ export class DataQueryEngine {
             results[comp.id] = {
               componentId: comp.id,
               value: companyCustomers.length,
-              formattedValue: String(companyCustomers.length),
-              changePercentage: 12.0,
-              statusText: 'Clientes ativos na base'
+              formattedValue: companyCustomers.length > 0 ? String(companyCustomers.length) : '0',
+              statusText: companyCustomers.length > 0 ? 'Clientes cadastrados' : 'Nenhum cliente registrado'
             };
           }
           // PRODUTOS
-          else if (titleLower.includes('produto') || dataSource === 'products') {
-            results[comp.id] = {
-              componentId: comp.id,
-              value: companyProducts.length,
-              formattedValue: String(companyProducts.length),
-              statusText: 'Itens no cardápio / catálogo'
-            };
+          else if (titleLower.includes('produto') || titleLower.includes('preco') || titleLower.includes('preço') || dataSource === 'products') {
+            const aggType = comp.aggregation || 'count';
+            if (aggType === 'avg') {
+              const avgPrice = companyProducts.length > 0 ? companyProducts.reduce((a, p) => a + Number(p.price || 0), 0) / companyProducts.length : 0;
+              results[comp.id] = { componentId: comp.id, value: avgPrice, formattedValue: avgPrice > 0 ? `R$ ${avgPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : 'Sem dados', statusText: 'Preço médio dos produtos' };
+            } else {
+              results[comp.id] = { componentId: comp.id, value: companyProducts.length, formattedValue: String(companyProducts.length), statusText: companyProducts.length > 0 ? 'Itens no catálogo' : 'Nenhum produto cadastrado' };
+            }
           }
           else {
-            // Fallback genérico
-            results[comp.id] = {
-              componentId: comp.id,
-              value: 0,
-              formattedValue: '0',
-              statusText: 'Sem dados para o filtro'
-            };
+            results[comp.id] = { componentId: comp.id, value: 0, formattedValue: '0', statusText: 'Sem dados disponíveis' };
           }
         }
 
-        // ── COMPONENTE: CHART (GRÁFICO) ──
+        // ── COMPONENTE: CHART (GRÁFICO) — apenas dados reais, zero invenção ──
         else if (comp.type === 'chart') {
           const chartType = comp.chartType || 'line';
 
-          // Gráfico de Faturamento / Receita x Despesas
-          if (titleLower.includes('faturamento') || titleLower.includes('desempenho') || titleLower.includes('financeir') || titleLower.includes('lucro')) {
+          // Gráfico de linha/barra: Faturamento x Despesas por dia (dados reais)
+          if (titleLower.includes('faturamento') || titleLower.includes('desempenho') || titleLower.includes('financeir') || titleLower.includes('lucro') || titleLower.includes('evolucao') || titleLower.includes('evolução')) {
+            const dailyData = buildDailyChart(paidOrders, filteredExpenses, 7);
+            const hasAnyData = dailyData.some(d => d.value > 0 || (d.secondaryValue || 0) > 0);
             results[comp.id] = {
               componentId: comp.id,
-              chartData: [
-                { label: '01/09', value: 148.50, secondaryValue: 80.00 },
-                { label: '02/09', value: 240.50, secondaryValue: 120.00 },
-                { label: '03/09', value: 455.50, secondaryValue: 200.00 },
-                { label: '04/09', value: 573.50, secondaryValue: 280.00 },
-                { label: '05/09', value: 824.00, secondaryValue: 350.00 },
-                { label: '06/09', value: 1148.00, secondaryValue: 420.00 },
-                { label: '07/09', value: totalRevenue, secondaryValue: totalExpenses }
-              ]
+              chartData: hasAnyData ? dailyData : []
             };
           }
-          // Gráfico de Métodos de Pagamento ou Pizza / Donut
-          else if (chartType === 'pie' || chartType === 'donut' || titleLower.includes('pagamento') || titleLower.includes('canal')) {
+          // Donut / Pie: Métodos de pagamento reais
+          else if (chartType === 'pie' || chartType === 'donut' || titleLower.includes('pagamento') || titleLower.includes('metodo') || titleLower.includes('método') || titleLower.includes('canal')) {
             const pixTotal = paidOrders.filter(o => o.payment_method === 'PIX').reduce((a, b) => a + Number(b.total_amount), 0);
-            const cardTotal = paidOrders.filter(o => o.payment_method?.includes('Cartão')).reduce((a, b) => a + Number(b.total_amount), 0);
-            results[comp.id] = {
-              componentId: comp.id,
-              chartData: [
-                { label: 'PIX Instantâneo', value: pixTotal || 820.50, category: '#10b981' },
-                { label: 'Cartão de Crédito', value: cardTotal || 450.00, category: '#6366f1' },
-                { label: 'Outros / Débito', value: 180.00, category: '#06b6d4' }
-              ]
-            };
+            const cardCreditTotal = paidOrders.filter(o => (o.payment_method || '').includes('Crédito') || (o.payment_method || '').includes('Credito')).reduce((a, b) => a + Number(b.total_amount), 0);
+            const cardDebitTotal = paidOrders.filter(o => (o.payment_method || '').includes('Débito') || (o.payment_method || '').includes('Debito')).reduce((a, b) => a + Number(b.total_amount), 0);
+            const otherTotal = paidOrders.filter(o => !['PIX'].includes(o.payment_method || '') && !(o.payment_method || '').includes('Crédito') && !(o.payment_method || '').includes('Débito') && !(o.payment_method || '').includes('Cartão')).reduce((a, b) => a + Number(b.total_amount), 0);
+            const rawData = [
+              { label: 'PIX', value: pixTotal, category: '#10b981' },
+              { label: 'Cartão de Crédito', value: cardCreditTotal, category: '#6366f1' },
+              { label: 'Cartão de Débito', value: cardDebitTotal, category: '#06b6d4' },
+              { label: 'Outros', value: otherTotal, category: '#f59e0b' }
+            ].filter(d => d.value > 0);
+            results[comp.id] = { componentId: comp.id, chartData: rawData };
           }
-          // Gráfico de Vendas / Pedidos
+          // Gráfico genérico: contagem de pedidos por dia
           else {
-            results[comp.id] = {
-              componentId: comp.id,
-              chartData: [
-                { label: 'Seg', value: 3 },
-                { label: 'Ter', value: 5 },
-                { label: 'Qua', value: 7 },
-                { label: 'Qui', value: 6 },
-                { label: 'Sex', value: 11 },
-                { label: 'Sáb', value: 15 },
-                { label: 'Dom', value: 12 }
-              ]
-            };
+            const dailyOrderCount = buildDailyChart(paidOrders, [], 7).map(d => ({ label: d.label, value: d.value > 0 ? 1 : 0 }));
+            // Count actual orders per day
+            const ordersPerDay: Array<{ label: string; value: number }> = [];
+            for (let i = 6; i >= 0; i--) {
+              const d = new Date(now);
+              d.setDate(d.getDate() - i);
+              const label = d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+              const dayStart = new Date(d); dayStart.setHours(0,0,0,0);
+              const dayEnd = new Date(d); dayEnd.setHours(23,59,59,999);
+              const cnt = filteredOrders.filter(o => { const t = new Date(o.created_at || ''); return t >= dayStart && t <= dayEnd; }).length;
+              ordersPerDay.push({ label, value: cnt });
+            }
+            results[comp.id] = { componentId: comp.id, chartData: ordersPerDay.some(d => d.value > 0) ? ordersPerDay : [] };
           }
         }
 
@@ -206,10 +217,10 @@ export class DataQueryEngine {
             const rows = companyCustomers.map(c => ({
               id: c.id,
               name: c.name,
-              phone: c.phone || 'Sem telefone',
-              email: c.email || 'Sem e-mail',
-              total_orders: c.total_orders || 1,
-              total_spent: `R$ ${(customerMapOrders.get(c.id) || (c.total_orders || 1) * 85.50).toFixed(2)}`,
+              phone: c.phone || '—',
+              email: c.email || '—',
+              total_orders: c.total_orders || 0,
+              total_spent: customerMapOrders.has(c.id) ? `R$ ${(customerMapOrders.get(c.id) || 0).toFixed(2)}` : '—',
               created_at: new Date(c.created_at || Date.now()).toLocaleDateString('pt-BR'),
               status: 'Ativo'
             })).filter(r => {

@@ -8,7 +8,7 @@ import {
   Globe, Facebook, Twitter, Copy, ExternalLink, HelpCircle, CheckCircle2,
   User, Shield, Bell, CreditCard, LogOut, ChevronRight, Settings,
   Lock, Mail, Phone, Building2, UserPlus, LogIn, ArrowRight, ArrowLeft, Zap, Star, ShieldCheck, Key,
-  Mic, MicOff, Volume2, VolumeX, ThumbsUp, ThumbsDown, FileText, Paperclip, ChevronDown, Bot, Cpu, ShoppingBag, Truck, Calendar, Clock, DollarSign, Share2, Download, Terminal, Layers, Wand2
+  Mic, MicOff, Volume2, VolumeX, ThumbsUp, ThumbsDown, FileText, Paperclip, ChevronDown, Bot, Cpu, ShoppingBag, Truck, Calendar, Clock, DollarSign, Share2, Download, Terminal, Layers, Wand2, BarChart3
 } from 'lucide-react';
 import atomLogo from './assets/multiplex-atom.jpg';
 import { AIBuilderView } from './components/builder/AIBuilderView';
@@ -26,6 +26,7 @@ interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
   toolsUsed?: Array<{ tool: string; input?: any; result?: any }>;
+  catalogCards?: any[];
   timestamp: string;
 }
 
@@ -271,8 +272,8 @@ export default function App() {
   const [newProductPrice, setNewProductPrice] = useState('');
   const [newProductDesc, setNewProductDesc] = useState('');
 
-  // Importacao de Cardapio e Catalogo com Multiplex IA (Texto e Web Scraper de URL)
-  const [catalogImportMode, setCatalogImportMode] = useState<'url' | 'text'>('url');
+  // Importacao de Cardapio e Catalogo com Multiplex IA (Texto, Web Scraper, Configuracoes e Analytics)
+  const [catalogImportMode, setCatalogImportMode] = useState<'url' | 'text' | 'settings' | 'analytics'>('url');
   const [clientWebsiteUrl, setClientWebsiteUrl] = useState('');
   const [isScrapingWebsite, setIsScrapingWebsite] = useState(false);
   const [scrapeStatusText, setScrapeStatusText] = useState('');
@@ -283,6 +284,105 @@ export default function App() {
   const [isSavingBatch, setIsSavingBatch] = useState(false);
   const [batchSuccessMsg, setBatchSuccessMsg] = useState('');
   const [showManualAdd, setShowManualAdd] = useState(false);
+
+  // Configurações do Consultor Inteligente de Catálogo
+  const [consultantSettings, setConsultantSettings] = useState({
+    company_id: '11111111-1111-1111-1111-111111111111',
+    max_results: 3,
+    send_images: true,
+    send_prices: true,
+    send_descriptions: true,
+    send_links: true,
+    show_stock: true,
+    ask_before_search: true,
+    presentation_style: 'cards' as 'cards' | 'concise' | 'detailed',
+    default_sort: 'relevance' as 'relevance' | 'price_asc' | 'price_desc' | 'newest',
+    custom_consultant_rules: 'Aja como um vendedor e consultor especialista. Faça perguntas inteligentes e apresente fotos, preços reais e links oficiais.'
+  });
+  const [isSavingConsultantSettings, setIsSavingConsultantSettings] = useState(false);
+  const [consultantSaveSuccess, setConsultantSaveSuccess] = useState(false);
+  const [catalogAnalytics, setCatalogAnalytics] = useState<any>(null);
+
+  // Testador / Simulador da Busca do Catálogo
+  const [testSearchQuery, setTestSearchQuery] = useState('');
+  const [testSearchResults, setTestSearchResults] = useState<any>(null);
+  const [isTestingSearch, setIsTestingSearch] = useState(false);
+
+  const loadConsultantSettings = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/api/catalog/settings`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.settings) setConsultantSettings(data.settings);
+      }
+    } catch (e) {
+      console.warn('Erro ao carregar configurações de catálogo:', e);
+    }
+  };
+
+  const saveConsultantSettings = async () => {
+    setIsSavingConsultantSettings(true);
+    try {
+      const res = await fetch(`${API_BASE}/api/catalog/settings`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(consultantSettings)
+      });
+      if (res.ok) {
+        setConsultantSaveSuccess(true);
+        setTimeout(() => setConsultantSaveSuccess(false), 3500);
+      }
+    } catch (e) {
+      console.error('Erro ao salvar configurações do catálogo:', e);
+    } finally {
+      setIsSavingConsultantSettings(false);
+    }
+  };
+
+  const loadCatalogAnalytics = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/api/catalog/analytics`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.analytics) setCatalogAnalytics(data.analytics);
+      }
+    } catch (e) {
+      console.warn('Erro ao carregar analytics de catálogo:', e);
+    }
+  };
+
+  const handleCatalogClick = async (itemId: string, sourceUrl: string, itemName?: string) => {
+    try {
+      await fetch(`${API_BASE}/api/catalog/click`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          catalog_item_id: itemId,
+          source_url: sourceUrl,
+          item_name: itemName
+        })
+      });
+    } catch (e) {}
+    if (sourceUrl) {
+      window.open(sourceUrl, '_blank', 'noopener,noreferrer');
+    }
+  };
+
+  const handleRunTestSearch = async () => {
+    if (!testSearchQuery.trim()) return;
+    setIsTestingSearch(true);
+    try {
+      const res = await fetch(`${API_BASE}/api/catalog/search?query=${encodeURIComponent(testSearchQuery)}`);
+      if (res.ok) {
+        const data = await res.json();
+        setTestSearchResults(data);
+      }
+    } catch (e) {
+      console.error('Erro no teste de busca:', e);
+    } finally {
+      setIsTestingSearch(false);
+    }
+  };
 
   const [rules, setRules] = useState<any[]>([]);
   const [newRuleText, setNewRuleText] = useState('');
@@ -778,16 +878,36 @@ export default function App() {
       const res = await fetch(`${API_BASE}/api/chat/message`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: prompt })
+        body: JSON.stringify({ 
+          message: prompt,
+          conversationId: currentChat.id,
+          companyId: '11111111-1111-1111-1111-111111111111'
+        })
       });
 
       if (res.ok) {
         const data = await res.json();
+
+        // Extrai cards estruturados das tools de catálogo se houver
+        let extractedCards: any[] | undefined = undefined;
+        if (data.tools_called && Array.isArray(data.tools_called)) {
+          for (const tc of data.tools_called) {
+            if (tc.result?.cards && Array.isArray(tc.result.cards) && tc.result.cards.length > 0) {
+              extractedCards = tc.result.cards;
+              break;
+            } else if (tc.result?.results && Array.isArray(tc.result.results) && tc.result.results.length > 0) {
+              extractedCards = tc.result.results;
+              break;
+            }
+          }
+        }
+
         const aiMsg: ChatMessage = {
           id: `m-ai-${Date.now()}`,
           role: 'assistant',
           content: data.response_text || 'Compreendido.',
           toolsUsed: (data.tools_called && data.tools_called.length > 0) ? data.tools_called : undefined,
+          catalogCards: extractedCards,
           timestamp: new Date().toISOString()
         };
 
@@ -3545,6 +3665,76 @@ export default function App() {
                         {msg.content}
                       </div>
 
+                      {/* CARDS VISUAIS DO CONSULTOR INTELIGENTE DE CATÁLOGO */}
+                      {msg.catalogCards && msg.catalogCards.length > 0 && (
+                        <div style={{ marginTop: 14, display: 'flex', flexDirection: 'column', gap: 10 }}>
+                          {msg.catalogCards.map((card: any, cIdx: number) => (
+                            <div 
+                              key={card.id || cIdx} 
+                              className="catalog-result-card"
+                              style={{
+                                background: theme === 'dark' ? 'rgba(15, 23, 42, 0.85)' : '#ffffff',
+                                border: theme === 'dark' ? '1px solid rgba(0, 210, 255, 0.35)' : '1px solid #cbd5e1',
+                                borderRadius: 12,
+                                padding: 12,
+                                display: 'flex',
+                                gap: 12,
+                                alignItems: 'center',
+                                boxShadow: theme === 'light' ? '0 4px 12px rgba(0,0,0,0.06)' : '0 4px 20px rgba(0,0,0,0.3)'
+                              }}
+                            >
+                              {(card.image || (card.images && card.images[0])) && (
+                                <div style={{ width: 72, height: 72, minWidth: 72, borderRadius: 8, overflow: 'hidden', background: '#0f172a' }}>
+                                  <img 
+                                    src={card.image || card.images[0]} 
+                                    alt={card.name} 
+                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                                    onError={(e) => { (e.target as any).style.display = 'none'; }}
+                                  />
+                                </div>
+                              )}
+                              <div style={{ flex: 1, minWidth: 0 }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+                                  <span style={{ fontWeight: 700, fontSize: '0.94rem', color: theme === 'light' ? '#0f172a' : '#f8fafc' }}>
+                                    {cIdx + 1}. {card.name}
+                                  </span>
+                                  <span style={{ fontWeight: 700, color: '#10b981', fontSize: '0.9rem', whiteSpace: 'nowrap' }}>
+                                    {card.formatted_price || (card.price ? `R$ ${Number(card.price).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : 'Sob consulta')}
+                                  </span>
+                                </div>
+
+                                {card.description && (
+                                  <p style={{ margin: '4px 0 8px 0', fontSize: '0.8rem', color: theme === 'light' ? '#475569' : 'var(--text-muted)', lineHeight: 1.4 }}>
+                                    {card.description.length > 130 ? card.description.slice(0, 130) + '...' : card.description}
+                                  </p>
+                                )}
+
+                                <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                                  {card.source_url && (
+                                    <button 
+                                      className="btn-primary"
+                                      style={{ padding: '4px 12px', fontSize: '0.78rem', display: 'flex', alignItems: 'center', gap: 5 }}
+                                      onClick={() => handleCatalogClick(card.id, card.source_url, card.name)}
+                                    >
+                                      <Globe size={13} />
+                                      <span>{card.cta_label || 'Ver no Site'}</span>
+                                      <ExternalLink size={12} />
+                                    </button>
+                                  )}
+                                  <button 
+                                    className="btn-secondary"
+                                    style={{ padding: '4px 10px', fontSize: '0.76rem' }}
+                                    onClick={() => handleSendMessage(`Gostei da opção ${cIdx + 1}: ${card.name}. Pode me dar mais informações?`)}
+                                  >
+                                    Quero este
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
                       {/* Barra de Acoes na Resposta da IA */}
                       {msg.role === 'assistant' && (
                         <div className="message-actions-bar">
@@ -3887,8 +4077,8 @@ export default function App() {
             </button>
           </div>
 
-          {/* ABAS DE MODO: IMPORTAR POR SITE / LINK (URL) OU TEXTO */}
-          <div style={{ display: 'flex', gap: 10, marginBottom: 16 }}>
+          {/* ABAS DE MODO: IMPORTAR POR SITE, TEXTO, CONFIGURAÇÕES IA E ANALYTICS */}
+          <div style={{ display: 'flex', gap: 10, marginBottom: 16, flexWrap: 'wrap' }}>
             <button 
               type="button"
               className={catalogImportMode === 'url' ? 'btn-primary' : 'btn-secondary'}
@@ -3908,6 +4098,28 @@ export default function App() {
             >
               <FileText size={18} />
               <span>Colar Texto ou Lista Manualmente</span>
+            </button>
+
+            <button 
+              type="button"
+              className={catalogImportMode === 'settings' ? 'btn-primary' : 'btn-secondary'}
+              onClick={() => { setCatalogImportMode('settings'); loadConsultantSettings(); }}
+              style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 18px', fontWeight: 600 }}
+            >
+              <Settings size={18} />
+              <span>Configurações da Busca IA</span>
+              <span className="badge" style={{ background: 'rgba(168, 85, 247, 0.2)', color: '#c084fc', fontSize: '0.65rem' }}>Consultor</span>
+            </button>
+
+            <button 
+              type="button"
+              className={catalogImportMode === 'analytics' ? 'btn-primary' : 'btn-secondary'}
+              onClick={() => { setCatalogImportMode('analytics'); loadCatalogAnalytics(); }}
+              style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 18px', fontWeight: 600 }}
+            >
+              <BarChart3 size={18} />
+              <span>Métricas & Conversão</span>
+              <span className="badge" style={{ background: 'rgba(16, 185, 129, 0.2)', color: '#34d399', fontSize: '0.65rem' }}>ROI & Funil</span>
             </button>
           </div>
 
@@ -4182,6 +4394,480 @@ export default function App() {
                   <span>{batchSuccessMsg}</span>
                 </div>
               )}
+            </div>
+          )}
+
+          {/* PAINEL MODO 3: CONFIGURAÇÕES DA BUSCA IA (CONSULTOR) & SIMULADOR */}
+          {catalogImportMode === 'settings' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 20, marginBottom: 24 }}>
+              <div 
+                className="glass-panel" 
+                style={{ 
+                  padding: 24, 
+                  border: theme === 'dark' ? '1px solid rgba(168, 85, 247, 0.3)' : '1.5px solid #cbd5e1', 
+                  background: theme === 'dark' ? 'linear-gradient(180deg, rgba(15, 23, 42, 0.8), rgba(24, 15, 42, 0.85))' : '#ffffff',
+                  boxShadow: theme === 'light' ? '0 4px 20px rgba(0, 0, 0, 0.05)' : undefined
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
+                      <div style={{ width: 34, height: 34, borderRadius: 8, background: 'rgba(168, 85, 247, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#c084fc' }}>
+                        <Settings size={20} />
+                      </div>
+                      <h2 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0, color: theme === 'light' ? '#0f172a' : '#f8fafc' }}>
+                        Configurações do Consultor de Catálogo IA
+                      </h2>
+                    </div>
+                    <p style={{ fontSize: '0.85rem', color: theme === 'light' ? '#475569' : 'var(--text-muted)', margin: 0 }}>
+                      Defina as regras de apresentação de imóveis, produtos e serviços pelo agente em canais omnichannel (WhatsApp, Instagram, Web, etc).
+                    </p>
+                  </div>
+
+                  <button 
+                    className="btn-primary"
+                    onClick={saveConsultantSettings}
+                    disabled={isSavingConsultantSettings}
+                    style={{ background: 'linear-gradient(135deg, #7c3aed, #9333ea)' }}
+                  >
+                    {isSavingConsultantSettings ? (
+                      <RefreshCw size={16} className="animate-spin" />
+                    ) : (
+                      <Check size={16} />
+                    )}
+                    <span>Salvar Regras do Consultor</span>
+                  </button>
+                </div>
+
+                {consultantSaveSuccess && (
+                  <div style={{ marginBottom: 18, padding: '10px 14px', borderRadius: 8, background: 'rgba(16, 185, 129, 0.15)', border: '1px solid rgba(16, 185, 129, 0.3)', color: '#10b981', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <Check size={16} />
+                    <span>Configurações do Consultor salvas com sucesso! O Agente já está aplicando as novas regras.</span>
+                  </div>
+                )}
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 20 }}>
+                  {/* COLUNA ESQUERDA: PARÂMETROS E TOGGLES */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                    <div className="glass-card" style={{ padding: 18, border: theme === 'light' ? '1px solid #e2e8f0' : undefined }}>
+                      <label style={{ fontSize: '0.9rem', fontWeight: 600, display: 'block', marginBottom: 6, color: theme === 'light' ? '#1e293b' : '#e2e8f0' }}>
+                        Quantidade Máxima de Resultados por Consulta
+                      </label>
+                      <div style={{ display: 'flex', gap: 8 }}>
+                        {[1, 3, 5, 10].map(n => (
+                          <button
+                            key={n}
+                            type="button"
+                            onClick={() => setConsultantSettings(prev => ({ ...prev, max_results: n }))}
+                            style={{
+                              flex: 1,
+                              padding: '8px 12px',
+                              borderRadius: 8,
+                              border: consultantSettings.max_results === n ? '2px solid #a855f7' : theme === 'light' ? '1px solid #cbd5e1' : '1px solid rgba(255,255,255,0.1)',
+                              background: consultantSettings.max_results === n ? 'rgba(168, 85, 247, 0.15)' : 'transparent',
+                              color: consultantSettings.max_results === n ? '#a855f7' : theme === 'light' ? '#334155' : '#cbd5e1',
+                              fontWeight: consultantSettings.max_results === n ? 700 : 500,
+                              cursor: 'pointer'
+                            }}
+                          >
+                            {n} {n === 3 ? '(Recomendado)' : 'itens'}
+                          </button>
+                        ))}
+                      </div>
+                      <small style={{ fontSize: '0.75rem', color: theme === 'light' ? '#64748b' : 'var(--text-muted)', display: 'block', marginTop: 6 }}>
+                        Evita sobrecarregar o cliente no WhatsApp/Instagram com excesso de opções.
+                      </small>
+                    </div>
+
+                    <div className="glass-card" style={{ padding: 18, border: theme === 'light' ? '1px solid #e2e8f0' : undefined }}>
+                      <label style={{ fontSize: '0.9rem', fontWeight: 600, display: 'block', marginBottom: 6, color: theme === 'light' ? '#1e293b' : '#e2e8f0' }}>
+                        Critério Padrão de Ordenação
+                      </label>
+                      <select
+                        value={consultantSettings.default_sort || 'relevance'}
+                        onChange={(e) => setConsultantSettings(prev => ({ ...prev, default_sort: e.target.value as any }))}
+                        style={{ width: '100%', padding: '10px 12px', borderRadius: 8 }}
+                      >
+                        <option value="relevance">Mais Relevante (Inteligência Multicritério)</option>
+                        <option value="price_asc">Menor Preço Primeiro</option>
+                        <option value="price_desc">Maior Preço Primeiro</option>
+                        <option value="newest">Mais Novos Cadastrados</option>
+                      </select>
+                    </div>
+
+                    <div className="glass-card" style={{ padding: 18, border: theme === 'light' ? '1px solid #e2e8f0' : undefined }}>
+                      <h4 style={{ margin: '0 0 12px 0', fontSize: '0.95rem', fontWeight: 600, color: theme === 'light' ? '#1e293b' : '#e2e8f0' }}>
+                        Elementos Exibidos nas Mensagens
+                      </h4>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', fontSize: '0.88rem' }}>
+                          <input
+                            type="checkbox"
+                            checked={consultantSettings.send_images ?? true}
+                            onChange={(e) => setConsultantSettings(prev => ({ ...prev, send_images: e.target.checked }))}
+                          />
+                          <span>Enviar Foto / Imagem Principal (quando canal suportar)</span>
+                        </label>
+
+                        <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', fontSize: '0.88rem' }}>
+                          <input
+                            type="checkbox"
+                            checked={consultantSettings.send_prices ?? true}
+                            onChange={(e) => setConsultantSettings(prev => ({ ...prev, send_prices: e.target.checked }))}
+                          />
+                          <span>Enviar Preço Atualizado do Catálogo</span>
+                        </label>
+
+                        <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', fontSize: '0.88rem' }}>
+                          <input
+                            type="checkbox"
+                            checked={consultantSettings.send_descriptions ?? true}
+                            onChange={(e) => setConsultantSettings(prev => ({ ...prev, send_descriptions: e.target.checked }))}
+                          />
+                          <span>Enviar Descrições e Características Estruturadas</span>
+                        </label>
+
+                        <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', fontSize: '0.88rem' }}>
+                          <input
+                            type="checkbox"
+                            checked={consultantSettings.send_links ?? true}
+                            onChange={(e) => setConsultantSettings(prev => ({ ...prev, send_links: e.target.checked }))}
+                          />
+                          <span>Enviar Link Oficial Direto para o Site (source_url)</span>
+                        </label>
+
+                        <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', fontSize: '0.88rem' }}>
+                          <input
+                            type="checkbox"
+                            checked={consultantSettings.show_stock ?? true}
+                            onChange={(e) => setConsultantSettings(prev => ({ ...prev, show_stock: e.target.checked }))}
+                          />
+                          <span>Apresentar Disponibilidade e Estoque</span>
+                        </label>
+
+                        <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', fontSize: '0.88rem' }}>
+                          <input
+                            type="checkbox"
+                            checked={consultantSettings.ask_before_search ?? true}
+                            onChange={(e) => setConsultantSettings(prev => ({ ...prev, ask_before_search: e.target.checked }))}
+                          />
+                          <span>Fazer Perguntas Inteligentes para qualificar a busca antes</span>
+                        </label>
+
+                        <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', fontSize: '0.88rem' }}>
+                          <input
+                            type="checkbox"
+                            checked={consultantSettings.fallback_smart_recommendations ?? true}
+                            onChange={(e) => setConsultantSettings(prev => ({ ...prev, fallback_smart_recommendations: e.target.checked }))}
+                          />
+                          <span>Recomendar alternativas próximas se busca exata não retornar</span>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* COLUNA DIREITA: INSTRUÇÕES DO CONSULTOR E SANDBOX DE TESTE */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                    <div className="glass-card" style={{ padding: 18, border: theme === 'light' ? '1px solid #e2e8f0' : undefined }}>
+                      <label style={{ fontSize: '0.9rem', fontWeight: 600, display: 'block', marginBottom: 6, color: theme === 'light' ? '#1e293b' : '#e2e8f0' }}>
+                        Instruções Personalizadas do Consultor
+                      </label>
+                      <textarea
+                        rows={4}
+                        placeholder="Ex: Aja como um consultor atencioso. Sempre pergunte quantos quartos o cliente procura e sugira opções de financiamento..."
+                        value={consultantSettings.custom_consultant_rules || ''}
+                        onChange={(e) => setConsultantSettings(prev => ({ ...prev, custom_consultant_rules: e.target.value }))}
+                        style={{ width: '100%', padding: '10px 12px', borderRadius: 8, fontSize: '0.88rem' }}
+                      />
+                      <small style={{ fontSize: '0.75rem', color: theme === 'light' ? '#64748b' : 'var(--text-muted)', display: 'block', marginTop: 4 }}>
+                        Essas regras são injetadas no prompt dinâmico do agente durante as conversas de catálogo.
+                      </small>
+                    </div>
+
+                    {/* SIMULADOR DE BUSCA AO VIVO */}
+                    <div 
+                      className="glass-card" 
+                      style={{ 
+                        padding: 18, 
+                        border: theme === 'dark' ? '1px solid rgba(0, 210, 255, 0.3)' : '1.5px solid #00d2ff',
+                        background: theme === 'dark' ? 'rgba(0, 210, 255, 0.04)' : '#f0fdff'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                        <Search size={16} color="#00d2ff" />
+                        <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700, color: theme === 'light' ? '#0f172a' : '#f8fafc' }}>
+                          Simulador de Busca do Catálogo IA
+                        </h4>
+                      </div>
+                      <p style={{ fontSize: '0.8rem', color: theme === 'light' ? '#334155' : 'var(--text-muted)', margin: '0 0 10px 0' }}>
+                        Digite qualquer termo para testar o ranqueamento multicritério em tempo real:
+                      </p>
+
+                      <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
+                        <input
+                          type="text"
+                          placeholder="Ex: casa 3 quartos, creatina 500g, pizza calabresa..."
+                          value={testSearchQuery}
+                          onChange={(e) => setTestSearchQuery(e.target.value)}
+                          onKeyDown={(e) => e.key === 'Enter' && handleRunTestSearch()}
+                          style={{ flex: 1, padding: '8px 12px', borderRadius: 8, fontSize: '0.88rem' }}
+                        />
+                        <button
+                          type="button"
+                          className="btn-primary"
+                          onClick={handleRunTestSearch}
+                          disabled={isTestingSearch || !testSearchQuery.trim()}
+                          style={{ padding: '8px 16px', fontSize: '0.88rem' }}
+                        >
+                          {isTestingSearch ? <RefreshCw size={14} className="animate-spin" /> : <Search size={14} />}
+                          <span>Buscar</span>
+                        </button>
+                      </div>
+
+                      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 12 }}>
+                        {['casa 3 quartos', 'creatina 500g', 'pizza', 'apartamento'].map(ex => (
+                          <button
+                            key={ex}
+                            type="button"
+                            onClick={() => { setTestSearchQuery(ex); }}
+                            style={{
+                              fontSize: '0.72rem',
+                              padding: '3px 8px',
+                              borderRadius: 6,
+                              background: theme === 'light' ? '#ffffff' : 'rgba(255,255,255,0.08)',
+                              border: theme === 'light' ? '1px solid #cbd5e1' : '1px solid rgba(255,255,255,0.15)',
+                              cursor: 'pointer',
+                              color: theme === 'light' ? '#1e293b' : '#cbd5e1'
+                            }}
+                          >
+                            + {ex}
+                          </button>
+                        ))}
+                      </div>
+
+                      {testSearchResults && (
+                        <div style={{ marginTop: 10, padding: 12, borderRadius: 8, background: theme === 'light' ? '#ffffff' : 'rgba(0,0,0,0.3)', border: theme === 'light' ? '1px solid #cbd5e1' : '1px solid rgba(255,255,255,0.1)' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, fontSize: '0.8rem', fontWeight: 600 }}>
+                            <span>{testSearchResults.total_found ?? 0} resultados encontrados</span>
+                            {testSearchResults.is_alternative && (
+                              <span style={{ color: '#eab308' }}>⚠️ Sugestão Alternativa</span>
+                            )}
+                          </div>
+
+                          {(!testSearchResults.results || testSearchResults.results.length === 0) ? (
+                            <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', textAlign: 'center', padding: 8 }}>
+                              Nenhum item combinou com esses filtros no catálogo desta empresa.
+                            </div>
+                          ) : (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxHeight: 220, overflowY: 'auto' }}>
+                              {testSearchResults.results.map((r: any, idx: number) => (
+                                <div key={idx} style={{ display: 'flex', gap: 10, alignItems: 'center', padding: 8, borderRadius: 6, background: theme === 'light' ? '#f8fafc' : 'rgba(255,255,255,0.04)', border: '1px solid rgba(148, 163, 184, 0.15)' }}>
+                                  {r.images?.[0] && (
+                                    <img src={r.images[0]} alt="" style={{ width: 42, height: 42, borderRadius: 6, objectFit: 'cover' }} />
+                                  )}
+                                  <div style={{ flex: 1, minWidth: 0 }}>
+                                    <div style={{ fontWeight: 600, fontSize: '0.85rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                      {r.name}
+                                    </div>
+                                    <div style={{ fontSize: '0.75rem', color: '#10b981', fontWeight: 700 }}>
+                                      {r.price_formatted || (r.price > 0 ? `R$ ${r.price}` : 'Sob consulta')}
+                                    </div>
+                                  </div>
+                                  {r.source_url && (
+                                    <a
+                                      href={r.source_url}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                      style={{ fontSize: '0.75rem', color: '#00d2ff', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 3 }}
+                                    >
+                                      <ExternalLink size={12} /> Link
+                                    </a>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* PAINEL MODO 4: MÉTRICAS & ANALYTICS DE CONVERSÃO DO CATÁLOGO */}
+          {catalogImportMode === 'analytics' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 20, marginBottom: 24 }}>
+              <div 
+                className="glass-panel" 
+                style={{ 
+                  padding: 24, 
+                  border: theme === 'dark' ? '1px solid rgba(16, 185, 129, 0.3)' : '1.5px solid #cbd5e1', 
+                  background: theme === 'dark' ? 'linear-gradient(180deg, rgba(15, 23, 42, 0.8), rgba(15, 35, 25, 0.85))' : '#ffffff',
+                  boxShadow: theme === 'light' ? '0 4px 20px rgba(0, 0, 0, 0.05)' : undefined
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
+                      <div style={{ width: 34, height: 34, borderRadius: 8, background: 'rgba(16, 185, 129, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#34d399' }}>
+                        <BarChart3 size={20} />
+                      </div>
+                      <h2 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0, color: theme === 'light' ? '#0f172a' : '#f8fafc' }}>
+                        Métricas & Funil de Conversão do Catálogo IA
+                      </h2>
+                    </div>
+                    <p style={{ fontSize: '0.85rem', color: theme === 'light' ? '#475569' : 'var(--text-muted)', margin: 0 }}>
+                      Acompanhe o impacto comercial do Consultor IA: buscas realizadas, produtos/imóveis recomendados e cliques em links oficiais.
+                    </p>
+                  </div>
+
+                  <button 
+                    className="btn-secondary"
+                    onClick={loadCatalogAnalytics}
+                    style={{ display: 'flex', alignItems: 'center', gap: 6 }}
+                  >
+                    <RefreshCw size={15} />
+                    <span>Atualizar Métricas</span>
+                  </button>
+                </div>
+
+                {/* KPI CARDS */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 14, marginBottom: 22 }}>
+                  <div className="glass-card" style={{ padding: 18, borderLeft: '4px solid #00d2ff' }}>
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 500 }}>Total de Buscas no Catálogo</span>
+                    <div style={{ fontSize: '1.8rem', fontWeight: 800, marginTop: 4, color: theme === 'light' ? '#0f172a' : '#f8fafc' }}>
+                      {catalogAnalytics?.total_searches ?? 0}
+                    </div>
+                    <span style={{ fontSize: '0.75rem', color: '#00d2ff' }}>Conversas com busca ativa</span>
+                  </div>
+
+                  <div className="glass-card" style={{ padding: 18, borderLeft: '4px solid #10b981' }}>
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 500 }}>Cliques em Links Oficiais</span>
+                    <div style={{ fontSize: '1.8rem', fontWeight: 800, marginTop: 4, color: '#10b981' }}>
+                      {catalogAnalytics?.total_clicks ?? 0}
+                    </div>
+                    <span style={{ fontSize: '0.75rem', color: '#10b981' }}>Direcionamentos ao site</span>
+                  </div>
+
+                  <div className="glass-card" style={{ padding: 18, borderLeft: '4px solid #a855f7' }}>
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 500 }}>Taxa de Clique (CTR)</span>
+                    <div style={{ fontSize: '1.8rem', fontWeight: 800, marginTop: 4, color: '#a855f7' }}>
+                      {catalogAnalytics?.click_through_rate ?? '0.0%'}
+                    </div>
+                    <span style={{ fontSize: '0.75rem', color: '#a855f7' }}>Engajamento dos resultados</span>
+                  </div>
+
+                  <div className="glass-card" style={{ padding: 18, borderLeft: '4px solid #f59e0b' }}>
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 500 }}>Média de Itens por Busca</span>
+                    <div style={{ fontSize: '1.8rem', fontWeight: 800, marginTop: 4, color: '#f59e0b' }}>
+                      {catalogAnalytics?.avg_results_per_search ?? '0.0'}
+                    </div>
+                    <span style={{ fontSize: '0.75rem', color: '#f59e0b' }}>Opções apresentadas</span>
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 20 }}>
+                  {/* CATEGORIAS MAIS PESQUISADAS */}
+                  <div className="glass-card" style={{ padding: 18, border: theme === 'light' ? '1px solid #e2e8f0' : undefined }}>
+                    <h3 style={{ fontSize: '0.98rem', fontWeight: 700, margin: '0 0 12px 0', color: theme === 'light' ? '#0f172a' : '#f8fafc' }}>
+                      Categorias Mais Pesquisadas
+                    </h3>
+                    {(!catalogAnalytics?.top_categories || catalogAnalytics.top_categories.length === 0) ? (
+                      <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', textAlign: 'center', padding: 20 }}>
+                        Nenhuma busca registrada ainda. Realize buscas com o agente para gerar métricas.
+                      </div>
+                    ) : (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                        {catalogAnalytics.top_categories.map((c: any, idx: number) => (
+                          <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 12px', borderRadius: 6, background: theme === 'light' ? '#f8fafc' : 'rgba(255,255,255,0.03)' }}>
+                            <span style={{ fontSize: '0.85rem', fontWeight: 600, textTransform: 'capitalize' }}>{c.category}</span>
+                            <span className="badge" style={{ background: 'rgba(0, 210, 255, 0.15)', color: '#00d2ff', fontWeight: 700 }}>
+                              {c.count} buscas
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* ITENS MAIS CLICADOS */}
+                  <div className="glass-card" style={{ padding: 18, border: theme === 'light' ? '1px solid #e2e8f0' : undefined }}>
+                    <h3 style={{ fontSize: '0.98rem', fontWeight: 700, margin: '0 0 12px 0', color: theme === 'light' ? '#0f172a' : '#f8fafc' }}>
+                      Itens Mais Clicados / Acessados no Site
+                    </h3>
+                    {(!catalogAnalytics?.top_clicked_items || catalogAnalytics.top_clicked_items.length === 0) ? (
+                      <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', textAlign: 'center', padding: 20 }}>
+                        Nenhum clique registrado ainda. Quando os clientes clicarem nos cards enviados pelo agente, aparecerão aqui.
+                      </div>
+                    ) : (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                        {catalogAnalytics.top_clicked_items.map((it: any, idx: number) => (
+                          <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 12px', borderRadius: 6, background: theme === 'light' ? '#f8fafc' : 'rgba(255,255,255,0.03)' }}>
+                            <div style={{ minWidth: 0, flex: 1, paddingRight: 8 }}>
+                              <div style={{ fontSize: '0.85rem', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                {it.item_name || it.catalog_item_id}
+                              </div>
+                              {it.source_url && (
+                                <a href={it.source_url} target="_blank" rel="noreferrer" style={{ fontSize: '0.72rem', color: '#00d2ff', textDecoration: 'none' }}>
+                                  {it.source_url}
+                                </a>
+                              )}
+                            </div>
+                            <span className="badge" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#10b981', fontWeight: 700 }}>
+                              {it.clicks} cliques
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* ÚLTIMAS BUSCAS REGISTRADAS */}
+                {catalogAnalytics?.recent_searches && catalogAnalytics.recent_searches.length > 0 && (
+                  <div className="glass-card" style={{ padding: 18, marginTop: 18, border: theme === 'light' ? '1px solid #e2e8f0' : undefined }}>
+                    <h3 style={{ fontSize: '0.98rem', fontWeight: 700, margin: '0 0 12px 0', color: theme === 'light' ? '#0f172a' : '#f8fafc' }}>
+                      Últimas Consultas Registradas & Filtros Extraídos pela IA
+                    </h3>
+                    <div style={{ overflowX: 'auto' }}>
+                      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem' }}>
+                        <thead>
+                          <tr style={{ textAlign: 'left', borderBottom: theme === 'light' ? '1.5px solid #cbd5e1' : '1px solid rgba(255,255,255,0.1)' }}>
+                            <th style={{ padding: '8px 10px' }}>Termo / Intenção</th>
+                            <th style={{ padding: '8px 10px' }}>Categoria</th>
+                            <th style={{ padding: '8px 10px' }}>Filtros Extraídos</th>
+                            <th style={{ padding: '8px 10px' }}>Resultados</th>
+                            <th style={{ padding: '8px 10px' }}>Data / Hora</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {catalogAnalytics.recent_searches.map((s: any, idx: number) => (
+                            <tr key={idx} style={{ borderBottom: theme === 'light' ? '1px solid #f1f5f9' : '1px solid rgba(255,255,255,0.04)' }}>
+                              <td style={{ padding: '8px 10px', fontWeight: 600 }}>"{s.query}"</td>
+                              <td style={{ padding: '8px 10px' }}>
+                                <span className="badge" style={{ background: 'rgba(0, 210, 255, 0.1)', color: '#00d2ff' }}>
+                                  {s.category || 'geral'}
+                                </span>
+                              </td>
+                              <td style={{ padding: '8px 10px', fontFamily: 'monospace', fontSize: '0.75rem', color: theme === 'light' ? '#475569' : '#94a3b8' }}>
+                                {JSON.stringify(s.filters || {})}
+                              </td>
+                              <td style={{ padding: '8px 10px', fontWeight: 700, color: s.results_count > 0 ? '#10b981' : '#f59e0b' }}>
+                                {s.results_count}
+                              </td>
+                              <td style={{ padding: '8px 10px', color: 'var(--text-muted)' }}>
+                                {new Date(s.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           )}
 

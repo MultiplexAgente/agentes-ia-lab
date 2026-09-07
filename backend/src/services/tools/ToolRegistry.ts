@@ -2,6 +2,9 @@ import { store } from '../../config/database.js';
 import { knowledgeBaseService } from '../knowledge/KnowledgeBaseService.js';
 import { memoryService } from '../memory/MemoryService.js';
 import { ToolDefinition, ToolExecutionResult, Order, OrderItem } from '../../types/index.js';
+import { CatalogSearchService } from '../catalog/CatalogSearchService.js';
+import { SearchSessionService } from '../catalog/SearchSessionService.js';
+import { CatalogFormatter } from '../catalog/CatalogFormatter.js';
 import { v4 as uuidv4 } from 'uuid';
 
 export interface ToolExecutionContext {
@@ -481,115 +484,462 @@ export class ToolRegistry {
       }
     });
 
-    // 12. consultar_catalog (Busca no catálogo sincronizado do site)
-    this.tools.set('consultar_catalog', {
+    // =========================================================================
+    // AI CATALOG CONSULTANT TOOLS (SEÇÃO 35-38)
+    // =========================================================================
+
+    // 12. search_catalog (Ferramenta universal de busca de catálogo)
+    this.tools.set('search_catalog', {
       definition: {
-        name: 'consultar_catalog',
-        description: 'Consulta itens, produtos, serviços, imóveis ou pratos sincronizados diretamente do site oficial da empresa.',
+        name: 'search_catalog',
+        description: 'Pesquisa itens no catálogo estruturado oficial da empresa (produtos, imóveis, veículos, pratos ou serviços) com filtros avançados, ordenação e relevância.',
         parameters: {
           type: 'object',
           properties: {
-            query: { type: 'string', description: 'Termo de busca, nome do item ou categoria.' },
-            business_type: { type: 'string', description: 'Filtro opcional por segmento (RESTAURANTE, IMOBILIÁRIA, CONCESSIONÁRIA, HOTEL, SERVIÇOS, LOJA, ECOMMERCE).' }
+            category: { type: 'string', description: 'Categoria opcional (ex: suplementos, imóveis, cardápio, eletrônicos).' },
+            query: { type: 'string', description: 'Termo de busca, nome do produto ou palavra-chave.' },
+            entity_type: { type: 'string', description: 'Tipo da entidade (product, property, vehicle, restaurant, service, hotel, course).' },
+            filters: { 
+              type: 'object', 
+              description: 'Filtros estruturados adicionais (ex: brand, weight, price_min, price_max, bedrooms, city, etc.).' 
+            },
+            limit: { type: 'number', description: 'Quantidade máxima de resultados (1 a 10, padrão 3).' }
           }
         }
       },
       handler: async (args, ctx) => {
-        const items = Array.from(store.catalogItems.values()).filter(
-          item => item.company_id === ctx.companyId && item.status === 'AVAILABLE'
-        );
+        const filters = {
+          category: args.category,
+          query: args.query,
+          entity_type: args.entity_type,
+          ...(args.filters || {})
+        };
 
-        const filtered = items.filter(item => {
-          if (args.business_type && item.attributes?.businessType && item.attributes.businessType !== args.business_type) {
-            return false;
-          }
-          if (args.query) {
-            const q = args.query.toLowerCase();
-            const matchesName = item.name.toLowerCase().includes(q);
-            const matchesDesc = (item.description || '').toLowerCase().includes(q);
-            const matchesCat = (item.category || '').toLowerCase().includes(q);
-            return matchesName || matchesDesc || matchesCat;
-          }
-          return true;
+        // Salva/atualiza filtros na sessão de busca
+        SearchSessionService.updateSessionFilters(ctx.conversationId, ctx.companyId, filters, {
+          category: args.category,
+          entity_type: args.entity_type,
+          query: args.query
         });
 
-        return filtered.slice(0, 10).map(i => ({
-          name: i.name,
-          price: i.price !== undefined ? `${i.currency} ${i.price.toFixed(2)}` : 'Sob consulta',
-          category: i.category,
-          description: i.description,
-          status: i.status,
-          attributes: i.attributes,
-          source_url: i.source_url,
-          images: i.images
-        }));
+        const searchRes = await CatalogSearchService.searchCatalog(ctx.companyId, filters, {
+          limit: args.limit || 3,
+          conversationId: ctx.conversationId,
+          customerId: ctx.customerId
+        });
+
+        // Salva os itens apresentados na sessão
+        SearchSessionService.savePresentedResults(ctx.conversationId, ctx.companyId, searchRes.items);
+
+        const settings = store.catalogSettings.get(ctx.companyId);
+        const formattedText = CatalogFormatter.formatTextResponse(searchRes.items, settings, searchRes.alternative_message);
+        const cards = CatalogFormatter.formatStructuredCards(searchRes.items, settings);
+
+        return {
+          results: searchRes.items.map(i => ({
+            id: i.id,
+            name: i.name,
+            brand: i.brand,
+            price: i.price,
+            formatted_price: i.formatted_price,
+            description: i.description,
+            images: i.images,
+            source_url: i.source_url,
+            availability: i.availability,
+            attributes: i.attributes
+          })),
+          total_found: searchRes.total_found,
+          is_alternative: searchRes.is_alternative,
+          alternative_message: searchRes.alternative_message,
+          formatted_presentation: formattedText,
+          cards
+        };
       }
     });
 
-    // 13. consultar_properties (Imobiliária)
-    this.tools.set('consultar_properties', {
+    // 13. search_properties (Especializada para Imobiliárias)
+    this.tools.set('search_properties', {
       definition: {
-        name: 'consultar_properties',
-        description: 'Consulta imóveis sincronizados do site (apartamentos, casas, terrenos, locação ou venda).',
+        name: 'search_properties',
+        description: 'Pesquisa imóveis (casas, apartamentos, terrenos) para venda ou locação com filtros de quartos, suítes, vagas, preço e bairro.',
         parameters: {
           type: 'object',
           properties: {
-            tipo: { type: 'string', description: 'Tipo do imóvel (apartamento, casa, terreno)' },
-            quartos: { type: 'number', description: 'Quantidade mínima de quartos' },
-            max_price: { type: 'number', description: 'Preço máximo em reais' }
+            transaction_type: { type: 'string', description: 'Tipo de negócio: venda, aluguel, temporada.' },
+            property_type: { type: 'string', description: 'Tipo do imóvel: casa, apartamento, cobertura, terreno, comercial.' },
+            bedrooms: { type: 'number', description: 'Número mínimo de quartos.' },
+            suites: { type: 'number', description: 'Número mínimo de suítes.' },
+            bathrooms: { type: 'number', description: 'Número mínimo de banheiros.' },
+            parking_spaces: { type: 'number', description: 'Número de vagas de garagem.' },
+            price_min: { type: 'number', description: 'Preço mínimo em reais.' },
+            price_max: { type: 'number', description: 'Preço máximo em reais.' },
+            city: { type: 'string', description: 'Cidade.' },
+            neighborhood: { type: 'string', description: 'Bairro ou região.' },
+            limit: { type: 'number', description: 'Quantidade máxima (padrão 3).' }
           }
         }
       },
       handler: async (args, ctx) => {
-        const items = Array.from(store.catalogItems.values()).filter(
-          i => i.company_id === ctx.companyId && i.status === 'AVAILABLE' && 
-          (i.attributes?.businessType === 'IMOBILIÁRIA' || i.category?.toLowerCase().includes('imóve') || i.category?.toLowerCase().includes('apart') || i.category?.toLowerCase().includes('casa'))
-        );
+        const filters = {
+          entity_type: 'property',
+          transaction_type: args.transaction_type,
+          bedrooms: args.bedrooms,
+          suites: args.suites,
+          bathrooms: args.bathrooms,
+          parking_spaces: args.parking_spaces,
+          price_min: args.price_min,
+          price_max: args.price_max,
+          city: args.city,
+          neighborhood: args.neighborhood,
+          query: args.property_type
+        };
 
-        return items.filter(i => {
-          if (args.max_price && i.price && i.price > args.max_price) return false;
-          if (args.quartos && i.attributes?.quartos && i.attributes.quartos < args.quartos) return false;
-          if (args.tipo && !i.name.toLowerCase().includes(args.tipo.toLowerCase())) return false;
-          return true;
-        }).map(i => ({
-          titulo: i.name,
-          valor: i.price ? `R$ ${i.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : 'Sob consulta',
-          descricao: i.description,
-          caracteristicas: i.attributes,
-          link_do_imovel: i.source_url
-        }));
+        SearchSessionService.updateSessionFilters(ctx.conversationId, ctx.companyId, filters, {
+          category: 'Imóveis',
+          entity_type: 'property'
+        });
+
+        const searchRes = await CatalogSearchService.searchCatalog(ctx.companyId, filters, {
+          limit: args.limit || 3,
+          conversationId: ctx.conversationId,
+          customerId: ctx.customerId
+        });
+
+        SearchSessionService.savePresentedResults(ctx.conversationId, ctx.companyId, searchRes.items);
+        const settings = store.catalogSettings.get(ctx.companyId);
+        const formattedText = CatalogFormatter.formatTextResponse(searchRes.items, settings, searchRes.alternative_message);
+
+        return {
+          results: searchRes.items.map(i => ({
+            id: i.id,
+            name: i.name,
+            price: i.price,
+            formatted_price: i.formatted_price,
+            description: i.description,
+            caracteristicas: i.attributes,
+            images: i.images,
+            source_url: i.source_url
+          })),
+          total_found: searchRes.total_found,
+          is_alternative: searchRes.is_alternative,
+          formatted_presentation: formattedText
+        };
       }
     });
 
-    // 14. consultar_services (Prestadores de serviço / Clínicas)
-    this.tools.set('consultar_services', {
+    // 14. search_products (Especializada para Produtos / E-commerce / Suplementos)
+    this.tools.set('search_products', {
       definition: {
-        name: 'consultar_services',
-        description: 'Consulta procedimentos, consultas e serviços oferecidos sincronizados do site.',
+        name: 'search_products',
+        description: 'Pesquisa produtos físicos, suplementos, roupas ou itens de e-commerce por marca, peso, volume, preço e disponibilidade.',
         parameters: {
           type: 'object',
           properties: {
-            query: { type: 'string', description: 'Nome do serviço ou especialidade.' }
+            query: { type: 'string', description: 'Nome do produto ou tipo (ex: creatina, whey, tênis).' },
+            brand: { type: 'string', description: 'Marca desejada (ex: Max Titanium, Integralmédica, Nike).' },
+            weight: { type: 'string', description: 'Peso ou gramatura (ex: 500g, 1kg, 250g).' },
+            volume: { type: 'string', description: 'Volume (ex: 350ml, 2L).' },
+            price_min: { type: 'number', description: 'Preço mínimo.' },
+            price_max: { type: 'number', description: 'Preço máximo.' },
+            availability: { type: 'string', description: 'Disponibilidade (available, all).' },
+            limit: { type: 'number', description: 'Quantidade máxima (padrão 3).' }
           }
         }
       },
       handler: async (args, ctx) => {
-        const items = Array.from(store.catalogItems.values()).filter(
-          i => i.company_id === ctx.companyId && i.status === 'AVAILABLE' &&
-          (i.attributes?.businessType === 'SERVIÇOS' || i.category?.toLowerCase().includes('servi'))
-        );
+        const filters = {
+          entity_type: 'product',
+          query: args.query,
+          brand: args.brand,
+          weight: args.weight,
+          volume: args.volume,
+          price_min: args.price_min,
+          price_max: args.price_max
+        };
 
-        return items.filter(i => {
-          if (!args.query) return true;
-          return i.name.toLowerCase().includes(args.query.toLowerCase()) || 
-                 (i.description || '').toLowerCase().includes(args.query.toLowerCase());
-        }).map(i => ({
-          servico: i.name,
-          preco: i.price ? `R$ ${i.price.toFixed(2)}` : 'Sob avaliação',
-          detalhes: i.description,
-          atributos: i.attributes,
-          link_oficial: i.source_url
-        }));
+        SearchSessionService.updateSessionFilters(ctx.conversationId, ctx.companyId, filters, {
+          entity_type: 'product',
+          query: args.query
+        });
+
+        const searchRes = await CatalogSearchService.searchCatalog(ctx.companyId, filters, {
+          limit: args.limit || 3,
+          conversationId: ctx.conversationId,
+          customerId: ctx.customerId
+        });
+
+        SearchSessionService.savePresentedResults(ctx.conversationId, ctx.companyId, searchRes.items);
+        const settings = store.catalogSettings.get(ctx.companyId);
+        const formattedText = CatalogFormatter.formatTextResponse(searchRes.items, settings, searchRes.alternative_message);
+
+        return {
+          results: searchRes.items.map(i => ({
+            id: i.id,
+            name: i.name,
+            brand: i.brand,
+            price: i.price,
+            formatted_price: i.formatted_price,
+            description: i.description,
+            images: i.images,
+            source_url: i.source_url,
+            availability: i.availability
+          })),
+          total_found: searchRes.total_found,
+          is_alternative: searchRes.is_alternative,
+          formatted_presentation: formattedText
+        };
+      }
+    });
+
+    // 15. search_services (Especializada para Clínicas / Prestadores de Serviço)
+    this.tools.set('search_services', {
+      definition: {
+        name: 'search_services',
+        description: 'Pesquisa serviços oferecidos, consultas, procedimentos ou orçamentos.',
+        parameters: {
+          type: 'object',
+          properties: {
+            query: { type: 'string', description: 'Nome do serviço ou especialidade (ex: limpeza de sofá, corte, consulta).' },
+            duration_minutes: { type: 'number', description: 'Duração aproximada em minutos.' },
+            price_max: { type: 'number', description: 'Preço máximo.' },
+            limit: { type: 'number', description: 'Quantidade máxima (padrão 3).' }
+          }
+        }
+      },
+      handler: async (args, ctx) => {
+        const filters = {
+          entity_type: 'service',
+          query: args.query,
+          duration_minutes: args.duration_minutes,
+          price_max: args.price_max
+        };
+
+        const searchRes = await CatalogSearchService.searchCatalog(ctx.companyId, filters, {
+          limit: args.limit || 3,
+          conversationId: ctx.conversationId,
+          customerId: ctx.customerId
+        });
+
+        SearchSessionService.savePresentedResults(ctx.conversationId, ctx.companyId, searchRes.items);
+        const settings = store.catalogSettings.get(ctx.companyId);
+        const formattedText = CatalogFormatter.formatTextResponse(searchRes.items, settings, searchRes.alternative_message);
+
+        return {
+          results: searchRes.items.map(i => ({
+            id: i.id,
+            name: i.name,
+            price: i.price,
+            formatted_price: i.formatted_price,
+            description: i.description,
+            source_url: i.source_url
+          })),
+          total_found: searchRes.total_found,
+          formatted_presentation: formattedText
+        };
+      }
+    });
+
+    // 16. get_catalog_item (Recupera detalhes de 1 item por ID)
+    this.tools.set('get_catalog_item', {
+      definition: {
+        name: 'get_catalog_item',
+        description: 'Recupera os detalhes completos, preço atualizado, estoque e link oficial de um item específico pelo ID.',
+        parameters: {
+          type: 'object',
+          properties: {
+            item_id: { type: 'string', description: 'ID do item.' }
+          },
+          required: ['item_id']
+        }
+      },
+      handler: async (args, ctx) => {
+        const item = CatalogSearchService.getItemById(ctx.companyId, args.item_id);
+        if (!item) return { found: false, message: 'Item não encontrado no catálogo da empresa.' };
+        return { found: true, item };
+      }
+    });
+
+    // 17. get_catalog_items (Recupera múltiplos itens por IDs)
+    this.tools.set('get_catalog_items', {
+      definition: {
+        name: 'get_catalog_items',
+        description: 'Recupera lista de múltiplos itens pelos seus IDs.',
+        parameters: {
+          type: 'object',
+          properties: {
+            item_ids: { type: 'array', items: { type: 'string' }, description: 'Lista de IDs dos itens.' }
+          },
+          required: ['item_ids']
+        }
+      },
+      handler: async (args, ctx) => {
+        const found = (args.item_ids || [])
+          .map((id: string) => CatalogSearchService.getItemById(ctx.companyId, id))
+          .filter(Boolean);
+        return { count: found.length, items: found };
+      }
+    });
+
+    // 18. get_item_availability (Verifica disponibilidade e estoque atual)
+    this.tools.set('get_item_availability', {
+      definition: {
+        name: 'get_item_availability',
+        description: 'Verifica a disponibilidade em tempo real e estoque do item.',
+        parameters: {
+          type: 'object',
+          properties: {
+            item_id: { type: 'string', description: 'ID do item.' }
+          },
+          required: ['item_id']
+        }
+      },
+      handler: async (args, ctx) => {
+        const item = CatalogSearchService.getItemById(ctx.companyId, args.item_id);
+        if (!item) return { found: false, available: false, message: 'Item não localizado.' };
+        return {
+          item_id: item.id,
+          name: item.name,
+          available: item.availability,
+          stock: item.stock,
+          status: item.availability ? 'DISPONÍVEL' : 'INDISPONÍVEL'
+        };
+      }
+    });
+
+    // 19. get_item_price (Consulta preço oficial verificado)
+    this.tools.set('get_item_price', {
+      definition: {
+        name: 'get_item_price',
+        description: 'Consulta o preço oficial e atualizado do item. NUNCA invente preços.',
+        parameters: {
+          type: 'object',
+          properties: {
+            item_id: { type: 'string', description: 'ID do item.' }
+          },
+          required: ['item_id']
+        }
+      },
+      handler: async (args, ctx) => {
+        const item = CatalogSearchService.getItemById(ctx.companyId, args.item_id);
+        if (!item) return { found: false, message: 'Item não localizado.' };
+        return {
+          item_id: item.id,
+          name: item.name,
+          price: item.price,
+          formatted_price: item.formatted_price
+        };
+      }
+    });
+
+    // 20. get_item_images (Consulta fotos reais do item)
+    this.tools.set('get_item_images', {
+      definition: {
+        name: 'get_item_images',
+        description: 'Consulta fotos e imagens oficiais do item no catálogo.',
+        parameters: {
+          type: 'object',
+          properties: {
+            item_id: { type: 'string', description: 'ID do item.' }
+          },
+          required: ['item_id']
+        }
+      },
+      handler: async (args, ctx) => {
+        const item = CatalogSearchService.getItemById(ctx.companyId, args.item_id);
+        if (!item) return { found: false, images: [] };
+        return {
+          item_id: item.id,
+          name: item.name,
+          images: item.images,
+          main_image: item.main_image
+        };
+      }
+    });
+
+    // 21. get_item_url (Consulta link oficial do site - source_url)
+    this.tools.set('get_item_url', {
+      definition: {
+        name: 'get_item_url',
+        description: 'Recupera o link original oficial (source_url) da página do produto/imóvel no site da empresa. NUNCA invente links.',
+        parameters: {
+          type: 'object',
+          properties: {
+            item_id: { type: 'string', description: 'ID do item.' }
+          },
+          required: ['item_id']
+        }
+      },
+      handler: async (args, ctx) => {
+        const item = CatalogSearchService.getItemById(ctx.companyId, args.item_id);
+        if (!item || !item.source_url) {
+          return { found: false, source_url: null, message: 'Link individual indisponível para este item.' };
+        }
+        return {
+          item_id: item.id,
+          name: item.name,
+          source_url: item.source_url
+        };
+      }
+    });
+
+    // 22. select_catalog_item (Resolve seleção multiturno: "gostei do segundo", "o mais barato")
+    this.tools.set('select_catalog_item', {
+      definition: {
+        name: 'select_catalog_item',
+        description: 'Resolve a escolha do cliente baseada em referências da conversa anterior (ex: "gostei do segundo", "a segunda casa", "o primeiro", "o mais barato", "o de 389 mil").',
+        parameters: {
+          type: 'object',
+          properties: {
+            reference: { type: 'string', description: 'Expressão falada pelo cliente (ex: "segundo", "opcao 2", "mais barato").' }
+          },
+          required: ['reference']
+        }
+      },
+      handler: async (args, ctx) => {
+        const resolution = SearchSessionService.resolveItemReference(ctx.conversationId, args.reference);
+        if (!resolution.resolved || !resolution.item) {
+          return { resolved: false, message: resolution.reason || 'Não consegui identificar qual opção você se referiu.' };
+        }
+
+        // Pega item atualizado do banco
+        const fullItem = CatalogSearchService.getItemById(ctx.companyId, resolution.item.id);
+        return {
+          resolved: true,
+          selection_reason: resolution.reason,
+          item: fullItem || resolution.item
+        };
+      }
+    });
+
+    // 23. get_search_session
+    this.tools.set('get_search_session', {
+      definition: {
+        name: 'get_search_session',
+        description: 'Consulta o estado atual da busca do cliente na conversa.',
+        parameters: {
+          type: 'object',
+          properties: {}
+        }
+      },
+      handler: async (args, ctx) => {
+        const session = store.searchSessions.get(ctx.conversationId);
+        return { session: session || null };
+      }
+    });
+
+    // 24. clear_search_session
+    this.tools.set('clear_search_session', {
+      definition: {
+        name: 'clear_search_session',
+        description: 'Reinicia o estado da busca do cliente para começar uma nova procura do zero.',
+        parameters: {
+          type: 'object',
+          properties: {}
+        }
+      },
+      handler: async (args, ctx) => {
+        SearchSessionService.clearSession(ctx.conversationId);
+        return { success: true, message: 'Sessão de busca reiniciada.' };
       }
     });
   }

@@ -86,15 +86,31 @@ export const DynamicRenderer: React.FC<DynamicRendererProps> = ({ schema, data, 
 
   const renderLineChart = (comp: UIComponent) => {
     const compData = data[comp.id] || {};
-    const chartData: Array<{ label: string; value: number; secondaryValue?: number }> = compData.chartData || [
-      { label: '01/09', value: 120, secondaryValue: 80 },
-      { label: '02/09', value: 240, secondaryValue: 130 },
-      { label: '03/09', value: 380, secondaryValue: 190 },
-      { label: '04/09', value: 510, secondaryValue: 240 },
-      { label: '05/09', value: 720, secondaryValue: 310 },
-      { label: '06/09', value: 950, secondaryValue: 380 },
-      { label: '07/09', value: 1270, secondaryValue: 490 }
-    ];
+    const chartData: Array<{ label: string; value: number; secondaryValue?: number }> = compData.chartData || [];
+    const hasData = chartData.length > 0 && chartData.some(d => d.value > 0 || (d.secondaryValue || 0) > 0);
+
+    if (!hasData) {
+      return (
+        <div
+          key={comp.id}
+          className="glass-card"
+          style={{
+            padding: 20,
+            background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.8))',
+            border: '1px solid rgba(255, 255, 255, 0.08)',
+            borderRadius: 14
+          }}
+        >
+          <h3 style={{ fontSize: '1rem', fontWeight: 700, margin: '0 0 8px 0', color: 'var(--text-main)' }}>{comp.title}</h3>
+          {comp.description && <p style={{ fontSize: '0.78rem', color: 'var(--text-dim)', margin: '0 0 16px 0' }}>{comp.description}</p>}
+          <div style={{ textAlign: 'center', padding: '28px 16px', color: 'var(--text-dim)', border: '1px dashed rgba(255,255,255,0.1)', borderRadius: 10 }}>
+            <AlertCircle size={28} style={{ opacity: 0.35, marginBottom: 8 }} />
+            <p style={{ margin: 0, fontSize: '0.82rem' }}>Sem dados suficientes para exibir este gráfico.</p>
+            <p style={{ margin: '4px 0 0', fontSize: '0.73rem', opacity: 0.6 }}>Os dados aparecerão aqui quando houver registros no período selecionado.</p>
+          </div>
+        </div>
+      );
+    }
 
     const maxVal = Math.max(...chartData.map(d => Math.max(d.value, d.secondaryValue || 0)), 100);
     const width = 500;
@@ -202,11 +218,30 @@ export const DynamicRenderer: React.FC<DynamicRendererProps> = ({ schema, data, 
 
   const renderDonutChart = (comp: UIComponent) => {
     const compData = data[comp.id] || {};
-    const chartData: Array<{ label: string; value: number; category?: string }> = compData.chartData || [
-      { label: 'PIX', value: 958, category: '#10b981' },
-      { label: 'Cartão de Crédito', value: 313, category: '#6366f1' },
-      { label: 'Outros', value: 180, category: '#06b6d4' }
-    ];
+    const chartData: Array<{ label: string; value: number; category?: string }> = compData.chartData || [];
+    const hasData = chartData.length > 0 && chartData.some(d => d.value > 0);
+
+    if (!hasData) {
+      return (
+        <div
+          key={comp.id}
+          className="glass-card"
+          style={{
+            padding: 20,
+            background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.8))',
+            border: '1px solid rgba(255, 255, 255, 0.08)',
+            borderRadius: 14
+          }}
+        >
+          <h3 style={{ fontSize: '1rem', fontWeight: 700, margin: '0 0 8px 0', color: 'var(--text-main)' }}>{comp.title}</h3>
+          {comp.description && <p style={{ fontSize: '0.78rem', color: 'var(--text-dim)', margin: '0 0 16px 0' }}>{comp.description}</p>}
+          <div style={{ textAlign: 'center', padding: '28px 16px', color: 'var(--text-dim)', border: '1px dashed rgba(255,255,255,0.1)', borderRadius: 10 }}>
+            <AlertCircle size={28} style={{ opacity: 0.35, marginBottom: 8 }} />
+            <p style={{ margin: 0, fontSize: '0.82rem' }}>Sem dados de pagamento registrados no período.</p>
+          </div>
+        </div>
+      );
+    }
 
     const total = chartData.reduce((acc, cur) => acc + cur.value, 0) || 1;
     let accumulatedAngle = 0;

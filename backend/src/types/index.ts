@@ -464,3 +464,167 @@ export interface Expense {
   created_at: string;
 }
 
+// =========================================================================
+// AI CATALOG CONSULTANT — CONSULTOR INTELIGENTE DE PRODUTOS, IMÓVEIS E SERVIÇOS
+// =========================================================================
+
+export type CatalogEntityType = 
+  | 'product' 
+  | 'property' 
+  | 'vehicle' 
+  | 'restaurant' 
+  | 'service' 
+  | 'hotel' 
+  | 'course' 
+  | 'job' 
+  | 'event' 
+  | 'custom';
+
+export interface CatalogSearchFilters {
+  category?: string;
+  query?: string;
+  entity_type?: CatalogEntityType | string;
+  price_min?: number;
+  price_max?: number;
+  // Imóveis
+  bedrooms?: number;
+  suites?: number;
+  bathrooms?: number;
+  parking_spaces?: number;
+  built_area_min?: number;
+  built_area_max?: number;
+  transaction_type?: 'venda' | 'aluguel' | 'temporada' | 'sale' | 'rent' | string;
+  city?: string;
+  neighborhood?: string;
+  condominium?: string;
+  amenities?: string[];
+  // Produtos & Suplementos
+  brand?: string;
+  weight?: number | string;
+  volume?: number | string;
+  size?: string;
+  color?: string;
+  sku?: string;
+  // Veículos
+  vehicle_type?: string;
+  model?: string;
+  year_min?: number;
+  year_max?: number;
+  mileage_max?: number;
+  fuel?: string;
+  transmission?: string;
+  // Serviços
+  duration_minutes?: number;
+  // Restaurantes
+  ingredients?: string[];
+  // Disponibilidade & Custom
+  availability?: 'available' | 'all' | 'in_stock';
+  custom_attributes?: Record<string, any>;
+}
+
+export interface CatalogItemResult {
+  id: string;
+  company_id: string;
+  source_id?: string;
+  name: string;
+  brand?: string;
+  category?: string;
+  entity_type?: CatalogEntityType | string;
+  description?: string;
+  price: number | null;
+  formatted_price: string;
+  currency: string;
+  images: string[];
+  main_image?: string;
+  source_url?: string;
+  availability: boolean;
+  stock?: number;
+  attributes?: Record<string, any>;
+  score?: number;
+  source_type: 'website_sync' | 'product_catalog';
+  cta?: {
+    label: string;
+    url: string;
+  };
+}
+
+export interface SearchSessionItemRef {
+  index: number; // 1, 2, 3...
+  id: string;
+  name: string;
+  brand?: string;
+  price?: number | null;
+  formatted_price?: string;
+  source_url?: string;
+  main_image?: string;
+  category?: string;
+  summary?: string;
+  attributes?: Record<string, any>;
+}
+
+export interface SearchSession {
+  id: string;
+  company_id: string;
+  conversation_id: string;
+  customer_id?: string;
+  category?: string;
+  entity_type?: string;
+  filters: CatalogSearchFilters;
+  last_query?: string;
+  last_results: SearchSessionItemRef[];
+  selected_item?: SearchSessionItemRef | null;
+  turn_count: number;
+  created_at: string;
+  updated_at: string;
+  expires_at: string;
+}
+
+export interface CatalogConsultantSettings {
+  company_id: string;
+  max_results: number; // 1, 3, 5, 10 (padrão 3)
+  send_images: boolean; // default true
+  send_prices: boolean; // default true
+  send_descriptions: boolean; // default true
+  send_links: boolean; // default true
+  show_stock: boolean; // default true
+  ask_before_search: boolean; // default true
+  presentation_style: 'cards' | 'concise' | 'detailed'; // default cards
+  default_sort: 'relevance' | 'price_asc' | 'price_desc' | 'newest'; // default relevance
+  custom_consultant_rules?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface CatalogSearchLog {
+  id: string;
+  company_id: string;
+  conversation_id: string;
+  customer_id?: string;
+  query?: string;
+  category?: string;
+  filters: Record<string, any>;
+  results_count: number;
+  results_shown_ids: string[];
+  created_at: string;
+}
+
+export interface CatalogClickLog {
+  id: string;
+  company_id: string;
+  conversation_id: string;
+  customer_id?: string;
+  catalog_item_id: string;
+  item_name?: string;
+  source_url: string;
+  clicked_at: string;
+}
+
+export interface CatalogAnalyticsSummary {
+  total_searches: number;
+  total_clicks: number;
+  click_through_rate: number; // percentage (clicks / searches)
+  top_categories: Array<{ category: string; count: number }>;
+  top_clicked_items: Array<{ item_id: string; item_name: string; clicks: number; url: string }>;
+  recent_searches: CatalogSearchLog[];
+}
+
