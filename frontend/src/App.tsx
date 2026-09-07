@@ -258,6 +258,13 @@ export default function App() {
   const [chatInput, setChatInput] = useState('');
   const [isSendingMessage, setIsSendingMessage] = useState(false);
 
+  // Modal de Confirmação de Exclusão Unificado (Chats e Módulos)
+  const [deleteConfirmTarget, setDeleteConfirmTarget] = useState<{
+    type: 'chat' | 'module';
+    id: string;
+    title: string;
+  } | null>(null);
+
   // Backend
   const [products, setProducts] = useState<any[]>([]);
   const [newProductName, setNewProductName] = useState('');
@@ -665,26 +672,51 @@ export default function App() {
     setChats(chats.map(c => c.id === chatId ? { ...c, isPinned: !c.isPinned } : c));
   };
 
-  const handleDeleteChat = (chatId: string) => {
-    const filtered = chats.filter(c => c.id !== chatId);
-    if (filtered.length === 0) {
-      const resetChat: ChatSession = {
-        id: `c-${Date.now()}`,
-        title: 'Novo chat',
-        folderId: null,
-        isPinned: false,
-        messages: [],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      };
-      setChats([resetChat]);
-      setActiveChatId(resetChat.id);
-    } else {
-      setChats(filtered);
-      if (activeChatId === chatId) {
-        setActiveChatId(filtered[0].id);
+  const handleDeleteChat = (chatId: string, chatTitle?: string) => {
+    const targetChat = chats.find(c => c.id === chatId);
+    setDeleteConfirmTarget({
+      type: 'chat',
+      id: chatId,
+      title: chatTitle || targetChat?.title || 'Novo chat'
+    });
+  };
+
+  const handleExecuteDelete = async () => {
+    if (!deleteConfirmTarget) return;
+    const { type, id } = deleteConfirmTarget;
+    if (type === 'chat') {
+      const filtered = chats.filter(c => c.id !== id);
+      if (filtered.length === 0) {
+        const resetChat: ChatSession = {
+          id: `c-${Date.now()}`,
+          title: 'Novo chat',
+          folderId: null,
+          isPinned: false,
+          messages: [],
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        };
+        setChats([resetChat]);
+        setActiveChatId(resetChat.id);
+      } else {
+        setChats(filtered);
+        if (activeChatId === id) {
+          setActiveChatId(filtered[0].id);
+        }
+      }
+    } else if (type === 'module') {
+      try {
+        await fetch(`${API_BASE}/api/builder/modules/${id}`, { method: 'DELETE' });
+        if (currentDynamicModule?.id === id) {
+          setCurrentDynamicModule(null);
+          setActiveView('builder');
+        }
+        loadSidebarModules();
+      } catch (err) {
+        console.error('Erro ao excluir módulo:', err);
       }
     }
+    setDeleteConfirmTarget(null);
   };
 
   const handleClearAllChats = () => {
@@ -2467,26 +2499,14 @@ export default function App() {
                       <LayoutDashboard size={16} color="#818cf8" />
                       <span>{mod.name}</span>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <span style={{ fontSize: '0.65rem', color: 'var(--text-dim)', background: 'rgba(255,255,255,0.05)', padding: '1px 5px', borderRadius: 4 }}>
-                        v{mod.version}
-                      </span>
+                    <span style={{ fontSize: '0.65rem', color: 'var(--text-dim)', background: 'rgba(255,255,255,0.05)', padding: '1px 5px', borderRadius: 4, marginRight: 4 }}>
+                      v{mod.version}
+                    </span>
+                    <div className="item-actions" onClick={(e) => e.stopPropagation()}>
                       <button
-                        onClick={async (e) => {
-                          e.stopPropagation();
-                          if (window.confirm(`Deseja remover o módulo "${mod.name}" do seu painel? (Seus dados não serão apagados)`)) {
-                            await fetch(`${API_BASE}/api/builder/modules/${mod.id}`, { method: 'DELETE' });
-                            if (currentDynamicModule?.id === mod.id) {
-                              setCurrentDynamicModule(null);
-                              setActiveView('builder');
-                            }
-                            loadSidebarModules();
-                          }
-                        }}
-                        style={{ background: 'transparent', border: 'none', color: 'var(--text-dim)', cursor: 'pointer', padding: 2, display: 'flex', alignItems: 'center' }}
-                        title="Excluir módulo"
-                        onMouseEnter={(e) => e.currentTarget.style.color = '#ef4444'}
-                        onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-dim)'}
+                        className="item-action-btn"
+                        title="Excluir este módulo"
+                        onClick={() => setDeleteConfirmTarget({ type: 'module', id: mod.id, title: mod.name })}
                       >
                         <Trash2 size={13} />
                       </button>
@@ -6417,6 +6437,78 @@ export default function App() {
                 </div>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* MODAL DE CONFIRMAÇÃO DE EXCLUSÃO (CHATS E MÓDULOS) */}
+      {deleteConfirmTarget && (
+        <div 
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0, 0, 0, 0.75)',
+            backdropFilter: 'blur(6px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 99999,
+            padding: 20
+          }}
+          onClick={() => setDeleteConfirmTarget(null)}
+        >
+          <div 
+            className="glass-panel"
+            style={{
+              maxWidth: 440,
+              width: '100%',
+              padding: 24,
+              borderRadius: 14,
+              border: theme === 'dark' ? '1px solid rgba(239, 68, 68, 0.4)' : '1.5px solid #ef4444',
+              background: theme === 'dark' ? '#0f172a' : '#ffffff',
+              boxShadow: '0 20px 40px rgba(0,0,0,0.4)',
+              color: theme === 'light' ? '#0f172a' : '#f8fafc'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
+              <div style={{ width: 42, height: 42, borderRadius: '50%', background: 'rgba(239, 68, 68, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ef4444', flexShrink: 0 }}>
+                <Trash2 size={20} />
+              </div>
+              <div>
+                <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 700, color: theme === 'light' ? '#0f172a' : '#f8fafc' }}>
+                  {deleteConfirmTarget.type === 'chat' ? 'Excluir esta conversa?' : 'Excluir este módulo?'}
+                </h3>
+                <span style={{ fontSize: '0.8rem', color: theme === 'light' ? '#64748b' : 'var(--text-muted)' }}>
+                  Ação permanente de remoção
+                </span>
+              </div>
+            </div>
+
+            <p style={{ fontSize: '0.9rem', lineHeight: 1.5, color: theme === 'light' ? '#334155' : 'var(--text-muted)', marginBottom: 20 }}>
+              {deleteConfirmTarget.type === 'chat' 
+                ? `Tem certeza que deseja excluir a conversa "${deleteConfirmTarget.title}"? Todas as mensagens serão apagadas definitivamente.`
+                : `Tem certeza que deseja remover o módulo "${deleteConfirmTarget.title}" do seu painel? Os dados operacionais e tabelas do banco não serão afetados.`
+              }
+            </p>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
+              <button 
+                className="btn-secondary"
+                onClick={() => setDeleteConfirmTarget(null)}
+                style={{ padding: '8px 16px', fontSize: '0.88rem' }}
+              >
+                Cancelar
+              </button>
+
+              <button 
+                className="btn-primary"
+                onClick={handleExecuteDelete}
+                style={{ background: '#ef4444', border: 'none', padding: '8px 18px', fontSize: '0.88rem', color: '#ffffff', fontWeight: 700 }}
+              >
+                Sim, Excluir {deleteConfirmTarget.type === 'chat' ? 'Chat' : 'Módulo'}
+              </button>
+            </div>
           </div>
         </div>
       )}
