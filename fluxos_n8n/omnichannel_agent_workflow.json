@@ -1,0 +1,134 @@
+{
+  "name": "Omnichannel AI Agent Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "omnichannel-agent",
+        "options": {}
+      },
+      "name": "Webhook Inbound",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [200, 300],
+      "id": "node-webhook-inbound"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.body.message }}",
+              "operation": "isNotEmpty"
+            },
+            {
+              "value1": "={{ $json.body.channel }}",
+              "operation": "isNotEmpty"
+            }
+          ]
+        }
+      },
+      "name": "Validar Payload & Tenant",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [420, 300],
+      "id": "node-validate-payload"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:3000/api/chat/message",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"companyId\": \"{{ $json.body.companyId || '11111111-1111-1111-1111-111111111111' }}\",\n  \"channel\": \"{{ $json.body.channel }}\",\n  \"externalMessageId\": \"{{ $json.body.externalMessageId }}\",\n  \"customerExternalId\": \"{{ $json.body.from }}\",\n  \"customerName\": \"{{ $json.body.customerName || 'Cliente' }}\",\n  \"message\": \"{{ $json.body.message }}\"\n}",
+        "options": {}
+      },
+      "name": "Chamar AIService Backend",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [660, 200],
+      "id": "node-call-agent"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.channel }}",
+              "value2": "whatsapp"
+            }
+          ]
+        }
+      },
+      "name": "Roteador de Canal",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [900, 200],
+      "id": "node-channel-router"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:3000/api/webhooks/outbound-log",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"event\": \"message.sent\",\n  \"channel\": \"{{ $json.channel }}\",\n  \"response\": \"{{ $json.response }}\",\n  \"status\": \"success\"\n}",
+        "options": {}
+      },
+      "name": "Registrar Evento & Log",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1140, 200],
+      "id": "node-log-event"
+    }
+  ],
+  "connections": {
+    "Webhook Inbound": {
+      "main": [
+        [
+          {
+            "node": "Validar Payload & Tenant",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar Payload & Tenant": {
+      "main": [
+        [
+          {
+            "node": "Chamar AIService Backend",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chamar AIService Backend": {
+      "main": [
+        [
+          {
+            "node": "Roteador de Canal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Roteador de Canal": {
+      "main": [
+        [
+          {
+            "node": "Registrar Evento & Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

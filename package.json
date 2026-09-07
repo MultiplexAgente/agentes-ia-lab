@@ -1,0 +1,54 @@
+{
+  "name": "agentes-ia-lab",
+  "version": "1.0.0",
+  "description": "Plataforma SaaS de Agentes de IA Omnichannel integrada ao n8n, Supabase e canais de mensageria",
+  "main": "backend/src/server.ts",
+  "scripts": {
+    "dev:backend": "tsx watch backend/src/server.ts",
+    "dev:frontend": "vite frontend",
+    "build:backend": "tsc -p backend/tsconfig.json",
+    "build:frontend": "vite build frontend",
+    "build": "npm run build:backend && npm run build:frontend",
+    "start": "node backend/dist/server.js",
+    "test": "vitest run"
+  },
+  "keywords": [
+    "n8n",
+    "ai-agent",
+    "omnichannel",
+    "whatsapp",
+    "instagram",
+    "telegram",
+    "supabase",
+    "openai"
+  ],
+  "author": "Anthony",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.21.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "openai": "^4.86.1",
+    "zod": "^3.24.2",
+    "@supabase/supabase-js": "^2.49.1",
+    "axios": "^1.8.1",
+    "uuid": "^11.1.0",
+    "multer": "^1.4.5-lts.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "lucide-react": "^0.475.0"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/multer": "^1.4.12",
+    "@types/node": "^20.17.19",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "@vitejs/plugin-react": "^4.3.4",
+    "tsx": "^4.19.3",
+    "typescript": "^5.7.3",
+    "vite": "^6.2.0",
+    "vitest": "^3.0.7"
+  }
+}
