@@ -34,7 +34,7 @@ export default function App() {
   const [teachChat, setTeachChat] = useState<Array<{ sender: 'user' | 'agent'; text: string; structured?: any }>>([
     { 
       sender: 'agent', 
-      text: 'Olá! Sou o seu novo Agente de IA. Estou pronto para aprender! Você pode me dizer sobre seus produtos, preços, horários de funcionamento, taxas ou regras de atendimento.' 
+      text: 'Olá! Sou o Multiplex, seu novo Agente de IA. Estou pronto para aprender! Você pode me dizer sobre seus produtos, preços, horários de funcionamento, taxas ou regras de atendimento.' 
     }
   ]);
   const [teachInput, setTeachInput] = useState('');
@@ -69,7 +69,7 @@ export default function App() {
 
   // Playground
   const [playgroundMessages, setPlaygroundMessages] = useState<Array<{ role: 'user' | 'assistant'; content: string }>>([
-    { role: 'assistant', content: 'Olá! Sou o seu atendente virtual. Faça perguntas para testar meus conhecimentos e regras cadastrados!' }
+    { role: 'assistant', content: 'Olá! Sou o Multiplex, seu atendente virtual inteligente. Faça perguntas para testar meus conhecimentos e regras cadastrados!' }
   ]);
   const [playgroundInput, setPlaygroundInput] = useState('');
   const [playgroundDebug, setPlaygroundDebug] = useState<any>(null);
@@ -324,8 +324,8 @@ export default function App() {
             <Bot size={24} color="#fff" />
           </div>
           <div>
-            <div className="brand-title">OmniAgent IA</div>
-            <div className="brand-subtitle">Fábrica de Agentes</div>
+            <div className="brand-title">Multiplex</div>
+            <div className="brand-subtitle">Agente de IA Omnichannel</div>
           </div>
         </div>
 

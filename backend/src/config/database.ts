@@ -90,9 +90,9 @@ export class InMemoryStore {
     this.agents.set(agentId, {
       id: agentId,
       company_id: companyId,
-      name: 'Meu Agente de IA',
-      description: 'Atendente virtual pronto para ser treinado',
-      system_prompt: 'Você é o atendente virtual da empresa. Responda com base no conhecimento e regras cadastradas.',
+      name: 'Multiplex',
+      description: 'Atendente virtual Multiplex pronto para ser treinado',
+      system_prompt: 'Você é o atendente virtual Multiplex da empresa. Responda com base no conhecimento e regras cadastradas.',
       language: 'pt-BR',
       active: true,
       auto_reply: true,
