@@ -707,6 +707,110 @@ body.light .n8n-badge {
   border-color: rgba(16, 185, 129, 0.4);
 }
 
+/* Auth, Navbar e Planos no Tema Claro - Máximo Contraste */
+body.light .auth-page-wrapper {
+  background: #f8fafc !important;
+}
+
+body.light .auth-top-navbar {
+  background: #ffffff !important;
+  border-bottom: 1.5px solid #cbd5e1 !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05) !important;
+}
+
+body.light .auth-nav-tabs {
+  background: #f1f5f9 !important;
+  border: 1.5px solid #cbd5e1 !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04) !important;
+}
+
+body.light .auth-nav-tab {
+  color: #0f172a !important;
+  font-weight: 700 !important;
+}
+
+body.light .auth-nav-tab:hover {
+  color: #4338ca !important;
+  background: #e2e8f0 !important;
+}
+
+body.light .auth-nav-tab.active {
+  background: #6366f1 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35) !important;
+}
+
+body.light .auth-card-container {
+  background: #ffffff !important;
+  border: 1.5px solid #cbd5e1 !important;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.06) !important;
+  color: #0f172a !important;
+}
+
+body.light .auth-cycle-switch {
+  background: #f1f5f9 !important;
+  border: 1.5px solid #cbd5e1 !important;
+}
+
+body.light .auth-cycle-label {
+  color: #475569 !important;
+  font-weight: 600 !important;
+}
+
+body.light .auth-cycle-label.active {
+  color: #0f172a !important;
+  font-weight: 800 !important;
+}
+
+body.light .auth-plan-box {
+  background: #ffffff !important;
+  border: 1.5px solid #cbd5e1 !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04) !important;
+  color: #0f172a !important;
+}
+
+body.light .auth-plan-box:hover {
+  border-color: #6366f1 !important;
+  box-shadow: 0 10px 25px rgba(99, 102, 241, 0.12) !important;
+}
+
+body.light .auth-plan-box.popular {
+  background: #ffffff !important;
+  border: 2px solid #6366f1 !important;
+  box-shadow: 0 10px 30px rgba(99, 102, 241, 0.15) !important;
+}
+
+body.light .auth-plan-box h3 {
+  color: #0f172a !important;
+  font-weight: 800 !important;
+}
+
+body.light .auth-plan-box p {
+  color: #334155 !important;
+  font-weight: 500 !important;
+}
+
+body.light .auth-feature-item {
+  background: #ffffff !important;
+  border: 1.5px solid #cbd5e1 !important;
+  color: #0f172a !important;
+}
+
+body.light .auth-hero-title {
+  color: #0f172a !important;
+}
+
+body.light .auth-hero-desc {
+  color: #334155 !important;
+}
+
+body.light .auth-step-pill {
+  background: rgba(99, 102, 241, 0.12) !important;
+  border: 1px solid rgba(99, 102, 241, 0.35) !important;
+  color: #4338ca !important;
+  font-weight: 700 !important;
+}
+
 /* Bolinha Minimalista do Tema (Sol e Lua) */
 .theme-circle-btn {
   width: 36px;
@@ -1124,8 +1228,8 @@ body.light .n8n-badge {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid var(--border-subtle);
-  background: rgba(10, 15, 29, 0.65);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(10, 15, 29, 0.95);
   backdrop-filter: blur(16px);
   position: sticky;
   top: 0;
@@ -1134,8 +1238,8 @@ body.light .n8n-badge {
 
 .auth-nav-tabs {
   display: inline-flex;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid var(--border-subtle);
+  background: rgba(15, 23, 42, 0.9);
+  border: 1.5px solid rgba(255, 255, 255, 0.18);
   border-radius: 12px;
   padding: 4px;
   gap: 4px;
@@ -1147,9 +1251,9 @@ body.light .n8n-badge {
   border-radius: 8px;
   border: none;
   background: transparent;
-  color: var(--text-muted);
+  color: #f1f5f9;
   font-size: 0.86rem;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -1158,14 +1262,14 @@ body.light .n8n-badge {
 }
 
 .auth-nav-tab:hover {
-  color: var(--text-main);
-  background: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.12);
 }
 
 .auth-nav-tab.active {
   background: var(--accent-primary);
   color: #ffffff;
-  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
+  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4);
 }
 
 /* Split Layout */

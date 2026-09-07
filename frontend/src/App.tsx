@@ -1608,7 +1608,14 @@ export default function App() {
     return (
       <div className="auth-page-wrapper">
         {/* BARRA SUPERIOR DE NAVEGACAO */}
-        <header className="auth-top-navbar">
+        <header 
+          className="auth-top-navbar"
+          style={{
+            background: theme === 'light' ? '#ffffff' : 'rgba(10, 15, 29, 0.95)',
+            borderBottom: theme === 'light' ? '1.5px solid #cbd5e1' : '1px solid rgba(255, 255, 255, 0.12)',
+            boxShadow: theme === 'light' ? '0 2px 10px rgba(0, 0, 0, 0.05)' : undefined
+          }}
+        >
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <img 
               src={atomLogo} 
@@ -1617,17 +1624,28 @@ export default function App() {
             />
             <div>
               <div style={{ fontWeight: 800, fontSize: '1.05rem', letterSpacing: '-0.3px', display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span>Multiplex IA</span>
+                <span style={{ color: theme === 'light' ? '#0f172a' : '#ffffff' }}>Multiplex IA</span>
                 <span style={{ fontSize: '0.68rem', color: '#06b6d4', background: 'rgba(6, 182, 212, 0.12)', border: '1px solid rgba(6, 182, 212, 0.3)', padding: '2px 8px', borderRadius: 10, fontWeight: 700 }}>v1.2 GPT-4o</span>
               </div>
-              <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Plataforma de Agentes Multicanal | BONASOFT</div>
+              <div style={{ fontSize: '0.72rem', color: theme === 'light' ? '#475569' : '#94a3b8', fontWeight: 500 }}>Plataforma de Agentes Multicanal | BONASOFT</div>
             </div>
           </div>
 
-          <div className="auth-nav-tabs">
+          <div 
+            className="auth-nav-tabs"
+            style={{
+              background: theme === 'light' ? '#f1f5f9' : 'rgba(15, 23, 42, 0.9)',
+              border: theme === 'light' ? '1.5px solid #cbd5e1' : '1.5px solid rgba(255, 255, 255, 0.18)',
+              boxShadow: theme === 'light' ? '0 2px 6px rgba(0,0,0,0.04)' : undefined
+            }}
+          >
             <button 
               className={`auth-nav-tab ${authMode === 'login' ? 'active' : ''}`}
               onClick={() => { setAuthMode('login'); setAuthError(null); }}
+              style={{
+                color: authMode === 'login' ? '#ffffff' : (theme === 'light' ? '#0f172a' : '#f8fafc'),
+                fontWeight: 700
+              }}
             >
               <LogIn size={15} />
               <span>Entrar na Conta</span>
@@ -1635,6 +1653,10 @@ export default function App() {
             <button 
               className={`auth-nav-tab ${authMode === 'register' ? 'active' : ''}`}
               onClick={() => { setAuthMode('register'); setAuthError(null); }}
+              style={{
+                color: authMode === 'register' ? '#ffffff' : (theme === 'light' ? '#0f172a' : '#f8fafc'),
+                fontWeight: 700
+              }}
             >
               <UserPlus size={15} />
               <span>Criar Nova Conta</span>
@@ -1642,20 +1664,51 @@ export default function App() {
             <button 
               className={`auth-nav-tab ${authMode === 'plans' ? 'active' : ''}`}
               onClick={() => { setAuthMode('plans'); setAuthError(null); }}
+              style={{
+                color: authMode === 'plans' ? '#ffffff' : (theme === 'light' ? '#0f172a' : '#f8fafc'),
+                fontWeight: 700
+              }}
             >
               <Sparkles size={15} />
               <span>Escolha de Planos</span>
             </button>
           </div>
 
-          <button 
-            className="btn-secondary"
-            onClick={() => handleDemoAccess('Anthony Both', 'anthony@amboth.com.br', 'plan_pro')}
-            style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.84rem', padding: '8px 16px', borderRadius: 10, borderColor: 'rgba(99, 102, 241, 0.4)', background: 'rgba(99, 102, 241, 0.1)' }}
-          >
-            <span>Acessar Painel Direto</span>
-            <ArrowRight size={15} color="var(--accent-primary)" />
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <button 
+              className="theme-circle-btn"
+              onClick={toggleTheme}
+              title={theme === 'dark' ? "Mudar para Modo Claro" : "Mudar para Modo Escuro"}
+              style={{
+                background: theme === 'light' ? '#ffffff' : 'rgba(255, 255, 255, 0.08)',
+                border: theme === 'light' ? '1.5px solid #cbd5e1' : '1px solid rgba(255, 255, 255, 0.15)',
+                color: theme === 'light' ? '#0f172a' : '#ffffff',
+                cursor: 'pointer'
+              }}
+            >
+              {theme === 'dark' ? <Sun size={17} color="#f59e0b" /> : <Moon size={17} color="#6366f1" />}
+            </button>
+
+            <button 
+              className="btn-secondary"
+              onClick={() => handleDemoAccess('Anthony Both', 'anthony@amboth.com.br', 'plan_pro')}
+              style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: 8, 
+                fontSize: '0.86rem', 
+                padding: '9px 18px', 
+                borderRadius: 10, 
+                border: theme === 'light' ? '1.5px solid #6366f1' : '1px solid rgba(99, 102, 241, 0.5)', 
+                background: theme === 'light' ? '#eef2ff' : 'rgba(99, 102, 241, 0.15)',
+                color: theme === 'light' ? '#4338ca' : '#ffffff',
+                fontWeight: 700
+              }}
+            >
+              <span>Acessar Painel Direto</span>
+              <ArrowRight size={15} color={theme === 'light' ? '#4338ca' : 'var(--accent-primary)'} />
+            </button>
+          </div>
         </header>
 
         {/* MODO 1: LOGIN (SPLIT SCREEN SAAS) */}
@@ -2167,10 +2220,22 @@ export default function App() {
             </div>
 
             {/* Toggle de Ciclo de Cobrança */}
-            <div className="auth-cycle-switch">
+            <div 
+              className="auth-cycle-switch"
+              style={{
+                background: theme === 'light' ? '#f1f5f9' : 'rgba(255, 255, 255, 0.04)',
+                border: theme === 'light' ? '1.5px solid #cbd5e1' : '1px solid var(--border-subtle)'
+              }}
+            >
               <span 
                 className={`auth-cycle-label ${authBillingCycle === 'monthly' ? 'active' : ''}`}
                 onClick={() => setAuthBillingCycle('monthly')}
+                style={{
+                  color: authBillingCycle === 'monthly' 
+                    ? (theme === 'light' ? '#0f172a' : '#ffffff') 
+                    : (theme === 'light' ? '#64748b' : 'var(--text-muted)'),
+                  fontWeight: authBillingCycle === 'monthly' ? 800 : 600
+                }}
               >
                 Faturamento Mensal
               </span>
@@ -2180,7 +2245,7 @@ export default function App() {
                   width: 44,
                   height: 24,
                   borderRadius: 12,
-                  background: authBillingCycle === 'yearly' ? 'var(--accent-primary)' : 'rgba(255,255,255,0.2)',
+                  background: authBillingCycle === 'yearly' ? '#6366f1' : (theme === 'light' ? '#94a3b8' : 'rgba(255,255,255,0.25)'),
                   position: 'relative',
                   cursor: 'pointer',
                   transition: 'background 0.2s'
@@ -2194,16 +2259,25 @@ export default function App() {
                   position: 'absolute',
                   top: 3,
                   left: authBillingCycle === 'yearly' ? 23 : 3,
-                  transition: 'left 0.2s cubic-bezier(0.16, 1, 0.3, 1)'
+                  transition: 'left 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.3)'
                 }} />
               </div>
               <span 
                 className={`auth-cycle-label ${authBillingCycle === 'yearly' ? 'active' : ''}`}
                 onClick={() => setAuthBillingCycle('yearly')}
-                style={{ display: 'flex', alignItems: 'center', gap: 6 }}
+                style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: 6,
+                  color: authBillingCycle === 'yearly' 
+                    ? (theme === 'light' ? '#0f172a' : '#ffffff') 
+                    : (theme === 'light' ? '#64748b' : 'var(--text-muted)'),
+                  fontWeight: authBillingCycle === 'yearly' ? 800 : 600
+                }}
               >
                 <span>Faturamento Anual</span>
-                <span style={{ fontSize: '0.7rem', color: '#10b981', background: 'rgba(16, 185, 129, 0.15)', padding: '2px 6px', borderRadius: 4, fontWeight: 700 }}>20% OFF</span>
+                <span style={{ fontSize: '0.72rem', color: '#059669', background: 'rgba(16, 185, 129, 0.15)', border: '1px solid rgba(16, 185, 129, 0.3)', padding: '2px 6px', borderRadius: 4, fontWeight: 800 }}>20% OFF</span>
               </span>
             </div>
 
@@ -2215,6 +2289,13 @@ export default function App() {
                   <div 
                     key={plan.id}
                     className={`auth-plan-box ${plan.popular ? 'popular' : ''}`}
+                    style={{
+                      background: theme === 'light' ? '#ffffff' : undefined,
+                      border: theme === 'light' 
+                        ? (plan.popular ? '2px solid #6366f1' : '1.5px solid #cbd5e1') 
+                        : undefined,
+                      color: theme === 'light' ? '#0f172a' : undefined
+                    }}
                   >
                     {plan.popular && (
                       <div className="auth-popular-tag">
@@ -2223,23 +2304,23 @@ export default function App() {
                       </div>
                     )}
 
-                    <h3 style={{ fontSize: '1.25rem', fontWeight: 700, margin: '0 0 6px 0' }}>{plan.name}</h3>
-                    <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', minHeight: 42, margin: '0 0 16px 0' }}>
+                    <h3 style={{ fontSize: '1.25rem', fontWeight: 800, margin: '0 0 6px 0', color: theme === 'light' ? '#0f172a' : '#f8fafc' }}>{plan.name}</h3>
+                    <p style={{ fontSize: '0.84rem', color: theme === 'light' ? '#334155' : 'var(--text-muted)', minHeight: 42, margin: '0 0 16px 0', fontWeight: 500, lineHeight: 1.4 }}>
                       {plan.description}
                     </p>
 
                     <div style={{ marginBottom: 18 }}>
                       {plan.is_custom ? (
-                        <div style={{ fontSize: '1.4rem', fontWeight: 800 }}>Sob Consulta</div>
+                        <div style={{ fontSize: '1.5rem', fontWeight: 900, color: theme === 'light' ? '#0f172a' : '#f8fafc' }}>Sob Consulta</div>
                       ) : (
                         <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
-                          <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>R$</span>
-                          <span style={{ fontSize: '2rem', fontWeight: 800 }}>{price}</span>
-                          <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>/ mes</span>
+                          <span style={{ fontSize: '0.95rem', fontWeight: 700, color: theme === 'light' ? '#475569' : 'var(--text-muted)' }}>R$</span>
+                          <span style={{ fontSize: '2.2rem', fontWeight: 900, color: theme === 'light' ? '#0f172a' : '#ffffff' }}>{price}</span>
+                          <span style={{ fontSize: '0.88rem', fontWeight: 600, color: theme === 'light' ? '#475569' : 'var(--text-muted)' }}>/ mes</span>
                         </div>
                       )}
                       {authBillingCycle === 'yearly' && !plan.is_custom && (
-                        <div style={{ fontSize: '0.72rem', color: '#10b981', marginTop: 2 }}>Faturado anualmente com 20% de desconto</div>
+                        <div style={{ fontSize: '0.74rem', color: '#059669', fontWeight: 700, marginTop: 2 }}>Faturado anualmente com 20% de desconto</div>
                       )}
                     </div>
 
@@ -2261,13 +2342,13 @@ export default function App() {
                       <span>Começar com {plan.name}</span>
                     </button>
 
-                    <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: 14, display: 'flex', flexDirection: 'column', gap: 9 }}>
-                      <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                    <div style={{ borderTop: theme === 'light' ? '1.5px solid #e2e8f0' : '1px solid var(--border-subtle)', paddingTop: 14, display: 'flex', flexDirection: 'column', gap: 9 }}>
+                      <div style={{ fontSize: '0.75rem', fontWeight: 800, color: theme === 'light' ? '#0f172a' : 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 0.5 }}>
                         O que esta incluso:
                       </div>
                       {(plan.features || []).map((feat: string, fIdx: number) => (
-                        <div key={fIdx} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: '0.8rem', color: 'var(--text-main)' }}>
-                          <CheckCircle2 size={14} color="var(--accent-primary)" style={{ flexShrink: 0, marginTop: 2 }} />
+                        <div key={fIdx} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: '0.82rem', color: theme === 'light' ? '#0f172a' : 'var(--text-main)', fontWeight: 500 }}>
+                          <CheckCircle2 size={15} color={theme === 'light' ? '#059669' : 'var(--accent-primary)'} style={{ flexShrink: 0, marginTop: 2 }} />
                           <span>{feat}</span>
                         </div>
                       ))}
@@ -2278,26 +2359,42 @@ export default function App() {
             </div>
 
             {/* Rodapé com Garantia e Suporte */}
-            <div style={{ marginTop: 28, padding: '18px 22px', borderRadius: 14, background: 'rgba(255, 255, 255, 0.02)', border: '1px solid var(--border-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
+            <div style={{ 
+              marginTop: 28, 
+              padding: '18px 22px', 
+              borderRadius: 14, 
+              background: theme === 'light' ? '#f8fafc' : 'rgba(255, 255, 255, 0.02)', 
+              border: theme === 'light' ? '1.5px solid #cbd5e1' : '1px solid var(--border-subtle)', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'space-between', 
+              flexWrap: 'wrap', 
+              gap: 16 
+            }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <ShieldCheck size={26} color="var(--accent-primary)" />
+                <ShieldCheck size={26} color="#6366f1" />
                 <div>
-                  <div style={{ fontWeight: 600, fontSize: '0.88rem' }}>Garantia de Satisfação de 7 Dias</div>
-                  <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Teste sem compromisso. Cancele com 1 clique se não atender suas expectativas.</div>
+                  <div style={{ fontWeight: 700, fontSize: '0.92rem', color: theme === 'light' ? '#0f172a' : '#f8fafc' }}>Garantia de Satisfação de 7 Dias</div>
+                  <div style={{ fontSize: '0.82rem', color: theme === 'light' ? '#334155' : 'var(--text-muted)', fontWeight: 500 }}>Teste sem compromisso. Cancele com 1 clique se não atender suas expectativas.</div>
                 </div>
               </div>
               <div style={{ display: 'flex', gap: 10 }}>
                 <button 
                   className="btn-secondary"
                   onClick={() => setAuthMode('login')}
-                  style={{ fontSize: '0.84rem' }}
+                  style={{ 
+                    fontSize: '0.86rem',
+                    fontWeight: 700,
+                    color: theme === 'light' ? '#0f172a' : undefined,
+                    border: theme === 'light' ? '1.5px solid #cbd5e1' : undefined
+                  }}
                 >
                   Já sou cliente, fazer Login
                 </button>
                 <button 
                   className="btn-primary"
                   onClick={() => handleDemoAccess('Anthony Both', 'anthony@amboth.com.br', 'plan_pro')}
-                  style={{ fontSize: '0.84rem' }}
+                  style={{ fontSize: '0.86rem', fontWeight: 700 }}
                 >
                   Acessar Painel Agora
                 </button>
