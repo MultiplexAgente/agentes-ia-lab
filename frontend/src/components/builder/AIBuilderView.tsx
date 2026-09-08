@@ -7,6 +7,7 @@ import {
 import { AIBuilderModule, AIBuildPlan } from '../../types/builder';
 import { DynamicRenderer } from './DynamicRenderer';
 import { AIEditModuleModal } from './AIEditModuleModal';
+import { AIConversationPanel } from '../conversation/AIConversationPanel';
 import atomLogo from '../../assets/multiplex-atom.jpg';
 
 interface AIBuilderViewProps {
@@ -196,121 +197,24 @@ export const AIBuilderView: React.FC<AIBuilderViewProps> = ({ onOpenModule, apiB
         </div>
       )}
 
-      {/* Caixa de Entrada Principal da IA */}
-      <div 
-        className="glass-panel" 
-        style={{ 
-          padding: 24, 
-          borderRadius: 18, 
-          background: 'linear-gradient(180deg, rgba(20, 27, 45, 0.85), rgba(12, 17, 32, 0.95))',
-          border: '1px solid rgba(99, 102, 241, 0.3)',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
-          marginBottom: 36
-        }}
-      >
-        <label style={{ display: 'block', fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: 8 }}>
-          O que você deseja criar?
-        </label>
-        <p style={{ fontSize: '0.82rem', color: 'var(--text-dim)', margin: '0 0 14px 0' }}>
-          Você pode pedir áreas financeiras, listas de clientes, dashboards de vendas, filtros personalizados ou alterações em módulos existentes.
-        </p>
-
-        <div style={{ position: 'relative' }}>
-          <textarea
-            rows={3}
-            placeholder="Ex: Crie uma área financeira com faturamento, despesas, lucro, pedidos pagos e gráficos de desempenho."
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
-            style={{
-              width: '100%',
-              padding: '16px 18px',
-              borderRadius: 14,
-              background: 'rgba(10, 15, 28, 0.8)',
-              border: '1px solid rgba(255, 255, 255, 0.12)',
-              color: 'var(--text-main)',
-              fontSize: '0.95rem',
-              lineHeight: 1.5,
-              resize: 'vertical'
-            }}
-          />
-
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 14, flexWrap: 'wrap', gap: 10 }}>
-            <span style={{ fontSize: '0.78rem', color: 'var(--text-dim)' }}>
-              🔒 Multi-tenancy ativo • Acesso restrito aos dados da sua empresa
-            </span>
-
-            <button
-              className="btn-primary"
-              onClick={() => handleGeneratePlan()}
-              disabled={loadingPlan || !prompt.trim()}
-              style={{
-                padding: '10px 24px',
-                fontSize: '0.92rem',
-                fontWeight: 700,
-                background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 8,
-                boxShadow: '0 4px 16px rgba(99, 102, 241, 0.4)'
-              }}
-            >
-              {loadingPlan ? (
-                <>
-                  <RefreshCw size={17} className="spin-slow" />
-                  Interpretando com IA...
-                </>
-              ) : (
-                <>
-                  <div style={{ width: 18, height: 18, borderRadius: '50%', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <img src={atomLogo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  </div>
-                  Criar com IA
-                </>
-              )}
-            </button>
-          </div>
-        </div>
-
-        {/* Sugestoes Rápidas em Grid */}
-        <div style={{ marginTop: 22 }}>
-          <span style={{ fontSize: '0.78rem', textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--text-dim)', fontWeight: 700, display: 'block', marginBottom: 10 }}>
-            Sugestões Rápidas:
-          </span>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 10 }}>
-            {promptSuggestions.map((s, idx) => (
-              <div
-                key={idx}
-                onClick={() => {
-                  setPrompt(s.prompt);
-                  handleGeneratePlan(s.prompt);
-                }}
-                style={{
-                  padding: '12px 14px',
-                  borderRadius: 12,
-                  background: 'rgba(255, 255, 255, 0.03)',
-                  border: '1px solid rgba(255, 255, 255, 0.06)',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'rgba(99, 102, 241, 0.1)';
-                  e.currentTarget.style.borderColor = 'rgba(99, 102, 241, 0.3)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)';
-                  e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.06)';
-                }}
-              >
-                <div style={{ fontSize: '0.86rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: 3 }}>
-                  {s.title}
-                </div>
-                <div style={{ fontSize: '0.76rem', color: 'var(--text-muted)', lineHeight: 1.3 }}>
-                  {s.desc}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+      {/* Painel Central de Diálogo Conversacional com a IA */}
+      <div style={{ marginBottom: 36 }}>
+        <AIConversationPanel
+          apiBase={apiBase}
+          context={{ page: 'builder', module: 'builder' }}
+          initialMessage="Olá! Sou a **Multiplex IA**, seu arquiteto inteligente de funcionalidades.\n\nO que você gostaria de criar ou aprimorar no seu painel hoje? Você pode pedir novas áreas, relatórios ou ajustes em funcionalidades existentes."
+          suggestions={[
+            'Quero uma área para acompanhar meus leads.',
+            'Crie uma área financeira com faturamento, despesas e pedidos.',
+            'Crie um painel de clientes cadastrados com total gasto.',
+            'Crie um dashboard com meus produtos cadastrados.'
+          ]}
+          placeholder="Ex: Quero criar uma área para acompanhar meus leads..."
+          height="540px"
+          onActionCompleted={async () => {
+            await loadModules();
+          }}
+        />
       </div>
 
       {/* PLANO DE EXECUCAO E LIVE PREVIEW */}

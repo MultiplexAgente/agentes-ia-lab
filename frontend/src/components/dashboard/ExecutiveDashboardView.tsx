@@ -18,6 +18,7 @@ import {
   ShieldCheck,
   AlertCircle
 } from 'lucide-react';
+import { ContextualAIChatCard } from '../conversation/ContextualAIChatCard';
 
 export interface DashboardData {
   metrics: {
@@ -77,13 +78,15 @@ interface Props {
   onRefresh: () => void;
   onNavigate: (view: any) => void;
   companyName?: string;
+  apiBase?: string;
 }
 
 export const ExecutiveDashboardView: React.FC<Props> = ({
   data,
   onRefresh,
   onNavigate,
-  companyName = 'Minha Empresa'
+  companyName = 'Minha Empresa',
+  apiBase = ''
 }) => {
   const [periodFilter, setPeriodFilter] = useState<'today' | '7d' | '30d' | 'all'>('30d');
   const [searchFilter, setSearchFilter] = useState('');
@@ -207,6 +210,23 @@ export const ExecutiveDashboardView: React.FC<Props> = ({
           </button>
         </div>
       </div>
+
+      {/* IA CONTEXTUAL: OPERAÇÃO E MÉTRICAS */}
+      <ContextualAIChatCard
+        apiBase={apiBase}
+        context={{
+          page: 'dashboard',
+          module: 'dashboard'
+        }}
+        title="💬 Pergunte à IA sobre sua operação hoje"
+        subtitle="Analise atendimentos, resoluções por IA, clientes ativos e taxa de conversão em tempo real."
+        suggestions={[
+          'Como está minha operação hoje?',
+          'Quantos clientes e conversas tivemos no WhatsApp e Instagram?',
+          'Quantas conversas a IA resolveu sem intervenção humana?'
+        ]}
+        onActionCompleted={onRefresh}
+      />
 
       {/* 4 CARDS PRINCIPAIS DO DOMÍNIO DO MULTIPLEX (SEM DADOS FAKE) */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16, marginBottom: 20 }}>

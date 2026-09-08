@@ -15,6 +15,8 @@ import { AIBuilderView } from './components/builder/AIBuilderView';
 import { DynamicModuleView } from './components/builder/DynamicModuleView';
 import { AIBuilderModule } from './types/builder';
 import { ExecutiveDashboardView, DashboardData } from './components/dashboard/ExecutiveDashboardView';
+import { ContextualAIChatCard } from './components/conversation/ContextualAIChatCard';
+import { aiConversationService } from './services/aiConversationService';
 
 interface FolderItem {
   id: string;
@@ -965,39 +967,34 @@ export default function App() {
     setIsSendingMessage(true);
 
     try {
-      const res = await fetch(`${API_BASE}/api/chat/message`, {
+      const res = await fetch(`${API_BASE}/api/ai/conversation/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           message: prompt,
           conversationId: currentChat.id,
-          companyId: '11111111-1111-1111-1111-111111111111'
+          companyId: '11111111-1111-1111-1111-111111111111',
+          context: {
+            page: activeView,
+            module: activeView
+          }
         })
       });
 
       if (res.ok) {
         const data = await res.json();
+        const contentText = data.assistantMessage?.content || data.response_text || 'Compreendido.';
 
-        // Extrai cards estruturados das tools de catálogo se houver
-        let extractedCards: any[] | undefined = undefined;
-        if (data.tools_called && Array.isArray(data.tools_called)) {
-          for (const tc of data.tools_called) {
-            if (tc.result?.cards && Array.isArray(tc.result.cards) && tc.result.cards.length > 0) {
-              extractedCards = tc.result.cards;
-              break;
-            } else if (tc.result?.results && Array.isArray(tc.result.results) && tc.result.results.length > 0) {
-              extractedCards = tc.result.results;
-              break;
-            }
-          }
+        // Opções rápidas sugeridas pela IA
+        let optionsText = '';
+        if (data.assistantMessage?.suggested_options && data.assistantMessage.suggested_options.length > 0) {
+          optionsText = '\n\n' + data.assistantMessage.suggested_options.map((opt: any) => `👉 [${opt.label}]`).join('   ');
         }
 
         const aiMsg: ChatMessage = {
-          id: `m-ai-${Date.now()}`,
+          id: data.assistantMessage?.id || `m-ai-${Date.now()}`,
           role: 'assistant',
-          content: data.response_text || 'Compreendido.',
-          toolsUsed: (data.tools_called && data.tools_called.length > 0) ? data.tools_called : undefined,
-          catalogCards: extractedCards,
+          content: contentText + optionsText,
           timestamp: new Date().toISOString()
         };
 
@@ -1022,7 +1019,7 @@ export default function App() {
       const aiMsg: ChatMessage = {
         id: `m-ai-${Date.now()}`,
         role: 'assistant',
-        content: `Resposta do Multiplex: A solicitacao sobre "${prompt}" foi concluida.`,
+        content: `Resposta do Multiplex: Não foi possível processar a solicitação sobre "${prompt}" no momento.`,
         timestamp: new Date().toISOString()
       };
       setChats(prevChats => prevChats.map(c => c.id === currentChat.id ? {
@@ -4164,6 +4161,26 @@ export default function App() {
             </button>
           </div>
 
+          {/* IA CONTEXTUAL: CATÁLOGO */}
+          <ContextualAIChatCard
+            apiBase={API_BASE}
+            context={{
+              page: 'catalog',
+              module: 'catalog',
+              entity: 'product'
+            }}
+            title="💬 Pergunte à IA sobre seu catálogo"
+            subtitle="Consulte itens sem preço, categorias, média de valores ou importe direto de sites."
+            suggestions={[
+              'Quais produtos estão sem preço?',
+              'Quero importar os produtos do meu site',
+              'Quais categorias temos cadastradas?'
+            ]}
+            onActionCompleted={() => {
+              loadProducts();
+            }}
+          />
+
           {/* ABAS DE MODO: IMPORTAR POR SITE, TEXTO, CONFIGURAÇÕES IA E ANALYTICS */}
           <div style={{ display: 'flex', gap: 10, marginBottom: 16, flexWrap: 'wrap' }}>
             <button 
@@ -5192,7 +5209,28 @@ export default function App() {
 
           {/* ABA 1: IDENTIDADE DA IA */}
           {identityTab === 'identity' && (
-            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(400px, 1.4fr) minmax(320px, 1fr)', gap: 24, alignItems: 'start' }}>
+            <>
+              {/* IA CONTEXTUAL: IDENTIDADE E APRESENTAÇÃO */}
+              <ContextualAIChatCard
+                apiBase={API_BASE}
+                context={{
+                  page: 'agent_identity',
+                  module: 'ai_agent',
+                  editable_fields: ['display_name', 'introduction', 'role_description', 'tone', 'communication_style']
+                }}
+                title="💬 Fale com a IA sobre esta configuração"
+                subtitle="Peça alterações de nome, tom de voz, apresentação e regras em linguagem natural."
+                suggestions={[
+                  'Quero que ela se chame Assistente Casa Nova',
+                  'Quero deixar a IA mais profissional',
+                  'Como ela está se apresentando aos clientes hoje?'
+                ]}
+                onActionCompleted={() => {
+                  loadAgentIdentity();
+                }}
+              />
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'minmax(400px, 1.4fr) minmax(320px, 1fr)', gap: 24, alignItems: 'start' }}>
               {/* Formulário de Identidade */}
               <div className="glass-panel" style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 18 }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--border-color)', paddingBottom: 12 }}>
@@ -5396,6 +5434,7 @@ export default function App() {
                 </div>
               </div>
             </div>
+            </>
           )}
 
           {/* ABA 2: REGRAS COMERCIAIS */}
@@ -6279,6 +6318,26 @@ export default function App() {
             </button>
           </div>
 
+          {/* IA CONTEXTUAL: INTEGRAÇÕES E CANAIS */}
+          <ContextualAIChatCard
+            apiBase={API_BASE}
+            context={{
+              page: 'integrations',
+              module: 'integrations',
+              integration_context: 'channels'
+            }}
+            title="💬 Fale com a IA sobre integrações"
+            subtitle="Conecte o MT 24 Horas Express, configure despacho de corridas ou integre WhatsApp e Instagram."
+            suggestions={[
+              'Quero conectar o MT 24 Horas Express',
+              'Quero pedir uma corrida pelo WhatsApp',
+              'Como conectar o WhatsApp Business?'
+            ]}
+            onActionCompleted={() => {
+              loadChannels();
+            }}
+          />
+
           {/* GRID COM TODOS OS CANAIS */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 18 }}>
             {(channels && channels.length > 0 ? channels : [
@@ -6778,6 +6837,7 @@ export default function App() {
           onRefresh={loadData}
           onNavigate={(v) => setActiveView(v)}
           companyName="Minha Empresa"
+          apiBase={API_BASE}
         />
       )}
 

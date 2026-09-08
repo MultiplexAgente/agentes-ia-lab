@@ -6,7 +6,8 @@ import {
   AgentMemoryItem, KnowledgeSource, SourceSyncRun, SourceSyncChange, NormalizedCatalogItem,
   AIBuilderModule, AIBuilderModuleVersion, Expense, UISchema,
   SearchSession, CatalogConsultantSettings, CatalogSearchLog, CatalogClickLog,
-  AgentIdentity, AgentIdentityAudit
+  AgentIdentity, AgentIdentityAudit,
+  AIConversation, AIConversationMessage
 } from '../types/index.js';
 
 dotenv.config();
@@ -65,6 +66,10 @@ export class InMemoryStore {
   public agentIdentities: Map<string, AgentIdentity> = new Map(); // key = company_id
   public agentIdentityAudits: AgentIdentityAudit[] = [];
 
+  // Global AI Conversation Layer (Admin Multiplex)
+  public aiConversations: Map<string, AIConversation> = new Map(); // key = conversation_id
+  public aiConversationMessages: Map<string, AIConversationMessage[]> = new Map(); // key = conversation_id
+
   private constructor() {
     this.seedCleanWorkspace();
   }
@@ -108,6 +113,8 @@ export class InMemoryStore {
     this.catalogClicks = [];
     this.agentIdentities.clear();
     this.agentIdentityAudits = [];
+    this.aiConversations.clear();
+    this.aiConversationMessages.clear();
     this.seedCleanWorkspace();
   }
 

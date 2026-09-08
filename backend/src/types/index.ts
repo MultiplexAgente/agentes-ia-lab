@@ -667,3 +667,84 @@ export interface CatalogAnalyticsSummary {
   recent_searches: CatalogSearchLog[];
 }
 
+// =========================================================================
+// GLOBAL AI CONVERSATION LAYER (Admin / Operador interagindo com o Multiplex)
+// =========================================================================
+
+export type AIConversationRole = 'user' | 'assistant' | 'system' | 'tool';
+
+export type AIConversationStatus = 
+  | 'ACTIVE' 
+  | 'WAITING_USER' 
+  | 'EXECUTING' 
+  | 'COMPLETED' 
+  | 'CANCELLED';
+
+export type AIConversationIntent = 
+  | 'question'
+  | 'request'
+  | 'clarification'
+  | 'confirmation'
+  | 'correction'
+  | 'conversation'
+  | 'action'
+  | 'cancel'
+  | 'new_task';
+
+export interface AIConversationContext {
+  page?: string;
+  module?: string;
+  action?: string;
+  entity?: string;
+  entity_id?: string;
+  current_record?: Record<string, any>;
+  editable_fields?: string[];
+  integration_context?: string;
+  permissions?: string[];
+  available_tools?: string[];
+}
+
+export interface AIConversationSuggestedOption {
+  label: string;
+  value: string;
+  action_type?: 'reply' | 'execute' | 'cancel' | 'navigate';
+  variant?: 'primary' | 'secondary' | 'danger';
+}
+
+export interface AIConversationToolCall {
+  id: string;
+  tool_name: string;
+  parameters: Record<string, any>;
+  status: 'PENDING' | 'EXECUTED' | 'FAILED';
+  result?: any;
+}
+
+export interface AIConversationMessage {
+  id: string;
+  conversation_id: string;
+  company_id: string;
+  user_id: string;
+  role: AIConversationRole;
+  content: string;
+  context?: AIConversationContext;
+  intent?: AIConversationIntent;
+  suggested_options?: AIConversationSuggestedOption[];
+  plan?: any; // AIBuildPlan ou plano de alteração de regras/identidade
+  tool_calls?: AIConversationToolCall[];
+  status?: AIConversationStatus;
+  feedback?: 'thumbs_up' | 'thumbs_down';
+  created_at: string;
+}
+
+export interface AIConversation {
+  id: string;
+  company_id: string;
+  user_id: string;
+  title: string;
+  context: AIConversationContext;
+  status: AIConversationStatus;
+  created_at: string;
+  updated_at: string;
+  metadata?: Record<string, any>;
+}
+
