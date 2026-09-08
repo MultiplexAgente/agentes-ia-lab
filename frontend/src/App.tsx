@@ -14,6 +14,7 @@ import atomLogo from './assets/multiplex-atom.jpg';
 import { AIBuilderView } from './components/builder/AIBuilderView';
 import { DynamicModuleView } from './components/builder/DynamicModuleView';
 import { AIBuilderModule } from './types/builder';
+import { ExecutiveDashboardView, DashboardData } from './components/dashboard/ExecutiveDashboardView';
 
 interface FolderItem {
   id: string;
@@ -171,8 +172,8 @@ export default function App() {
     setTheme(prev => prev === 'dark' ? 'light' : 'dark');
   };
 
-  // Visao ativa
-  const [activeView, setActiveView] = useState<'chat' | 'teach' | 'menu' | 'personality' | 'knowledge' | 'channels' | 'playground' | 'logs' | 'dashboard' | 'builder' | 'dynamic_module'>('chat');
+  // Visao ativa (Dashboard como primeira aba padrao)
+  const [activeView, setActiveView] = useState<'chat' | 'teach' | 'menu' | 'personality' | 'knowledge' | 'channels' | 'playground' | 'logs' | 'dashboard' | 'builder' | 'dynamic_module'>('dashboard');
   const [currentDynamicModule, setCurrentDynamicModule] = useState<AIBuilderModule | null>(null);
   const [sidebarModules, setSidebarModules] = useState<AIBuilderModule[]>([]);
 
@@ -498,6 +499,37 @@ export default function App() {
     revenue_brl: 0.00
   });
 
+  const [dashboardData, setDashboardData] = useState<DashboardData>({
+    metrics: {
+      conversations_today: 0,
+      messages_today: 0,
+      customers_served: 0,
+      ai_assisted_chats: 0,
+      human_assisted_chats: 0,
+      ai_automation_rate: 92,
+      orders_created: 0,
+      orders_delivered: 0,
+      orders_pending: 0,
+      revenue_brl: 0.00,
+      total_expenses_brl: 0.00,
+      net_profit_brl: 0.00,
+      profit_margin_percent: 0,
+      avg_ticket_brl: 0.00,
+      conversion_rate_percent: 0,
+      avg_response_time_seconds: 1.2,
+      ai_cost_usd: 0.00,
+      connected_channels: 2,
+      catalog_total_items: 0,
+      catalog_searches_count: 0,
+      catalog_clicks_count: 0
+    },
+    recent_orders: [],
+    top_customers: [],
+    payment_methods: [],
+    expenses_by_category: [],
+    recent_activities: []
+  });
+
   // Treinamento
   const [teachChat, setTeachChat] = useState<Array<{ sender: 'user' | 'agent'; text: string; structured?: any }>>([
     { 
@@ -544,6 +576,14 @@ export default function App() {
       if (resDash?.ok) {
         const d = await resDash.json();
         if (d.metrics) setMetrics(d.metrics);
+        setDashboardData({
+          metrics: d.metrics || {},
+          recent_orders: d.recent_orders || [],
+          top_customers: d.top_customers || [],
+          payment_methods: d.payment_methods || [],
+          expenses_by_category: d.expenses_by_category || [],
+          recent_activities: d.recent_activities || []
+        });
       }
       if (resHist?.ok) setStructuredHistory(await resHist.json());
       if (resLogs?.ok) setLogsList(await resLogs.json());
@@ -2575,16 +2615,29 @@ export default function App() {
           {/* Navegacao Principal */}
           <div className="sidebar-scrollable">
             <div className="sidebar-section">
+              {/* 1. DASHBOARD (PRIMEIRA ABA OBRIGATÓRIA) */}
+              <div 
+                className={`sidebar-item ${activeView === 'dashboard' ? 'active' : ''}`}
+                onClick={() => setActiveView('dashboard')}
+              >
+                <div className="item-main">
+                  <LayoutDashboard size={17} color="var(--accent-primary)" />
+                  <span style={{ fontWeight: 600 }}>Dashboard</span>
+                </div>
+              </div>
+
+              {/* 2. NOVO CHAT */}
               <div 
                 className={`sidebar-item ${activeView === 'chat' ? 'active' : ''}`}
                 onClick={handleCreateNewChat}
               >
                 <div className="item-main">
                   <Edit3 size={17} color="var(--accent-cyan)" />
-                  <span style={{ fontWeight: 600 }}>Novo chat</span>
+                  <span>Novo chat</span>
                 </div>
               </div>
 
+              {/* 3. ENSINAR IA */}
               <div 
                 className={`sidebar-item ${activeView === 'teach' ? 'active' : ''}`}
                 onClick={() => setActiveView('teach')}
@@ -2595,7 +2648,7 @@ export default function App() {
                 </div>
               </div>
 
-              {/* AI APP BUILDER (CRIAR COM IA) */}
+              {/* 4. AI APP BUILDER (CRIAR COM IA) */}
               <div 
                 className={`sidebar-item ${activeView === 'builder' ? 'active' : ''}`}
                 onClick={() => setActiveView('builder')}
@@ -2613,6 +2666,7 @@ export default function App() {
                 <span style={{ fontSize: '0.62rem', padding: '2px 6px', borderRadius: 4, background: 'linear-gradient(135deg, #6366f1, #a855f7)', color: '#fff', fontWeight: 800 }}>NOVO</span>
               </div>
 
+              {/* 5. CATÁLOGO, PRODUTOS E IMÓVEIS */}
               <div 
                 className={`sidebar-item ${activeView === 'menu' ? 'active' : ''}`}
                 onClick={() => setActiveView('menu')}
@@ -2626,6 +2680,7 @@ export default function App() {
                 )}
               </div>
 
+              {/* 6. PERSONALIDADE E REGRAS */}
               <div 
                 className={`sidebar-item ${activeView === 'personality' ? 'active' : ''}`}
                 onClick={() => setActiveView('personality')}
@@ -2639,6 +2694,7 @@ export default function App() {
                 )}
               </div>
 
+              {/* 7. BASE DE CONHECIMENTO */}
               <div 
                 className={`sidebar-item ${activeView === 'knowledge' ? 'active' : ''}`}
                 onClick={() => setActiveView('knowledge')}
@@ -2649,6 +2705,7 @@ export default function App() {
                 </div>
               </div>
 
+              {/* 8. CONECTAR CANAIS */}
               <div 
                 className={`sidebar-item ${activeView === 'channels' ? 'active' : ''}`}
                 onClick={() => setActiveView('channels')}
@@ -2659,6 +2716,7 @@ export default function App() {
                 </div>
               </div>
 
+              {/* 9. PLAYGROUND DE TESTES */}
               <div 
                 className={`sidebar-item ${activeView === 'playground' ? 'active' : ''}`}
                 onClick={() => setActiveView('playground')}
@@ -2666,27 +2724,6 @@ export default function App() {
                 <div className="item-main">
                   <PlayCircle size={17} color="var(--accent-rose)" />
                   <span>Playground de Testes</span>
-                </div>
-              </div>
-
-
-              <div 
-                className={`sidebar-item ${activeView === 'logs' ? 'active' : ''}`}
-                onClick={() => setActiveView('logs')}
-              >
-                <div className="item-main">
-                  <Activity size={17} color="var(--text-muted)" />
-                  <span>Logs e Auditoria</span>
-                </div>
-              </div>
-
-              <div 
-                className={`sidebar-item ${activeView === 'dashboard' ? 'active' : ''}`}
-                onClick={() => setActiveView('dashboard')}
-              >
-                <div className="item-main">
-                  <LayoutDashboard size={17} color="var(--text-muted)" />
-                  <span>Dashboard</span>
                 </div>
               </div>
             </div>
@@ -6448,86 +6485,14 @@ export default function App() {
         </div>
       )}
 
-      {/* TELA: LOGS */}
-      {activeView === 'logs' && (
-        <div className="main-panel-scrollable">
-          <div className="page-header">
-            <div>
-              <h1 className="page-title">Logs e Auditoria</h1>
-              <p className="page-desc">Historico de eventos e requisicoes.</p>
-            </div>
-            <button className="btn-secondary" onClick={() => setActiveView('chat')}>
-              <MessageSquare size={16} /> Voltar ao Chat
-            </button>
-          </div>
-
-          <div className="glass-panel" style={{ padding: 20 }}>
-            {logsList.length === 0 ? (
-              <div style={{ color: 'var(--text-dim)', textAlign: 'center', padding: 30 }}>
-                Nenhum log registrado.
-              </div>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                {logsList.map((log, idx) => (
-                  <div key={idx} className="glass-card" style={{ padding: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div>
-                      <div style={{ fontWeight: 600, fontSize: '0.88rem' }}>{log.event}</div>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>{log.timestamp}</div>
-                    </div>
-                    <span className="badge" style={{ background: 'rgba(99,102,241,0.15)', color: 'var(--accent-cyan)' }}>
-                      {log.channel || 'API'}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* TELA: DASHBOARD */}
+      {/* TELA: DASHBOARD EXECUTIVO COMPLETO (PRIMEIRA ABA) */}
       {activeView === 'dashboard' && (
-        <div className="main-panel-scrollable">
-          <div className="page-header">
-            <div>
-              <h1 className="page-title">Dashboard Executivo</h1>
-              <p className="page-desc">Métricas consolidadas de conversão e atendimento.</p>
-            </div>
-            <button className="btn-secondary" onClick={() => setActiveView('chat')}>
-              <MessageSquare size={16} /> Voltar ao Chat
-            </button>
-          </div>
-
-          <div className="grid-metrics">
-            <div className="glass-card" style={{ padding: 18 }}>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', textTransform: 'uppercase' }}>Conversas Hoje</div>
-              <div style={{ fontSize: '1.8rem', fontWeight: 700, marginTop: 4 }}>{metrics.conversations_today}</div>
-            </div>
-            <div className="glass-card" style={{ padding: 18 }}>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', textTransform: 'uppercase' }}>Pedidos Criados</div>
-              <div style={{ fontSize: '1.8rem', fontWeight: 700, marginTop: 4 }}>{metrics.orders_created}</div>
-            </div>
-            <div className="glass-card" style={{ padding: 18 }}>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', textTransform: 'uppercase' }}>Faturamento Gerado</div>
-              <div style={{ fontSize: '1.8rem', fontWeight: 700, marginTop: 4, color: '#10b981' }}>
-                R$ {Number(metrics.revenue_brl || 0).toFixed(2)}
-              </div>
-            </div>
-          </div>
-
-          <div className="glass-panel" style={{ padding: 20, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <span className="status-dot-green"></span>
-              <div>
-                <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>Automações e Webhooks Ativos</div>
-                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Fluxos omnichannel sincronizados</div>
-              </div>
-            </div>
-            <button className="btn-secondary" onClick={loadData}>
-              <RefreshCw size={14} /> Atualizar Métricas
-            </button>
-          </div>
-        </div>
+        <ExecutiveDashboardView 
+          data={dashboardData}
+          onRefresh={loadData}
+          onNavigate={(v) => setActiveView(v)}
+          companyName="Minha Empresa"
+        />
       )}
 
       {/* TELA: AI APP BUILDER (CRIAR COM IA) */}
