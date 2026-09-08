@@ -8,7 +8,9 @@ export type ConversationStatus =
   | 'WAITING_HUMAN'
   | 'HUMAN_ACTIVE'
   | 'COMPLETED'
-  | 'CLOSED';
+  | 'CLOSED'
+  | 'IA_ATIVA'
+  | 'ENCERRADA';
 
 export type MessageSenderType = 'customer' | 'agent' | 'human';
 
@@ -47,6 +49,40 @@ export interface AgentPersonality {
   response_length: 'short' | 'concise' | 'detailed';
   commercial_style: 'consultative' | 'direct' | 'aggressive';
   custom_instructions?: string;
+}
+
+export interface AgentIdentity {
+  id: string;
+  company_id: string;
+  agent_id: string;
+  display_name: string;
+  company_name: string;
+  introduction: string;
+  role_description: string;
+  auto_introduce: boolean;
+  initial_message?: string;
+  tone: 'formal' | 'professional' | 'casual' | 'friendly';
+  communication_style: 'direct' | 'consultative' | 'commercial' | 'welcoming' | 'expert';
+  emoji_usage: 'never' | 'low' | 'moderate' | 'free';
+  avatar_url?: string;
+  language: string;
+  enabled: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AgentIdentityAudit {
+  id: string;
+  company_id: string;
+  agent_id?: string;
+  changed_by?: string;
+  changes?: Record<string, any>;
+  field_changed?: string;
+  previous_value?: string;
+  new_value?: string;
+  updated_by?: string;
+  created_at?: string;
+  timestamp?: string;
 }
 
 export interface AgentRule {
@@ -119,6 +155,8 @@ export interface Conversation {
   status: ConversationStatus;
   last_message_text?: string;
   last_message_at?: string;
+  created_at?: string;
+  updated_at?: string;
   tags?: string[];
   metadata?: Record<string, any>;
   customer?: Customer;
@@ -130,6 +168,7 @@ export interface Message {
   conversation_id: string;
   company_id: string;
   sender_type: MessageSenderType;
+  sender?: string;
   external_message_id?: string;
   text: string;
   media_type: 'text' | 'image' | 'audio' | 'document';

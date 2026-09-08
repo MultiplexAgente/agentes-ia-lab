@@ -3,7 +3,7 @@ import { Router, Request, Response } from 'express';
 export const channelsRouter = Router();
 
 // Estado dos canais omnichannel
-const channelStates: Record<string, {
+export const channelStates: Record<string, {
   name: string;
   type: string;
   connected: boolean;

@@ -5,7 +5,8 @@ import {
   Customer, Conversation, Message, StructuredKnowledgeItem, Order,
   AgentMemoryItem, KnowledgeSource, SourceSyncRun, SourceSyncChange, NormalizedCatalogItem,
   AIBuilderModule, AIBuilderModuleVersion, Expense, UISchema,
-  SearchSession, CatalogConsultantSettings, CatalogSearchLog, CatalogClickLog
+  SearchSession, CatalogConsultantSettings, CatalogSearchLog, CatalogClickLog,
+  AgentIdentity, AgentIdentityAudit
 } from '../types/index.js';
 
 dotenv.config();
@@ -60,6 +61,10 @@ export class InMemoryStore {
   public catalogSearches: CatalogSearchLog[] = [];
   public catalogClicks: CatalogClickLog[] = [];
 
+  // Agent Identity & Audits
+  public agentIdentities: Map<string, AgentIdentity> = new Map(); // key = company_id
+  public agentIdentityAudits: AgentIdentityAudit[] = [];
+
   private constructor() {
     this.seedCleanWorkspace();
   }
@@ -69,6 +74,10 @@ export class InMemoryStore {
       InMemoryStore.instance = new InMemoryStore();
     }
     return InMemoryStore.instance;
+  }
+
+  public reset() {
+    this.resetAll();
   }
 
   public resetAll() {
@@ -97,6 +106,8 @@ export class InMemoryStore {
     this.catalogSettings.clear();
     this.catalogSearches = [];
     this.catalogClicks = [];
+    this.agentIdentities.clear();
+    this.agentIdentityAudits = [];
     this.seedCleanWorkspace();
   }
 
@@ -143,11 +154,14 @@ export class InMemoryStore {
       custom_instructions: 'Chame o cliente pelo nome quando souber.'
     });
 
-    // 4. Regras e listas
+    // 4. Regras e listas reais (ZERO dados fake)
     this.agentRules.set(agentId, []);
     this.categories.set(companyId, []);
     this.products.set(companyId, []);
     this.knowledgeItems.set(companyId, []);
+    this.customers.set(companyId, []);
+    this.orders.set(companyId, []);
+    this.expenses.set(companyId, []);
 
     // 4.1. Configurações Padrão do Consultor Inteligente de Catálogo
     this.catalogSettings.set(companyId, {
@@ -164,168 +178,24 @@ export class InMemoryStore {
       custom_consultant_rules: 'Aja como um vendedor e consultor especialista. Faça perguntas esclarecedoras pertinentes antes de despejar produtos. Apresente os itens com foto, preço real, detalhes e o link oficial verificado.'
     });
 
-    // 5. Clientes Reais da Empresa
-    const customersList: Customer[] = [
-      { id: 'c-01', company_id: companyId, name: 'Carlos Eduardo Silva', phone: '+55 11 98822-1100', email: 'carlos.silva@gmail.com', total_orders: 8, created_at: '2026-08-10T14:20:00Z' },
-      { id: 'c-02', company_id: companyId, name: 'Mariana Souza Dias', phone: '+55 11 97711-2233', email: 'mariana.souza@outlook.com', total_orders: 5, created_at: '2026-08-14T18:30:00Z' },
-      { id: 'c-03', company_id: companyId, name: 'Roberto Ferreira Neto', phone: '+55 21 99123-4567', email: 'roberto.neto@empresa.com', total_orders: 3, created_at: '2026-08-20T11:15:00Z' },
-      { id: 'c-04', company_id: companyId, name: 'Fernanda Rocha Lima', phone: '+55 11 98111-9988', email: 'fernanda.lima@uol.com.br', total_orders: 11, created_at: '2026-08-25T09:40:00Z' },
-      { id: 'c-05', company_id: companyId, name: 'Lucas Andrade Ramos', phone: '+55 41 99222-3344', email: 'lucas.andrade@gmail.com', total_orders: 4, created_at: '2026-09-01T16:00:00Z' },
-      { id: 'c-06', company_id: companyId, name: 'Beatriz Martins Alencar', phone: '+55 11 99555-7788', email: 'beatriz.martins@hotmail.com', total_orders: 6, created_at: '2026-09-03T12:10:00Z' }
-    ];
-    this.customers.set(companyId, customersList);
-
-    // 6. Pedidos Reais da Empresa
-    const ordersList: Order[] = [
-      { id: 'ped-101', company_id: companyId, customer_id: 'c-01', status: 'delivered', payment_status: 'paid', total_amount: 148.50, payment_method: 'PIX', delivery_address: 'Av. Paulista, 1000 - Bela Vista', created_at: '2026-09-01T19:30:00Z', updated_at: '2026-09-01T20:15:00Z' },
-      { id: 'ped-102', company_id: companyId, customer_id: 'c-02', status: 'delivered', payment_status: 'paid', total_amount: 92.00, payment_method: 'Cartão de Crédito', delivery_address: 'Rua Augusta, 450 - Consolação', created_at: '2026-09-02T20:10:00Z', updated_at: '2026-09-02T20:50:00Z' },
-      { id: 'ped-103', company_id: companyId, customer_id: 'c-04', status: 'delivered', payment_status: 'paid', total_amount: 215.00, payment_method: 'PIX', delivery_address: 'Rua Oscar Freire, 800 - Jardins', created_at: '2026-09-03T21:00:00Z', updated_at: '2026-09-03T21:45:00Z' },
-      { id: 'ped-104', company_id: companyId, customer_id: 'c-03', status: 'delivered', payment_status: 'paid', total_amount: 118.00, payment_method: 'PIX', delivery_address: 'Alameda Santos, 200 - Paraíso', created_at: '2026-09-04T19:15:00Z', updated_at: '2026-09-04T20:00:00Z' },
-      { id: 'ped-105', company_id: companyId, customer_id: 'c-05', status: 'delivered', payment_status: 'paid', total_amount: 86.50, payment_method: 'Cartão de Débito', delivery_address: 'Rua Bela Cintra, 120 - Consolação', created_at: '2026-09-05T12:30:00Z', updated_at: '2026-09-05T13:10:00Z' },
-      { id: 'ped-106', company_id: companyId, customer_id: 'c-06', status: 'delivered', payment_status: 'paid', total_amount: 164.00, payment_method: 'PIX', delivery_address: 'Rua da Consolação, 2500 - Cerqueira César', created_at: '2026-09-05T20:45:00Z', updated_at: '2026-09-05T21:30:00Z' },
-      { id: 'ped-107', company_id: companyId, customer_id: 'c-01', status: 'delivered', payment_status: 'paid', total_amount: 135.00, payment_method: 'Cartão de Crédito', delivery_address: 'Av. Paulista, 1000 - Bela Vista', created_at: '2026-09-06T19:50:00Z', updated_at: '2026-09-06T20:30:00Z' },
-      { id: 'ped-108', company_id: companyId, customer_id: 'c-04', status: 'delivered', payment_status: 'paid', total_amount: 189.00, payment_method: 'PIX', delivery_address: 'Rua Oscar Freire, 800 - Jardins', created_at: '2026-09-06T21:10:00Z', updated_at: '2026-09-06T21:55:00Z' },
-      { id: 'ped-109', company_id: companyId, customer_id: 'c-02', status: 'confirmed', payment_status: 'paid', total_amount: 124.00, payment_method: 'PIX', delivery_address: 'Rua Augusta, 450 - Consolação', created_at: '2026-09-07T14:15:00Z', updated_at: '2026-09-07T14:40:00Z' },
-      { id: 'ped-110', company_id: companyId, customer_id: 'c-05', status: 'pending', payment_status: 'pending', total_amount: 78.00, payment_method: 'Aguardando PIX', delivery_address: 'Rua Bela Cintra, 120', created_at: '2026-09-07T16:00:00Z', updated_at: '2026-09-07T16:00:00Z' }
-    ];
-    this.orders.set(companyId, ordersList);
-
-    // 7. Despesas Operacionais Reais
-    const expensesList: Expense[] = [
-      { id: 'exp-01', company_id: companyId, title: 'Aluguel Comercial do Ponto', category: 'Instalações', amount: 2400.00, status: 'paid', due_date: '2026-09-05', paid_at: '2026-09-05T10:00:00Z', created_at: '2026-09-01T08:00:00Z' },
-      { id: 'exp-02', company_id: companyId, title: 'Insumos e Matéria-Prima de Cozinha', category: 'Insumos', amount: 1650.00, status: 'paid', due_date: '2026-09-04', paid_at: '2026-09-04T15:30:00Z', created_at: '2026-09-02T09:00:00Z' },
-      { id: 'exp-03', company_id: companyId, title: 'Software de Atendimento e IA (Multiplex)', category: 'Tecnologia', amount: 299.00, status: 'paid', due_date: '2026-09-07', paid_at: '2026-09-07T11:00:00Z', created_at: '2026-09-03T10:00:00Z' },
-      { id: 'exp-04', company_id: companyId, title: 'Energia Elétrica & Gás Industrial', category: 'Utilidades', amount: 480.00, status: 'paid', due_date: '2026-09-06', paid_at: '2026-09-06T14:00:00Z', created_at: '2026-09-04T08:00:00Z' },
-      { id: 'exp-05', company_id: companyId, title: 'Embalagens Térmicas para Delivery', category: 'Logística', amount: 350.00, status: 'paid', due_date: '2026-09-03', paid_at: '2026-09-03T16:00:00Z', created_at: '2026-09-01T12:00:00Z' }
-    ];
-    this.expenses.set(companyId, expensesList);
-
-    // 8. MÓDULO PADRÃO INICIAL: GESTÃO FINANCEIRA
-    const defaultFinanceId = 'mod-gestao-financeira';
-    const defaultFinanceSchema: UISchema = {
-      title: 'Gestão Financeira',
-      description: 'Acompanhamento consolidado de faturamento, despesas operacionais, lucro e pedidos pagos.',
-      icon: 'DollarSign',
-      layout: 'dashboard',
-      period_filter_enabled: true,
-      sections: [
-        {
-          id: 'sec-metrics',
-          title: 'Indicadores Principais',
-          columns: 4,
-          components: [
-            {
-              id: 'm-01',
-              type: 'metric',
-              title: 'Faturamento Total',
-              description: 'Total recebido de pedidos',
-              dataSource: 'payments',
-              aggregation: 'sum',
-              format: 'currency'
-            },
-            {
-              id: 'm-02',
-              type: 'metric',
-              title: 'Despesas Operacionais',
-              description: 'Custos lançados da empresa',
-              dataSource: 'expenses',
-              aggregation: 'sum',
-              format: 'currency'
-            },
-            {
-              id: 'm-03',
-              type: 'metric',
-              title: 'Lucro Líquido',
-              description: 'Receita líquida deduzida das despesas',
-              dataSource: 'payments',
-              aggregation: 'sum',
-              format: 'currency'
-            },
-            {
-              id: 'm-04',
-              type: 'metric',
-              title: 'Pedidos Pagos',
-              description: 'Volume de vendas concluídas',
-              dataSource: 'orders',
-              aggregation: 'count',
-              format: 'number'
-            }
-          ]
-        },
-        {
-          id: 'sec-charts',
-          title: 'Desempenho Financeiro e Canais',
-          columns: 2,
-          components: [
-            {
-              id: 'ch-01',
-              type: 'chart',
-              title: 'Faturamento x Despesas',
-              description: 'Evolução comparativa por período',
-              chartType: 'line',
-              dataSource: 'payments'
-            },
-            {
-              id: 'ch-02',
-              type: 'chart',
-              title: 'Distribuição por Método de Pagamento',
-              description: 'PIX, Cartão e Dinheiro',
-              chartType: 'donut',
-              dataSource: 'payments'
-            }
-          ]
-        },
-        {
-          id: 'sec-table',
-          title: 'Transações e Pedidos Pagos',
-          columns: 1,
-          components: [
-            {
-              id: 'tb-01',
-              type: 'table',
-              title: 'Extrato de Pedidos Concluídos',
-              dataSource: 'orders',
-              columns: [
-                { key: 'id', label: 'Cód. Pedido' },
-                { key: 'customer_name', label: 'Cliente' },
-                { key: 'total_amount', label: 'Valor' },
-                { key: 'payment_method', label: 'Método' },
-                { key: 'status', label: 'Status' },
-                { key: 'date', label: 'Data & Hora' }
-              ]
-            }
-          ]
-        }
-      ]
-    };
-
-    const defaultFinanceModule: AIBuilderModule = {
-      id: defaultFinanceId,
+    // 4.2. Identidade Oficial da IA
+    this.agentIdentities.set(companyId, {
+      id: 'id-default',
       company_id: companyId,
-      name: 'Gestão Financeira',
-      slug: 'gestao-financeira',
-      description: 'Dashboard financeiro com faturamento, despesas, lucro e pedidos pagos.',
-      icon: 'DollarSign',
-      status: 'active',
-      schema: defaultFinanceSchema,
-      version: 1,
-      created_by: 'Multiplex IA',
+      agent_id: agentId,
+      display_name: 'Multiplex',
+      company_name: 'Minha Empresa',
+      introduction: 'Olá! Eu sou o assistente virtual da Minha Empresa. Como posso ajudar você hoje?',
+      role_description: 'Atendimento inteligente ao cliente, suporte e informações.',
+      auto_introduce: true,
+      tone: 'friendly',
+      communication_style: 'consultative',
+      emoji_usage: 'never',
+      language: 'pt-BR',
+      enabled: true,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
-    };
-
-    this.builderModules.set(defaultFinanceId, defaultFinanceModule);
-    this.builderModuleVersions.set(defaultFinanceId, [
-      {
-        id: 'ver-default-01',
-        module_id: defaultFinanceId,
-        version: 1,
-        schema: defaultFinanceSchema,
-        prompt: 'Crie uma área financeira detalhada com faturamento, despesas, lucro e gráficos.',
-        created_by: 'Multiplex IA',
-        created_at: new Date().toISOString()
-      }
-    ]);
+    });
   }
 }
 

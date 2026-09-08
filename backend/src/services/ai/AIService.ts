@@ -65,9 +65,13 @@ export class AIService {
     // 4. Busca Conhecimento Relevante (RAG)
     const retrievedKnowledge = await knowledgeBaseService.searchKnowledge(companyId, incomingText);
 
+    // 4.1. Identidade Oficial da IA
+    const identity = store.agentIdentities.get(companyId);
+
     // 5. Monta o Prompt de Sistema Dinâmico (Seção 37)
     const systemPrompt = this.buildDynamicSystemPrompt({
       companyName: company?.name || 'Nossa Empresa',
+      identity,
       personality,
       rules,
       knowledge: retrievedKnowledge,
@@ -231,29 +235,34 @@ export class AIService {
    */
   private buildDynamicSystemPrompt(params: {
     companyName: string;
+    identity?: any;
     personality?: any;
     rules: any[];
     knowledge: any[];
     memories: any[];
     customerName: string;
   }): string {
-    const { companyName, personality, rules, knowledge, memories, customerName } = params;
+    const { companyName, identity, personality, rules, knowledge, memories, customerName } = params;
+    const aiName = identity?.display_name || 'Multiplex';
+    const compName = identity?.company_name || companyName;
 
     return `
-# IDENTIDADE
-Você é o atendente virtual inteligente da empresa "${companyName}".
-Seu objetivo é prestar um atendimento ágil, consultivo, tirar dúvidas de preços e cardápio, e conduzir pedidos com precisão.
+# IDENTIDADE OFICIAL DA IA
+Você é "${aiName}", assistente virtual oficial da empresa "${compName}".
+${identity?.role_description ? `Função principal: ${identity.role_description}` : ''}
+${identity?.introduction ? `Frase de apresentação padrão: "${identity.introduction}"` : ''}
+${identity?.auto_introduce ? 'Quando for a primeira interação, apresente-se brevemente usando seu nome e empresa.' : 'Não é necessário repetir seu nome a todo momento se a conversa já estiver em andamento.'}
 
 # CLIENTE ATUAL
 Nome: ${customerName}
 Memórias registradas: ${memories.length > 0 ? memories.map(m => `${m.key}: ${m.value}`).join('; ') : 'Nenhuma preferência prévia registrada.'}
 
 # PERSONALIDADE & TOM DE VOZ
-- Tom: ${personality?.tone || 'amigável'}
+- Tom: ${identity?.tone || personality?.tone || 'amigável'}
 - Formalidade: ${personality?.formality || 'informal'}
 - Uso de Emojis: PROIBIDO. NUNCA USE EMOJIS NAS RESPOSTAS.
 - Tamanho das respostas: ${personality?.response_length || 'conciso'}
-- Estilo Comercial: ${personality?.commercial_style || 'consultivo'}
+- Estilo Comercial: ${identity?.communication_style || personality?.commercial_style || 'consultivo'}
 ${personality?.custom_instructions ? `- Instruções adicionais: ${personality.custom_instructions}` : ''}
 
 # REGRAS OBRIGATÓRIAS DA EMPRESA (POR PRIORIDADE)
@@ -295,6 +304,26 @@ ${knowledge.length > 0 ? JSON.stringify(knowledge, null, 2) : 'Nenhum conhecimen
     }
   ): Promise<string> {
     const q = query.toLowerCase();
+    const identity = store.agentIdentities.get(ctx.companyId);
+
+    // Regra 0: Pergunta sobre identidade / Quem é você / Qual seu nome
+    if (
+      q.includes('quem e voce') ||
+      q.includes('quem e você') ||
+      q.includes('quem é voce') ||
+      q.includes('quem é você') ||
+      q.includes('qual o seu nome') ||
+      q.includes('qual seu nome') ||
+      q.includes('com quem estou falando') ||
+      q.includes('com quem falo')
+    ) {
+      const name = identity?.display_name || 'Multiplex';
+      const comp = identity?.company_name || 'nossa empresa';
+      if (identity?.introduction) {
+        return identity.introduction;
+      }
+      return `Olá! Eu sou o ${name}, assistente virtual inteligente da ${comp}. ${identity?.role_description ? `Minha função é: ${identity.role_description}.` : ''} Como posso ajudar você hoje?`;
+    }
 
     // Regra 1: Reclamação ou pedido de atendente humano
     if (q.includes('humano') || q.includes('pessoa') || q.includes('atendente') || q.includes('reclamação') || q.includes('reclamar')) {

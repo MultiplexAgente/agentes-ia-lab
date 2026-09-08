@@ -13,12 +13,94 @@ agentRouter.get('/config', (req: Request, res: Response) => {
   const agent = store.agents.get(DEFAULT_AGENT_ID) || Array.from(store.agents.values()).find(a => a.company_id === companyId);
   const personality = store.agentPersonalities.get(agent?.id || DEFAULT_AGENT_ID);
   const rules = store.agentRules.get(agent?.id || DEFAULT_AGENT_ID) || [];
+  const identity = store.agentIdentities.get(companyId) || {
+    id: 'id-default',
+    company_id: companyId,
+    agent_id: agent?.id || DEFAULT_AGENT_ID,
+    display_name: 'Multiplex',
+    company_name: 'Minha Empresa',
+    introduction: 'Olá! Eu sou o assistente virtual da Minha Empresa. Como posso ajudar você hoje?',
+    role_description: 'Atendimento inteligente ao cliente, suporte e informações.',
+    auto_introduce: true,
+    tone: 'friendly',
+    communication_style: 'consultative',
+    emoji_usage: 'never',
+    language: 'pt-BR',
+    enabled: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
+  };
 
   return res.json({
     agent,
     personality,
+    identity,
     rules: rules.sort((a, b) => b.priority - a.priority)
   });
+});
+
+// Obter identidade da IA
+agentRouter.get('/identity', (req: Request, res: Response) => {
+  const companyId = (req.query.companyId as string) || DEFAULT_COMPANY_ID;
+  const identity = store.agentIdentities.get(companyId) || {
+    id: 'id-default',
+    company_id: companyId,
+    agent_id: DEFAULT_AGENT_ID,
+    display_name: 'Multiplex',
+    company_name: 'Minha Empresa',
+    introduction: 'Olá! Eu sou o assistente virtual da Minha Empresa. Como posso ajudar você hoje?',
+    role_description: 'Atendimento inteligente ao cliente, suporte e informações.',
+    auto_introduce: true,
+    tone: 'friendly',
+    communication_style: 'consultative',
+    emoji_usage: 'never',
+    language: 'pt-BR',
+    enabled: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
+  };
+  return res.json(identity);
+});
+
+// Atualizar identidade da IA
+agentRouter.put('/identity', (req: Request, res: Response) => {
+  const companyId = (req.body.companyId as string) || (req.body.company_id as string) || DEFAULT_COMPANY_ID;
+  const current = store.agentIdentities.get(companyId) || {
+    id: uuidv4(),
+    company_id: companyId,
+    agent_id: DEFAULT_AGENT_ID,
+    display_name: 'Multiplex',
+    company_name: 'Minha Empresa',
+    introduction: 'Olá! Eu sou o assistente virtual da Minha Empresa. Como posso ajudar você hoje?',
+    role_description: 'Atendimento ao cliente',
+    auto_introduce: true,
+    tone: 'friendly',
+    communication_style: 'consultative',
+    emoji_usage: 'never',
+    language: 'pt-BR',
+    enabled: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
+  };
+
+  const updated = {
+    ...current,
+    ...req.body,
+    company_id: companyId,
+    updated_at: new Date().toISOString()
+  };
+
+  store.agentIdentities.set(companyId, updated);
+
+  store.agentIdentityAudits.push({
+    id: uuidv4(),
+    company_id: companyId,
+    changed_by: req.body.changed_by || 'Administrador',
+    changes: req.body,
+    timestamp: new Date().toISOString()
+  });
+
+  return res.json(updated);
 });
 
 // Atualizar personalidade

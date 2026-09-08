@@ -389,6 +389,55 @@ export default function App() {
   const [newRuleText, setNewRuleText] = useState('');
   const [newRulePriority, setNewRulePriority] = useState(5);
 
+  // Identidade e Nome da IA (Personalização por Empresa)
+  const [identityTab, setIdentityTab] = useState<'identity' | 'rules'>('identity');
+  const [agentIdentity, setAgentIdentity] = useState<{
+    display_name: string;
+    company_name: string;
+    introduction: string;
+    role_description: string;
+    auto_introduce: boolean;
+    tone: string;
+    communication_style: string;
+    emoji_usage: string;
+  }>({
+    display_name: 'Multiplex',
+    company_name: 'Minha Empresa',
+    introduction: 'Olá! Eu sou o assistente virtual da Minha Empresa. Como posso ajudar você hoje?',
+    role_description: 'Atendimento inteligente ao cliente, informações de produtos/serviços e suporte.',
+    auto_introduce: true,
+    tone: 'friendly',
+    communication_style: 'consultative',
+    emoji_usage: 'never'
+  });
+  const [isSavingIdentity, setIsSavingIdentity] = useState(false);
+  const [identitySaveSuccess, setIdentitySaveSuccess] = useState(false);
+
+  const handleSaveIdentity = async () => {
+    setIsSavingIdentity(true);
+    setIdentitySaveSuccess(false);
+    try {
+      const res = await fetch(`${API_BASE}/api/agent/identity`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...agentIdentity,
+          changed_by: currentUser?.name || 'Administrador'
+        })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setAgentIdentity(data);
+        setIdentitySaveSuccess(true);
+        setTimeout(() => setIdentitySaveSuccess(false), 4000);
+      }
+    } catch (err) {
+      console.error('Erro ao salvar identidade da IA:', err);
+    } finally {
+      setIsSavingIdentity(false);
+    }
+  };
+
   const [knowledgeList, setKnowledgeList] = useState<any[]>([]);
   const [newKbSubject, setNewKbSubject] = useState('');
   const [newKbContent, setNewKbContent] = useState('');
@@ -570,6 +619,7 @@ export default function App() {
       if (resAgent?.ok) {
         const ag = await resAgent.json();
         if (ag.rules) setRules(ag.rules);
+        if (ag.identity) setAgentIdentity(ag.identity);
       }
       if (resKb?.ok) setKnowledgeList(await resKb.json());
       if (resChan?.ok) setChannels(await resChan.json());
@@ -5104,65 +5154,301 @@ export default function App() {
         </div>
       )}
 
-      {/* TELA: PERSONALIDADE E REGRAS */}
+      {/* TELA: IDENTIDADE E REGRAS DO AGENTE IA */}
       {activeView === 'personality' && (
         <div className="main-panel-scrollable">
-          <div className="page-header">
+          <div className="page-header" style={{ marginBottom: 16 }}>
             <div>
-              <h1 className="page-title">Personalidade e Regras Comerciais</h1>
-              <p className="page-desc">Defina as regras obrigatorias que o Multiplex deve seguir.</p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
+                <h1 className="page-title" style={{ margin: 0 }}>Identidade e Regras do Agente IA</h1>
+                <span className="bonasoft-badge-tag">Omnichannel Multiplex</span>
+              </div>
+              <p className="page-desc">
+                Defina como o agente se apresenta aos clientes, seu nome oficial, empresa, tom de voz e regras obrigatórias de atendimento.
+              </p>
             </div>
             <button className="btn-secondary" onClick={() => setActiveView('chat')}>
               <MessageSquare size={16} /> Voltar ao Chat
             </button>
           </div>
 
-          <div className="glass-panel" style={{ padding: 20 }}>
-            <h2 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: 14 }}>Nova Regra de Negocio</h2>
-            <textarea 
-              placeholder="Ex: Nao conceder descontos, oferecer adicionais ao fechar pedido..."
-              value={newRuleText}
-              onChange={(e) => setNewRuleText(e.target.value)}
-              rows={3}
-              style={{ marginBottom: 12 }}
-            />
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: '0.88rem' }}>
-                <span>Prioridade da Regra (1 a 10):</span>
-                <input 
-                  type="number" 
-                  min="1" 
-                  max="10" 
-                  value={newRulePriority} 
-                  onChange={(e) => setNewRulePriority(parseInt(e.target.value) || 5)} 
-                  style={{ width: 70, padding: '6px 10px' }}
-                />
-              </div>
-              <button className="btn-primary" onClick={handleAddRule}>
-                <Plus size={16} /> Salvar Regra
-              </button>
-            </div>
+          {/* Seletor de Abas: Identidade da IA & Regras de Negócio */}
+          <div style={{ display: 'flex', gap: 10, marginBottom: 20, borderBottom: '1px solid var(--border-color)', paddingBottom: 10 }}>
+            <button
+              className={identityTab === 'identity' ? 'btn-primary' : 'btn-secondary'}
+              onClick={() => setIdentityTab('identity')}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '8px 16px', borderRadius: 8, fontWeight: 500 }}
+            >
+              <Bot size={16} /> Identidade da IA
+            </button>
+            <button
+              className={identityTab === 'rules' ? 'btn-primary' : 'btn-secondary'}
+              onClick={() => setIdentityTab('rules')}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '8px 16px', borderRadius: 8, fontWeight: 500 }}
+            >
+              <Sliders size={16} /> Regras Comerciais ({rules.length})
+            </button>
           </div>
 
-          <div>
-            <h2 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: 12 }}>Regras Ativas ({rules.length})</h2>
-            {rules.length === 0 ? (
-              <div className="glass-card" style={{ padding: 24, textAlign: 'center', color: 'var(--text-dim)' }}>
-                Nenhuma regra personalizada configurada ainda.
-              </div>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                {rules.map((r, i) => (
-                  <div key={r.id || i} className="glass-card" style={{ padding: 14, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: '0.92rem' }}>{r.rule_text}</span>
-                    <span className="badge" style={{ background: 'rgba(99,102,241,0.15)', color: 'var(--accent-cyan)' }}>
-                      Prioridade {r.priority || 5}
+          {/* ABA 1: IDENTIDADE DA IA */}
+          {identityTab === 'identity' && (
+            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(400px, 1.4fr) minmax(320px, 1fr)', gap: 24, alignItems: 'start' }}>
+              {/* Formulário de Identidade */}
+              <div className="glass-panel" style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 18 }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--border-color)', paddingBottom: 12 }}>
+                  <div>
+                    <h2 style={{ fontSize: '1.08rem', fontWeight: 600, margin: 0 }}>Apresentação e Nome do Agente</h2>
+                    <p style={{ fontSize: '0.82rem', color: 'var(--text-dim)', margin: '2px 0 0 0' }}>
+                      Essas informações definem como a IA se apresenta aos seus clientes em todos os canais.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Grid Nome da IA e Nome da Empresa */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.84rem', fontWeight: 600, marginBottom: 6 }}>
+                      Nome da IA <span style={{ color: 'var(--accent-cyan)' }}>*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={agentIdentity.display_name}
+                      onChange={(e) => setAgentIdentity({ ...agentIdentity, display_name: e.target.value })}
+                      placeholder="Ex: Lia, Assistente Casa Nova, Luna"
+                      style={{ width: '100%', padding: '10px 12px', borderRadius: 8, background: 'var(--bg-input)', border: '1px solid var(--border-color)', color: 'var(--text-main)', fontSize: '0.9rem' }}
+                    />
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginTop: 4, display: 'block' }}>
+                      Nome próprio ou formal com que ela responde.
                     </span>
                   </div>
-                ))}
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.84rem', fontWeight: 600, marginBottom: 6 }}>
+                      Nome da Empresa <span style={{ color: 'var(--accent-cyan)' }}>*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={agentIdentity.company_name}
+                      onChange={(e) => setAgentIdentity({ ...agentIdentity, company_name: e.target.value })}
+                      placeholder="Ex: Restaurante Sabor da Terra"
+                      style={{ width: '100%', padding: '10px 12px', borderRadius: 8, background: 'var(--bg-input)', border: '1px solid var(--border-color)', color: 'var(--text-main)', fontSize: '0.9rem' }}
+                    />
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginTop: 4, display: 'block' }}>
+                      A empresa que a IA representa no atendimento.
+                    </span>
+                  </div>
+                </div>
+
+                {/* Apresentação Padrão */}
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.84rem', fontWeight: 600, marginBottom: 6 }}>
+                    Apresentação Padrão aos Clientes <span style={{ color: 'var(--accent-cyan)' }}>*</span>
+                  </label>
+                  <textarea
+                    rows={3}
+                    value={agentIdentity.introduction}
+                    onChange={(e) => setAgentIdentity({ ...agentIdentity, introduction: e.target.value })}
+                    placeholder="Ex: Olá! Eu sou a Lia, assistente virtual do Restaurante Sabor da Terra. Posso te ajudar com nosso cardápio e pedidos."
+                    style={{ width: '100%', padding: '10px 12px', borderRadius: 8, background: 'var(--bg-input)', border: '1px solid var(--border-color)', color: 'var(--text-main)', fontSize: '0.88rem', resize: 'vertical' }}
+                  />
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginTop: 4, display: 'block' }}>
+                    Esta mensagem é usada quando o cliente inicia o contato ou pergunta com quem está falando.
+                  </span>
+                </div>
+
+                {/* Função Principal */}
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.84rem', fontWeight: 600, marginBottom: 6 }}>
+                    Função Principal / Especialidade
+                  </label>
+                  <input
+                    type="text"
+                    value={agentIdentity.role_description}
+                    onChange={(e) => setAgentIdentity({ ...agentIdentity, role_description: e.target.value })}
+                    placeholder="Ex: Consultoria de imóveis de alto padrão, agendamento de visitas e esclarecimento de dúvidas"
+                    style={{ width: '100%', padding: '10px 12px', borderRadius: 8, background: 'var(--bg-input)', border: '1px solid var(--border-color)', color: 'var(--text-main)', fontSize: '0.88rem' }}
+                  />
+                </div>
+
+                {/* Toggle Auto-Apresentação */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 14px', background: 'rgba(255,255,255,0.03)', borderRadius: 8, border: '1px solid var(--border-color)' }}>
+                  <input
+                    type="checkbox"
+                    id="auto-introduce"
+                    checked={agentIdentity.auto_introduce}
+                    onChange={(e) => setAgentIdentity({ ...agentIdentity, auto_introduce: e.target.checked })}
+                    style={{ width: 18, height: 18, cursor: 'pointer', accentColor: 'var(--accent-cyan)' }}
+                  />
+                  <label htmlFor="auto-introduce" style={{ cursor: 'pointer', fontSize: '0.88rem', fontWeight: 500, margin: 0 }}>
+                    Apresentar-se automaticamente no início da conversa
+                    <span style={{ display: 'block', fontSize: '0.76rem', color: 'var(--text-dim)', fontWeight: 400 }}>
+                      A IA iniciará o diálogo informando seu nome e o nome da empresa.
+                    </span>
+                  </label>
+                </div>
+
+                {/* Grid Tom e Estilo de Comunicação */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.84rem', fontWeight: 600, marginBottom: 6 }}>
+                      Tom de Voz
+                    </label>
+                    <select
+                      value={agentIdentity.tone}
+                      onChange={(e) => setAgentIdentity({ ...agentIdentity, tone: e.target.value })}
+                      style={{ width: '100%', padding: '10px 12px', borderRadius: 8, background: 'var(--bg-input)', border: '1px solid var(--border-color)', color: 'var(--text-main)', fontSize: '0.88rem' }}
+                    >
+                      <option value="friendly">Amigável e acolhedor</option>
+                      <option value="professional">Profissional e formal</option>
+                      <option value="consultative">Consultivo e técnico</option>
+                      <option value="enthusiastic">Entusiasta e ágil</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.84rem', fontWeight: 600, marginBottom: 6 }}>
+                      Estilo de Comunicação
+                    </label>
+                    <select
+                      value={agentIdentity.communication_style}
+                      onChange={(e) => setAgentIdentity({ ...agentIdentity, communication_style: e.target.value })}
+                      style={{ width: '100%', padding: '10px 12px', borderRadius: 8, background: 'var(--bg-input)', border: '1px solid var(--border-color)', color: 'var(--text-main)', fontSize: '0.88rem' }}
+                    >
+                      <option value="consultative">Consultivo (qualifica antes)</option>
+                      <option value="direct">Direto e conciso</option>
+                      <option value="educational">Educativo e detalhado</option>
+                      <option value="persuasive">Comercial e persuasivo</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Salvar e Feedback */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 10, paddingTop: 14, borderTop: '1px solid var(--border-color)' }}>
+                  {identitySaveSuccess ? (
+                    <span style={{ color: '#10b981', display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: '0.88rem', fontWeight: 500 }}>
+                      <CheckCircle2 size={16} /> Identidade salva com sucesso!
+                    </span>
+                  ) : (
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>
+                      Atualizações têm efeito imediato nas conversas.
+                    </span>
+                  )}
+                  <button
+                    className="btn-primary"
+                    onClick={handleSaveIdentity}
+                    disabled={isSavingIdentity}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 20px' }}
+                  >
+                    {isSavingIdentity ? <RefreshCw size={16} className="spin" /> : <Check size={16} />}
+                    {isSavingIdentity ? 'Salvando...' : 'Salvar Identidade'}
+                  </button>
+                </div>
               </div>
-            )}
-          </div>
+
+              {/* Preview em Tempo Real */}
+              <div className="glass-panel" style={{ padding: 22, position: 'sticky', top: 20 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+                  <Sparkles size={16} color="var(--accent-cyan)" />
+                  <h3 style={{ fontSize: '0.98rem', fontWeight: 600, margin: 0 }}>Simulação de Apresentação</h3>
+                </div>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-dim)', marginBottom: 18 }}>
+                  Como o cliente vê e ouve a IA nos canais conectados:
+                </p>
+
+                {/* Card de Simulação Estilo WhatsApp */}
+                <div style={{ background: 'rgba(0,0,0,0.35)', borderRadius: 12, border: '1px solid var(--border-color)', padding: 16 }}>
+                  {/* Cabeçalho do Contato */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, paddingBottom: 12, borderBottom: '1px solid rgba(255,255,255,0.06)', marginBottom: 14 }}>
+                    <div style={{ width: 38, height: 38, borderRadius: '50%', background: 'linear-gradient(135deg, #6366f1, #06b6d4)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, color: '#fff', fontSize: '1rem' }}>
+                      {(agentIdentity.display_name || 'M').charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <div style={{ fontWeight: 600, fontSize: '0.92rem', color: 'var(--text-main)' }}>
+                        {agentIdentity.display_name || 'Multiplex IA'}
+                      </div>
+                      <div style={{ fontSize: '0.74rem', color: '#10b981', display: 'flex', alignItems: 'center', gap: 4 }}>
+                        <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#10b981' }}></span>
+                        {agentIdentity.company_name ? `${agentIdentity.company_name} • Online` : 'Online'}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Diálogo Simulado */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    {/* Mensagem do Cliente */}
+                    <div style={{ alignSelf: 'flex-start', background: 'rgba(255,255,255,0.08)', borderRadius: '12px 12px 12px 2px', padding: '10px 14px', maxWidth: '85%', fontSize: '0.84rem' }}>
+                      Oi, como vocês funcionam?
+                      <div style={{ fontSize: '0.68rem', color: 'var(--text-dim)', textAlign: 'right', marginTop: 2 }}>14:30</div>
+                    </div>
+
+                    {/* Resposta do Agente */}
+                    <div style={{ alignSelf: 'flex-end', background: 'rgba(99,102,241,0.22)', border: '1px solid rgba(99,102,241,0.35)', borderRadius: '12px 12px 2px 12px', padding: '10px 14px', maxWidth: '90%', fontSize: '0.84rem', color: 'var(--text-main)' }}>
+                      {agentIdentity.introduction || `Olá! Eu sou o assistente virtual da ${agentIdentity.company_name || 'empresa'}. Como posso te ajudar hoje?`}
+                      <div style={{ fontSize: '0.68rem', color: 'var(--accent-cyan)', textAlign: 'right', marginTop: 4, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 3 }}>
+                        14:30 <Check size={12} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ marginTop: 14, padding: 12, borderRadius: 8, background: 'rgba(6,182,212,0.06)', border: '1px solid rgba(6,182,212,0.18)', fontSize: '0.78rem', color: 'var(--text-dim)', lineHeight: 1.4 }}>
+                  💡 <strong>Dica Multiplex:</strong> Os clientes valorizam quando o agente se apresenta pelo nome e informa de forma transparente que é o assistente virtual da empresa.
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ABA 2: REGRAS COMERCIAIS */}
+          {identityTab === 'rules' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+              <div className="glass-panel" style={{ padding: 20 }}>
+                <h2 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: 14 }}>Nova Regra de Negócio</h2>
+                <textarea 
+                  placeholder="Ex: Não conceder descontos, oferecer adicionais ao fechar pedido, transferir para humano caso o cliente solicite..."
+                  value={newRuleText}
+                  onChange={(e) => setNewRuleText(e.target.value)}
+                  rows={3}
+                  style={{ marginBottom: 12, width: '100%', padding: '10px 12px', borderRadius: 8, background: 'var(--bg-input)', border: '1px solid var(--border-color)', color: 'var(--text-main)', fontSize: '0.88rem' }}
+                />
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: '0.88rem' }}>
+                    <span>Prioridade da Regra (1 a 10):</span>
+                    <input 
+                      type="number" 
+                      min="1" 
+                      max="10" 
+                      value={newRulePriority} 
+                      onChange={(e) => setNewRulePriority(parseInt(e.target.value) || 5)} 
+                      style={{ width: 70, padding: '6px 10px', borderRadius: 6, background: 'var(--bg-input)', border: '1px solid var(--border-color)', color: 'var(--text-main)' }}
+                    />
+                  </div>
+                  <button className="btn-primary" onClick={handleAddRule}>
+                    <Plus size={16} /> Salvar Regra
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <h2 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: 12 }}>Regras Ativas ({rules.length})</h2>
+                {rules.length === 0 ? (
+                  <div className="glass-card" style={{ padding: 24, textAlign: 'center', color: 'var(--text-dim)' }}>
+                    Nenhuma regra personalizada configurada ainda.
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    {rules.map((r, i) => (
+                      <div key={r.id || i} className="glass-card" style={{ padding: 14, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontSize: '0.92rem' }}>{r.rule_text}</span>
+                        <span className="badge" style={{ background: 'rgba(99,102,241,0.15)', color: 'var(--accent-cyan)' }}>
+                          Prioridade {r.priority || 5}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* ── BONASOFT Watermark ── */}
           <div className="bonasoft-watermark-container" style={{ marginTop: 28 }}>

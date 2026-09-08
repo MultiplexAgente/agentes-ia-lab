@@ -1,9 +1,10 @@
-﻿import OpenAI from 'openai';
+import OpenAI from 'openai';
 import dotenv from 'dotenv';
 import { v4 as uuidv4 } from 'uuid';
 import { AIBuilderModule, AIBuildPlan, UISchema, UIComponent } from '../../types/index.js';
 import { store } from '../../config/database.js';
 import { ApplicationIntrospectionService, SystemSnapshot } from './ApplicationIntrospectionService.js';
+import { DataSourceRegistry } from './DataSourceRegistry.js';
 
 dotenv.config();
 
@@ -24,6 +25,18 @@ export class AIBuilderService {
   }): Promise<AIBuildPlan> {
     const { companyId, prompt, currentModuleId } = params;
     const promptLower = prompt.toLowerCase();
+
+    // CRÍTICO: Recusa estrita de criação de dados fictícios em produção
+    if (
+      promptLower.includes('fictício') ||
+      promptLower.includes('ficticio') ||
+      promptLower.includes('fake') ||
+      promptLower.includes('invente') ||
+      promptLower.includes('mock') ||
+      (promptLower.includes('preencher') && promptLower.includes('cliente'))
+    ) {
+      throw new Error('A criação de dados fictícios em produção é proibida pelas diretrizes do Multiplex. O sistema opera exclusivamente com dados e integrações reais. Para testes visuais ou demonstrações, utilize explicitamente o Modo Demonstração (DEMO MODE).');
+    }
 
     // STEP 1: Real system introspection - know what exists before planning
     const snapshot = ApplicationIntrospectionService.inspect(companyId);

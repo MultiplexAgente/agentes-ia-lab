@@ -1,4 +1,5 @@
 import { store } from '../../config/database.js';
+import { DataSourceRegistry } from './DataSourceRegistry.js';
 
 export interface EntityInfo {
   name: string;
@@ -57,31 +58,35 @@ export class ApplicationIntrospectionService {
         };
       });
 
-    const orders = store.orders.get(companyId) || [];
+    const conversations = Array.from(store.conversations.values()).filter(c => c.company_id === companyId);
+    let totalMessages = 0;
+    for (const c of conversations) {
+      totalMessages += (store.messages.get(c.id) || []).length;
+    }
     const customers = store.customers.get(companyId) || [];
     const products = store.products.get(companyId) || [];
-    const expenses = store.expenses.get(companyId) || [];
     const catalogItems = Array.from(store.catalogItems.values()).filter(i => i.company_id === companyId);
-    const paidOrders = orders.filter(o => o.payment_status === 'paid');
+    const orders = store.orders.get(companyId) || [];
+    const expenses = store.expenses.get(companyId) || [];
 
     const entities: EntityInfo[] = [
-      { name: 'orders', displayName: 'Pedidos', count: orders.length, hasData: orders.length > 0, fields: ['id','customer_id','total_amount','payment_status','payment_method','status','created_at'], description: orders.length + ' pedidos (' + paidOrders.length + ' pagos)' },
-      { name: 'payments', displayName: 'Pagamentos', count: paidOrders.length, hasData: paidOrders.length > 0, fields: ['id','total_amount','payment_method','status','created_at'], description: paidOrders.length + ' pagamentos confirmados' },
-      { name: 'customers', displayName: 'Clientes', count: customers.length, hasData: customers.length > 0, fields: ['id','name','phone','email','total_orders','created_at'], description: customers.length + ' clientes na base' },
-      { name: 'products', displayName: 'Produtos', count: products.length, hasData: products.length > 0, fields: ['id','name','price','category','active','description'], description: products.length + ' produtos' },
-      { name: 'expenses', displayName: 'Despesas', count: expenses.length, hasData: expenses.length > 0, fields: ['id','title','category','amount','status','due_date'], description: expenses.length + ' lancamentos' },
-      { name: 'catalog', displayName: 'Catalogo IA', count: catalogItems.length, hasData: catalogItems.length > 0, fields: ['id','name','price','category','source_url','images'], description: catalogItems.length + ' itens no catalogo' }
+      { name: 'conversations', displayName: 'Conversas / Atendimentos', count: conversations.length, hasData: conversations.length > 0, fields: ['id', 'customer_id', 'channel_type', 'status', 'created_at'], description: `${conversations.length} conversas registradas` },
+      { name: 'messages', displayName: 'Mensagens Trocadas', count: totalMessages, hasData: totalMessages > 0, fields: ['id', 'conversation_id', 'sender', 'content', 'created_at'], description: `${totalMessages} mensagens no histórico` },
+      { name: 'customers', displayName: 'Clientes', count: customers.length, hasData: customers.length > 0, fields: ['id', 'name', 'phone', 'email', 'total_orders', 'created_at'], description: `${customers.length} clientes na base` },
+      { name: 'catalog_items', displayName: 'Catálogo de Produtos / Serviços', count: (products.length + catalogItems.length), hasData: (products.length + catalogItems.length) > 0, fields: ['id', 'name', 'price', 'category', 'source_url'], description: `${products.length + catalogItems.length} itens cadastrados` },
+      { name: 'orders', displayName: 'Pedidos Comerciais', count: orders.length, hasData: orders.length > 0, fields: ['id', 'customer_id', 'total_amount', 'status', 'created_at'], description: `${orders.length} pedidos reais` },
+      { name: 'expenses', displayName: 'Despesas Lançadas', count: expenses.length, hasData: expenses.length > 0, fields: ['id', 'title', 'category', 'amount', 'due_date'], description: `${expenses.length} despesas registradas` }
     ];
 
     const availableDataSources = entities.filter(e => e.hasData).map(e => e.name);
     const hasAnyData = availableDataSources.length > 0;
 
     const moduleList = existingModules.length > 0
-      ? existingModules.map(m => '  * ' + m.name + ' (/' + m.slug + ') - v' + m.version).join('\n')
+      ? existingModules.map(m => `  * ${m.name} (/${m.slug}) - v${m.version}`).join('\n')
       : '  (nenhum)';
-    const entityList = entities.map(e => '  * ' + e.displayName + ': ' + e.count + ' registros').join('\n');
+    const entityList = entities.map(e => `  * ${e.displayName}: ${e.count} registros`).join('\n');
 
-    const contextSummary = 'SISTEMA ATUAL - ' + companyName + ':\nModulos existentes:\n' + moduleList + '\nEntidades:\n' + entityList + '\nFontes com dados reais: ' + (availableDataSources.join(', ') || 'nenhuma');
+    const contextSummary = `SISTEMA ATUAL - ${companyName}:\nMódulos existentes:\n${moduleList}\nEntidades do Domínio:\n${entityList}\nFontes com dados reais no momento: ${availableDataSources.join(', ') || 'nenhuma (mostrar empty state ou zero)'}`;
 
     return { companyId, companyName, existingModules, entities, availableDataSources, hasAnyData, contextSummary };
   }
@@ -91,7 +96,7 @@ export class ApplicationIntrospectionService {
     const p = intent.toLowerCase();
     return snapshot.existingModules.find(m => {
       const n = m.name.toLowerCase(), s = m.slug.toLowerCase();
-      if (n.includes(p) || p.includes(n) || s.includes(p.replace(/\s+/g,'-'))) return true;
+      if (n.includes(p) || p.includes(n) || s.includes(p.replace(/\s+/g, '-'))) return true;
       if ((p.includes('financ') || p.includes('faturament')) && n.includes('financ')) return true;
       if ((p.includes('client') || p.includes('consumidor')) && n.includes('client')) return true;
       if ((p.includes('pedido') || p.includes('venda')) && (n.includes('pedido') || n.includes('venda'))) return true;
@@ -104,11 +109,23 @@ export class ApplicationIntrospectionService {
     const p = intent.toLowerCase();
     const seen = new Set<string>();
     const add = (names: string[]) => names.forEach(n => seen.add(n));
-    if (p.includes('financ') || p.includes('faturament') || p.includes('lucro') || p.includes('receita')) add(['payments','expenses','orders']);
-    if (p.includes('despesa') || p.includes('custo')) add(['expenses']);
-    if (p.includes('client') || p.includes('consumidor') || p.includes('lead')) add(['customers','orders']);
-    if (p.includes('pedido') || p.includes('venda') || p.includes('transa')) add(['orders','payments','customers']);
-    if (p.includes('produto') || p.includes('card') || p.includes('catalog')) add(['products','catalog']);
+
+    if (p.includes('conversa') || p.includes('atendimento') || p.includes('chat') || p.includes('mensagem')) {
+      add(['conversations', 'messages']);
+    }
+    if (p.includes('client') || p.includes('consumidor') || p.includes('lead') || p.includes('contato')) {
+      add(['customers', 'conversations']);
+    }
+    if (p.includes('produto') || p.includes('servico') || p.includes('imovel') || p.includes('catalogo') || p.includes('cardapio')) {
+      add(['catalog_items']);
+    }
+    if (p.includes('pedido') || p.includes('venda')) {
+      add(['orders']);
+    }
+    if (p.includes('financ') || p.includes('despesa') || p.includes('faturament')) {
+      add(['orders', 'expenses']);
+    }
+
     return snapshot.entities.filter(e => seen.has(e.name));
   }
 }
