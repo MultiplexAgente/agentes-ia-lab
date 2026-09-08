@@ -17,6 +17,7 @@ import { AIBuilderModule } from './types/builder';
 import { ExecutiveDashboardView, DashboardData } from './components/dashboard/ExecutiveDashboardView';
 import { ContextualAIChatCard } from './components/conversation/ContextualAIChatCard';
 import { aiConversationService } from './services/aiConversationService';
+import { LandingChatPage } from './components/landing/LandingChatPage';
 
 interface FolderItem {
   id: string;
@@ -498,6 +499,13 @@ export default function App() {
     return saved !== 'false';
   });
 
+  // Landing page: exibida antes do formulário de auth
+  const [showLandingPage, setShowLandingPage] = useState<boolean>(() => {
+    const saved = localStorage.getItem('multiplex_is_authenticated');
+    // Mostra landing se NÃO autenticado
+    return saved === 'false' || saved === null;
+  });
+
   const [authMode, setAuthMode] = useState<'login' | 'register' | 'plans'>('login');
   const [authStep, setAuthStep] = useState<1 | 2>(1);
   const [authEmail, setAuthEmail] = useState('');
@@ -807,10 +815,12 @@ export default function App() {
   const handleLogout = () => {
     localStorage.setItem('multiplex_is_authenticated', 'false');
     setIsAuthenticated(false);
+    setShowLandingPage(true);
     setShowUserPopup(false);
     setConfirmModal(null);
     setAuthMode('login');
   };
+
 
   const currentChat = chats.find(c => c.id === activeChatId) || chats[0];
 
@@ -1811,6 +1821,25 @@ export default function App() {
   const regularFolders = folders.filter(f => !f.isPinned);
   const pinnedChats = chats.filter(c => c.isPinned);
 
+  // ── LANDING PAGE (primeira tela pública) ──
+  if (!isAuthenticated && showLandingPage) {
+    return (
+      <LandingChatPage
+        theme={theme}
+        toggleTheme={toggleTheme}
+        onLogin={() => {
+          setShowLandingPage(false);
+          setAuthMode('login');
+        }}
+        onRegister={() => {
+          setShowLandingPage(false);
+          setAuthMode('register');
+          setAuthStep(1);
+        }}
+      />
+    );
+  }
+
   if (!isAuthenticated) {
     return (
       <div className="auth-page-wrapper">
@@ -1882,6 +1911,23 @@ export default function App() {
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            {/* Botão voltar para Landing */}
+            <button
+              onClick={() => setShowLandingPage(true)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 6,
+                padding: '8px 14px', borderRadius: 8, cursor: 'pointer',
+                border: theme === 'light' ? '1px solid #cbd5e1' : '1px solid rgba(255,255,255,0.1)',
+                background: 'transparent',
+                color: theme === 'light' ? '#64748b' : '#94a3b8',
+                fontSize: '0.82rem', fontWeight: 600, transition: 'all 0.2s'
+              }}
+              title="Voltar para a página inicial"
+            >
+              <ArrowLeft size={14} />
+              Início
+            </button>
+
             <button 
               className="theme-circle-btn"
               onClick={toggleTheme}
@@ -1917,6 +1963,7 @@ export default function App() {
             </button>
           </div>
         </header>
+
 
         {/* MODO 1: LOGIN (SPLIT SCREEN SAAS) */}
         {authMode === 'login' && (
