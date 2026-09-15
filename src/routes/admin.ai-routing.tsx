@@ -35,6 +35,7 @@ interface AuditLog {
 
 interface AdminPayload {
   company: { id: string; name: string };
+  companies: Array<{ id: string; name: string }>;
   settings: {
     strategy: string;
     categoryStrategies: Record<string, string>;
