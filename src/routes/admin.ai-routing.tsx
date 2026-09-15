@@ -3,6 +3,15 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 
+// O nome real do modelo nunca aparece na tela: mostramos o "motor" escolhido.
+const TIER_LABELS: Record<string, string> = {
+  quality: "Motor máxima qualidade",
+  balanced: "Motor equilibrado",
+  fast: "Motor rápido",
+  cheap: "Motor econômico",
+  code: "Motor técnico",
+};
+
 interface AuditLog {
   id: string;
   created_at: string;
