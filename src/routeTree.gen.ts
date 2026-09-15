@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as EmpresaRouteImport } from './routes/empresa'
 import { Route as AdminAiRoutingRouteImport } from './routes/admin.ai-routing'
 import { Route as ApiProductsRouteImport } from './routes/api/products'
 import { Route as ApiAdminAiRoutingRouteImport } from './routes/api/admin/ai-routing'
@@ -23,6 +24,11 @@ import { Route as ApiPublicWhatsappWebhookRouteImport } from './routes/api/publi
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EmpresaRoute = EmpresaRouteImport.update({
+  id: '/empresa',
+  path: '/empresa',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminAiRoutingRoute = AdminAiRoutingRouteImport.update({
@@ -74,6 +80,7 @@ const ApiPublicWhatsappWebhookRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/empresa': typeof EmpresaRoute
   '/admin/ai-routing': typeof AdminAiRoutingRoute
   '/api/products': typeof ApiProductsRoute
   '/api/admin/ai-routing': typeof ApiAdminAiRoutingRoute
@@ -86,6 +93,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/empresa': typeof EmpresaRoute
   '/admin/ai-routing': typeof AdminAiRoutingRoute
   '/api/products': typeof ApiProductsRoute
   '/api/admin/ai-routing': typeof ApiAdminAiRoutingRoute
@@ -99,6 +107,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/empresa': typeof EmpresaRoute
   '/admin/ai-routing': typeof AdminAiRoutingRoute
   '/api/products': typeof ApiProductsRoute
   '/api/admin/ai-routing': typeof ApiAdminAiRoutingRoute
@@ -113,6 +122,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/empresa'
     | '/admin/ai-routing'
     | '/api/products'
     | '/api/admin/ai-routing'
@@ -125,6 +135,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/empresa'
     | '/admin/ai-routing'
     | '/api/products'
     | '/api/admin/ai-routing'
@@ -137,6 +148,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/empresa'
     | '/admin/ai-routing'
     | '/api/products'
     | '/api/admin/ai-routing'
@@ -150,6 +162,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  EmpresaRoute: typeof EmpresaRoute
   AdminAiRoutingRoute: typeof AdminAiRoutingRoute
   ApiProductsRoute: typeof ApiProductsRoute
   ApiAdminAiRoutingRoute: typeof ApiAdminAiRoutingRoute
@@ -168,6 +181,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/empresa': {
+      id: '/empresa'
+      path: '/empresa'
+      fullPath: '/empresa'
+      preLoaderRoute: typeof EmpresaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/ai-routing': {
@@ -238,6 +258,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  EmpresaRoute: EmpresaRoute,
   AdminAiRoutingRoute: AdminAiRoutingRoute,
   ApiProductsRoute: ApiProductsRoute,
   ApiAdminAiRoutingRoute: ApiAdminAiRoutingRoute,

@@ -66,8 +66,15 @@ export const Route = createFileRoute("/api/admin/ai-routing")({
           { calls: 0, tokens: 0, costUsd: 0, latencySum: 0, byModel: {} as Record<string, number>, byTask: {} as Record<string, number> },
         );
 
+        const { data: companies } = await supabase
+          .from("companies")
+          .select("id, name")
+          .eq("active", true)
+          .order("name", { ascending: true });
+
         return Response.json({
           company,
+          companies: companies ?? [],
           settings,
           settingsPersisted: persisted,
           settingsError: settingsError ?? null,
