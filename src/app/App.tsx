@@ -542,10 +542,9 @@ export default function App() {
     };
   });
 
-  // Estados da IA Mais Completa (Multiplex IA)
-  const [selectedModel, setSelectedModel] = useState<'gpt-4o' | 'claude-3.5-sonnet' | 'deepseek-v3' | 'gemini-1.5-pro'>('gpt-4o');
-  const [showModelDropdown, setShowModelDropdown] = useState(false);
-  const [selectedAIMode, setSelectedAIMode] = useState<'geral' | 'cardapio' | 'logistica' | 'agendamento' | 'vendas' | 'suporte'>('geral');
+  // Multiplex IA: o usuário conversa com UMA IA. A escolha do modelo é feita
+  // automaticamente pelo roteador no servidor e nunca aparece na interface.
+  const [lastRouting, setLastRouting] = useState<{ taskLabel: string; complexity: string } | null>(null);
   const [promptCategory, setPromptCategory] = useState<'destaques' | 'cardapio' | 'frete' | 'horarios' | 'agendamento' | 'promocoes'>('destaques');
   const [isRecordingVoice, setIsRecordingVoice] = useState(false);
   const [speakingMsgId, setSpeakingMsgId] = useState<string | null>(null);
@@ -989,7 +988,12 @@ export default function App() {
         body: JSON.stringify({ 
           message: prompt,
           conversationId: currentChat.id,
-          companyId: '11111111-1111-1111-1111-111111111111',
+          companyId: currentUser?.company_id,
+          channel: 'web',
+          history: (currentChat.messages || [])
+            .filter((m: ChatMessage) => m.role === 'user' || m.role === 'assistant')
+            .slice(-12)
+            .map((m: ChatMessage) => ({ role: m.role, content: m.content })),
           context: {
             page: activeView,
             module: activeView
@@ -999,6 +1003,9 @@ export default function App() {
 
       if (res.ok) {
         const data = await res.json();
+        if (data.routing) {
+          setLastRouting({ taskLabel: data.routing.taskLabel, complexity: data.routing.complexity });
+        }
         const contentText = data.assistantMessage?.content || data.response_text || 'Compreendido.';
 
         // Opções rápidas sugeridas pela IA

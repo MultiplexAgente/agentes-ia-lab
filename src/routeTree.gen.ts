@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminAiRoutingRouteImport } from './routes/admin.ai-routing'
 import { Route as ApiProductsRouteImport } from './routes/api/products'
 import { Route as ApiAdminAiRoutingRouteImport } from './routes/api/admin/ai-routing'
 import { Route as ApiAiConversationChatRouteImport } from './routes/api/ai/conversation/chat'
@@ -17,6 +18,11 @@ import { Route as ApiAiConversationChatRouteImport } from './routes/api/ai/conve
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminAiRoutingRoute = AdminAiRoutingRouteImport.update({
+  id: '/admin/ai-routing',
+  path: '/admin/ai-routing',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiProductsRoute = ApiProductsRouteImport.update({
@@ -37,12 +43,14 @@ const ApiAiConversationChatRoute = ApiAiConversationChatRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin/ai-routing': typeof AdminAiRoutingRoute
   '/api/products': typeof ApiProductsRoute
   '/api/admin/ai-routing': typeof ApiAdminAiRoutingRoute
   '/api/ai/conversation/chat': typeof ApiAiConversationChatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin/ai-routing': typeof AdminAiRoutingRoute
   '/api/products': typeof ApiProductsRoute
   '/api/admin/ai-routing': typeof ApiAdminAiRoutingRoute
   '/api/ai/conversation/chat': typeof ApiAiConversationChatRoute
@@ -50,6 +58,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin/ai-routing': typeof AdminAiRoutingRoute
   '/api/products': typeof ApiProductsRoute
   '/api/admin/ai-routing': typeof ApiAdminAiRoutingRoute
   '/api/ai/conversation/chat': typeof ApiAiConversationChatRoute
@@ -58,18 +67,21 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin/ai-routing'
     | '/api/products'
     | '/api/admin/ai-routing'
     | '/api/ai/conversation/chat'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/admin/ai-routing'
     | '/api/products'
     | '/api/admin/ai-routing'
     | '/api/ai/conversation/chat'
   id:
     | '__root__'
     | '/'
+    | '/admin/ai-routing'
     | '/api/products'
     | '/api/admin/ai-routing'
     | '/api/ai/conversation/chat'
@@ -77,6 +89,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminAiRoutingRoute: typeof AdminAiRoutingRoute
   ApiProductsRoute: typeof ApiProductsRoute
   ApiAdminAiRoutingRoute: typeof ApiAdminAiRoutingRoute
   ApiAiConversationChatRoute: typeof ApiAiConversationChatRoute
@@ -89,6 +102,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/ai-routing': {
+      id: '/admin/ai-routing'
+      path: '/admin/ai-routing'
+      fullPath: '/admin/ai-routing'
+      preLoaderRoute: typeof AdminAiRoutingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/products': {
@@ -117,6 +137,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminAiRoutingRoute: AdminAiRoutingRoute,
   ApiProductsRoute: ApiProductsRoute,
   ApiAdminAiRoutingRoute: ApiAdminAiRoutingRoute,
   ApiAiConversationChatRoute: ApiAiConversationChatRoute,
