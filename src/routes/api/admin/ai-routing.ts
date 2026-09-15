@@ -1,124 +1,85 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 
-import {
-  MODEL_CATALOG,
-  ROUTING_STRATEGIES,
-  STRATEGY_LABELS,
-  TASK_CATEGORIES,
-  TASK_LABELS,
-} from "@/lib/multiplex/router.server";
-import { loadSettings, sanitizeSettings, saveSettings } from "@/lib/multiplex/settings.server";
-import { getServiceClient, resolveCompanyId } from "@/lib/multiplex/supabase.server";
-
-interface AuditRow {
-  cost_usd: number | null;
-  tokens_prompt: number | null;
-  tokens_completion: number | null;
-  latency_ms: number | null;
-  model_used: string | null;
-  task_category: string | null;
-}
+import { requireCompanySession } from "@/lib/multiplex/company-auth.server";
+import { MODEL_CATALOG, STRATEGY_LABELS, TASK_LABELS } from "@/lib/multiplex/router.server";
+import { loadSettings, saveSettings } from "@/lib/multiplex/settings.server";
+import { getServiceClient } from "@/lib/multiplex/supabase.server";
 
 const SettingsSchema = z.object({
-  companyId: z.string().max(64).optional(),
-  settings: z.unknown(),
+  settings: z.object({
+    strategy: z.enum(["QUALITY_FIRST", "BALANCED", "SPEED_FIRST", "COST_FIRST"]),
+    categoryStrategies: z.record(z.enum(["QUALITY_FIRST", "BALANCED", "SPEED_FIRST", "COST_FIRST"])),
+    modelPrices: z.record(z.object({ input: z.number().nonnegative(), output: z.number().nonnegative() })),
+    monthlyBudgetUsd: z.number().nonnegative().nullable(),
+  }),
 });
+
+function canAdmin(role: string): boolean {
+  return role === "owner" || role === "admin";
+}
 
 export const Route = createFileRoute("/api/admin/ai-routing")({
   server: {
     handlers: {
       GET: async ({ request }) => {
         const supabase = getServiceClient();
-        if (!supabase) {
-          return Response.json({ error: "Banco de dados não configurado." }, { status: 503 });
-        }
+        if (!supabase) return Response.json({ error: "Banco não configurado." }, { status: 503 });
+        const session = await requireCompanySession(supabase, request);
+        if ("error" in session) return Response.json({ error: session.error }, { status: session.status });
+        if (!canAdmin(session.role)) return Response.json({ error: "Acesso administrativo necessário." }, { status: 403 });
 
         const url = new URL(request.url);
-        const company = await resolveCompanyId(supabase, url.searchParams.get("companyId") ?? undefined);
-        if (!company) {
-          return Response.json({ error: "Nenhuma empresa ativa encontrada." }, { status: 400 });
-        }
-
-        const limit = Math.min(Number(url.searchParams.get("limit") ?? 50) || 50, 200);
-        const { settings, persisted, error: settingsError } = await loadSettings(supabase, company.id);
-
-        const { data: logs, error: logsError } = await supabase
-          .from("ai_routing_audit")
-          .select(
-            "id, created_at, channel, task_category, complexity, strategy, model_selected, model_used, fallback_used, user_message, assistant_message, tokens_prompt, tokens_completion, cost_usd, cost_status, latency_ms, tools_used, context_sources, error",
-          )
-          .eq("company_id", company.id)
-          .order("created_at", { ascending: false })
-          .limit(limit);
-
-        const rows = (logs ?? []) as unknown as AuditRow[];
-        const totals = rows.reduce(
-          (acc, row) => {
-            acc.calls += 1;
-            acc.tokens += (row.tokens_prompt ?? 0) + (row.tokens_completion ?? 0);
-            acc.costUsd += row.cost_usd ?? 0;
-            acc.latencySum += row.latency_ms ?? 0;
-            if (row.model_used) acc.byModel[row.model_used] = (acc.byModel[row.model_used] ?? 0) + 1;
-            if (row.task_category) acc.byTask[row.task_category] = (acc.byTask[row.task_category] ?? 0) + 1;
-            return acc;
-          },
-          { calls: 0, tokens: 0, costUsd: 0, latencySum: 0, byModel: {} as Record<string, number>, byTask: {} as Record<string, number> },
-        );
-
-        const { data: companies } = await supabase
-          .from("companies")
-          .select("id, name")
-          .eq("active", true)
-          .order("name", { ascending: true });
-
+        const limit = Math.min(Math.max(Number(url.searchParams.get("limit") ?? 100), 1), 300);
+        const [{ data: logs, error }, settingsResult] = await Promise.all([
+          supabase.from("ai_routing_audit").select("*").eq("company_id", session.companyId).order("created_at", { ascending: false }).limit(limit),
+          loadSettings(supabase, session.companyId),
+        ]);
+        if (error) return Response.json({ error: error.message }, { status: 500 });
+        const rows = (logs ?? []) as Array<Record<string, unknown>>;
+        const cleanLogs = rows.map((row) => {
+          const {
+            model_selected: _selected,
+            model_used: _used,
+            response_model: _responseModel,
+            ...visible
+          } = row;
+          return {
+            ...visible,
+            engine: MODEL_CATALOG.find((model) => model.id === _used)?.tier ?? "balanced",
+          };
+        });
         return Response.json({
-          company,
-          companies: companies ?? [],
-          settings,
-          settingsPersisted: persisted,
-          settingsError: settingsError ?? null,
-          logs: logs ?? [],
-          logsError: logsError?.message ?? null,
+          company: { id: session.companyId, name: session.companyName },
+          companies: [{ id: session.companyId, name: session.companyName }],
+          logs: cleanLogs,
           summary: {
-            calls: totals.calls,
-            tokens: totals.tokens,
-            costUsd: Number(totals.costUsd.toFixed(6)),
-            avgLatencyMs: totals.calls ? Math.round(totals.latencySum / totals.calls) : 0,
-            byModel: totals.byModel,
-            byTask: totals.byTask,
+            calls: rows.length,
+            tokens: rows.reduce((sum, row) => sum + Number(row["total_tokens"] ?? Number(row["tokens_prompt"] ?? 0) + Number(row["tokens_completion"] ?? 0)), 0),
+            costUsd: rows.reduce((sum, row) => sum + Number(row["cost_usd"] ?? 0), 0),
+            avgLatencyMs: rows.length ? Math.round(rows.reduce((sum, row) => sum + Number(row["latency_ms"] ?? 0), 0) / rows.length) : 0,
+            byModel: {},
+            byTask: rows.reduce<Record<string, number>>((acc, row) => {
+              const key = String(row["task_category"] ?? "geral");
+              acc[key] = (acc[key] ?? 0) + 1;
+              return acc;
+            }, {}),
           },
-          catalog: {
-            models: MODEL_CATALOG.map((model) => ({ id: model.id, tier: model.tier })),
-            tasks: TASK_CATEGORIES.map((task) => ({ id: task, label: TASK_LABELS[task] })),
-            strategies: ROUTING_STRATEGIES.map((strategy) => ({ id: strategy, label: STRATEGY_LABELS[strategy] })),
-          },
+          settings: settingsResult.settings,
+          catalog: MODEL_CATALOG.map((model) => ({ id: model.id, tier: model.tier })),
+          labels: { tasks: TASK_LABELS, strategies: STRATEGY_LABELS },
         });
       },
-
       POST: async ({ request }) => {
         const supabase = getServiceClient();
-        if (!supabase) {
-          return Response.json({ error: "Banco de dados não configurado." }, { status: 503 });
-        }
-
+        if (!supabase) return Response.json({ error: "Banco não configurado." }, { status: 503 });
+        const session = await requireCompanySession(supabase, request);
+        if ("error" in session) return Response.json({ error: session.error }, { status: session.status });
+        if (!canAdmin(session.role)) return Response.json({ error: "Acesso administrativo necessário." }, { status: 403 });
         const parsed = SettingsSchema.safeParse(await request.json().catch(() => null));
-        if (!parsed.success) {
-          return Response.json({ error: "Requisição inválida." }, { status: 400 });
-        }
-
-        const company = await resolveCompanyId(supabase, parsed.data.companyId);
-        if (!company) {
-          return Response.json({ error: "Nenhuma empresa ativa encontrada." }, { status: 400 });
-        }
-
-        const settings = sanitizeSettings(parsed.data.settings);
-        const result = await saveSettings(supabase, company.id, settings);
-        if (!result.ok) {
-          return Response.json({ error: result.error }, { status: 500 });
-        }
-
-        return Response.json({ settings, company });
+        if (!parsed.success) return Response.json({ error: "Configuração inválida." }, { status: 400 });
+        const saved = await saveSettings(supabase, session.companyId, parsed.data.settings);
+        return saved.error ? Response.json({ error: saved.error }, { status: 500 }) : Response.json({ settings: parsed.data.settings });
       },
     },
   },

@@ -150,9 +150,7 @@ export const Route = createFileRoute("/api/public/whatsapp/webhook")({
             conversationId,
           });
 
-          const reply = turn.ok
-            ? turn.text
-            : "Estou com uma instabilidade momentânea para responder. Pode repetir em instantes?";
+          const reply = turn.ok ? turn.text : turn.error;
 
           const sent = await sendWhatsAppText(channel, message.from, reply);
           await recordMessage(supabase, {

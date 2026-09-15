@@ -19,8 +19,7 @@ interface AuditLog {
   task_category: string;
   complexity: string;
   strategy: string;
-  model_selected: string;
-  model_used: string;
+  engine: string;
   fallback_used: boolean;
   user_message: string | null;
   assistant_message: string | null;
@@ -90,13 +89,15 @@ function AiRoutingAdminPage() {
   const [notice, setNotice] = useState<string | null>(null);
   const [draft, setDraft] = useState<AdminPayload["settings"] | null>(null);
   const [companyId, setCompanyId] = useState<string>("");
+  const token = typeof window === "undefined" ? null : localStorage.getItem("multiplex_company_token");
 
   const load = useCallback(async (selected?: string) => {
     setLoading(true);
     setError(null);
     try {
-      const query = selected ? `&companyId=${selected}` : "";
-      const response = await fetch(`/api/admin/ai-routing?limit=100${query}`);
+       const response = await fetch(`/api/admin/ai-routing?limit=100`, {
+         headers: token ? { Authorization: `Bearer ${token}` } : {},
+       });
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error ?? "Falha ao carregar a auditoria.");
       setData(payload as AdminPayload);
@@ -107,7 +108,7 @@ function AiRoutingAdminPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+   }, [token]);
 
   useEffect(() => {
     void load();
@@ -120,8 +121,8 @@ function AiRoutingAdminPage() {
     try {
       const response = await fetch("/api/admin/ai-routing", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ settings: draft, companyId }),
+         headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+         body: JSON.stringify({ settings: draft }),
       });
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error ?? "Falha ao salvar.");
@@ -147,7 +148,7 @@ function AiRoutingAdminPage() {
       <header className="mb-6">
         <h1 className="text-2xl font-semibold">Auditoria de roteamento</h1>
         <p className="text-sm text-muted-foreground">
-          Visível apenas ao administrador: modelo real escolhido em cada conversa, tokens, custo, latência e as
+          Visível apenas ao administrador: motor escolhido em cada conversa, tokens, custo, latência e as
           prioridades de roteamento da empresa.
         </p>
 
@@ -362,9 +363,7 @@ function AiRoutingAdminPage() {
                         </td>
                         <td className="p-2">{log.strategy}</td>
                         <td className="p-2">
-                          {TIER_LABELS[
-                            data.catalog.models.find((model) => model.id === log.model_used)?.tier ?? ""
-                          ] ?? "Motor interno"}
+                           {TIER_LABELS[log.engine] ?? "Motor interno"}
                           {log.fallback_used && <span className="ml-1 text-amber-500">(fallback)</span>}
                         </td>
                         <td className="p-2 whitespace-nowrap">

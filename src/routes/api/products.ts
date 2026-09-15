@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { getServiceClient, resolveCompanyId } from "@/lib/multiplex/supabase.server";
+import { getServiceClient, resolvePublicCompany } from "@/lib/multiplex/supabase.server";
 
 export const Route = createFileRoute("/api/products")({
   server: {
@@ -11,8 +11,7 @@ export const Route = createFileRoute("/api/products")({
           return Response.json({ error: "Banco de dados não configurado." }, { status: 503 });
         }
 
-        const url = new URL(request.url);
-        const company = await resolveCompanyId(supabase, url.searchParams.get("companyId") ?? undefined);
+        const company = await resolvePublicCompany(supabase);
         if (!company) {
           return Response.json({ products: [], categories: [] });
         }

@@ -82,3 +82,13 @@ export async function requireCompanySession(
     role: row.role,
   };
 }
+
+export async function getOptionalCompanySession(
+  supabase: SupabaseClient,
+  request: Request,
+): Promise<CompanySession | null> {
+  const header = request.headers.get("authorization") ?? "";
+  if (!header.toLowerCase().startsWith("bearer ")) return null;
+  const result = await requireCompanySession(supabase, request);
+  return "error" in result ? null : result;
+}

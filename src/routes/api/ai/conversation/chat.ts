@@ -1,19 +1,17 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 
+import { getOptionalCompanySession } from "@/lib/multiplex/company-auth.server";
+import { ensureWebConversation, loadPersistedHistory, persistMessage } from "@/lib/multiplex/conversation.server";
 import { runMultiplexTurn } from "@/lib/multiplex/pipeline.server";
-import { getServiceClient, resolveCompanyId } from "@/lib/multiplex/supabase.server";
+import { getServiceClient, resolvePublicCompany } from "@/lib/multiplex/supabase.server";
 
 const BodySchema = z.object({
   message: z.string().min(1).max(8000),
-  companyId: z.string().max(64).optional(),
-  conversationId: z.string().max(64).optional(),
-  channel: z.string().max(32).optional(),
-  history: z
-    .array(z.object({ role: z.enum(["user", "assistant"]), content: z.string().max(8000) }))
-    .max(24)
-    .optional(),
-  context: z.record(z.string(), z.unknown()).optional(),
+  conversationId: z.string().uuid().nullable().optional(),
+  publicSessionId: z.string().uuid().optional(),
+  channel: z.enum(["web"]).default("web"),
+  context: z.record(z.unknown()).optional(),
 });
 
 export const Route = createFileRoute("/api/ai/conversation/chat")({
@@ -21,69 +19,82 @@ export const Route = createFileRoute("/api/ai/conversation/chat")({
     handlers: {
       POST: async ({ request }) => {
         const parsed = BodySchema.safeParse(await request.json().catch(() => null));
-        if (!parsed.success) {
-          return Response.json({ error: "Requisição inválida." }, { status: 400 });
-        }
-        const body = parsed.data;
-
-        if (!process.env["OPENAI_API_KEY"]) {
-          return Response.json(
-            { error: "A chave de IA não está configurada no servidor." },
-            { status: 503 },
-          );
-        }
+        if (!parsed.success) return Response.json({ error: "Mensagem ou sessão inválida." }, { status: 400 });
 
         const supabase = getServiceClient();
-        if (!supabase) {
-          return Response.json(
-            { error: "A conexão com o banco de dados não está configurada." },
-            { status: 503 },
-          );
+        if (!supabase) return Response.json({ error: "Banco de dados não configurado." }, { status: 503 });
+
+        const session = await getOptionalCompanySession(supabase, request);
+        const company = session
+          ? { id: session.companyId, name: session.companyName }
+          : await resolvePublicCompany(supabase);
+        if (!company) return Response.json({ error: "Empresa do chat público não configurada." }, { status: 503 });
+        if (!session && !parsed.data.publicSessionId) {
+          return Response.json({ error: "Sessão pública inválida." }, { status: 400 });
         }
 
-        const company = await resolveCompanyId(supabase, body.companyId);
-        if (!company) {
-          return Response.json({ error: "Nenhuma empresa ativa encontrada." }, { status: 400 });
-        }
+        const actor = session
+          ? { kind: "authenticated" as const, userId: session.userId, email: session.email }
+          : { kind: "public" as const, publicSessionId: parsed.data.publicSessionId };
+        const conversation = await ensureWebConversation(supabase, {
+          companyId: company.id,
+          requestedConversationId: parsed.data.conversationId,
+          actor,
+        });
+        if (!conversation) return Response.json({ error: "Não foi possível abrir a conversa." }, { status: 500 });
 
-        const turn = await runMultiplexTurn({
+        const history = await loadPersistedHistory(supabase, company.id, conversation.id, 12);
+        const incoming = await persistMessage(supabase, {
+          companyId: company.id,
+          conversationId: conversation.id,
+          senderType: "customer",
+          text: parsed.data.message,
+          metadata: { actor: actor.kind },
+          status: "received",
+        });
+        if (!incoming) return Response.json({ error: "Não foi possível registrar sua mensagem." }, { status: 500 });
+
+        const result = await runMultiplexTurn({
           supabase,
           company,
-          message: body.message,
-          history: body.history ?? [],
-          channel: body.channel ?? "web",
-          conversationId: body.conversationId ?? null,
+          message: parsed.data.message,
+          history,
+          channel: "web",
+          conversationId: conversation.id,
+          messageId: incoming.id,
+          agentId: conversation.agentId,
+          requestContext: parsed.data.context,
         });
-
-        if (!turn.ok) {
-          return Response.json(
-            { error: "Não foi possível gerar a resposta agora. Tente novamente." },
-            { status: 502 },
-          );
+        if (!result.ok) {
+          return Response.json({ error: result.error, conversation: { id: conversation.id } }, { status: result.status });
         }
 
+        const assistant = await persistMessage(supabase, {
+          companyId: company.id,
+          conversationId: conversation.id,
+          senderType: "agent",
+          text: result.text,
+          metadata: {
+            response_id: result.trace.responseId,
+            response_model: result.trace.responseModel,
+            finish_reason: result.trace.finishReason,
+          },
+        });
+        if (!assistant) return Response.json({ error: "A resposta real foi recebida, mas não pôde ser registrada." }, { status: 500 });
+
         return Response.json({
-          conversation: { id: body.conversationId ?? null, company_id: company.id },
-          assistantMessage: {
-            id: `assistant-${Date.now()}`,
-            role: "assistant",
-            content: turn.text,
-          },
-          // Visível ao usuário: tarefa e prioridade, nunca o nome do modelo.
+          conversation: { id: conversation.id, company_id: company.id },
+          assistantMessage: { id: assistant.id, role: "assistant", content: result.text },
           routing: {
-            task: turn.routing.category,
-            taskLabel: turn.routing.categoryLabel,
-            complexity: turn.routing.complexity,
-            strategy: turn.routing.strategy,
-            reason: turn.routing.publicReason,
+            task: result.routing.category,
+            taskLabel: result.routing.categoryLabel,
+            complexity: result.routing.complexity,
+            strategy: result.routing.strategy,
+            reason: result.routing.publicReason,
           },
-          usage: {
-            promptTokens: turn.promptTokens,
-            completionTokens: turn.completionTokens,
-            latencyMs: turn.latencyMs,
-          },
-          catalog: { products: turn.productCount, sources: turn.contextSources },
-          auditPersisted: turn.auditPersisted,
+          usage: result.usage,
+          context: result.context,
+          auditPersisted: result.auditPersisted,
         });
       },
     },

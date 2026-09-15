@@ -69,3 +69,28 @@ export async function resolveCompanyId(
 
   return (data as { id: string; name: string } | null) ?? null;
 }
+
+/** Public chat tenant is resolved only from server configuration or a unique active tenant. */
+export async function resolvePublicCompany(
+  supabase: SupabaseClient,
+): Promise<{ id: string; name: string } | null> {
+  const configured = process.env["MULTIPLEX_PUBLIC_COMPANY_ID"] ?? process.env["MULTIPLEX_DEFAULT_COMPANY_ID"];
+  if (isUuid(configured)) {
+    const { data } = await supabase
+      .from("companies")
+      .select("id, name")
+      .eq("id", configured)
+      .eq("active", true)
+      .maybeSingle();
+    if (data) return data as { id: string; name: string };
+  }
+
+  const { data } = await supabase
+    .from("companies")
+    .select("id, name")
+    .eq("active", true)
+    .order("created_at", { ascending: true })
+    .limit(2);
+  const rows = (data ?? []) as Array<{ id: string; name: string }>;
+  return rows.length === 1 ? rows[0] : null;
+}
