@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from 'react';
 import { LogIn, Moon, Plus, Sun } from 'lucide-react';
-import atomLogo from '../../assets/multiplex-atom.jpg';
+import atomLogo from '@/assets/multiplex-atom.jpg';
 import {
   Conversation,
   ConversationContent,
