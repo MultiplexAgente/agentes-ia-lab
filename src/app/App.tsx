@@ -10,7 +10,7 @@ import {
   Lock, Mail, Phone, Building2, UserPlus, LogIn, ArrowRight, ArrowLeft, Zap, Star, ShieldCheck, Key,
   Mic, MicOff, Volume2, VolumeX, ThumbsUp, ThumbsDown, FileText, Paperclip, ChevronDown, Bot, Cpu, ShoppingBag, Truck, Calendar, Clock, DollarSign, Share2, Download, Terminal, Layers, Wand2, BarChart3
 } from 'lucide-react';
-import atomLogo from './assets/multiplex-atom.jpg';
+import atomLogo from '@/assets/multiplex-atom.jpg';
 import { AIBuilderView } from './components/builder/AIBuilderView';
 import { DynamicModuleView } from './components/builder/DynamicModuleView';
 import { AIBuilderModule } from './types/builder';
