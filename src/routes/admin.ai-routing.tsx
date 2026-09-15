@@ -148,7 +148,7 @@ function AiRoutingAdminPage() {
       <header className="mb-6">
         <h1 className="text-2xl font-semibold">Auditoria de roteamento</h1>
         <p className="text-sm text-muted-foreground">
-          Visível apenas ao administrador: modelo real escolhido em cada conversa, tokens, custo, latência e as
+          Visível apenas ao administrador: motor escolhido em cada conversa, tokens, custo, latência e as
           prioridades de roteamento da empresa.
         </p>
 

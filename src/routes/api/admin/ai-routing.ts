@@ -37,13 +37,18 @@ export const Route = createFileRoute("/api/admin/ai-routing")({
         ]);
         if (error) return Response.json({ error: error.message }, { status: 500 });
         const rows = (logs ?? []) as Array<Record<string, unknown>>;
-        const cleanLogs = rows.map((row) => ({
-          ...row,
-          model_selected: undefined,
-          model_used: undefined,
-          response_model: undefined,
-          engine: (MODEL_CATALOG.find((model) => model.id === row["model_used"])?.tier ?? "balanced"),
-        }));
+        const cleanLogs = rows.map((row) => {
+          const {
+            model_selected: _selected,
+            model_used: _used,
+            response_model: _responseModel,
+            ...visible
+          } = row;
+          return {
+            ...visible,
+            engine: MODEL_CATALOG.find((model) => model.id === _used)?.tier ?? "balanced",
+          };
+        });
         return Response.json({
           company: { id: session.companyId, name: session.companyName },
           companies: [{ id: session.companyId, name: session.companyName }],

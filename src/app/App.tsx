@@ -609,6 +609,7 @@ export default function App() {
   ]);
   const [playgroundInput, setPlaygroundInput] = useState('');
   const [playgroundDebug, setPlaygroundDebug] = useState<any>(null);
+  const [playgroundConversationId, setPlaygroundConversationId] = useState<string>();
 
   // Logs
   const [logsList, setLogsList] = useState<any[]>([]);
@@ -1172,23 +1173,30 @@ export default function App() {
     setPlaygroundMessages(prev => [...prev, { role: 'user', content: text }]);
 
     try {
-      const res = await fetch(`${API_BASE}/api/chat/message`, {
+      const token = localStorage.getItem('multiplex_company_token');
+      const res = await fetch(`${API_BASE}/api/ai/conversation/chat`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text })
+        headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        body: JSON.stringify({
+          message: text,
+          conversationId: playgroundConversationId,
+          ...(!token ? { publicSessionId: crypto.randomUUID() } : {}),
+          channel: 'web',
+          context: { page: 'playground' }
+        })
       });
-      if (res.ok) {
-        const data = await res.json();
-        setPlaygroundMessages(prev => [...prev, { role: 'assistant', content: data.response_text }]);
-        setPlaygroundDebug({
-          tools: data.tools_called || [],
-          knowledge: data.knowledge_used || [],
-          rules: data.rules_applied || [],
-          latency: data.latency_ms || 100
-        });
-      }
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || `A IA retornou um erro HTTP ${res.status}.`);
+      setPlaygroundConversationId(data.conversation?.id);
+      setPlaygroundMessages(prev => [...prev, { role: 'assistant', content: data.assistantMessage.content }]);
+      setPlaygroundDebug({
+        tools: [],
+        knowledge: data.context?.sources || [],
+        rules: [data.routing?.reason].filter(Boolean),
+        latency: data.usage?.latencyMs ?? 0
+      });
     } catch (e) {
-      console.error(e);
+      setPlaygroundMessages(prev => [...prev, { role: 'assistant', content: e instanceof Error ? e.message : 'Falha de rede ao contatar a IA.' }]);
     }
   };
 
