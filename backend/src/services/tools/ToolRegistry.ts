@@ -739,7 +739,7 @@ export class ToolRegistry {
       }
     });
 
-    // 16. get_catalog_item (Recupera detalhes de 1 item por ID)
+    // 16. get_catalog_item (Recupera detalhes de 1 item por ID — Supabase-first)
     this.tools.set('get_catalog_item', {
       definition: {
         name: 'get_catalog_item',
@@ -753,7 +753,9 @@ export class ToolRegistry {
         }
       },
       handler: async (args, ctx) => {
-        const item = CatalogSearchService.getItemById(ctx.companyId, args.item_id);
+        // Supabase-first via CompositeCatalogProvider
+        const item = await CatalogSearchService.getItemByIdAsync(ctx.companyId, args.item_id)
+          || CatalogSearchService.getItemById(ctx.companyId, args.item_id);
         if (!item) return { found: false, message: 'Item não encontrado no catálogo da empresa.' };
         return { found: true, item };
       }
@@ -940,6 +942,209 @@ export class ToolRegistry {
       handler: async (args, ctx) => {
         SearchSessionService.clearSession(ctx.conversationId);
         return { success: true, message: 'Sessão de busca reiniciada.' };
+      }
+    });
+
+    // =========================================================================
+    // FERRAMENTAS ESPECIALIZADAS — NOVOS SEGMENTOS (hotel, curso, vaga, agro)
+    // =========================================================================
+
+    // 25. search_hotels (Hotéis / Pousadas / Hostels)
+    this.tools.set('search_hotels', {
+      definition: {
+        name: 'search_hotels',
+        description: 'Pesquisa hotéis, pousadas e hospedagens com filtros de estrelas, localização, preço e comodidades.',
+        parameters: {
+          type: 'object',
+          properties: {
+            query: { type: 'string', description: 'Nome ou tipo de hospedagem (ex: pousada, resort, hostel).' },
+            city: { type: 'string', description: 'Cidade de destino.' },
+            neighborhood: { type: 'string', description: 'Bairro ou localização.' },
+            stars: { type: 'number', description: 'Mínimo de estrelas (1-5).' },
+            price_min: { type: 'number', description: 'Diária mínima em reais.' },
+            price_max: { type: 'number', description: 'Diária máxima em reais.' },
+            amenities: { type: 'array', items: { type: 'string' }, description: 'Comodidades desejadas (piscina, academia, café da manhã, pet-friendly).' },
+            limit: { type: 'number', description: 'Quantidade máxima (padrão 3).' }
+          }
+        }
+      },
+      handler: async (args, ctx) => {
+        const filters: any = {
+          entity_type: 'hotel',
+          query: args.query,
+          city: args.city,
+          neighborhood: args.neighborhood,
+          price_min: args.price_min,
+          price_max: args.price_max,
+          stars: args.stars,
+          amenities: args.amenities,
+        };
+
+        SearchSessionService.updateSessionFilters(ctx.conversationId, ctx.companyId, filters, {
+          category: 'Hotéis',
+          entity_type: 'hotel',
+          query: args.query
+        });
+
+        const searchRes = await CatalogSearchService.searchCatalog(ctx.companyId, filters, {
+          limit: args.limit || 3,
+          conversationId: ctx.conversationId,
+          customerId: ctx.customerId
+        });
+
+        SearchSessionService.savePresentedResults(ctx.conversationId, ctx.companyId, searchRes.items);
+        const settings = store.catalogSettings.get(ctx.companyId);
+        const formattedText = CatalogFormatter.formatTextResponse(searchRes.items, settings, searchRes.alternative_message);
+        const cards = CatalogFormatter.formatStructuredCards(searchRes.items, settings);
+
+        return {
+          results: searchRes.items,
+          total_found: searchRes.total_found,
+          is_alternative: searchRes.is_alternative,
+          formatted_presentation: formattedText,
+          cards
+        };
+      }
+    });
+
+    // 26. search_courses (Cursos / Treinamentos / Capacitações)
+    this.tools.set('search_courses', {
+      definition: {
+        name: 'search_courses',
+        description: 'Pesquisa cursos, treinamentos, workshops ou capacitações com filtros de modalidade, carga horária e preço.',
+        parameters: {
+          type: 'object',
+          properties: {
+            query: { type: 'string', description: 'Nome do curso ou área de conhecimento.' },
+            modality: { type: 'string', description: 'Modalidade: online, presencial, híbrido.' },
+            has_certificate: { type: 'boolean', description: 'Exige certificado?' },
+            price_max: { type: 'number', description: 'Preço máximo.' },
+            limit: { type: 'number', description: 'Quantidade máxima (padrão 3).' }
+          }
+        }
+      },
+      handler: async (args, ctx) => {
+        const filters: any = {
+          entity_type: 'course',
+          query: args.query,
+          price_max: args.price_max,
+          modality: args.modality,
+          has_certificate: args.has_certificate,
+        };
+
+        SearchSessionService.updateSessionFilters(ctx.conversationId, ctx.companyId, filters, {
+          category: 'Cursos',
+          entity_type: 'course',
+          query: args.query
+        });
+
+        const searchRes = await CatalogSearchService.searchCatalog(ctx.companyId, filters, {
+          limit: args.limit || 3,
+          conversationId: ctx.conversationId,
+          customerId: ctx.customerId
+        });
+
+        SearchSessionService.savePresentedResults(ctx.conversationId, ctx.companyId, searchRes.items);
+        const settings = store.catalogSettings.get(ctx.companyId);
+        const formattedText = CatalogFormatter.formatTextResponse(searchRes.items, settings, searchRes.alternative_message);
+        const cards = CatalogFormatter.formatStructuredCards(searchRes.items, settings);
+
+        return {
+          results: searchRes.items,
+          total_found: searchRes.total_found,
+          formatted_presentation: formattedText,
+          cards
+        };
+      }
+    });
+
+    // 27. search_jobs (Vagas de Emprego / Freelaç / Oportunidades)
+    this.tools.set('search_jobs', {
+      definition: {
+        name: 'search_jobs',
+        description: 'Pesquisa vagas de emprego, freelas ou oportunidades com filtros de regime, modalidade e faixa salarial.',
+        parameters: {
+          type: 'object',
+          properties: {
+            query: { type: 'string', description: 'Área ou cargo desejado (ex: desenvolvedora, vendedor, motorista).' },
+            employment_type: { type: 'string', description: 'Regime: CLT, PJ, estágio, freela, temporário.' },
+            work_mode: { type: 'string', description: 'Modalidade: remoto, presencial, híbrido.' },
+            city: { type: 'string', description: 'Cidade.' },
+            salary_min: { type: 'number', description: 'Salário mínimo desejado.' },
+            limit: { type: 'number', description: 'Quantidade máxima (padrão 3).' }
+          }
+        }
+      },
+      handler: async (args, ctx) => {
+        const filters: any = {
+          entity_type: 'job',
+          query: args.query,
+          employment_type: args.employment_type,
+          work_mode: args.work_mode,
+          city: args.city,
+          price_min: args.salary_min, // Reutiliza price_min para salário mínimo
+        };
+
+        SearchSessionService.updateSessionFilters(ctx.conversationId, ctx.companyId, filters, {
+          category: 'Vagas',
+          entity_type: 'job',
+          query: args.query
+        });
+
+        const searchRes = await CatalogSearchService.searchCatalog(ctx.companyId, filters, {
+          limit: args.limit || 3,
+          conversationId: ctx.conversationId,
+          customerId: ctx.customerId
+        });
+
+        SearchSessionService.savePresentedResults(ctx.conversationId, ctx.companyId, searchRes.items);
+        const settings = store.catalogSettings.get(ctx.companyId);
+        const formattedText = CatalogFormatter.formatTextResponse(searchRes.items, settings, searchRes.alternative_message);
+        const cards = CatalogFormatter.formatStructuredCards(searchRes.items, settings);
+
+        return {
+          results: searchRes.items,
+          total_found: searchRes.total_found,
+          formatted_presentation: formattedText,
+          cards
+        };
+      }
+    });
+
+    // 28. log_catalog_click (Registra clique do cliente em item — analytics)
+    this.tools.set('log_catalog_click', {
+      definition: {
+        name: 'log_catalog_click',
+        description: 'Registra quando o cliente demonstra interesse ou clica em um item específico do catálogo (analytics e ranking).',
+        parameters: {
+          type: 'object',
+          properties: {
+            item_id: { type: 'string', description: 'ID do item selecionado.' },
+            item_name: { type: 'string', description: 'Nome do item.' },
+            source_url: { type: 'string', description: 'URL do item (opcional).' }
+          },
+          required: ['item_id']
+        }
+      },
+      handler: async (args, ctx) => {
+        const item = await CatalogSearchService.getItemByIdAsync(ctx.companyId, args.item_id)
+          || CatalogSearchService.getItemById(ctx.companyId, args.item_id);
+
+        await CatalogSearchService.logClick({
+          companyId: ctx.companyId,
+          conversationId: ctx.conversationId,
+          customerId: ctx.customerId,
+          itemId: args.item_id,
+          itemName: args.item_name || item?.name,
+          entityType: item?.entity_type,
+          sourceUrl: args.source_url || item?.source_url,
+        });
+
+        return {
+          logged: true,
+          item_id: args.item_id,
+          message: 'Interesse registrado com sucesso.'
+        };
       }
     });
   }

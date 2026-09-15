@@ -1,3 +1,9 @@
+// =========================================================================
+// CATALOG RANKING SERVICE — Scoring e Ordenação Universal
+// Suporta todos os segmentos: product, property, vehicle, restaurant,
+// service, hotel, course, job, event, agro
+// =========================================================================
+
 import { CatalogItemResult, CatalogSearchFilters } from '../../types/index.js';
 
 export class CatalogRankingService {
@@ -7,7 +13,7 @@ export class CatalogRankingService {
   static calculateItemScore(item: CatalogItemResult, filters: CatalogSearchFilters): number {
     let score = 0;
 
-    // 1. Penalização máxima ou eliminação para indisponíveis
+    // 1. Penalização máxima para indisponíveis
     if (!item.availability || (item.stock !== undefined && item.stock <= 0)) {
       return -100;
     }
@@ -15,19 +21,17 @@ export class CatalogRankingService {
     // 2. Filtro estrito de Tipo de Entidade (se especificado)
     if (filters.entity_type && item.entity_type) {
       const targetEntity = filters.entity_type.toLowerCase();
-      const itemEntity = item.entity_type.toLowerCase();
+      const itemEntity = (item.entity_type || '').toLowerCase();
       if (targetEntity !== itemEntity) {
-        return -100; // Entidade incompatível (ex: não misturar imóveis com produtos ou serviços)
+        return -100; // Entidades incompatíveis
       }
       score += 40;
     }
 
-    // 3. Imóveis: Quartos / Suítes / Vagas / Tipo de Transação
+    // 3. IMÓVEIS — Quartos / Suítes / Vagas / Tipo de Transação
     if (filters.bedrooms !== undefined) {
       const itemBedrooms = Number(item.attributes?.bedrooms || item.attributes?.quartos || 0);
-      if (itemBedrooms < filters.bedrooms) {
-        return -100; // Não atende o requisito mínimo de quartos
-      }
+      if (itemBedrooms < filters.bedrooms) return -100;
       score += (itemBedrooms === filters.bedrooms ? 60 : 40);
     }
 
@@ -54,45 +58,116 @@ export class CatalogRankingService {
       const itemTt = (item.attributes?.transaction_type || item.attributes?.tipo_transacao || item.category || '').toLowerCase();
       if (itemTt) {
         const isRental = itemTt.includes('alug') || itemTt.includes('rent') || itemTt.includes('loca');
-        const isSale = itemTt.includes('vend') || itemTt.includes('sale');
+        const isSale = itemTt.includes('vend') || itemTt.includes('sale') || itemTt.includes('compra');
         const wantsRental = tt.includes('alug') || tt.includes('rent') || tt.includes('loca');
-        const wantsSale = tt.includes('vend') || tt.includes('sale');
-
-        if ((wantsRental && isSale) || (wantsSale && isRental)) {
-          return -100; // Conflito direto entre aluguel e venda
-        }
-        if ((wantsRental && isRental) || (wantsSale && isSale)) {
-          score += 40;
-        }
+        const wantsSale = tt.includes('vend') || tt.includes('sale') || tt.includes('compra');
+        if ((wantsRental && isSale) || (wantsSale && isRental)) return -100;
+        if ((wantsRental && isRental) || (wantsSale && isSale)) score += 40;
       }
     }
 
-    // 4. Preço estrito (Se estourar o orçamento, não é match exato)
+    // 4. VEÍCULOS — Ano / KM / Combustível / Câmbio
+    if (filters.vehicle_type) {
+      const vt = filters.vehicle_type.toLowerCase();
+      const itemVt = (item.attributes?.vehicle_type || item.category || '').toLowerCase();
+      if (itemVt && itemVt.includes(vt)) score += 35;
+    }
+
+    if (filters.year_min !== undefined) {
+      const itemYear = Number(item.attributes?.year || item.attributes?.ano || 0);
+      if (itemYear && itemYear < filters.year_min) return -100;
+      score += 20;
+    }
+
+    if (filters.year_max !== undefined) {
+      const itemYear = Number(item.attributes?.year || item.attributes?.ano || 0);
+      if (itemYear && itemYear > filters.year_max) return -100;
+      score += 20;
+    }
+
+    if (filters.mileage_max !== undefined) {
+      const itemKm = Number(item.attributes?.mileage || item.attributes?.km || 0);
+      if (itemKm && itemKm > filters.mileage_max) return -100;
+      score += 25;
+    }
+
+    if (filters.fuel) {
+      const fuel = filters.fuel.toLowerCase();
+      const itemFuel = (item.attributes?.fuel || item.attributes?.combustivel || '').toLowerCase();
+      if (itemFuel) {
+        if (itemFuel.includes(fuel) || fuel.includes(itemFuel)) score += 30;
+        else return -100;
+      }
+    }
+
+    if (filters.transmission) {
+      const trans = filters.transmission.toLowerCase();
+      const itemTrans = (item.attributes?.transmission || item.attributes?.cambio || '').toLowerCase();
+      if (itemTrans && (itemTrans.includes(trans) || trans.includes(itemTrans))) score += 25;
+    }
+
+    // 5. HOTEL — Estrelas / Comodidades / Check-in
+    if ((filters as any).stars !== undefined) {
+      const itemStars = Number(item.attributes?.stars || item.attributes?.estrelas || 0);
+      if (itemStars < (filters as any).stars) return -100;
+      score += itemStars === (filters as any).stars ? 50 : 30;
+    }
+
+    if ((filters as any).amenities && Array.isArray((filters as any).amenities)) {
+      const wantedAmenities = ((filters as any).amenities as string[]).map((a: string) => a.toLowerCase());
+      const itemAmenities = (item.attributes?.amenities || []).map((a: string) => a.toLowerCase());
+      const matchCount = wantedAmenities.filter(a => itemAmenities.some((ia: string) => ia.includes(a))).length;
+      score += matchCount * 20;
+    }
+
+    // 6. CURSO — Modalidade / Carga horária / Certificado
+    if ((filters as any).modality) {
+      const wantedModality = (filters as any).modality.toLowerCase();
+      const itemModality = (item.attributes?.modality || item.attributes?.modalidade || '').toLowerCase();
+      if (itemModality && (itemModality.includes(wantedModality) || wantedModality.includes(itemModality))) score += 35;
+    }
+
+    if ((filters as any).has_certificate !== undefined) {
+      const hasCert = item.attributes?.has_certificate || item.attributes?.certificado;
+      if (hasCert === (filters as any).has_certificate) score += 25;
+    }
+
+    // 7. VAGA DE EMPREGO — Regime / Área / Localização
+    if ((filters as any).employment_type) {
+      const wantedType = (filters as any).employment_type.toLowerCase();
+      const itemType = (item.attributes?.employment_type || item.attributes?.regime || '').toLowerCase();
+      if (itemType && (itemType.includes(wantedType) || wantedType.includes(itemType))) score += 35;
+      else if (itemType) return -100;
+    }
+
+    if ((filters as any).work_mode) {
+      const wantedMode = (filters as any).work_mode.toLowerCase();
+      const itemMode = (item.attributes?.work_mode || item.attributes?.modalidade_trabalho || '').toLowerCase();
+      if (itemMode && (itemMode.includes(wantedMode) || wantedMode.includes(itemMode))) score += 30;
+    }
+
+    // 8. AGRO — Cultura / Área / Localização Rural
+    if ((filters as any).crop_type) {
+      const crop = (filters as any).crop_type.toLowerCase();
+      const itemCrop = (item.attributes?.crop_type || item.category || '').toLowerCase();
+      if (itemCrop && itemCrop.includes(crop)) score += 35;
+    }
+
+    // 9. Preço estrito (TODOS os segmentos)
     if (item.price !== null && item.price !== undefined) {
       const price = item.price;
       const min = filters.price_min;
       const max = filters.price_max;
-
-      if (max !== undefined && price > max) {
-        return -100; // Preço acima do teto estipulado
-      }
-
-      if (min !== undefined && price < min) {
-        return -100; // Preço abaixo do piso estipulado
-      }
-
-      if (min !== undefined && max !== undefined) {
-        score += 60; // Enquadramento perfeito na faixa
-      } else if (max !== undefined) {
-        score += 50;
-      } else if (min !== undefined) {
-        score += 30;
-      }
+      if (max !== undefined && price > max) return -100;
+      if (min !== undefined && price < min) return -100;
+      if (min !== undefined && max !== undefined) score += 60;
+      else if (max !== undefined) score += 50;
+      else if (min !== undefined) score += 30;
     }
 
     score += 20; // Bônus base por disponibilidade
 
-    // 5. Pontuação textual (Query)
+    // 10. Pontuação textual (Query)
     if (filters.query && filters.query.trim()) {
       const q = filters.query.trim().toLowerCase();
       const qTokens = q.split(/\s+/).filter(t => t.length > 1);
@@ -101,37 +176,26 @@ export class CatalogRankingService {
       const catLower = (item.category || '').toLowerCase();
       const brandLower = (item.brand || '').toLowerCase();
 
-      // Correspondência exata do nome
-      if (nameLower === q) {
-        score += 150;
-      } else if (nameLower.includes(q)) {
-        score += 90;
-      }
+      if (nameLower === q) score += 150;
+      else if (nameLower.includes(q)) score += 90;
 
-      // Correspondência por tokens
       let tokenMatches = 0;
       for (const token of qTokens) {
-        if (nameLower.includes(token)) {
-          score += 35;
-          tokenMatches++;
-        } else if (brandLower.includes(token)) {
-          score += 30;
-          tokenMatches++;
-        } else if (catLower.includes(token)) {
-          score += 25;
-          tokenMatches++;
-        } else if (descLower.includes(token)) {
-          score += 15;
-          tokenMatches++;
+        if (nameLower.includes(token)) { score += 35; tokenMatches++; }
+        else if (brandLower.includes(token)) { score += 30; tokenMatches++; }
+        else if (catLower.includes(token)) { score += 25; tokenMatches++; }
+        else if (descLower.includes(token)) { score += 15; tokenMatches++; }
+        // Busca em atributos extras
+        else {
+          const attrsText = JSON.stringify(item.attributes || '').toLowerCase();
+          if (attrsText.includes(token)) { score += 10; tokenMatches++; }
         }
       }
 
-      if (tokenMatches === qTokens.length && qTokens.length > 1) {
-        score += 40; // Bônus se todos os termos da busca foram contemplados
-      }
+      if (tokenMatches === qTokens.length && qTokens.length > 1) score += 40;
     }
 
-    // 6. Correspondência de Categoria
+    // 11. Correspondência de Categoria
     if (filters.category && item.category) {
       if (item.category.toLowerCase().includes(filters.category.toLowerCase()) ||
           filters.category.toLowerCase().includes(item.category.toLowerCase())) {
@@ -139,28 +203,23 @@ export class CatalogRankingService {
       }
     }
 
-    // 7. Marca (Produtos / Veículos / Equipamentos)
+    // 12. Marca (Produtos / Veículos / Equipamentos)
     if (filters.brand) {
       const targetBrand = filters.brand.toLowerCase();
       const itemBrand = (item.brand || item.attributes?.brand || item.attributes?.marca || '').toLowerCase();
-      if (itemBrand.includes(targetBrand) || targetBrand.includes(itemBrand)) {
-        score += 60;
-      } else {
-        return -100; // Marca solicitada não bate
-      }
+      if (itemBrand.includes(targetBrand) || targetBrand.includes(itemBrand)) score += 60;
+      else return -100;
     }
 
-    // 8. Peso / Volume / Medida
+    // 13. Peso / Volume / Medida (Produtos)
     if (filters.weight) {
       const weightStr = String(filters.weight).toLowerCase().replace(/\s+/g, '');
       const itemWeight = String(item.attributes?.weight || item.attributes?.peso || '').toLowerCase().replace(/\s+/g, '');
       const itemNameAndDesc = `${item.name} ${item.description || ''}`.toLowerCase().replace(/\s+/g, '');
-      if (itemWeight.includes(weightStr) || itemNameAndDesc.includes(weightStr)) {
-        score += 50;
-      }
+      if (itemWeight.includes(weightStr) || itemNameAndDesc.includes(weightStr)) score += 50;
     }
 
-    // 9. Bairro / Cidade / Região
+    // 14. Localização (Imóveis / Hotéis / Vagas / Agro)
     if (filters.city) {
       const targetCity = filters.city.toLowerCase();
       const itemCity = (item.attributes?.city || item.attributes?.cidade || '').toLowerCase();
@@ -173,13 +232,26 @@ export class CatalogRankingService {
       if (itemNeigh.includes(targetNeigh)) score += 40;
     }
 
-    // 9. Presença de Link Oficial Verificado (source_url) e Fotos
-    if (item.source_url && (item.source_url.startsWith('http://') || item.source_url.startsWith('https://'))) {
-      score += 15;
+    // 15. Duração do Serviço
+    if (filters.duration_minutes !== undefined) {
+      const itemDur = Number(item.attributes?.duration_minutes || item.attributes?.duracao || 0);
+      if (itemDur > 0) {
+        const diff = Math.abs(itemDur - filters.duration_minutes) / filters.duration_minutes;
+        if (diff < 0.2) score += 30;
+        else if (diff < 0.5) score += 15;
+      }
     }
-    if (item.images && item.images.length > 0) {
-      score += 10;
+
+    // 16. Ingredientes (Restaurante)
+    if (filters.ingredients && filters.ingredients.length > 0) {
+      const itemIngredients = JSON.stringify(item.attributes?.ingredients || '').toLowerCase();
+      const matches = filters.ingredients.filter(ing => itemIngredients.includes(ing.toLowerCase())).length;
+      score += matches * 20;
     }
+
+    // 17. Bônus: link oficial e fotos
+    if (item.source_url && (item.source_url.startsWith('http://') || item.source_url.startsWith('https://'))) score += 15;
+    if (item.images && item.images.length > 0) score += 10;
 
     return score;
   }
@@ -192,16 +264,13 @@ export class CatalogRankingService {
     filters: CatalogSearchFilters,
     sortMode: 'relevance' | 'price_asc' | 'price_desc' | 'newest' = 'relevance'
   ): CatalogItemResult[] {
-    // 1. Calcula os scores
     const scored = items.map(item => ({
       ...item,
       score: this.calculateItemScore(item, filters)
     }));
 
-    // 2. Filtra itens com pontuação positiva / aceitável
     const valid = scored.filter(i => (i.score || 0) > 0);
 
-    // 3. Aplica o ordenamento desejado
     if (sortMode === 'price_asc') {
       return valid.sort((a, b) => {
         const priceA = a.price ?? 999999999;
@@ -220,7 +289,6 @@ export class CatalogRankingService {
       });
     }
 
-    // Padrão: 'relevance'
     return valid.sort((a, b) => (b.score || 0) - (a.score || 0));
   }
 }

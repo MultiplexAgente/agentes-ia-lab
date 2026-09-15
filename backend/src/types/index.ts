@@ -430,6 +430,38 @@ export interface NormalizedCatalogItem {
     postal_code?: string;
     amenities?: string[];
   };
+  hotel_details?: {
+    stars?: number;
+    check_in?: string;
+    check_out?: string;
+    amenities?: string[];
+    room_types?: string[];
+    total_rooms?: number;
+  };
+  course_details?: {
+    modality?: 'online' | 'presencial' | 'hibrido';
+    duration_hours?: number;
+    has_certificate?: boolean;
+    instructor?: string;
+    start_date?: string;
+    platform?: string;
+  };
+  job_details?: {
+    employment_type?: 'CLT' | 'PJ' | 'estagio' | 'freela' | 'temporario';
+    work_mode?: 'remoto' | 'presencial' | 'hibrido';
+    salary_min?: number;
+    salary_max?: number;
+    salary_info?: string;
+    area?: string;
+    company_name?: string;
+  };
+  agro_details?: {
+    crop_type?: string;
+    area_ha?: number;
+    location?: string;
+    state?: string;
+    harvest_season?: string;
+  };
   menu_details?: {
     ingredients?: string[];
     variations?: Array<{ name: string; additional_price: number }>;
@@ -569,7 +601,8 @@ export type CatalogEntityType =
   | 'hotel' 
   | 'course' 
   | 'job' 
-  | 'event' 
+  | 'event'
+  | 'agro'
   | 'custom';
 
 export interface CatalogSearchFilters {
