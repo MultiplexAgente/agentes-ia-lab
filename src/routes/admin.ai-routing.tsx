@@ -230,7 +230,7 @@ function AiRoutingAdminPage() {
                       const price = draft.modelPrices[model.id] ?? { input: 0, output: 0 };
                       return (
                         <div key={model.id} className="flex flex-wrap items-center gap-2 text-sm">
-                          <span className="min-w-40 font-mono text-xs">{model.id}</span>
+                          <span className="min-w-48 text-xs">{TIER_LABELS[model.tier] ?? model.tier}</span>
                           <input
                             type="number"
                             step="0.01"
