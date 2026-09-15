@@ -249,8 +249,16 @@ function CompanyPage() {
             value={password}
             onChange={(event) => setPassword(event.target.value)}
           />
+          <label className="flex items-center gap-2 text-sm text-muted-foreground">
+            <input
+              type="checkbox"
+              checked={firstAccess}
+              onChange={(event) => setFirstAccess(event.target.checked)}
+            />
+            É meu primeiro acesso: criar minha senha
+          </label>
           <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "Entrando…" : "Entrar"}
+            {loading ? (firstAccess ? "Criando acesso…" : "Entrando…") : firstAccess ? "Criar senha e entrar" : "Entrar"}
           </Button>
         </form>
         {error && <p className="mt-3 text-sm text-destructive">{error}</p>}
