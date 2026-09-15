@@ -3522,8 +3522,8 @@ export default function App() {
                 />
                 <PromptInputFooter className="px-3 pb-3">
                   <div className="flex items-center gap-1">
-                    <PromptInputButton tooltip="Anexar arquivo" onClick={() => setShowAttachModal(true)} className="text-muted-foreground hover:text-foreground"><Paperclip /></PromptInputButton>
-                    <PromptInputButton tooltip="Ditar por voz" onClick={handleToggleVoiceRecording} className="text-muted-foreground hover:text-foreground">{isRecordingVoice ? <MicOff /> : <Mic />}</PromptInputButton>
+                    <PromptInputButton title="Anexar arquivo" onClick={() => setShowAttachModal(true)} className="text-muted-foreground hover:text-foreground"><Paperclip /></PromptInputButton>
+                    <PromptInputButton title="Ditar por voz" onClick={handleToggleVoiceRecording} className="text-muted-foreground hover:text-foreground">{isRecordingVoice ? <MicOff /> : <Mic />}</PromptInputButton>
                   </div>
                   <PromptInputSubmit className="size-9 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90" disabled={!chatInput.trim() || isSendingMessage} status={isSendingMessage ? 'submitted' : 'ready'}>{!isSendingMessage && <ArrowUp />}</PromptInputSubmit>
                 </PromptInputFooter>

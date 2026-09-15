@@ -127,7 +127,7 @@ export const LandingChatPage: React.FC<LandingChatPageProps> = ({
         <div className="flex items-center gap-1">
           <PromptInputButton
             aria-label="Anexar arquivo"
-            tooltip="Anexar arquivo"
+            title="Anexar arquivo"
             onClick={() => fileInputRef.current?.click()}
             className="text-muted-foreground hover:text-foreground"
           >
@@ -135,7 +135,7 @@ export const LandingChatPage: React.FC<LandingChatPageProps> = ({
           </PromptInputButton>
           <PromptInputButton
             aria-label="Usar voz"
-            tooltip="Usar voz"
+            title="Usar voz"
             className="text-muted-foreground hover:text-foreground"
           >
             <Mic className="size-4" />
