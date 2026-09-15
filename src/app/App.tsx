@@ -988,7 +988,12 @@ export default function App() {
         body: JSON.stringify({ 
           message: prompt,
           conversationId: currentChat.id,
-          companyId: '11111111-1111-1111-1111-111111111111',
+          companyId: currentUser?.company_id,
+          channel: 'web',
+          history: (currentChat.messages || [])
+            .filter((m: ChatMessage) => m.role === 'user' || m.role === 'assistant')
+            .slice(-12)
+            .map((m: ChatMessage) => ({ role: m.role, content: m.content })),
           context: {
             page: activeView,
             module: activeView
@@ -998,6 +1003,9 @@ export default function App() {
 
       if (res.ok) {
         const data = await res.json();
+        if (data.routing) {
+          setLastRouting({ taskLabel: data.routing.taskLabel, complexity: data.routing.complexity });
+        }
         const contentText = data.assistantMessage?.content || data.response_text || 'Compreendido.';
 
         // Opções rápidas sugeridas pela IA
