@@ -2079,4 +2079,116 @@ body.light .suggestion-cat-btn.active {
   color: #4ade80;
 }
 
+/* ============================================
+   ANIMAÇÕES AI STATUS INDICATOR
+   ============================================ */
+@keyframes ai-status-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.65; }
+}
 
+@keyframes ai-dot-bounce {
+  0%, 80%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-4px); }
+}
+
+/* ============================================
+   RESPONSIVIDADE MOBILE (Chat-First)
+   ============================================ */
+@media (max-width: 768px) {
+  /* Sidebar colapsa para overlay em mobile */
+  .sidebar {
+    position: fixed !important;
+    left: -280px !important;
+    top: 0 !important;
+    height: 100vh !important;
+    z-index: 200 !important;
+    transition: left 0.28s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    width: 260px !important;
+  }
+
+  .sidebar.sidebar-open {
+    left: 0 !important;
+    box-shadow: 4px 0 40px rgba(0, 0, 0, 0.5) !important;
+  }
+
+  /* Overlay escuro quando sidebar aberta em mobile */
+  .sidebar-mobile-overlay {
+    display: block !important;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    z-index: 199;
+    backdrop-filter: blur(2px);
+  }
+
+  /* Conteúdo principal ocupa tela inteira */
+  .app-container {
+    flex-direction: column !important;
+  }
+
+  .chatgpt-main {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  /* Top bar mais compacta */
+  .chatgpt-top-bar {
+    padding: 10px 14px !important;
+    gap: 8px !important;
+  }
+
+  /* Sugestões em coluna no mobile */
+  .rich-suggestions-grid {
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
+
+  /* Abas de categorias com scroll horizontal */
+  .suggestion-category-bar {
+    overflow-x: auto !important;
+    padding-bottom: 4px !important;
+    flex-wrap: nowrap !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .suggestion-cat-btn {
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* Chat input ocupa largura total */
+  .chat-input-area {
+    padding: 12px !important;
+  }
+
+  /* Cards de auth em mobile */
+  .auth-split-layout {
+    flex-direction: column !important;
+  }
+
+  .auth-hero-showcase {
+    display: none !important;
+  }
+
+  .auth-plans-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Mensagens ocupam mais espaço em telas pequenas */
+  .chatgpt-top-bar .model-selector span {
+    display: none;
+  }
+
+  /* Welcome title menor */
+  .chat-welcome-title {
+    font-size: 1.4rem !important;
+  }
+
+  /* Input menor */
+  .chat-input-area textarea {
+    font-size: 0.9rem !important;
+  }
+}

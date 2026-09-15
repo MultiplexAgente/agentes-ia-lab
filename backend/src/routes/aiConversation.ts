@@ -122,3 +122,64 @@ aiConversationRouter.post('/messages/:id/feedback', (req: Request, res: Response
 
   return res.json({ success: ok });
 });
+
+/**
+ * 7. Gerar Título Automático para Conversa (baseado no conteúdo real)
+ */
+aiConversationRouter.post('/generate-title', async (req: Request, res: Response) => {
+  const { userMessage, assistantResponse } = req.body;
+
+  if (!userMessage) {
+    return res.status(400).json({ error: 'userMessage é obrigatório.' });
+  }
+
+  try {
+    // Geração de título inteligente baseada nas primeiras mensagens
+    const combined = `${userMessage} ${assistantResponse || ''}`.toLowerCase();
+
+    // Palavras-chave para categorização rápida
+    const keywordMap: Record<string, string> = {
+      'catálogo|produto|item|estoque|preço|valor': 'Consulta de Catálogo',
+      'cliente|contato|cadastro|lead': 'Gestão de Clientes',
+      'pedido|compra|encomenda|venda': 'Pedido de Compra',
+      'campanha|marketing|instagram|post': 'Campanha de Marketing',
+      'imóvel|apartamento|casa|terreno|aluguel': 'Catálogo de Imóveis',
+      'veículo|carro|moto|caminhão': 'Catálogo de Veículos',
+      'hotel|hospedagem|quarto|diária': 'Busca de Hospedagem',
+      'curso|treinamento|capacitação|aula': 'Cursos e Treinamentos',
+      'vaga|emprego|contratação|currículo': 'Vagas de Emprego',
+      'financeiro|pagamento|boleto|fatura': 'Financeiro',
+      'agendamento|reserva|horário|consulta': 'Agendamento',
+      'configuração|ajuste|personalizar|regra': 'Configurações',
+      'relatório|métricas|análise|dashboard': 'Análise e Relatórios',
+      'integração|canal|whatsapp|telegram|instagram': 'Integração de Canal',
+      'automação|fluxo|n8n|webhook': 'Automação',
+    };
+
+    let title = '';
+    for (const [pattern, label] of Object.entries(keywordMap)) {
+      if (new RegExp(pattern).test(combined)) {
+        title = label;
+        break;
+      }
+    }
+
+    // Fallback: usa as primeiras palavras significativas da mensagem
+    if (!title) {
+      const words = userMessage
+        .replace(/[^\w\sáàãâéêíóôõúüçÁÀÃÂÉÊÍÓÔÕÚÜÇ]/g, ' ')
+        .trim()
+        .split(/\s+/)
+        .filter((w: string) => w.length > 3)
+        .slice(0, 4)
+        .join(' ');
+      title = words.charAt(0).toUpperCase() + words.slice(1) || 'Nova Conversa';
+    }
+
+    return res.json({ title });
+  } catch (err: any) {
+    console.error('Erro ao gerar título:', err);
+    return res.status(500).json({ error: 'Falha ao gerar título.' });
+  }
+});
+

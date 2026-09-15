@@ -16,8 +16,11 @@ import { DynamicModuleView } from './components/builder/DynamicModuleView';
 import { AIBuilderModule } from './types/builder';
 import { ExecutiveDashboardView, DashboardData } from './components/dashboard/ExecutiveDashboardView';
 import { ContextualAIChatCard } from './components/conversation/ContextualAIChatCard';
+import { AIStatusIndicator } from './components/conversation/AIStatusIndicator';
+import { EmptyState } from './components/EmptyState';
 import { aiConversationService } from './services/aiConversationService';
 import { LandingChatPage } from './components/landing/LandingChatPage';
+
 
 interface FolderItem {
   id: string;
@@ -175,8 +178,8 @@ export default function App() {
     setTheme(prev => prev === 'dark' ? 'light' : 'dark');
   };
 
-  // Visao ativa (Dashboard como primeira aba padrao)
-  const [activeView, setActiveView] = useState<'chat' | 'teach' | 'menu' | 'personality' | 'knowledge' | 'channels' | 'playground' | 'logs' | 'dashboard' | 'builder' | 'dynamic_module'>('dashboard');
+  // Visao ativa (Chat IA como primeira aba padrao — IA e o centro)
+  const [activeView, setActiveView] = useState<'chat' | 'teach' | 'menu' | 'personality' | 'knowledge' | 'channels' | 'playground' | 'logs' | 'dashboard' | 'builder' | 'dynamic_module'>('chat');
   const [currentDynamicModule, setCurrentDynamicModule] = useState<AIBuilderModule | null>(null);
   const [sidebarModules, setSidebarModules] = useState<AIBuilderModule[]>([]);
 
@@ -262,6 +265,11 @@ export default function App() {
   // Chat input
   const [chatInput, setChatInput] = useState('');
   const [isSendingMessage, setIsSendingMessage] = useState(false);
+  const [isAIThinking, setIsAIThinking] = useState(false);
+  const [aiStatusText, setAIStatusText] = useState('');
+  const [isLoadingConversations, setIsLoadingConversations] = useState(false);
+  // Mobile sidebar overlay
+  const [sidebarMobileOpen, setSidebarMobileOpen] = useState(false);
 
   // Modal de Confirmação de Exclusão Unificado (Chats e Módulos)
   const [deleteConfirmTarget, setDeleteConfirmTarget] = useState<{
@@ -525,15 +533,8 @@ export default function App() {
         return JSON.parse(saved);
       } catch (e) {}
     }
-    return {
-      name: 'Anthony Both',
-      email: 'anthony@amboth.com.br',
-      company_name: 'Anthony Burgers & Delivery',
-      phone: '+55 11 99999-8888',
-      plan_id: 'plan_pro',
-      avatar_initials: 'AN',
-      billing_cycle: 'monthly'
-    };
+    // Estado inicial genérico — será substituído pelo login real
+    return null;
   });
 
   // Estados da IA Mais Completa (Multiplex IA)
@@ -709,12 +710,16 @@ export default function App() {
         loadData();
       }
     } catch (err) {
+      // Fallback offline: cria usuário baseado apenas no email informado
+      const namePart = authEmail ? authEmail.split('@')[0].replace(/[._]/g, ' ') : 'Usuário';
+      const formattedName = namePart.charAt(0).toUpperCase() + namePart.slice(1);
+      const initials = formattedName.slice(0, 2).toUpperCase() || 'US';
       const userObj = {
-        name: 'Anthony Both',
-        email: authEmail || 'anthony@amboth.com.br',
-        company_name: 'Anthony Burgers & Delivery',
+        name: formattedName,
+        email: authEmail || '',
+        company_name: 'Minha Empresa',
         plan_id: 'plan_pro',
-        avatar_initials: 'AN',
+        avatar_initials: initials,
         billing_cycle: 'monthly'
       };
       setCurrentUser(userObj);
@@ -796,14 +801,14 @@ export default function App() {
     }
   };
 
-  const handleDemoAccess = (name = 'Anthony Both', email = 'anthony@amboth.com.br', planId = 'plan_pro') => {
+  const handleDemoAccess = () => {
     const userObj = {
-      name,
-      email,
-      company_name: 'Anthony Burgers & Delivery',
-      phone: '+55 11 99999-8888',
-      plan_id: planId,
-      avatar_initials: name.slice(0, 2).toUpperCase(),
+      name: 'Demonstração',
+      email: 'demo@multiplex.ia',
+      company_name: 'Empresa Demo',
+      phone: '',
+      plan_id: 'plan_pro',
+      avatar_initials: 'DM',
       billing_cycle: 'monthly'
     };
     setCurrentUser(userObj);
@@ -854,20 +859,47 @@ export default function App() {
     setEditFolderName('');
   };
 
-  // Acoes de Chats
-  const handleCreateNewChat = () => {
+  // Acoes de Chats — com integração backend real
+  const handleCreateNewChat = async () => {
+    // Cria localmente primeiro para resposta imediata (UX)
+    const localId = `c-${Date.now()}`;
     const newChat: ChatSession = {
-      id: `c-${Date.now()}`,
-      title: 'Novo chat',
+      id: localId,
+      title: 'Nova conversa',
       folderId: selectedFolderFilter || null,
       isPinned: false,
       messages: [],
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
-    setChats([newChat, ...chats]);
-    setActiveChatId(newChat.id);
+    setChats(prev => [newChat, ...prev]);
+    setActiveChatId(localId);
     setActiveView('chat');
+
+    // Persiste no backend em background
+    try {
+      const res = await fetch(`${API_BASE}/api/ai/conversation/conversations`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          companyId: '11111111-1111-1111-1111-111111111111',
+          userId: currentUser?.id || 'admin-user',
+          title: 'Nova conversa'
+        })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const backendId = data.conversation?.id;
+        if (backendId && backendId !== localId) {
+          // Substitui o ID local pelo ID real do backend
+          setChats(prev => prev.map(c => c.id === localId ? { ...c, id: backendId } : c));
+          setActiveChatId(backendId);
+        }
+      }
+    } catch (e) {
+      // Fallback: continua apenas com localStorage
+      console.warn('Backend indisponível — chat criado só localmente.');
+    }
   };
 
   const handleTogglePinChat = (chatId: string) => {
@@ -963,18 +995,24 @@ export default function App() {
     };
 
     const updatedMessages = [...currentChat.messages, userMsg];
-    const isFirstUserMessage = currentChat.messages.filter(m => m.role === 'user').length === 0;
-    const newTitle = isFirstUserMessage ? (prompt.length > 30 ? prompt.slice(0, 30) + '...' : prompt) : currentChat.title;
+    const userMsgCount = currentChat.messages.filter(m => m.role === 'user').length;
+    const isFirstUserMessage = userMsgCount === 0;
+    // Título temporário apenas na primeira mensagem — será substituído por título real após resposta
+    const tempTitle = isFirstUserMessage
+      ? (prompt.length > 35 ? prompt.slice(0, 35) + '...' : prompt)
+      : currentChat.title;
 
     setChats(chats.map(c => c.id === currentChat.id ? {
       ...c,
-      title: newTitle,
+      title: tempTitle,
       messages: updatedMessages,
       updatedAt: new Date().toISOString()
     } : c));
 
     setChatInput('');
     setIsSendingMessage(true);
+    setIsAIThinking(true);
+    setAIStatusText('Processando...');
 
     try {
       const res = await fetch(`${API_BASE}/api/ai/conversation/chat`, {
@@ -994,6 +1032,16 @@ export default function App() {
       if (res.ok) {
         const data = await res.json();
         const contentText = data.assistantMessage?.content || data.response_text || 'Compreendido.';
+        const toolsUsedList = data.assistantMessage?.tools_used || data.tools_used || [];
+
+        // Detecta ferramenta usada para status display
+        if (toolsUsedList.length > 0) {
+          const toolName = toolsUsedList[0]?.tool || '';
+          if (toolName.includes('catalog') || toolName.includes('search')) setAIStatusText('Consultando catálogo...');
+          else if (toolName.includes('order')) setAIStatusText('Verificando pedidos...');
+          else if (toolName.includes('customer')) setAIStatusText('Consultando clientes...');
+          else if (toolName.includes('knowledge')) setAIStatusText('Buscando na base de conhecimento...');
+        }
 
         // Opções rápidas sugeridas pela IA
         let optionsText = '';
@@ -1005,19 +1053,43 @@ export default function App() {
           id: data.assistantMessage?.id || `m-ai-${Date.now()}`,
           role: 'assistant',
           content: contentText + optionsText,
+          toolsUsed: toolsUsedList,
           timestamp: new Date().toISOString()
         };
 
+        // Gera título inteligente após a segunda mensagem do usuário
+        let finalTitle = tempTitle;
+        if (userMsgCount === 1) {
+          try {
+            const titleRes = await fetch(`${API_BASE}/api/ai/conversation/generate-title`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                userMessage: prompt,
+                assistantResponse: contentText.slice(0, 200)
+              })
+            });
+            if (titleRes.ok) {
+              const titleData = await titleRes.json();
+              finalTitle = titleData.title || tempTitle;
+            }
+          } catch {
+            // Fallback: mantém título baseado na mensagem
+          }
+        }
+
         setChats(prevChats => prevChats.map(c => c.id === currentChat.id ? {
           ...c,
+          title: finalTitle,
           messages: [...c.messages, aiMsg],
           updatedAt: new Date().toISOString()
         } : c));
       } else {
+        const errData = await res.json().catch(() => ({}));
         const aiMsg: ChatMessage = {
-          id: `m-ai-${Date.now()}`,
+          id: `m-ai-err-${Date.now()}`,
           role: 'assistant',
-          content: `Mensagem recebida: "${prompt}". Resposta processada pelo Multiplex.`,
+          content: `⚠️ Erro ao processar: ${errData.error || `Servidor retornou ${res.status}`}. Tente novamente.`,
           timestamp: new Date().toISOString()
         };
         setChats(prevChats => prevChats.map(c => c.id === currentChat.id ? {
@@ -1027,9 +1099,9 @@ export default function App() {
       }
     } catch (e) {
       const aiMsg: ChatMessage = {
-        id: `m-ai-${Date.now()}`,
+        id: `m-ai-err-${Date.now()}`,
         role: 'assistant',
-        content: `Resposta do Multiplex: Não foi possível processar a solicitação sobre "${prompt}" no momento.`,
+        content: '⚠️ Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.',
         timestamp: new Date().toISOString()
       };
       setChats(prevChats => prevChats.map(c => c.id === currentChat.id ? {
@@ -1038,6 +1110,8 @@ export default function App() {
       } : c));
     } finally {
       setIsSendingMessage(false);
+      setIsAIThinking(false);
+      setAIStatusText('');
     }
   };
 
@@ -2121,8 +2195,8 @@ export default function App() {
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                     <div className="avatar-circle" style={{ width: 24, height: 24, fontSize: '0.7rem' }}>AN</div>
                     <div style={{ textAlign: 'left' }}>
-                      <div style={{ fontWeight: 600 }}>Anthony Both</div>
-                      <div style={{ fontSize: '0.7rem', color: '#10b981' }}>Plano Profissional (Ativo)</div>
+                      <div style={{ fontWeight: 600 }}>Demonstração</div>
+                      <div style={{ fontSize: '0.7rem', color: '#10b981' }}>Acesso rápido ao painel</div>
                     </div>
                   </div>
                   <ChevronRight size={15} color="var(--text-muted)" />
@@ -2131,7 +2205,7 @@ export default function App() {
                 <button 
                   type="button"
                   className="btn-secondary"
-                  onClick={() => handleDemoAccess('Convidado Teste', 'convidado@multiplex.ia', 'plan_basic')}
+                  onClick={() => handleDemoAccess()}
                   style={{ width: '100%', padding: '9px 12px', fontSize: '0.84rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderRadius: 10 }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -2667,9 +2741,18 @@ export default function App() {
 
   return (
     <div className="app-container">
+      {/* OVERLAY MOBILE: fecha sidebar ao clicar fora */}
+      {sidebarMobileOpen && (
+        <div
+          className="sidebar-mobile-overlay"
+          onClick={() => setSidebarMobileOpen(false)}
+          style={{ display: 'block' }}
+        />
+      )}
+
       {/* BARRA LATERAL */}
       {!sidebarCollapsed && (
-        <aside className="sidebar">
+        <aside className={`sidebar${sidebarMobileOpen ? ' sidebar-open' : ''}`}>
           {/* Cabecalho */}
           <div className="chatgpt-sidebar-header">
             <div className="chatgpt-brand" onClick={() => setActiveView('chat')} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -3195,7 +3278,7 @@ export default function App() {
                 >
                   <div className="avatar-circle">{currentUser?.avatar_initials || 'AN'}</div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontWeight: 600, fontSize: '0.85rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{currentUser?.name || 'Anthony Both'}</div>
+                    <div style={{ fontWeight: 600, fontSize: '0.85rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{currentUser?.name || 'Usuário'}</div>
                     <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{billingData?.plan?.name || 'Profissional'}</div>
                   </div>
                   <ChevronRight size={16} color="var(--text-muted)" />
@@ -3325,7 +3408,7 @@ export default function App() {
               >
                 <div className="avatar-circle">{currentUser?.avatar_initials || 'AN'}</div>
                 <div>
-                  <div className="user-name">{currentUser?.name || 'Anthony Both'}</div>
+                  <div className="user-name">{currentUser?.name || 'Usuário'}</div>
                   <div className="user-plan" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                     <span>{billingData?.plan?.name || 'Profissional'}</span>
                     <span style={{ fontSize: '0.65rem', color: '#10b981' }}>● Ativo</span>
@@ -3352,6 +3435,7 @@ export default function App() {
           {/* Top Bar com Seletor de Modelo e Indicadores */}
           <div className="chatgpt-top-bar" style={{ position: 'relative' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              {/* Botão de menu hamburger para mobile / expandir sidebar */}
               {sidebarCollapsed && (
                 <button 
                   className="icon-btn" 
@@ -3361,6 +3445,18 @@ export default function App() {
                   <PanelLeft size={20} />
                 </button>
               )}
+              {!sidebarCollapsed && (
+                <button
+                  className="icon-btn"
+                  title="Abrir menu lateral no mobile"
+                  onClick={() => setSidebarMobileOpen(prev => !prev)}
+                  style={{ display: 'none' }}
+                  id="mobile-sidebar-btn"
+                >
+                  <PanelLeft size={20} />
+                </button>
+              )}
+
 
               {/* Seletor Interativo de Modelos IA */}
               <div 
@@ -3929,13 +4025,14 @@ export default function App() {
                     <img src={atomLogo} alt="Multiplex IA" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
                   </div>
                   <div className="message-body-ai" style={{ display: 'flex', alignItems: 'center', gap: 10, color: 'var(--text-dim)', padding: '6px 0' }}>
-                    <RefreshCw size={16} className="animate-spin" color="var(--accent-cyan)" />
-                    <span style={{ fontSize: '0.9rem' }}>
-                      Multiplex IA consultando base, executando regras e gerando resposta...
-                    </span>
+                    <AIStatusIndicator
+                      status={isAIThinking ? 'thinking' : 'using_tool'}
+                      statusText={aiStatusText || 'Processando sua solicitação...'}
+                    />
                   </div>
                 </div>
               )}
+
             </div>
           </div>
 

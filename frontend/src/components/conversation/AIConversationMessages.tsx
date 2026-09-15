@@ -1,7 +1,8 @@
 import React from 'react';
 import { 
   Check, X, ThumbsUp, ThumbsDown, Sparkles, Layers,
-  ChevronRight, ArrowRight, ShieldCheck, AlertCircle, RefreshCw, Eye
+  ChevronRight, ArrowRight, ShieldCheck, AlertCircle, RefreshCw, Eye,
+  Search, Package, Users, ShoppingCart, BookOpen, Zap
 } from 'lucide-react';
 import { AIConversationMessage, AIConversationSuggestedOption } from '../../types/conversation';
 import atomLogo from '../../assets/multiplex-atom.jpg';
@@ -9,6 +10,7 @@ import atomLogo from '../../assets/multiplex-atom.jpg';
 interface AIConversationMessagesProps {
   messages: AIConversationMessage[];
   isTyping: boolean;
+  statusText?: string;
   onSelectOption: (option: AIConversationSuggestedOption) => void;
   onApprovePlan: (plan: any) => void;
   onRejectPlan?: () => void;
@@ -19,6 +21,7 @@ interface AIConversationMessagesProps {
 export const AIConversationMessages: React.FC<AIConversationMessagesProps> = ({
   messages,
   isTyping,
+  statusText,
   onSelectOption,
   onApprovePlan,
   onRejectPlan,
@@ -77,6 +80,52 @@ export const AIConversationMessages: React.FC<AIConversationMessagesProps> = ({
               >
                 {msg.content}
               </div>
+
+              {/* TOOLS USED BADGES */}
+              {isAI && msg.toolsUsed && msg.toolsUsed.length > 0 && (
+                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 4 }}>
+                  {msg.toolsUsed.map((tool: any, tIdx: number) => {
+                    const toolName = (tool?.tool || tool || '').toString().toLowerCase();
+                    let label = 'Ferramenta';
+                    let color = '#64748b';
+                    let bg = 'rgba(100,116,139,0.12)';
+                    let icon = <Zap size={11} />;
+
+                    if (toolName.includes('catalog') || toolName.includes('search_product')) {
+                      label = 'Catálogo consultado'; color = '#06b6d4'; bg = 'rgba(6,182,212,0.12)'; icon = <Search size={11} />;
+                    } else if (toolName.includes('order') || toolName.includes('pedido')) {
+                      label = 'Pedido verificado'; color = '#10b981'; bg = 'rgba(16,185,129,0.12)'; icon = <ShoppingCart size={11} />;
+                    } else if (toolName.includes('customer') || toolName.includes('cliente')) {
+                      label = 'Cliente consultado'; color = '#818cf8'; bg = 'rgba(99,102,241,0.12)'; icon = <Users size={11} />;
+                    } else if (toolName.includes('knowledge') || toolName.includes('conhecimento')) {
+                      label = 'Base de conhecimento'; color = '#a78bfa'; bg = 'rgba(139,92,246,0.12)'; icon = <BookOpen size={11} />;
+                    } else if (toolName.includes('catalog_item') || toolName.includes('product')) {
+                      label = 'Produto buscado'; color = '#f59e0b'; bg = 'rgba(245,158,11,0.12)'; icon = <Package size={11} />;
+                    }
+
+                    return (
+                      <span
+                        key={tIdx}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 5,
+                          padding: '3px 9px',
+                          borderRadius: 20,
+                          fontSize: '0.72rem',
+                          fontWeight: 600,
+                          color,
+                          background: bg,
+                          border: `1px solid ${color}30`,
+                        }}
+                      >
+                        {icon}
+                        {label}
+                      </span>
+                    );
+                  })}
+                </div>
+              )}
 
               {/* CARD DE PLANO DE EXECUÇÃO PROPOSTO PELA IA */}
               {msg.plan && (
@@ -297,7 +346,7 @@ export const AIConversationMessages: React.FC<AIConversationMessagesProps> = ({
             }}
           >
             <RefreshCw size={14} className="spin-animation" style={{ color: 'var(--accent-cyan)' }} />
-            <span>Multiplex IA está analisando dados e formulando resposta...</span>
+            <span>{statusText || 'Multiplex IA está analisando...'}</span>
           </div>
         </div>
       )}
