@@ -1,5 +1,4 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import dotenv from 'dotenv';
 import { 
   Company, Agent, AgentPersonality, AgentRule, Product, ProductCategory,
   Customer, Conversation, Message, StructuredKnowledgeItem, Order,
@@ -10,7 +9,6 @@ import {
   AIConversation, AIConversationMessage
 } from '../types/index';
 
-dotenv.config();
 
 const FORBIDDEN_DB = 'nptkxlrhrlssdsevpgqe';
 

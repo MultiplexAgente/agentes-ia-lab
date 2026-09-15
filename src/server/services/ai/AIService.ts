@@ -1,13 +1,11 @@
 import OpenAI from 'openai';
 import axios from 'axios';
-import dotenv from 'dotenv';
 import { store } from '../../config/database';
 import { memoryService } from '../memory/MemoryService';
 import { knowledgeBaseService } from '../knowledge/KnowledgeBaseService';
 import { ToolRegistry } from '../tools/ToolRegistry';
 import { AIServiceResponse, ToolExecutionResult } from '../../types/index';
 
-dotenv.config();
 
 export class AIService {
   private openai: OpenAI | null = null;

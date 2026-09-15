@@ -1,12 +1,10 @@
 import OpenAI from 'openai';
-import dotenv from 'dotenv';
 import { v4 as uuidv4 } from 'uuid';
 import { AIBuilderModule, AIBuildPlan, UISchema, UIComponent } from '../../types/index';
 import { store } from '../../config/database';
 import { ApplicationIntrospectionService, SystemSnapshot } from './ApplicationIntrospectionService';
 import { DataSourceRegistry } from './DataSourceRegistry';
 
-dotenv.config();
 
 export class AIBuilderService {
   private openai: OpenAI | null = null;

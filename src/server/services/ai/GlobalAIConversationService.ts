@@ -1,5 +1,4 @@
 import OpenAI from 'openai';
-import dotenv from 'dotenv';
 import { v4 as uuidv4 } from 'uuid';
 import { store } from '../../config/database';
 import { 
@@ -14,7 +13,6 @@ import {
 import { ApplicationIntrospectionService } from '../builder/ApplicationIntrospectionService';
 import { AIToolExecutor } from './AIToolExecutor';
 
-dotenv.config();
 
 export class GlobalAIConversationService {
   private openai: OpenAI | null = null;
