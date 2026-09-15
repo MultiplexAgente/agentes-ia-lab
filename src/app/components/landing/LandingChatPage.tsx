@@ -1,26 +1,32 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import {
   ArrowUp,
+  History,
+  Menu,
   Mic,
   Moon,
-  PanelLeft,
+  Paperclip,
   Plus,
   Search,
-  Settings,
-  SquarePen,
   Sun,
+  UserRound,
+  X,
 } from 'lucide-react';
-import atomLogo from '@/assets/multiplex-atom.jpg';
 import {
   Conversation,
   ConversationContent,
-  ConversationEmptyState,
   ConversationScrollButton,
 } from '@/components/ai-elements/conversation';
 import { Message, MessageContent, MessageResponse } from '@/components/ai-elements/message';
+import {
+  PromptInput,
+  PromptInputButton,
+  PromptInputFooter,
+  PromptInputSubmit,
+  PromptInputTextarea,
+} from '@/components/ai-elements/prompt-input';
 import { Shimmer } from '@/components/ai-elements/shimmer';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
 
 const API_BASE = typeof window !== 'undefined' && window.location.port === '5173'
   ? 'http://localhost:3000'
@@ -43,26 +49,21 @@ export const LandingChatPage: React.FC<LandingChatPageProps> = ({
   theme,
   toggleTheme,
   onLogin,
-  onRegister,
 }) => {
   const [messages, setMessages] = useState<LandingMessage[]>([]);
-  const [inputText, setInputText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [conversationId, setConversationId] = useState<string>();
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [navigationOpen, setNavigationOpen] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const sendMessage = useCallback(async (text: string) => {
     const prompt = text.trim();
     if (!prompt || isTyping) return;
 
-    const userMessage: LandingMessage = {
-      id: `user-${Date.now()}`,
-      role: 'user',
-      content: prompt,
-    };
-
-    setInputText('');
-    setMessages((current) => [...current, userMessage]);
+    setMessages((current) => [
+      ...current,
+      { id: `user-${Date.now()}`, role: 'user', content: prompt },
+    ]);
     setIsTyping(true);
 
     try {
@@ -77,10 +78,7 @@ export const LandingChatPage: React.FC<LandingChatPageProps> = ({
         }),
       });
       const data = await response.json().catch(() => ({}));
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Não foi possível processar sua solicitação agora.');
-      }
+      if (!response.ok) throw new Error(data.error || 'Não foi possível concluir agora.');
 
       setConversationId(data.conversation?.id);
       setMessages((current) => [
@@ -97,7 +95,7 @@ export const LandingChatPage: React.FC<LandingChatPageProps> = ({
         {
           id: `error-${Date.now()}`,
           role: 'assistant',
-          content: error instanceof Error ? error.message : 'Não foi possível processar sua solicitação agora.',
+          content: error instanceof Error ? error.message : 'Não foi possível concluir agora.',
         },
       ]);
     } finally {
@@ -108,148 +106,141 @@ export const LandingChatPage: React.FC<LandingChatPageProps> = ({
   const startNewChat = () => {
     setMessages([]);
     setConversationId(undefined);
-    setInputText('');
-  };
-
-  const handleSubmit = (event: React.FormEvent) => {
-    event.preventDefault();
-    sendMessage(inputText);
+    setNavigationOpen(false);
   };
 
   const composer = (
-    <form onSubmit={handleSubmit} className="mx-auto w-full max-w-3xl">
-      <div className="flex items-end gap-2 rounded-[28px] border border-border bg-muted/60 px-3 py-2 shadow-sm transition-colors focus-within:border-foreground/20">
-        <button
-          type="button"
-          aria-label="Adicionar"
-          className="mb-1 grid size-9 shrink-0 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-foreground/10 hover:text-foreground"
-        >
-          <Plus className="size-5" />
-        </button>
-        <textarea
-          autoFocus
-          rows={1}
-          value={inputText}
+    <PromptInput
+      accept="image/*,.pdf,.txt,.doc,.docx"
+      multiple
+      onSubmit={({ text }) => sendMessage(text)}
+      className="multiplex-composer"
+    >
+      <PromptInputTextarea
+        autoFocus
+        disabled={isTyping}
+        name="message"
+        placeholder="Mensagem para a Multiplex IA"
+        className="min-h-24 px-5 pt-5 text-[15px] leading-6 sm:min-h-28"
+      />
+      <PromptInputFooter className="px-3 pb-3">
+        <div className="flex items-center gap-1">
+          <PromptInputButton
+            aria-label="Anexar arquivo"
+            title="Anexar arquivo"
+            onClick={() => fileInputRef.current?.click()}
+            className="text-muted-foreground hover:text-foreground"
+          >
+            <Paperclip className="size-4" />
+          </PromptInputButton>
+          <PromptInputButton
+            aria-label="Usar voz"
+            title="Usar voz"
+            className="text-muted-foreground hover:text-foreground"
+          >
+            <Mic className="size-4" />
+          </PromptInputButton>
+        </div>
+        <PromptInputSubmit
+          aria-label="Enviar mensagem"
           disabled={isTyping}
-          onChange={(event) => {
-            setInputText(event.target.value);
-            event.target.style.height = 'auto';
-            event.target.style.height = `${Math.min(event.target.scrollHeight, 200)}px`;
-          }}
-          onKeyDown={(event) => {
-            if (event.key === 'Enter' && !event.shiftKey) {
-              event.preventDefault();
-              sendMessage(inputText);
-            }
-          }}
-          placeholder="Pergunte à Multiplex IA"
-          className="max-h-[200px] min-h-9 flex-1 resize-none bg-transparent py-2 text-base leading-6 text-foreground outline-none placeholder:text-muted-foreground"
-        />
-        <button
-          type="button"
-          aria-label="Ditar"
-          className="mb-1 grid size-9 shrink-0 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-foreground/10 hover:text-foreground"
+          status={isTyping ? 'submitted' : 'ready'}
+          className="size-9 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90"
         >
-          <Mic className="size-5" />
-        </button>
-        <button
-          type="submit"
-          aria-label="Enviar"
-          disabled={!inputText.trim() || isTyping}
-          className="mb-1 grid size-9 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground transition-opacity disabled:opacity-40"
-        >
-          <ArrowUp className="size-5" />
-        </button>
-      </div>
-    </form>
+          {!isTyping && <ArrowUp className="size-4" />}
+        </PromptInputSubmit>
+      </PromptInputFooter>
+    </PromptInput>
   );
 
   return (
-    <div className="flex h-dvh min-h-0 w-full bg-background text-foreground">
-      {/* Barra lateral */}
-      <aside
-        className={cn(
-          'hidden shrink-0 flex-col justify-between border-r border-border bg-muted/40 transition-all duration-200 md:flex',
-          sidebarOpen ? 'w-64' : 'w-16',
-        )}
-      >
-        <div className="flex flex-col gap-1 p-3">
-          <div className="mb-2 flex items-center justify-between">
-            <img className="size-8 rounded-lg object-cover" src={atomLogo} alt="Multiplex IA" />
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setSidebarOpen((value) => !value)}
-              title="Recolher barra lateral"
-              aria-label="Recolher barra lateral"
-            >
-              <PanelLeft />
-            </Button>
-          </div>
+    <div className="relative flex h-dvh min-h-0 w-full overflow-hidden bg-background text-foreground">
+      <input ref={fileInputRef} type="file" multiple className="hidden" aria-hidden="true" />
 
-          <SidebarItem icon={<SquarePen className="size-4" />} label="Novo chat" open={sidebarOpen} onClick={startNewChat} />
-          <SidebarItem icon={<Search className="size-4" />} label="Buscar chats" open={sidebarOpen} onClick={startNewChat} />
-          <SidebarItem icon={<Settings className="size-4" />} label="Configurações" open={sidebarOpen} onClick={onLogin} />
+      <header className="absolute inset-x-0 top-0 z-30 flex h-16 items-center justify-between px-4 sm:px-7">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setNavigationOpen(true)}
+          aria-label="Abrir conversas"
+          title="Conversas"
+          className="rounded-lg text-muted-foreground hover:text-foreground"
+        >
+          <Menu />
+        </Button>
+        <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleTheme}
+            aria-label="Alternar tema"
+            title="Alternar tema"
+            className="rounded-lg text-muted-foreground hover:text-foreground"
+          >
+            {theme === 'dark' ? <Sun /> : <Moon />}
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onLogin}
+            aria-label="Acessar conta"
+            title="Acessar conta"
+            className="rounded-lg text-muted-foreground hover:text-foreground"
+          >
+            <UserRound />
+          </Button>
         </div>
+      </header>
 
-        {sidebarOpen && (
-          <div className="border-t border-border p-4">
-            <p className="text-sm font-medium">Respostas com os seus dados</p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              Entre para acessar o seu catálogo, pedidos e histórico de conversas.
-            </p>
-            <Button className="mt-3 w-full" onClick={onLogin}>Entrar</Button>
-          </div>
-        )}
-      </aside>
+      {navigationOpen && (
+        <>
+          <button
+            type="button"
+            className="absolute inset-0 z-40 bg-overlay backdrop-blur-sm"
+            onClick={() => setNavigationOpen(false)}
+            aria-label="Fechar navegação"
+          />
+          <aside className="absolute inset-y-0 left-0 z-50 flex w-[min(88vw,320px)] flex-col border-r border-border bg-popover/95 p-4 shadow-2xl backdrop-blur-2xl">
+            <div className="mb-8 flex items-center justify-between px-1">
+              <span className="font-display text-base font-semibold">Multiplex IA</span>
+              <Button variant="ghost" size="icon" onClick={() => setNavigationOpen(false)} aria-label="Fechar">
+                <X />
+              </Button>
+            </div>
+            <Button variant="secondary" className="justify-start" onClick={startNewChat}>
+              <Plus /> Novo chat
+            </Button>
+            <div className="mt-7 flex items-center gap-2 px-2 text-xs font-medium text-muted-foreground">
+              <History className="size-4" /> Conversas
+            </div>
+            <div className="mt-3 flex min-h-0 flex-1 flex-col items-center justify-center text-center text-muted-foreground">
+              <Search className="mb-3 size-5" />
+              <span className="text-xs">Nenhuma conversa salva</span>
+            </div>
+          </aside>
+        </>
+      )}
 
-      <main className="flex min-w-0 flex-1 flex-col">
-        <header className="flex h-14 shrink-0 items-center justify-between gap-3 px-3 sm:px-5">
-          <div className="flex min-w-0 items-center gap-2">
-            <Button
-              className="md:hidden"
-              variant="ghost"
-              size="icon"
-              onClick={() => setSidebarOpen((value) => !value)}
-              aria-label="Menu"
-            >
-              <PanelLeft />
-            </Button>
-            <span className="truncate text-base font-semibold">Multiplex IA</span>
-          </div>
-          <div className="flex shrink-0 items-center gap-2">
-            <Button variant="ghost" size="icon" onClick={toggleTheme} title="Alternar tema" aria-label="Alternar tema">
-              {theme === 'dark' ? <Sun /> : <Moon />}
-            </Button>
-            <Button variant="outline" size="sm" className="rounded-full" onClick={onLogin}>
-              Entrar
-            </Button>
-            <Button size="sm" className="hidden rounded-full sm:inline-flex" onClick={onRegister}>
-              Criar conta
-            </Button>
-          </div>
-        </header>
-
+      <main className="relative flex min-w-0 flex-1 flex-col pt-16">
         {messages.length === 0 && !isTyping ? (
-          <div className="flex min-h-0 flex-1 flex-col items-center justify-center px-4">
-            <h1 className="mb-7 text-center text-[1.75rem] font-semibold sm:text-[2rem]">
-              Por onde começamos?
-            </h1>
-            <div className="w-full">{composer}</div>
-            <p className="mt-4 text-center text-xs text-muted-foreground">
-              A Multiplex IA responde com os dados reais cadastrados no seu sistema.
-            </p>
-          </div>
+          <section className="flex min-h-0 flex-1 items-center justify-center px-4 pb-[10vh]">
+            <div className="w-full max-w-3xl animate-chat-enter">
+              <div className="mb-10 text-center">
+                <div className="mx-auto mb-5 grid size-10 place-items-center rounded-xl border border-primary/25 bg-primary/10 shadow-glow">
+                  <span className="size-2 rounded-full bg-primary" />
+                </div>
+                <h1 className="font-display text-3xl font-medium sm:text-4xl">O que vamos fazer?</h1>
+              </div>
+              {composer}
+            </div>
+          </section>
         ) : (
           <>
             <Conversation className="min-h-0">
-              <ConversationContent className="mx-auto min-h-full w-full max-w-3xl gap-7 px-4 py-6 sm:px-6">
-                {messages.length === 0 && (
-                  <ConversationEmptyState className="min-h-[40vh]" title="" description="" />
-                )}
+              <ConversationContent className="mx-auto min-h-full w-full max-w-3xl gap-9 px-4 pb-8 pt-10 sm:px-6">
                 {messages.map((message) => (
                   <Message key={message.id} from={message.role}>
-                    <MessageContent className="text-[0.95rem] leading-7">
+                    <MessageContent className="text-[15px] leading-7">
                       {message.role === 'assistant'
                         ? <MessageResponse>{message.content}</MessageResponse>
                         : message.content}
@@ -258,20 +249,14 @@ export const LandingChatPage: React.FC<LandingChatPageProps> = ({
                 ))}
                 {isTyping && (
                   <Message from="assistant">
-                    <MessageContent>
-                      <Shimmer>Pensando...</Shimmer>
-                    </MessageContent>
+                    <MessageContent><Shimmer>Pensando…</Shimmer></MessageContent>
                   </Message>
                 )}
               </ConversationContent>
               <ConversationScrollButton />
             </Conversation>
-
-            <div className="shrink-0 px-3 pb-4 pt-2 sm:px-6">
-              {composer}
-              <p className="mt-2 text-center text-xs text-muted-foreground">
-                Confira informações importantes antes de tomar decisões.
-              </p>
+            <div className="shrink-0 px-4 pb-5 pt-2 sm:px-6">
+              <div className="mx-auto max-w-3xl">{composer}</div>
             </div>
           </>
         )}
@@ -279,23 +264,3 @@ export const LandingChatPage: React.FC<LandingChatPageProps> = ({
     </div>
   );
 };
-
-const SidebarItem: React.FC<{
-  icon: React.ReactNode;
-  label: string;
-  open: boolean;
-  onClick: () => void;
-}> = ({ icon, label, open, onClick }) => (
-  <button
-    type="button"
-    onClick={onClick}
-    title={label}
-    className={cn(
-      'flex items-center gap-3 rounded-lg px-2.5 py-2 text-sm text-foreground/80 transition-colors hover:bg-foreground/10 hover:text-foreground',
-      !open && 'justify-center',
-    )}
-  >
-    <span className="shrink-0">{icon}</span>
-    {open && <span className="truncate">{label}</span>}
-  </button>
-);
