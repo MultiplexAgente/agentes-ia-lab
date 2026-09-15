@@ -354,6 +354,9 @@ function AiRoutingAdminPage() {
                         <td className="p-2 whitespace-nowrap">
                           {new Date(log.created_at).toLocaleString("pt-BR")}
                         </td>
+                        <td className="p-2 whitespace-nowrap">
+                          {log.channel === "whatsapp" ? "WhatsApp" : "Chat web"}
+                        </td>
                         <td className="p-2">
                           {log.task_category} · {log.complexity}
                         </td>
