@@ -3,6 +3,15 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 
+// O nome real do modelo nunca aparece na tela: mostramos o "motor" escolhido.
+const TIER_LABELS: Record<string, string> = {
+  quality: "Motor máxima qualidade",
+  balanced: "Motor equilibrado",
+  fast: "Motor rápido",
+  cheap: "Motor econômico",
+  code: "Motor técnico",
+};
+
 interface AuditLog {
   id: string;
   created_at: string;
@@ -221,7 +230,7 @@ function AiRoutingAdminPage() {
                       const price = draft.modelPrices[model.id] ?? { input: 0, output: 0 };
                       return (
                         <div key={model.id} className="flex flex-wrap items-center gap-2 text-sm">
-                          <span className="min-w-40 font-mono text-xs">{model.id}</span>
+                          <span className="min-w-48 text-xs">{TIER_LABELS[model.tier] ?? model.tier}</span>
                           <input
                             type="number"
                             step="0.01"
@@ -324,8 +333,10 @@ function AiRoutingAdminPage() {
                           {log.task_category} · {log.complexity}
                         </td>
                         <td className="p-2">{log.strategy}</td>
-                        <td className="p-2 font-mono">
-                          {log.model_used}
+                        <td className="p-2">
+                          {TIER_LABELS[
+                            data.catalog.models.find((model) => model.id === log.model_used)?.tier ?? ""
+                          ] ?? "Motor interno"}
                           {log.fallback_used && <span className="ml-1 text-amber-500">(fallback)</span>}
                         </td>
                         <td className="p-2 whitespace-nowrap">
