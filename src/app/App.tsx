@@ -20,7 +20,7 @@ import { aiConversationService } from './services/aiConversationService';
 import { LandingChatPage } from './components/landing/LandingChatPage';
 import { Conversation, ConversationContent, ConversationEmptyState, ConversationScrollButton } from '@/components/ai-elements/conversation';
 import { Message, MessageActions, MessageAction, MessageContent, MessageResponse } from '@/components/ai-elements/message';
-import { PromptInput, PromptInputFooter, PromptInputSubmit, PromptInputTextarea } from '@/components/ai-elements/prompt-input';
+import { PromptInput, PromptInputButton, PromptInputFooter, PromptInputSubmit, PromptInputTextarea } from '@/components/ai-elements/prompt-input';
 import { Shimmer } from '@/components/ai-elements/shimmer';
 import { Tool, ToolContent, ToolHeader, ToolInput, ToolOutput } from '@/components/ai-elements/tool';
 import { Button } from '@/components/ui/button';
@@ -253,6 +253,7 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => window.innerWidth <= 768);
+  const [chatNavigationOpen, setChatNavigationOpen] = useState(false);
 
   // Pastas
   const [isCreatingFolder, setIsCreatingFolder] = useState(false);
@@ -2675,7 +2676,7 @@ export default function App() {
   return (
     <div className="app-container">
       {/* BARRA LATERAL */}
-      {!sidebarCollapsed && (
+      {!sidebarCollapsed && activeView !== 'chat' && (
         <aside className="sidebar">
           {/* Cabecalho */}
           <div className="chatgpt-sidebar-header">
@@ -3355,25 +3356,20 @@ export default function App() {
 
       {/* AREA PRINCIPAL: CHAT OU TELAS */}
       {activeView === 'chat' && (
-        <main className="flex min-h-0 flex-1 flex-col bg-background text-foreground">
-          <header className="flex h-14 shrink-0 items-center justify-between border-b border-border px-3 sm:px-5">
-            <div className="flex min-w-0 items-center gap-2.5">
-              {sidebarCollapsed && (
-                <Button variant="ghost" size="icon" title="Abrir menu" onClick={() => setSidebarCollapsed(false)}>
-                  <PanelLeft />
-                </Button>
-              )}
-              <img src={atomLogo} alt="Multiplex IA" className="size-7 rounded-md object-cover" />
-              <span className="truncate text-sm font-semibold">Multiplex IA</span>
-            </div>
+        <main className="relative flex min-h-0 flex-1 flex-col bg-background text-foreground">
+          <header className="flex h-16 shrink-0 items-center justify-between px-4 sm:px-7">
+            <Button variant="ghost" size="icon" title="Abrir conversas" aria-label="Abrir conversas" onClick={() => setChatNavigationOpen(true)} className="rounded-lg text-muted-foreground hover:text-foreground">
+              <PanelLeft />
+            </Button>
             <div className="flex items-center gap-1">
-              <Button variant="ghost" size="icon" title="Exportar conversa" onClick={handleExportConversation}>
+              <Button variant="ghost" size="icon" title="Exportar conversa" onClick={handleExportConversation} className="rounded-lg text-muted-foreground hover:text-foreground">
                 <Download />
               </Button>
               <Button
                 variant="ghost"
                 size="icon"
                 title="Limpar conversa"
+                className="rounded-lg text-muted-foreground hover:text-foreground"
                 onClick={() => {
                   if (currentChat?.messages.length && confirm('Deseja limpar as mensagens desta conversa?')) {
                     setChats(chats.map((chat) => chat.id === currentChat.id ? { ...chat, messages: [] } : chat));
@@ -3382,18 +3378,44 @@ export default function App() {
               >
                 <Trash2 />
               </Button>
-              <Button variant="ghost" size="icon" title="Nova conversa" onClick={handleCreateNewChat}>
+              <Button variant="ghost" size="icon" title="Nova conversa" onClick={handleCreateNewChat} className="rounded-lg text-muted-foreground hover:text-foreground">
                 <Plus />
               </Button>
             </div>
           </header>
 
+          {chatNavigationOpen && (
+            <>
+              <button type="button" className="absolute inset-0 z-40 bg-overlay backdrop-blur-sm" onClick={() => setChatNavigationOpen(false)} aria-label="Fechar navegação" />
+              <aside className="absolute inset-y-0 left-0 z-50 flex w-[min(88vw,320px)] flex-col border-r border-border bg-popover/95 p-4 shadow-2xl backdrop-blur-2xl">
+                <div className="mb-8 flex items-center justify-between px-1">
+                  <span className="font-display text-base font-semibold">Multiplex IA</span>
+                  <Button variant="ghost" size="icon" onClick={() => setChatNavigationOpen(false)} aria-label="Fechar"><X /></Button>
+                </div>
+                <Button variant="secondary" className="justify-start" onClick={() => { handleCreateNewChat(); setChatNavigationOpen(false); }}>
+                  <Plus /> Novo chat
+                </Button>
+                <div className="mt-7 flex items-center gap-2 px-2 text-xs font-medium text-muted-foreground"><History className="size-4" /> Conversas</div>
+                <div className="mt-3 min-h-0 flex-1 space-y-1 overflow-y-auto">
+                  {filteredChats.map((chat) => (
+                    <Button key={chat.id} variant={activeChatId === chat.id ? 'secondary' : 'ghost'} className="w-full justify-start truncate" onClick={() => { setActiveChatId(chat.id); setChatNavigationOpen(false); }}>
+                      <MessageSquare className="size-4 shrink-0" /><span className="truncate">{chat.title}</span>
+                    </Button>
+                  ))}
+                </div>
+                <Button variant="ghost" className="justify-start text-muted-foreground" onClick={() => { setChatNavigationOpen(false); setActiveView('dashboard'); setSidebarCollapsed(false); }}>
+                  <LayoutDashboard /> Painel da empresa
+                </Button>
+              </aside>
+            </>
+          )}
+
           <Conversation className="min-h-0">
-            <ConversationContent className="mx-auto min-h-full w-full max-w-3xl gap-7 px-4 py-8 sm:px-6">
+            <ConversationContent className="mx-auto min-h-full w-full max-w-3xl gap-9 px-4 py-8 sm:px-6">
               {currentChat && currentChat.messages.length === 0 ? (
-                <ConversationEmptyState className="min-h-[58vh] p-4">
-                  <img src={atomLogo} alt="Multiplex IA" className="mb-3 size-12 rounded-xl object-cover" />
-                  <h1 className="text-2xl font-semibold sm:text-3xl">Como posso ajudar?</h1>
+                <ConversationEmptyState className="min-h-[62vh] p-4 animate-chat-enter">
+                  <div className="mb-3 grid size-10 place-items-center rounded-xl border border-primary/25 bg-primary/10 shadow-glow"><span className="size-2 rounded-full bg-primary" /></div>
+                  <h1 className="font-display text-3xl font-medium sm:text-4xl">O que vamos fazer?</h1>
                 </ConversationEmptyState>
               ) : (
                 currentChat?.messages.map((msg) => (
@@ -3481,7 +3503,7 @@ export default function App() {
             <ConversationScrollButton />
           </Conversation>
 
-          <div className="shrink-0 bg-background px-3 pb-4 pt-2 sm:px-6 sm:pb-6">
+          <div className="shrink-0 bg-background px-4 pb-5 pt-2 sm:px-6">
             <div className="mx-auto w-full max-w-3xl">
               {attachedFile && (
                 <div className="mb-2 flex items-center justify-between rounded-md border border-border bg-muted px-3 py-2 text-xs">
@@ -3489,24 +3511,23 @@ export default function App() {
                   <Button variant="ghost" size="icon-sm" title="Remover anexo" onClick={() => setAttachedFile(null)}><X /></Button>
                 </div>
               )}
-              <PromptInput className="rounded-2xl border-border bg-card shadow-sm" onSubmit={() => handleSendMessage()}>
+              <PromptInput className="multiplex-composer" onSubmit={() => handleSendMessage()}>
                 <PromptInputTextarea
                   autoFocus
-                  className="min-h-14 px-4 py-3 text-base"
+                  className="min-h-24 px-5 pt-5 text-[15px] leading-6 sm:min-h-28"
                   disabled={isSendingMessage}
                   onChange={(event) => setChatInput(event.target.value)}
-                  placeholder="Escreva o que você precisa"
+                  placeholder="Mensagem para a Multiplex IA"
                   value={chatInput}
                 />
-                <PromptInputFooter className="px-2 pb-2">
+                <PromptInputFooter className="px-3 pb-3">
                   <div className="flex items-center gap-1">
-                    <Button variant="ghost" size="icon-sm" title="Anexar arquivo" onClick={() => setShowAttachModal(true)}><Paperclip /></Button>
-                    <Button variant="ghost" size="icon-sm" title="Ditar por voz" onClick={handleToggleVoiceRecording}>{isRecordingVoice ? <MicOff /> : <Mic />}</Button>
+                    <PromptInputButton tooltip="Anexar arquivo" onClick={() => setShowAttachModal(true)} className="text-muted-foreground hover:text-foreground"><Paperclip /></PromptInputButton>
+                    <PromptInputButton tooltip="Ditar por voz" onClick={handleToggleVoiceRecording} className="text-muted-foreground hover:text-foreground">{isRecordingVoice ? <MicOff /> : <Mic />}</PromptInputButton>
                   </div>
-                  <PromptInputSubmit disabled={!chatInput.trim() || isSendingMessage} status={isSendingMessage ? 'submitted' : 'ready'} />
+                  <PromptInputSubmit className="size-9 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90" disabled={!chatInput.trim() || isSendingMessage} status={isSendingMessage ? 'submitted' : 'ready'}>{!isSendingMessage && <ArrowUp />}</PromptInputSubmit>
                 </PromptInputFooter>
               </PromptInput>
-              <p className="mt-2 text-center text-xs text-muted-foreground">Confira informações importantes antes de tomar decisões.</p>
             </div>
           </div>
         </main>
