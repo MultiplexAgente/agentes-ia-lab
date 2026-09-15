@@ -89,16 +89,19 @@ function AiRoutingAdminPage() {
   const [saving, setSaving] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const [draft, setDraft] = useState<AdminPayload["settings"] | null>(null);
+  const [companyId, setCompanyId] = useState<string>("");
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (selected?: string) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch("/api/admin/ai-routing?limit=100");
+      const query = selected ? `&companyId=${selected}` : "";
+      const response = await fetch(`/api/admin/ai-routing?limit=100${query}`);
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error ?? "Falha ao carregar a auditoria.");
       setData(payload as AdminPayload);
       setDraft((payload as AdminPayload).settings);
+      setCompanyId((payload as AdminPayload).company.id);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Falha ao carregar a auditoria.");
     } finally {
@@ -118,7 +121,7 @@ function AiRoutingAdminPage() {
       const response = await fetch("/api/admin/ai-routing", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ settings: draft }),
+        body: JSON.stringify({ settings: draft, companyId }),
       });
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error ?? "Falha ao salvar.");
