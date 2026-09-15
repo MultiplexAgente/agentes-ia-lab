@@ -85,6 +85,7 @@ function CompanyPage() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [firstAccess, setFirstAccess] = useState(false);
 
   const [form, setForm] = useState({
     id: "",
@@ -136,7 +137,7 @@ function CompanyPage() {
       const response = await fetch("/api/company/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, create: firstAccess }),
       });
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error ?? "E-mail ou senha inválidos.");
