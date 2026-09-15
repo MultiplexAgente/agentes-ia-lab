@@ -13,6 +13,10 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminAiRoutingRouteImport } from './routes/admin.ai-routing'
 import { Route as ApiProductsRouteImport } from './routes/api/products'
 import { Route as ApiAdminAiRoutingRouteImport } from './routes/api/admin/ai-routing'
+import { Route as ApiCompanyLoginRouteImport } from './routes/api/company/login'
+import { Route as ApiCompanyProductsRouteImport } from './routes/api/company/products'
+import { Route as ApiCompanySettingsRouteImport } from './routes/api/company/settings'
+import { Route as ApiCompanyWorkspaceRouteImport } from './routes/api/company/workspace'
 import { Route as ApiAiConversationChatRouteImport } from './routes/api/ai/conversation/chat'
 import { Route as ApiPublicWhatsappWebhookRouteImport } from './routes/api/public/whatsapp/webhook'
 
@@ -36,6 +40,26 @@ const ApiAdminAiRoutingRoute = ApiAdminAiRoutingRouteImport.update({
   path: '/api/admin/ai-routing',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiCompanyLoginRoute = ApiCompanyLoginRouteImport.update({
+  id: '/api/company/login',
+  path: '/api/company/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiCompanyProductsRoute = ApiCompanyProductsRouteImport.update({
+  id: '/api/company/products',
+  path: '/api/company/products',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiCompanySettingsRoute = ApiCompanySettingsRouteImport.update({
+  id: '/api/company/settings',
+  path: '/api/company/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiCompanyWorkspaceRoute = ApiCompanyWorkspaceRouteImport.update({
+  id: '/api/company/workspace',
+  path: '/api/company/workspace',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAiConversationChatRoute = ApiAiConversationChatRouteImport.update({
   id: '/api/ai/conversation/chat',
   path: '/api/ai/conversation/chat',
@@ -53,6 +77,10 @@ export interface FileRoutesByFullPath {
   '/admin/ai-routing': typeof AdminAiRoutingRoute
   '/api/products': typeof ApiProductsRoute
   '/api/admin/ai-routing': typeof ApiAdminAiRoutingRoute
+  '/api/company/login': typeof ApiCompanyLoginRoute
+  '/api/company/products': typeof ApiCompanyProductsRoute
+  '/api/company/settings': typeof ApiCompanySettingsRoute
+  '/api/company/workspace': typeof ApiCompanyWorkspaceRoute
   '/api/ai/conversation/chat': typeof ApiAiConversationChatRoute
   '/api/public/whatsapp/webhook': typeof ApiPublicWhatsappWebhookRoute
 }
@@ -61,6 +89,10 @@ export interface FileRoutesByTo {
   '/admin/ai-routing': typeof AdminAiRoutingRoute
   '/api/products': typeof ApiProductsRoute
   '/api/admin/ai-routing': typeof ApiAdminAiRoutingRoute
+  '/api/company/login': typeof ApiCompanyLoginRoute
+  '/api/company/products': typeof ApiCompanyProductsRoute
+  '/api/company/settings': typeof ApiCompanySettingsRoute
+  '/api/company/workspace': typeof ApiCompanyWorkspaceRoute
   '/api/ai/conversation/chat': typeof ApiAiConversationChatRoute
   '/api/public/whatsapp/webhook': typeof ApiPublicWhatsappWebhookRoute
 }
@@ -70,6 +102,10 @@ export interface FileRoutesById {
   '/admin/ai-routing': typeof AdminAiRoutingRoute
   '/api/products': typeof ApiProductsRoute
   '/api/admin/ai-routing': typeof ApiAdminAiRoutingRoute
+  '/api/company/login': typeof ApiCompanyLoginRoute
+  '/api/company/products': typeof ApiCompanyProductsRoute
+  '/api/company/settings': typeof ApiCompanySettingsRoute
+  '/api/company/workspace': typeof ApiCompanyWorkspaceRoute
   '/api/ai/conversation/chat': typeof ApiAiConversationChatRoute
   '/api/public/whatsapp/webhook': typeof ApiPublicWhatsappWebhookRoute
 }
@@ -80,6 +116,10 @@ export interface FileRouteTypes {
     | '/admin/ai-routing'
     | '/api/products'
     | '/api/admin/ai-routing'
+    | '/api/company/login'
+    | '/api/company/products'
+    | '/api/company/settings'
+    | '/api/company/workspace'
     | '/api/ai/conversation/chat'
     | '/api/public/whatsapp/webhook'
   fileRoutesByTo: FileRoutesByTo
@@ -88,6 +128,10 @@ export interface FileRouteTypes {
     | '/admin/ai-routing'
     | '/api/products'
     | '/api/admin/ai-routing'
+    | '/api/company/login'
+    | '/api/company/products'
+    | '/api/company/settings'
+    | '/api/company/workspace'
     | '/api/ai/conversation/chat'
     | '/api/public/whatsapp/webhook'
   id:
@@ -96,6 +140,10 @@ export interface FileRouteTypes {
     | '/admin/ai-routing'
     | '/api/products'
     | '/api/admin/ai-routing'
+    | '/api/company/login'
+    | '/api/company/products'
+    | '/api/company/settings'
+    | '/api/company/workspace'
     | '/api/ai/conversation/chat'
     | '/api/public/whatsapp/webhook'
   fileRoutesById: FileRoutesById
@@ -105,6 +153,10 @@ export interface RootRouteChildren {
   AdminAiRoutingRoute: typeof AdminAiRoutingRoute
   ApiProductsRoute: typeof ApiProductsRoute
   ApiAdminAiRoutingRoute: typeof ApiAdminAiRoutingRoute
+  ApiCompanyLoginRoute: typeof ApiCompanyLoginRoute
+  ApiCompanyProductsRoute: typeof ApiCompanyProductsRoute
+  ApiCompanySettingsRoute: typeof ApiCompanySettingsRoute
+  ApiCompanyWorkspaceRoute: typeof ApiCompanyWorkspaceRoute
   ApiAiConversationChatRoute: typeof ApiAiConversationChatRoute
   ApiPublicWhatsappWebhookRoute: typeof ApiPublicWhatsappWebhookRoute
 }
@@ -139,6 +191,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAdminAiRoutingRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/company/login': {
+      id: '/api/company/login'
+      path: '/api/company/login'
+      fullPath: '/api/company/login'
+      preLoaderRoute: typeof ApiCompanyLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/company/products': {
+      id: '/api/company/products'
+      path: '/api/company/products'
+      fullPath: '/api/company/products'
+      preLoaderRoute: typeof ApiCompanyProductsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/company/settings': {
+      id: '/api/company/settings'
+      path: '/api/company/settings'
+      fullPath: '/api/company/settings'
+      preLoaderRoute: typeof ApiCompanySettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/company/workspace': {
+      id: '/api/company/workspace'
+      path: '/api/company/workspace'
+      fullPath: '/api/company/workspace'
+      preLoaderRoute: typeof ApiCompanyWorkspaceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/ai/conversation/chat': {
       id: '/api/ai/conversation/chat'
       path: '/api/ai/conversation/chat'
@@ -161,6 +241,10 @@ const rootRouteChildren: RootRouteChildren = {
   AdminAiRoutingRoute: AdminAiRoutingRoute,
   ApiProductsRoute: ApiProductsRoute,
   ApiAdminAiRoutingRoute: ApiAdminAiRoutingRoute,
+  ApiCompanyLoginRoute: ApiCompanyLoginRoute,
+  ApiCompanyProductsRoute: ApiCompanyProductsRoute,
+  ApiCompanySettingsRoute: ApiCompanySettingsRoute,
+  ApiCompanyWorkspaceRoute: ApiCompanyWorkspaceRoute,
   ApiAiConversationChatRoute: ApiAiConversationChatRoute,
   ApiPublicWhatsappWebhookRoute: ApiPublicWhatsappWebhookRoute,
 }
