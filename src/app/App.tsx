@@ -594,19 +594,12 @@ export default function App() {
   });
 
   // Treinamento
-  const [teachChat, setTeachChat] = useState<Array<{ sender: 'user' | 'agent'; text: string; structured?: any }>>([
-    { 
-      sender: 'agent', 
-      text: 'Olá, sou o Multiplex IA. Insira informações sobre produtos, preços, regras ou horários para eu aprender.' 
-    }
-  ]);
+  const [teachChat, setTeachChat] = useState<Array<{ sender: 'user' | 'agent'; text: string; structured?: any }>>([]);
   const [teachInput, setTeachInput] = useState('');
   const [structuredHistory, setStructuredHistory] = useState<any[]>([]);
 
   // Playground
-  const [playgroundMessages, setPlaygroundMessages] = useState<Array<{ role: 'user' | 'assistant'; content: string }>>([
-    { role: 'assistant', content: 'Ambiente de testes do Multiplex IA. Digite para testar a execução de funções e regras.' }
-  ]);
+  const [playgroundMessages, setPlaygroundMessages] = useState<Array<{ role: 'user' | 'assistant'; content: string }>>([]);
   const [playgroundInput, setPlaygroundInput] = useState('');
   const [playgroundDebug, setPlaygroundDebug] = useState<any>(null);
   const [playgroundConversationId, setPlaygroundConversationId] = useState<string>();
@@ -1161,7 +1154,10 @@ export default function App() {
         loadData();
       }
     } catch (e) {
-      setTeachChat(prev => [...prev, { sender: 'agent', text: 'Informacao processada e salva.' }]);
+      setTeachChat(prev => [...prev, {
+        sender: 'agent',
+        text: e instanceof Error ? e.message : 'Falha ao salvar a informação.'
+      }]);
     }
   };
 
