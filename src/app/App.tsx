@@ -503,15 +503,12 @@ export default function App() {
 
   // Autenticacao, Login, Cadastro e Aba de Planos
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
-    const saved = localStorage.getItem('multiplex_is_authenticated');
-    return saved !== 'false';
+    return Boolean(localStorage.getItem('multiplex_company_token'));
   });
 
   // Landing page: exibida antes do formulário de auth
   const [showLandingPage, setShowLandingPage] = useState<boolean>(() => {
-    const saved = localStorage.getItem('multiplex_is_authenticated');
-    // Mostra landing se NÃO autenticado
-    return saved === 'false' || saved === null;
+    return !localStorage.getItem('multiplex_company_token');
   });
 
   const [authMode, setAuthMode] = useState<'login' | 'register' | 'plans'>('login');
@@ -685,49 +682,32 @@ export default function App() {
     setAuthLoading(true);
     setAuthError(null);
     try {
-      const res = await fetch(`${API_BASE}/api/auth/login`, {
+       const res = await fetch(`${API_BASE}/api/company/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: authEmail, password: authPassword })
       });
       const data = await res.json();
-      if (res.ok && data.user) {
-        setCurrentUser(data.user);
-        localStorage.setItem('multiplex_user', JSON.stringify(data.user));
+       if (res.ok && data.accessToken) {
+         const user = {
+           name: data.user?.email?.split('@')[0] || 'Usuário',
+           email: data.user?.email,
+           company_id: data.company?.id,
+           company_name: data.company?.name,
+           role: data.user?.role,
+           avatar_initials: (data.user?.email || 'US').slice(0, 2).toUpperCase()
+         };
+         setCurrentUser(user);
+         localStorage.setItem('multiplex_user', JSON.stringify(user));
+         localStorage.setItem('multiplex_company_token', data.accessToken);
         localStorage.setItem('multiplex_is_authenticated', 'true');
         setIsAuthenticated(true);
         loadData();
       } else {
-        const namePart = authEmail.split('@')[0].replace(/[._]/g, ' ');
-        const formattedName = namePart.charAt(0).toUpperCase() + namePart.slice(1);
-        const initials = formattedName.slice(0, 2).toUpperCase() || 'US';
-        const userObj = {
-          name: formattedName,
-          email: authEmail,
-          company_name: 'Minha Empresa',
-          plan_id: 'plan_pro',
-          avatar_initials: initials,
-          billing_cycle: 'monthly'
-        };
-        setCurrentUser(userObj);
-        localStorage.setItem('multiplex_user', JSON.stringify(userObj));
-        localStorage.setItem('multiplex_is_authenticated', 'true');
-        setIsAuthenticated(true);
-        loadData();
+         setAuthError(data.error || 'E-mail ou senha inválidos.');
       }
     } catch (err) {
-      const userObj = {
-        name: 'Anthony Both',
-        email: authEmail || 'anthony@amboth.com.br',
-        company_name: 'Anthony Burgers & Delivery',
-        plan_id: 'plan_pro',
-        avatar_initials: 'AN',
-        billing_cycle: 'monthly'
-      };
-      setCurrentUser(userObj);
-      localStorage.setItem('multiplex_user', JSON.stringify(userObj));
-      localStorage.setItem('multiplex_is_authenticated', 'true');
-      setIsAuthenticated(true);
+       setAuthError(err instanceof Error ? err.message : 'Não foi possível entrar.');
     } finally {
       setAuthLoading(false);
     }
@@ -821,6 +801,8 @@ export default function App() {
 
   const handleLogout = () => {
     localStorage.setItem('multiplex_is_authenticated', 'false');
+    localStorage.removeItem('multiplex_company_token');
+    localStorage.removeItem('multiplex_user');
     setIsAuthenticated(false);
     setShowLandingPage(true);
     setShowUserPopup(false);
