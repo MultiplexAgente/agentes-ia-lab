@@ -333,8 +333,10 @@ function AiRoutingAdminPage() {
                           {log.task_category} · {log.complexity}
                         </td>
                         <td className="p-2">{log.strategy}</td>
-                        <td className="p-2 font-mono">
-                          {log.model_used}
+                        <td className="p-2">
+                          {TIER_LABELS[
+                            data.catalog.models.find((model) => model.id === log.model_used)?.tier ?? ""
+                          ] ?? "Motor interno"}
                           {log.fallback_used && <span className="ml-1 text-amber-500">(fallback)</span>}
                         </td>
                         <td className="p-2 whitespace-nowrap">
