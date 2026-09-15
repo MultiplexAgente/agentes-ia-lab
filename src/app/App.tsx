@@ -2021,12 +2021,6 @@ export default function App() {
                 </div>
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 16px', borderRadius: 10, background: 'rgba(255, 255, 255, 0.02)', border: '1px solid var(--border-subtle)', width: 'fit-content' }}>
-                <Activity size={16} color="#10b981" />
-                <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
-                  <strong style={{ color: 'var(--text-main)' }}>+12.840</strong> mensagens atendidas hoje com 99.4% de satisfação.
-                </span>
-              </div>
             </div>
 
             {/* LADO DIREITO: FORMULARIO DE LOGIN */}
