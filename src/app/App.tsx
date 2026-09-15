@@ -558,7 +558,7 @@ export default function App() {
     revenue_brl: 0.00
   });
 
-  const [dashboardData, setDashboardData] = useState<DashboardData>({
+  const [dashboardData, setDashboardData] = useState<any>({
     metrics: {
       conversations_today: 0,
       messages_today: 0,
@@ -4709,7 +4709,7 @@ export default function App() {
                           <input
                             type="checkbox"
                             checked={(consultantSettings as any).fallback_smart_recommendations ?? true}
-                            onChange={(e) => setConsultantSettings(prev => ({ ...prev, fallback_smart_recommendations: e.target.checked }))}
+                            onChange={(e) => setConsultantSettings(prev => ({ ...prev, fallback_smart_recommendations: e.target.checked }) as any)}
                           />
                           <span>Recomendar alternativas próximas se busca exata não retornar</span>
                         </label>
