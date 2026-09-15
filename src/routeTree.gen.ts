@@ -10,33 +10,43 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiAiConversationChatRouteImport } from './routes/api/ai/conversation/chat'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAiConversationChatRoute = ApiAiConversationChatRouteImport.update({
+  id: '/api/ai/conversation/chat',
+  path: '/api/ai/conversation/chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/api/ai/conversation/chat': typeof ApiAiConversationChatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/api/ai/conversation/chat': typeof ApiAiConversationChatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/api/ai/conversation/chat': typeof ApiAiConversationChatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/api/ai/conversation/chat'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/api/ai/conversation/chat'
+  id: '__root__' | '/' | '/api/ai/conversation/chat'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ApiAiConversationChatRoute: typeof ApiAiConversationChatRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +58,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/ai/conversation/chat': {
+      id: '/api/ai/conversation/chat'
+      path: '/api/ai/conversation/chat'
+      fullPath: '/api/ai/conversation/chat'
+      preLoaderRoute: typeof ApiAiConversationChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ApiAiConversationChatRoute: ApiAiConversationChatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
