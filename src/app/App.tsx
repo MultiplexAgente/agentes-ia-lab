@@ -542,10 +542,9 @@ export default function App() {
     };
   });
 
-  // Estados da IA Mais Completa (Multiplex IA)
-  const [selectedModel, setSelectedModel] = useState<'gpt-4o' | 'claude-3.5-sonnet' | 'deepseek-v3' | 'gemini-1.5-pro'>('gpt-4o');
-  const [showModelDropdown, setShowModelDropdown] = useState(false);
-  const [selectedAIMode, setSelectedAIMode] = useState<'geral' | 'cardapio' | 'logistica' | 'agendamento' | 'vendas' | 'suporte'>('geral');
+  // Multiplex IA: o usuário conversa com UMA IA. A escolha do modelo é feita
+  // automaticamente pelo roteador no servidor e nunca aparece na interface.
+  const [lastRouting, setLastRouting] = useState<{ taskLabel: string; complexity: string } | null>(null);
   const [promptCategory, setPromptCategory] = useState<'destaques' | 'cardapio' | 'frete' | 'horarios' | 'agendamento' | 'promocoes'>('destaques');
   const [isRecordingVoice, setIsRecordingVoice] = useState(false);
   const [speakingMsgId, setSpeakingMsgId] = useState<string | null>(null);
