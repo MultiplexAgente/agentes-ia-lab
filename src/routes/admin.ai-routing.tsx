@@ -126,7 +126,7 @@ function AiRoutingAdminPage() {
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error ?? "Falha ao salvar.");
       setNotice("Prioridades salvas.");
-      await load();
+      await load(companyId);
     } catch (err) {
       setNotice(err instanceof Error ? err.message : "Falha ao salvar.");
     } finally {
@@ -150,6 +150,26 @@ function AiRoutingAdminPage() {
           Visível apenas ao administrador: modelo real escolhido em cada conversa, tokens, custo, latência e as
           prioridades de roteamento da empresa.
         </p>
+
+        {data && data.companies.length > 1 && (
+          <label className="mt-4 block max-w-sm text-sm">
+            <span className="mb-1 block font-medium">Empresa</span>
+            <select
+              className="w-full rounded-md border border-input bg-background p-2"
+              value={companyId}
+              onChange={(event) => {
+                setCompanyId(event.target.value);
+                void load(event.target.value);
+              }}
+            >
+              {data.companies.map((item) => (
+                <option key={item.id} value={item.id}>
+                  {item.name}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
       </header>
 
       {loading && <p className="text-sm text-muted-foreground">Carregando…</p>}
