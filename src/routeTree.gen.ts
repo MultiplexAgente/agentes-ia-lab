@@ -10,11 +10,17 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiAdminAiRoutingRouteImport } from './routes/api/admin/ai-routing'
 import { Route as ApiAiConversationChatRouteImport } from './routes/api/ai/conversation/chat'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAdminAiRoutingRoute = ApiAdminAiRoutingRouteImport.update({
+  id: '/api/admin/ai-routing',
+  path: '/api/admin/ai-routing',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAiConversationChatRoute = ApiAiConversationChatRouteImport.update({
@@ -25,27 +31,31 @@ const ApiAiConversationChatRoute = ApiAiConversationChatRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/api/admin/ai-routing': typeof ApiAdminAiRoutingRoute
   '/api/ai/conversation/chat': typeof ApiAiConversationChatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/api/admin/ai-routing': typeof ApiAdminAiRoutingRoute
   '/api/ai/conversation/chat': typeof ApiAiConversationChatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/api/admin/ai-routing': typeof ApiAdminAiRoutingRoute
   '/api/ai/conversation/chat': typeof ApiAiConversationChatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api/ai/conversation/chat'
+  fullPaths: '/' | '/api/admin/ai-routing' | '/api/ai/conversation/chat'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/ai/conversation/chat'
-  id: '__root__' | '/' | '/api/ai/conversation/chat'
+  to: '/' | '/api/admin/ai-routing' | '/api/ai/conversation/chat'
+  id: '__root__' | '/' | '/api/admin/ai-routing' | '/api/ai/conversation/chat'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ApiAdminAiRoutingRoute: typeof ApiAdminAiRoutingRoute
   ApiAiConversationChatRoute: typeof ApiAiConversationChatRoute
 }
 
@@ -56,6 +66,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/ai-routing': {
+      id: '/api/admin/ai-routing'
+      path: '/api/admin/ai-routing'
+      fullPath: '/api/admin/ai-routing'
+      preLoaderRoute: typeof ApiAdminAiRoutingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/ai/conversation/chat': {
@@ -70,6 +87,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ApiAdminAiRoutingRoute: ApiAdminAiRoutingRoute,
   ApiAiConversationChatRoute: ApiAiConversationChatRoute,
 }
 export const routeTree = rootRouteImport
