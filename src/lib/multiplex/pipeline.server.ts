@@ -124,7 +124,7 @@ export async function runMultiplexTurn(input: ChatTurnInput): Promise<ChatTurnRe
       const outputTokens = usage.outputTokens ?? 0;
       const totalTokens = usage.totalTokens ?? inputTokens + outputTokens;
       const responseModel = finalStep.response.modelId ?? finalStep.model.modelId;
-      const cost = estimateCostUsd(responseModel, inputTokens, outputTokens, settings.modelPrices);
+      const cost = estimateCostUsd(responseModel, inputTokens, outputTokens, settings.modelPrices, candidate);
       const requestMetadata = {
         conversation_id: input.conversationId ?? null,
         message_id: input.messageId ?? null,

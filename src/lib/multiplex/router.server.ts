@@ -223,8 +223,18 @@ export function estimateCostUsd(
   promptTokens: number,
   completionTokens: number,
   prices: RoutingSettings["modelPrices"],
+  requestedModel?: string,
 ): { costUsd: number | null; status: "calculado" | "preco_nao_configurado" } {
-  const price = prices[model];
+  const keys = Object.keys(prices);
+  const candidateKeys = [model, requestedModel].filter(Boolean) as string[];
+  let price = candidateKeys.map((key) => prices[key]).find((item) => item && (item.input || item.output));
+  if (!price) {
+    // O modelo real pode voltar com sufixo de data (ex.: gpt-5.6-luna-2026-08-01).
+    const prefixKey = keys
+      .filter((key) => candidateKeys.some((candidate) => candidate.startsWith(key) || key.startsWith(candidate)))
+      .sort((a, b) => b.length - a.length)[0];
+    if (prefixKey) price = prices[prefixKey];
+  }
   if (!price || (!price.input && !price.output)) {
     return { costUsd: null, status: "preco_nao_configurado" };
   }
