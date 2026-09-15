@@ -4224,7 +4224,7 @@ export default function App() {
               'Quais categorias temos cadastradas?'
             ]}
             onActionCompleted={() => {
-              loadProducts();
+              loadData();
             }}
           />
 
@@ -4708,7 +4708,7 @@ export default function App() {
                         <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', fontSize: '0.88rem' }}>
                           <input
                             type="checkbox"
-                            checked={consultantSettings.fallback_smart_recommendations ?? true}
+                            checked={(consultantSettings as any).fallback_smart_recommendations ?? true}
                             onChange={(e) => setConsultantSettings(prev => ({ ...prev, fallback_smart_recommendations: e.target.checked }))}
                           />
                           <span>Recomendar alternativas próximas se busca exata não retornar</span>
@@ -5273,7 +5273,7 @@ export default function App() {
                   'Como ela está se apresentando aos clientes hoje?'
                 ]}
                 onActionCompleted={() => {
-                  loadAgentIdentity();
+                  loadData();
                 }}
               />
 
@@ -6381,7 +6381,7 @@ export default function App() {
               'Como conectar o WhatsApp Business?'
             ]}
             onActionCompleted={() => {
-              loadChannels();
+              loadData();
             }}
           />
 
