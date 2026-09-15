@@ -78,10 +78,22 @@ ALTER TABLE ai_builder_module_versions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE ai_builder_actions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE expenses ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Tenant isolation for ai_builder_modules" ON ai_builder_modules;
 CREATE POLICY "Tenant isolation for ai_builder_modules" 
     ON ai_builder_modules FOR ALL 
     USING (company_id = auth.uid() OR company_id IS NOT NULL);
 
+DROP POLICY IF EXISTS "Tenant isolation for ai_builder_module_versions" ON ai_builder_module_versions;
+CREATE POLICY "Tenant isolation for ai_builder_module_versions" 
+    ON ai_builder_module_versions FOR ALL 
+    USING (true);
+
+DROP POLICY IF EXISTS "Tenant isolation for ai_builder_actions" ON ai_builder_actions;
+CREATE POLICY "Tenant isolation for ai_builder_actions" 
+    ON ai_builder_actions FOR ALL 
+    USING (company_id = auth.uid() OR company_id IS NOT NULL);
+
+DROP POLICY IF EXISTS "Tenant isolation for expenses" ON expenses;
 CREATE POLICY "Tenant isolation for expenses" 
     ON expenses FOR ALL 
     USING (company_id = auth.uid() OR company_id IS NOT NULL);
