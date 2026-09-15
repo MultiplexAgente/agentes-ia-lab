@@ -338,6 +338,7 @@ function AiRoutingAdminPage() {
                   <thead className="text-muted-foreground">
                     <tr>
                       <th className="p-2">Quando</th>
+                      <th className="p-2">Canal</th>
                       <th className="p-2">Tarefa</th>
                       <th className="p-2">Prioridade</th>
                       <th className="p-2">Modelo usado</th>
