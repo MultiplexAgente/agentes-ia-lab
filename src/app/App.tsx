@@ -42,6 +42,7 @@ interface ChatMessage {
 
 interface ChatSession {
   id: string;
+  serverConversationId?: string;
   title: string;
   folderId?: string | null;
   isPinned: boolean;
@@ -985,16 +986,19 @@ export default function App() {
     try {
       const res = await fetch(`${API_BASE}/api/ai/conversation/chat`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(localStorage.getItem('multiplex_company_token')
+            ? { Authorization: `Bearer ${localStorage.getItem('multiplex_company_token')}` }
+            : {})
+        },
         body: JSON.stringify({ 
           message: prompt,
-          conversationId: currentChat.id,
-          companyId: currentUser?.company_id,
+          conversationId: currentChat.serverConversationId,
+          ...(!localStorage.getItem('multiplex_company_token')
+            ? { publicSessionId: crypto.randomUUID() }
+            : {}),
           channel: 'web',
-          history: (currentChat.messages || [])
-            .filter((m: ChatMessage) => m.role === 'user' || m.role === 'assistant')
-            .slice(-12)
-            .map((m: ChatMessage) => ({ role: m.role, content: m.content })),
           context: {
             page: activeView,
             module: activeView
@@ -1007,31 +1011,28 @@ export default function App() {
         if (data.routing) {
           setLastRouting({ taskLabel: data.routing.taskLabel, complexity: data.routing.complexity });
         }
-        const contentText = data.assistantMessage?.content || data.response_text || 'Compreendido.';
-
-        // Opções rápidas sugeridas pela IA
-        let optionsText = '';
-        if (data.assistantMessage?.suggested_options && data.assistantMessage.suggested_options.length > 0) {
-          optionsText = '\n\n' + data.assistantMessage.suggested_options.map((opt: any) => `👉 [${opt.label}]`).join('   ');
-        }
+        if (!data.assistantMessage?.content) throw new Error('A resposta real não contém texto.');
+        const contentText = data.assistantMessage.content;
 
         const aiMsg: ChatMessage = {
           id: data.assistantMessage?.id || `m-ai-${Date.now()}`,
           role: 'assistant',
-          content: contentText + optionsText,
+          content: contentText,
           timestamp: new Date().toISOString()
         };
 
         setChats(prevChats => prevChats.map(c => c.id === currentChat.id ? {
           ...c,
+          serverConversationId: data.conversation?.id || c.serverConversationId,
           messages: [...c.messages, aiMsg],
           updatedAt: new Date().toISOString()
         } : c));
       } else {
+        const payload = await res.json().catch(() => ({}));
         const aiMsg: ChatMessage = {
           id: `m-ai-${Date.now()}`,
           role: 'assistant',
-          content: 'Não foi possível processar sua solicitação agora. Tente novamente.',
+          content: payload.error || `A IA retornou um erro HTTP ${res.status}.`,
           timestamp: new Date().toISOString()
         };
         setChats(prevChats => prevChats.map(c => c.id === currentChat.id ? {
@@ -1043,7 +1044,7 @@ export default function App() {
       const aiMsg: ChatMessage = {
         id: `m-ai-${Date.now()}`,
         role: 'assistant',
-        content: 'Não foi possível processar sua solicitação agora. Tente novamente.',
+        content: e instanceof Error ? e.message : 'Falha de rede ao contatar a IA.',
         timestamp: new Date().toISOString()
       };
       setChats(prevChats => prevChats.map(c => c.id === currentChat.id ? {

@@ -7,10 +7,12 @@ import { loadSettings, saveSettings } from "@/lib/multiplex/settings.server";
 import { getServiceClient } from "@/lib/multiplex/supabase.server";
 
 const SettingsSchema = z.object({
-  strategy: z.enum(["QUALITY_FIRST", "BALANCED", "SPEED_FIRST", "COST_FIRST"]),
-  categoryStrategies: z.record(z.string()).optional(),
-  modelPrices: z.record(z.object({ inputPerMillion: z.number().nonnegative(), outputPerMillion: z.number().nonnegative() })).optional(),
-  monthlyBudgetUsd: z.number().nonnegative().nullable().optional(),
+  settings: z.object({
+    strategy: z.enum(["QUALITY_FIRST", "BALANCED", "SPEED_FIRST", "COST_FIRST"]),
+    categoryStrategies: z.record(z.enum(["QUALITY_FIRST", "BALANCED", "SPEED_FIRST", "COST_FIRST"])),
+    modelPrices: z.record(z.object({ input: z.number().nonnegative(), output: z.number().nonnegative() })),
+    monthlyBudgetUsd: z.number().nonnegative().nullable(),
+  }),
 });
 
 function canAdmin(role: string): boolean {
@@ -47,10 +49,16 @@ export const Route = createFileRoute("/api/admin/ai-routing")({
           companies: [{ id: session.companyId, name: session.companyName }],
           logs: cleanLogs,
           summary: {
-            totalCalls: rows.length,
-            totalTokens: rows.reduce((sum, row) => sum + Number(row["total_tokens"] ?? Number(row["tokens_prompt"] ?? 0) + Number(row["tokens_completion"] ?? 0)), 0),
-            totalCostUsd: rows.reduce((sum, row) => sum + Number(row["cost_usd"] ?? 0), 0),
-            averageLatencyMs: rows.length ? Math.round(rows.reduce((sum, row) => sum + Number(row["latency_ms"] ?? 0), 0) / rows.length) : 0,
+            calls: rows.length,
+            tokens: rows.reduce((sum, row) => sum + Number(row["total_tokens"] ?? Number(row["tokens_prompt"] ?? 0) + Number(row["tokens_completion"] ?? 0)), 0),
+            costUsd: rows.reduce((sum, row) => sum + Number(row["cost_usd"] ?? 0), 0),
+            avgLatencyMs: rows.length ? Math.round(rows.reduce((sum, row) => sum + Number(row["latency_ms"] ?? 0), 0) / rows.length) : 0,
+            byModel: {},
+            byTask: rows.reduce<Record<string, number>>((acc, row) => {
+              const key = String(row["task_category"] ?? "geral");
+              acc[key] = (acc[key] ?? 0) + 1;
+              return acc;
+            }, {}),
           },
           settings: settingsResult.settings,
           catalog: MODEL_CATALOG.map((model) => ({ id: model.id, tier: model.tier })),
@@ -65,8 +73,8 @@ export const Route = createFileRoute("/api/admin/ai-routing")({
         if (!canAdmin(session.role)) return Response.json({ error: "Acesso administrativo necessário." }, { status: 403 });
         const parsed = SettingsSchema.safeParse(await request.json().catch(() => null));
         if (!parsed.success) return Response.json({ error: "Configuração inválida." }, { status: 400 });
-        const saved = await saveSettings(supabase, session.companyId, parsed.data);
-        return saved.error ? Response.json({ error: saved.error }, { status: 500 }) : Response.json({ settings: saved.settings });
+        const saved = await saveSettings(supabase, session.companyId, parsed.data.settings);
+        return saved.error ? Response.json({ error: saved.error }, { status: 500 }) : Response.json({ settings: parsed.data.settings });
       },
     },
   },

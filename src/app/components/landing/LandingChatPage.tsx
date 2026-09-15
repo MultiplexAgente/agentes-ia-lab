@@ -53,6 +53,7 @@ export const LandingChatPage: React.FC<LandingChatPageProps> = ({
   const [messages, setMessages] = useState<LandingMessage[]>([]);
   const [isTyping, setIsTyping] = useState(false);
   const [conversationId, setConversationId] = useState<string>();
+  const [publicSessionId] = useState(() => crypto.randomUUID());
   const [navigationOpen, setNavigationOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -71,8 +72,8 @@ export const LandingChatPage: React.FC<LandingChatPageProps> = ({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          companyId: '11111111-1111-1111-1111-111111111111',
           conversationId,
+          publicSessionId,
           message: prompt,
           context: { page: 'chat' },
         }),
@@ -86,7 +87,7 @@ export const LandingChatPage: React.FC<LandingChatPageProps> = ({
         {
           id: data.assistantMessage?.id || `assistant-${Date.now()}`,
           role: 'assistant',
-          content: data.assistantMessage?.content || data.response_text || 'Não recebi uma resposta válida.',
+           content: data.assistantMessage.content,
         },
       ]);
     } catch (error) {
@@ -101,7 +102,7 @@ export const LandingChatPage: React.FC<LandingChatPageProps> = ({
     } finally {
       setIsTyping(false);
     }
-  }, [conversationId, isTyping]);
+  }, [conversationId, isTyping, publicSessionId]);
 
   const startNewChat = () => {
     setMessages([]);

@@ -87,7 +87,7 @@ export const Route = createFileRoute("/api/ai/conversation/chat")({
           assistantMessage: { id: assistant.id, role: "assistant", content: result.text },
           routing: {
             task: result.routing.category,
-            taskLabel: result.routing.taskLabel,
+            taskLabel: result.routing.categoryLabel,
             complexity: result.routing.complexity,
             strategy: result.routing.strategy,
             reason: result.routing.publicReason,
