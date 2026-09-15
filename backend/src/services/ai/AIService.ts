@@ -3,6 +3,8 @@ import axios from 'axios';
 import dotenv from 'dotenv';
 import { store } from '../../config/database.js';
 import { memoryService } from '../memory/MemoryService.js';
+import { MemoryExtractor } from '../memory/MemoryExtractor.js';
+import { EntityResolver } from '../memory/EntityResolver.js';
 import { knowledgeBaseService } from '../knowledge/KnowledgeBaseService.js';
 import { ToolRegistry } from '../tools/ToolRegistry.js';
 import { AIServiceResponse, ToolExecutionResult } from '../../types/index.js';
@@ -26,11 +28,13 @@ export class AIService {
     conversationId: string;
     incomingText: string;
     externalMessageId?: string;
+    channelType?: string;
+    customerExternalId?: string;
   }): Promise<AIServiceResponse> {
     const startTime = Date.now();
-    const { companyId, conversationId, incomingText, externalMessageId } = params;
+    const { companyId, conversationId, incomingText, externalMessageId, channelType, customerExternalId } = params;
 
-    // 1. Recupera conversa e cliente
+    // ── STEP 1: Recupera conversa
     const conversation = store.conversations.get(conversationId);
     if (!conversation) {
       throw new Error(`Conversa ${conversationId} não encontrada.`);
@@ -41,7 +45,7 @@ export class AIService {
     const personality = store.agentPersonalities.get(agent?.id || '');
     const rules = (store.agentRules.get(agent?.id || '') || []).filter(r => r.active).sort((a, b) => b.priority - a.priority);
 
-    // Se a conversa estiver com atendimento humano ativo, o agente NÃO responde
+    // Bloqueia se atendimento humano ativo
     if (conversation.status === 'HUMAN_ACTIVE' || conversation.status === 'WAITING_HUMAN') {
       return {
         response_text: '',
@@ -55,20 +59,47 @@ export class AIService {
       };
     }
 
-    // 2. Salva a mensagem recebida do cliente no histórico
-    await memoryService.addMessage(conversationId, companyId, 'customer', incomingText, externalMessageId);
+    // ── STEP 2: Salva mensagem do cliente
+    const savedMsg = await memoryService.addMessage(conversationId, companyId, 'customer', incomingText, externalMessageId);
 
-    // 3. Recupera Memórias de Longo Prazo e Histórico Recente
-    const customerMemories = await memoryService.getCustomerMemory(conversation.customer_id, companyId);
-    const recentHistory = await memoryService.getConversationHistory(conversationId, 6);
+    // ── STEP 3: Resolução de Entidade (EntityResolver)
+    let customerId = conversation.customer_id;
+    let customerName = conversation.customer?.name || 'Cliente';
 
-    // 4. Busca Conhecimento Relevante (RAG)
-    const retrievedKnowledge = await knowledgeBaseService.searchKnowledge(companyId, incomingText);
+    if (customerExternalId && channelType) {
+      const resolved = await EntityResolver.resolveByChannelId(companyId, customerExternalId, channelType);
+      if (resolved.customer && !resolved.is_ambiguous) {
+        customerId = resolved.customer.id;
+        customerName = resolved.customer.name || customerName;
+      }
+    }
 
-    // 4.1. Identidade Oficial da IA
+    // ── STEP 4: Dados Operacionais Reais (PRIORIDADE MÁXIMA)
+    const customerOrders = (store.orders.get(companyId) || []).filter(o => o.customer_id === customerId).slice(-5);
     const identity = store.agentIdentities.get(companyId);
 
-    // 5. Monta o Prompt de Sistema Dinâmico (Seção 37)
+    // Formata dados operacionais para o prompt
+    const operationalContext = this.buildOperationalContext(customerOrders);
+
+    // ── STEP 5: Recuperação SELETIVA de Memórias Relevantes
+    const relevantMemories = await memoryService.retrieveRelevantMemories({
+      companyId,
+      customerId,
+      query: incomingText,
+      requestorType: 'agent',
+      limit: 10,
+    });
+
+    // Compatibilidade legada
+    const customerMemories = relevantMemories.map(m => ({ key: m.key, value: m.value, confidence: m.confidence }));
+
+    // ── STEP 6: Histórico Recente de Conversa
+    const recentHistory = await memoryService.getConversationHistory(conversationId, 6);
+
+    // ── STEP 7: Busca Conhecimento Relevante (RAG)
+    const retrievedKnowledge = await knowledgeBaseService.searchKnowledge(companyId, incomingText);
+
+    // ── STEP 8: Monta Prompt de Sistema Enriquecido
     const systemPrompt = this.buildDynamicSystemPrompt({
       companyName: company?.name || 'Nossa Empresa',
       identity,
@@ -76,7 +107,8 @@ export class AIService {
       rules,
       knowledge: retrievedKnowledge,
       memories: customerMemories,
-      customerName: conversation.customer?.name || 'Cliente'
+      customerName,
+      operationalContext,
     });
 
     const toolsCalled: ToolExecutionResult[] = [];
@@ -213,10 +245,42 @@ export class AIService {
       });
     }
 
-    // 7. Salva a resposta do agente na memória da conversa
-    await memoryService.addMessage(conversationId, companyId, 'agent', responseText);
+    // ── STEP 9: Salva a resposta do agente
+    const savedAgentMsg = await memoryService.addMessage(conversationId, companyId, 'agent', responseText);
 
-    // 8. Registra no Log Estruturado
+    // ── STEP 10: Extração de Memórias Pós-Resposta (do cliente E da IA)
+    // Extrai do texto do cliente
+    const customerCandidates = MemoryExtractor.extract(incomingText, {
+      senderType: 'customer',
+      conversationId,
+      customerId,
+      companyId,
+    });
+    // Extrai do texto da IA (agente confirma informações operacionais)
+    const agentCandidates = MemoryExtractor.extract(responseText, {
+      senderType: 'agent',
+      conversationId,
+      customerId,
+      companyId,
+    });
+
+    const allCandidates = [...agentCandidates, ...customerCandidates];
+    for (const candidate of allCandidates) {
+      try {
+        await memoryService.storeMemory({
+          companyId,
+          customerId,
+          agentId: agent?.id,
+          conversationId,
+          messageId: savedAgentMsg.id,
+          candidate,
+        });
+      } catch {
+        // Não impede resposta ao usuário
+      }
+    }
+
+    // ── STEP 11: Resposta final
     const latency = Date.now() - startTime;
     return {
       response_text: responseText,
@@ -233,6 +297,17 @@ export class AIService {
   /**
    * Construtor do System Prompt Dinâmico
    */
+  /**
+   * Formata dados operacionais reais para o contexto da IA
+   */
+  private buildOperationalContext(orders: any[]): string {
+    if (!orders || orders.length === 0) return '';
+    const lines = orders.map(o =>
+      `Pedido #${o.id?.slice(-6) || '???'}: status=${o.status}, total=R$${o.total || o.total_amount || 0}, criado=${o.created_at?.slice(0, 10) || '?'}`
+    );
+    return lines.join('\n');
+  }
+
   private buildDynamicSystemPrompt(params: {
     companyName: string;
     identity?: any;
@@ -241,8 +316,9 @@ export class AIService {
     knowledge: any[];
     memories: any[];
     customerName: string;
+    operationalContext?: string;
   }): string {
-    const { companyName, identity, personality, rules, knowledge, memories, customerName } = params;
+    const { companyName, identity, personality, rules, knowledge, memories, customerName, operationalContext } = params;
     const aiName = identity?.display_name || 'Multiplex';
     const compName = identity?.company_name || companyName;
 
@@ -253,9 +329,19 @@ ${identity?.role_description ? `Função principal: ${identity.role_description}
 ${identity?.introduction ? `Frase de apresentação padrão: "${identity.introduction}"` : ''}
 ${identity?.auto_introduce ? 'Quando for a primeira interação, apresente-se brevemente usando seu nome e empresa.' : 'Não é necessário repetir seu nome a todo momento se a conversa já estiver em andamento.'}
 
+# REGRA CRÍTICA DE PRIORIDADE
+DADOS OPERACIONAIS DO SISTEMA TÊM PRIORIDADE ABSOLUTA sobre qualquer memória armazenada.
+Se o sistema indica que um pedido foi ENTREGUE, responda que foi entregue — mesmo que uma memória diga "será entregue amanhã".
+JAMAIS contradiga dados operacionais atuais com base em memórias antigas.
+JAMAIS revele notas INTERNAS ao cliente. Informações marcadas como INTERNAL são apenas para contexto operacional.
+
 # CLIENTE ATUAL
 Nome: ${customerName}
-Memórias registradas: ${memories.length > 0 ? memories.map(m => `${m.key}: ${m.value}`).join('; ') : 'Nenhuma preferência prévia registrada.'}
+${operationalContext ? `
+# DADOS OPERACIONAIS ATUAIS (PRIORIDADE MÁXIMA — use estes, não memórias)
+${operationalContext}` : ''}
+# MEMÓRIAS RELEVANTES RECUPERADAS (Contexto — subordinado aos dados operacionais)
+${memories.length > 0 ? memories.map((m: any) => `${m.key}: ${m.value}`).join('\n') : 'Nenhuma memória relevante recuperada para esta consulta.'}
 
 # PERSONALIDADE & TOM DE VOZ
 - Tom: ${identity?.tone || personality?.tone || 'amigável'}

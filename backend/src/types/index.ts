@@ -226,6 +226,7 @@ export interface OrderItem {
   item_total: number;
 }
 
+// Legacy interface (mantida para compatibilidade)
 export interface AgentMemoryItem {
   id: string;
   company_id: string;
@@ -234,6 +235,58 @@ export interface AgentMemoryItem {
   key: string;
   value: string;
   confidence: number;
+}
+
+// =========================================================================
+// MEMÓRIA EMPRESARIAL ENTERPRISE
+// =========================================================================
+
+export type MemoryTypeV2 = 'CUSTOMER' | 'OPERATIONAL' | 'PREFERENCE' | 'CONTEXT' | 'BEHAVIOR';
+export type MemoryVisibility = 'INTERNAL' | 'CUSTOMER_VISIBLE' | 'RESTRICTED';
+export type MemoryConfidenceLevel = 'HIGH' | 'MEDIUM' | 'LOW' | 'UNCERTAIN';
+export type MemorySource = 'conversation' | 'system' | 'admin' | 'document' | 'inference';
+export type MemoryAuditAction = 'CREATED' | 'UPDATED' | 'INVALIDATED' | 'EXPIRED' | 'MERGED';
+
+export interface EnterpriseMemoryItem {
+  id: string;
+  company_id: string;
+  agent_id?: string;
+  customer_id: string;
+  conversation_id?: string;
+  message_id?: string;
+  memory_type: MemoryTypeV2;
+  entity_type?: string;      // customer | order | vehicle | service | appointment
+  entity_id?: string;
+  key: string;
+  value: string;
+  value_json?: Record<string, any>;
+  confidence: number;
+  confidence_level: MemoryConfidenceLevel;
+  source: MemorySource;
+  visibility: MemoryVisibility;
+  valid_from: string;
+  valid_until?: string | null;
+  is_current: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AgentMemoryAudit {
+  id: string;
+  memory_id: string;
+  company_id: string;
+  customer_id: string;
+  action: MemoryAuditAction;
+  previous_value?: string;
+  previous_value_json?: Record<string, any>;
+  new_value?: string;
+  new_value_json?: Record<string, any>;
+  reason?: string;
+  source?: string;
+  performed_by?: string;
+  conversation_id?: string;
+  message_id?: string;
+  created_at: string;
 }
 
 export interface ToolDefinition {
