@@ -16,6 +16,7 @@ import sourcesRouter from './routes/sources.js';
 import { builderRouter } from './routes/builder.js';
 import { catalogRouter } from './routes/catalog.js';
 import { aiConversationRouter } from './routes/aiConversation.js';
+import { publicChatRouter } from './routes/publicChat.js';
 
 dotenv.config();
 
@@ -53,6 +54,7 @@ app.use('/api/sources', sourcesRouter);
 app.use('/api/builder', builderRouter);
 app.use('/api/catalog', catalogRouter);
 app.use('/api/ai/conversation', aiConversationRouter);
+app.use('/api/public', publicChatRouter);
 
 
 // Inicialização do Servidor
