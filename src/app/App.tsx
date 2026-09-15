@@ -18,6 +18,12 @@ import { ExecutiveDashboardView, DashboardData } from './components/dashboard/Ex
 import { ContextualAIChatCard } from './components/conversation/ContextualAIChatCard';
 import { aiConversationService } from './services/aiConversationService';
 import { LandingChatPage } from './components/landing/LandingChatPage';
+import { Conversation, ConversationContent, ConversationEmptyState, ConversationScrollButton } from '@/components/ai-elements/conversation';
+import { Message, MessageActions, MessageAction, MessageContent, MessageResponse } from '@/components/ai-elements/message';
+import { PromptInput, PromptInputFooter, PromptInputSubmit, PromptInputTextarea } from '@/components/ai-elements/prompt-input';
+import { Shimmer } from '@/components/ai-elements/shimmer';
+import { Tool, ToolContent, ToolHeader, ToolInput, ToolOutput } from '@/components/ai-elements/tool';
+import { Button } from '@/components/ui/button';
 
 interface FolderItem {
   id: string;
@@ -175,8 +181,8 @@ export default function App() {
     setTheme(prev => prev === 'dark' ? 'light' : 'dark');
   };
 
-  // Visao ativa (Dashboard como primeira aba padrao)
-  const [activeView, setActiveView] = useState<'chat' | 'teach' | 'menu' | 'personality' | 'knowledge' | 'channels' | 'playground' | 'logs' | 'dashboard' | 'builder' | 'dynamic_module'>('dashboard');
+  // A conversa é a tela principal
+  const [activeView, setActiveView] = useState<'chat' | 'teach' | 'menu' | 'personality' | 'knowledge' | 'channels' | 'playground' | 'logs' | 'dashboard' | 'builder' | 'dynamic_module'>('chat');
   const [currentDynamicModule, setCurrentDynamicModule] = useState<AIBuilderModule | null>(null);
   const [sidebarModules, setSidebarModules] = useState<AIBuilderModule[]>([]);
 
@@ -1017,7 +1023,7 @@ export default function App() {
         const aiMsg: ChatMessage = {
           id: `m-ai-${Date.now()}`,
           role: 'assistant',
-          content: `Mensagem recebida: "${prompt}". Resposta processada pelo Multiplex.`,
+          content: 'Não foi possível processar sua solicitação agora. Tente novamente.',
           timestamp: new Date().toISOString()
         };
         setChats(prevChats => prevChats.map(c => c.id === currentChat.id ? {
@@ -1029,7 +1035,7 @@ export default function App() {
       const aiMsg: ChatMessage = {
         id: `m-ai-${Date.now()}`,
         role: 'assistant',
-        content: `Resposta do Multiplex: Não foi possível processar a solicitação sobre "${prompt}" no momento.`,
+        content: 'Não foi possível processar sua solicitação agora. Tente novamente.',
         timestamp: new Date().toISOString()
       };
       setChats(prevChats => prevChats.map(c => c.id === currentChat.id ? {
@@ -3348,718 +3354,158 @@ export default function App() {
 
       {/* AREA PRINCIPAL: CHAT OU TELAS */}
       {activeView === 'chat' && (
-        <main className="chatgpt-main">
-          {/* Top Bar com Seletor de Modelo e Indicadores */}
-          <div className="chatgpt-top-bar" style={{ position: 'relative' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <main className="flex min-h-0 flex-1 flex-col bg-background text-foreground">
+          <header className="flex h-14 shrink-0 items-center justify-between border-b border-border px-3 sm:px-5">
+            <div className="flex min-w-0 items-center gap-2.5">
               {sidebarCollapsed && (
-                <button 
-                  className="icon-btn" 
-                  title="Expandir barra lateral"
-                  onClick={() => setSidebarCollapsed(false)}
-                >
-                  <PanelLeft size={20} />
-                </button>
+                <Button variant="ghost" size="icon" title="Abrir menu" onClick={() => setSidebarCollapsed(false)}>
+                  <PanelLeft />
+                </Button>
               )}
-
-              {/* Seletor Interativo de Modelos IA */}
-              <div 
-                className="model-selector" 
-                style={{ display: 'flex', alignItems: 'center', gap: 8, position: 'relative' }}
-                onClick={() => setShowModelDropdown(!showModelDropdown)}
-                title="Clique para alternar o modelo de inteligência artificial"
-              >
-                <img src={atomLogo} alt="Multiplex IA" style={{ width: 22, height: 22, borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(0, 210, 255, 0.5)' }} />
-                <span>
-                  {selectedModel === 'gpt-4o' && 'Multiplex IA (GPT-4o)'}
-                  {selectedModel === 'claude-3.5-sonnet' && 'Multiplex IA (Claude 3.5 Sonnet)'}
-                  {selectedModel === 'deepseek-v3' && 'Multiplex IA (DeepSeek V3/R1)'}
-                  {selectedModel === 'gemini-1.5-pro' && 'Multiplex IA (Gemini 1.5 Pro)'}
-                </span>
-                <ChevronDown size={14} style={{ transform: showModelDropdown ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
-                <span className="badge" style={{ fontSize: '0.68rem', padding: '2px 6px', background: 'rgba(16,185,129,0.15)', color: '#10b981' }}>
-                  Funções Ativas
-                </span>
-                <span className="badge" style={{ fontSize: '0.68rem', padding: '2px 6px', background: 'rgba(99,102,241,0.15)', color: '#818cf8' }}>
-                  RAG & Memória
-                </span>
-              </div>
-
-              {/* Dropdown de Escolha de Modelos */}
-              {showModelDropdown && (
-                <div className="model-dropdown-menu" onClick={(e) => e.stopPropagation()}>
-                  <div style={{ fontSize: '0.72rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--text-dim)', padding: '6px 10px' }}>
-                    Selecione o Motor de IA
-                  </div>
-                  
-                  <div 
-                    className={`model-option-card ${selectedModel === 'gpt-4o' ? 'selected' : ''}`}
-                    onClick={() => { setSelectedModel('gpt-4o'); setShowModelDropdown(false); }}
-                  >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--text-main)' }}>OpenAI GPT-4o</span>
-                      <span className="badge" style={{ background: 'rgba(16,185,129,0.2)', color: '#10b981', fontSize: '0.65rem' }}>Padrão Oficial</span>
-                    </div>
-                    <span style={{ fontSize: '0.76rem', color: 'var(--text-muted)' }}>Multimodal rápido com Function Calling nativo e raciocínio de alta precisão.</span>
-                  </div>
-
-                  <div 
-                    className={`model-option-card ${selectedModel === 'claude-3.5-sonnet' ? 'selected' : ''}`}
-                    onClick={() => { setSelectedModel('claude-3.5-sonnet'); setShowModelDropdown(false); }}
-                  >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--text-main)' }}>Claude 3.5 Sonnet</span>
-                      <span className="badge" style={{ background: 'rgba(245,158,11,0.2)', color: '#f59e0b', fontSize: '0.65rem' }}>Alta Redação</span>
-                    </div>
-                    <span style={{ fontSize: '0.76rem', color: 'var(--text-muted)' }}>Excelente para diálogos consultivos, fechamento de vendas e redação humanizada.</span>
-                  </div>
-
-                  <div 
-                    className={`model-option-card ${selectedModel === 'deepseek-v3' ? 'selected' : ''}`}
-                    onClick={() => { setSelectedModel('deepseek-v3'); setShowModelDropdown(false); }}
-                  >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--text-main)' }}>DeepSeek V3 / R1</span>
-                      <span className="badge" style={{ background: 'rgba(6,182,212,0.2)', color: '#06b6d4', fontSize: '0.65rem' }}>Lógica & Preços</span>
-                    </div>
-                    <span style={{ fontSize: '0.76rem', color: 'var(--text-muted)' }}>Cálculos de frete complexos, regras condicionais e velocidade ultra-rápida.</span>
-                  </div>
-
-                  <div 
-                    className={`model-option-card ${selectedModel === 'gemini-1.5-pro' ? 'selected' : ''}`}
-                    onClick={() => { setSelectedModel('gemini-1.5-pro'); setShowModelDropdown(false); }}
-                  >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--text-main)' }}>Gemini 1.5 Pro</span>
-                      <span className="badge" style={{ background: 'rgba(139,92,246,0.2)', color: '#a78bfa', fontSize: '0.65rem' }}>Janela 1M</span>
-                    </div>
-                    <span style={{ fontSize: '0.76rem', color: 'var(--text-muted)' }}>Contexto massivo para leitura de catálogos gigantes e PDFs de regras.</span>
-                  </div>
-                </div>
-              )}
+              <img src={atomLogo} alt="Multiplex IA" className="size-7 rounded-md object-cover" />
+              <span className="truncate text-sm font-semibold">Multiplex IA</span>
             </div>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              {/* Exportar conversa */}
-              <button 
-                className="icon-btn" 
-                title="Exportar conversa atual (.txt)"
-                onClick={handleExportConversation}
-              >
-                <Download size={17} />
-              </button>
-
-              {/* Limpar histórico deste chat */}
-              <button 
-                className="icon-btn" 
-                title="Limpar mensagens desta conversa"
+            <div className="flex items-center gap-1">
+              <Button variant="ghost" size="icon" title="Exportar conversa" onClick={handleExportConversation}>
+                <Download />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                title="Limpar conversa"
                 onClick={() => {
-                  if (currentChat && currentChat.messages.length > 0) {
-                    if (confirm('Deseja limpar as mensagens desta conversa?')) {
-                      setChats(chats.map(c => c.id === currentChat.id ? { ...c, messages: [] } : c));
-                    }
+                  if (currentChat?.messages.length && confirm('Deseja limpar as mensagens desta conversa?')) {
+                    setChats(chats.map((chat) => chat.id === currentChat.id ? { ...chat, messages: [] } : chat));
                   }
                 }}
               >
-                <Trash2 size={17} />
-              </button>
-
-              <button 
-                className="icon-btn" 
-                title="Novo Chat"
-                onClick={handleCreateNewChat}
-              >
-                <Plus size={18} />
-              </button>
+                <Trash2 />
+              </Button>
+              <Button variant="ghost" size="icon" title="Nova conversa" onClick={handleCreateNewChat}>
+                <Plus />
+              </Button>
             </div>
-          </div>
+          </header>
 
-          {/* Feed de Mensagens */}
-          <div className="chat-feed-container" onClick={() => setShowModelDropdown(false)}>
-            <div className="chat-thread-inner">
+          <Conversation className="min-h-0">
+            <ConversationContent className="mx-auto min-h-full w-full max-w-3xl gap-7 px-4 py-8 sm:px-6">
               {currentChat && currentChat.messages.length === 0 ? (
-                <div className="chat-welcome-container" style={{ textAlign: 'center', maxWidth: 860, margin: '0 auto', width: '100%' }}>
-                  <div className="chat-welcome-icon" style={{ padding: 0, overflow: 'hidden', background: 'transparent', border: '2px solid rgba(0, 210, 255, 0.5)', boxShadow: '0 0 32px rgba(0, 210, 255, 0.35)', width: 62, height: 62, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px auto' }}>
-                    <img src={atomLogo} alt="Multiplex IA" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
-                  </div>
-                  <h1 className="chat-welcome-title" style={{ fontSize: '1.85rem', fontWeight: 800, letterSpacing: '-0.5px', marginBottom: 24 }}>
-                    Como posso ajudar você hoje?
-                  </h1>
-
-                  {/* Abas de Categorias de Sugestões Rápidas */}
-                  <div className="suggestion-category-bar">
-                    <button 
-                      className={`suggestion-cat-btn ${promptCategory === 'destaques' ? 'active' : ''}`}
-                      onClick={() => setPromptCategory('destaques')}
-                    >
-                      <Star size={13} /> Destaques
-                    </button>
-                    <button 
-                      className={`suggestion-cat-btn ${promptCategory === 'cardapio' ? 'active' : ''}`}
-                      onClick={() => setPromptCategory('cardapio')}
-                    >
-                      <ShoppingBag size={13} /> Cardápio & Itens
-                    </button>
-                    <button 
-                      className={`suggestion-cat-btn ${promptCategory === 'frete' ? 'active' : ''}`}
-                      onClick={() => setPromptCategory('frete')}
-                    >
-                      <Truck size={13} /> Frete & Logística
-                    </button>
-                    <button 
-                      className={`suggestion-cat-btn ${promptCategory === 'horarios' ? 'active' : ''}`}
-                      onClick={() => setPromptCategory('horarios')}
-                    >
-                      <Clock size={13} /> Horários & Regras
-                    </button>
-                    <button 
-                      className={`suggestion-cat-btn ${promptCategory === 'agendamento' ? 'active' : ''}`}
-                      onClick={() => setPromptCategory('agendamento')}
-                    >
-                      <Calendar size={13} /> Agendamentos
-                    </button>
-                    <button 
-                      className={`suggestion-cat-btn ${promptCategory === 'promocoes' ? 'active' : ''}`}
-                      onClick={() => setPromptCategory('promocoes')}
-                    >
-                      <DollarSign size={13} /> Vendas & Promoções
-                    </button>
-                  </div>
-
-                  {/* Grid Rico de Sugestões por Categoria */}
-                  <div className="rich-suggestions-grid" style={{ margin: '0 auto' }}>
-                    {promptCategory === 'destaques' && (
-                      <>
-                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Quais são todos os produtos do cardápio e os preços?')}>
-                          <div className="rich-suggestion-header">
-                            <span className="rich-suggestion-badge">Cardápio</span>
-                            <ShoppingBag size={14} color="var(--accent-cyan)" />
-                          </div>
-                          <div className="rich-suggestion-title">Consultar Cardápio Completo</div>
-                          <div className="rich-suggestion-desc">Mostre todos os produtos, preços e itens ativos cadastrados.</div>
-                        </div>
-
-                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Qual é a taxa de entrega e as regras de frete da loja?')}>
-                          <div className="rich-suggestion-header">
-                            <span className="rich-suggestion-badge">Logística</span>
-                            <Truck size={14} color="var(--accent-cyan)" />
-                          </div>
-                          <div className="rich-suggestion-title">Calcular Frete & Raio</div>
-                          <div className="rich-suggestion-desc">Consulte as regras de entrega, raio de atendimento e taxa estimada.</div>
-                        </div>
-
-                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Qual é o horário de funcionamento de vocês hoje?')}>
-                          <div className="rich-suggestion-header">
-                            <span className="rich-suggestion-badge">Horários</span>
-                            <Clock size={14} color="var(--accent-cyan)" />
-                          </div>
-                          <div className="rich-suggestion-title">Horário de Atendimento</div>
-                          <div className="rich-suggestion-desc">Verifique horários de funcionamento, abertura e dias de atendimento.</div>
-                        </div>
-
-                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Quero agendar um atendimento para amanhã à tarde.')}>
-                          <div className="rich-suggestion-header">
-                            <span className="rich-suggestion-badge">Agendamento</span>
-                            <Calendar size={14} color="var(--accent-cyan)" />
-                          </div>
-                          <div className="rich-suggestion-title">Agendar Atendimento VIP</div>
-                          <div className="rich-suggestion-desc">Teste a função de agendamento de serviço ou reserva de mesa.</div>
-                        </div>
-                      </>
-                    )}
-
-                    {promptCategory === 'cardapio' && (
-                      <>
-                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Quais são os pratos e produtos mais vendidos da casa?')}>
-                          <div className="rich-suggestion-header">
-                            <span className="rich-suggestion-badge">Mais Pedidos</span>
-                            <Star size={14} color="var(--accent-cyan)" />
-                          </div>
-                          <div className="rich-suggestion-title">Itens Populares & Carros-chefe</div>
-                          <div className="rich-suggestion-desc">Descubra os produtos recomendados pela IA para clientes.</div>
-                        </div>
-
-                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Sugira um combo promocional com prato principal e bebida.')}>
-                          <div className="rich-suggestion-header">
-                            <span className="rich-suggestion-badge">Combos</span>
-                            <Zap size={14} color="var(--accent-cyan)" />
-                          </div>
-                          <div className="rich-suggestion-title">Sugerir Combo com Bebida</div>
-                          <div className="rich-suggestion-desc">Monte uma sugestão atrativa de lanche/refeição completa.</div>
-                        </div>
-
-                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Quais sobremesas e adicionais vocês têm disponíveis?')}>
-                          <div className="rich-suggestion-header">
-                            <span className="rich-suggestion-badge">Sobremesas</span>
-                            <ShoppingBag size={14} color="var(--accent-cyan)" />
-                          </div>
-                          <div className="rich-suggestion-title">Sobremesas & Acompanhamentos</div>
-                          <div className="rich-suggestion-desc">Veja os doces, batatas, molhos e adicionais do catálogo.</div>
-                        </div>
-
-                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Vocês têm opções vegetarianas ou sem lactose?')}>
-                          <div className="rich-suggestion-header">
-                            <span className="rich-suggestion-badge">Especial</span>
-                            <CheckCircle2 size={14} color="var(--accent-cyan)" />
-                          </div>
-                          <div className="rich-suggestion-title">Restrições & Opções Vegetarianas</div>
-                          <div className="rich-suggestion-desc">Consulte itens adequados a restrições alimentares.</div>
-                        </div>
-                      </>
-                    )}
-
-                    {promptCategory === 'frete' && (
-                      <>
-                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Qual é o raio máximo de atendimento e a taxa para 5 km?')}>
-                          <div className="rich-suggestion-header">
-                            <span className="rich-suggestion-badge">Raio de Entrega</span>
-                            <Truck size={14} color="var(--accent-cyan)" />
-                          </div>
-                          <div className="rich-suggestion-title">Raio Máximo de Entrega</div>
-                          <div className="rich-suggestion-desc">Veja até onde a entrega atende e os valores por quilômetro.</div>
-                        </div>
-
-                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Quanto tempo demora para meu pedido chegar?')}>
-                          <div className="rich-suggestion-header">
-                            <span className="rich-suggestion-badge">Tempo</span>
-                            <Clock size={14} color="var(--accent-cyan)" />
-                          </div>
-                          <div className="rich-suggestion-title">Tempo Estimado de Entrega</div>
-                          <div className="rich-suggestion-desc">Consulte o tempo médio de preparo e rota do motoboy.</div>
-                        </div>
-
-                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Existe valor mínimo para entrega grátis?')}>
-                          <div className="rich-suggestion-header">
-                            <span className="rich-suggestion-badge">Gratuidade</span>
-                            <DollarSign size={14} color="var(--accent-cyan)" />
-                          </div>
-                          <div className="rich-suggestion-title">Regra de Frete Grátis</div>
-                          <div className="rich-suggestion-desc">Condições para isenção da taxa de entrega.</div>
-                        </div>
-
-                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Posso retirar meu pedido diretamente no balcão?')}>
-                          <div className="rich-suggestion-header">
-                            <span className="rich-suggestion-badge">Balcão</span>
-                            <Building2 size={14} color="var(--accent-cyan)" />
-                          </div>
-                          <div className="rich-suggestion-title">Retirada no Estabelecimento</div>
-                          <div className="rich-suggestion-desc">Como funciona o take-away sem custo de frete.</div>
-                        </div>
-                      </>
-                    )}
-
-                    {promptCategory === 'horarios' && (
-                      <>
-                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Quais são os dias e horários de funcionamento da loja?')}>
-                          <div className="rich-suggestion-header">
-                            <span className="rich-suggestion-badge">Agenda</span>
-                            <Clock size={14} color="var(--accent-cyan)" />
-                          </div>
-                          <div className="rich-suggestion-title">Horários da Semana</div>
-                          <div className="rich-suggestion-desc">Abertura e fechamento de segunda a domingo.</div>
-                        </div>
-
-                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Vocês atendem em feriados e fins de semana?')}>
-                          <div className="rich-suggestion-header">
-                            <span className="rich-suggestion-badge">Feriados</span>
-                            <Calendar size={14} color="var(--accent-cyan)" />
-                          </div>
-                          <div className="rich-suggestion-title">Funcionamento em Feriados</div>
-                          <div className="rich-suggestion-desc">Plantão de atendimento em datas especiais.</div>
-                        </div>
-
-                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Existe atendimento noturno ou plantão de delivery 24 horas?')}>
-                          <div className="rich-suggestion-header">
-                            <span className="rich-suggestion-badge">Plantão</span>
-                            <Moon size={14} color="var(--accent-cyan)" />
-                          </div>
-                          <div className="rich-suggestion-title">Plantão Noturno / MT 24 Horas</div>
-                          <div className="rich-suggestion-desc">Verifique se o delivery opera durante a madrugada.</div>
-                        </div>
-
-                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Quais são as regras obrigatórias que você segue no atendimento?')}>
-                          <div className="rich-suggestion-header">
-                            <span className="rich-suggestion-badge">Diretrizes</span>
-                            <Sliders size={14} color="var(--accent-cyan)" />
-                          </div>
-                          <div className="rich-suggestion-title">Regras Comerciais Ativas</div>
-                          <div className="rich-suggestion-desc">Políticas de desconto, cordialidade e tom de voz da IA.</div>
-                        </div>
-                      </>
-                    )}
-
-                    {promptCategory === 'agendamento' && (
-                      <>
-                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Quero reservar uma mesa para 4 pessoas nesta sexta-feira.')}>
-                          <div className="rich-suggestion-header">
-                            <span className="rich-suggestion-badge">Reserva</span>
-                            <Calendar size={14} color="var(--accent-cyan)" />
-                          </div>
-                          <div className="rich-suggestion-title">Reserva de Mesa ou Salão</div>
-                          <div className="rich-suggestion-desc">Agende data, horário e número de pessoas com a IA.</div>
-                        </div>
-
-                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Quais horários estão disponíveis para agendamento esta semana?')}>
-                          <div className="rich-suggestion-header">
-                            <span className="rich-suggestion-badge">Vagas</span>
-                            <Clock size={14} color="var(--accent-cyan)" />
-                          </div>
-                          <div className="rich-suggestion-title">Consultar Horários Livres</div>
-                          <div className="rich-suggestion-desc">Verifique a agenda de atendimento sem conflitos.</div>
-                        </div>
-
-                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Como faço para reagendar ou cancelar meu horário marcado?')}>
-                          <div className="rich-suggestion-header">
-                            <span className="rich-suggestion-badge">Alteração</span>
-                            <AlertCircle size={14} color="var(--accent-cyan)" />
-                          </div>
-                          <div className="rich-suggestion-title">Reagendamento Fácil</div>
-                          <div className="rich-suggestion-desc">Como o cliente altera a data diretamente pelo WhatsApp.</div>
-                        </div>
-
-                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('A IA envia lembrete automático de confirmação antes do horário?')}>
-                          <div className="rich-suggestion-header">
-                            <span className="rich-suggestion-badge">Lembretes</span>
-                            <Bell size={14} color="var(--accent-cyan)" />
-                          </div>
-                          <div className="rich-suggestion-title">Lembretes Automáticos</div>
-                          <div className="rich-suggestion-desc">Notificações preventivas para reduzir faltas de clientes.</div>
-                        </div>
-                      </>
-                    )}
-
-                    {promptCategory === 'promocoes' && (
-                      <>
-                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Tem algum cupom de desconto para minha primeira compra?')}>
-                          <div className="rich-suggestion-header">
-                            <span className="rich-suggestion-badge">Boas-vindas</span>
-                            <Zap size={14} color="var(--accent-cyan)" />
-                          </div>
-                          <div className="rich-suggestion-title">Cupom de Primeira Compra</div>
-                          <div className="rich-suggestion-desc">Consulte se há código promocional para novos clientes.</div>
-                        </div>
-
-                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Qual é a promoção especial ou oferta do dia de hoje?')}>
-                          <div className="rich-suggestion-header">
-                            <span className="rich-suggestion-badge">Oferta do Dia</span>
-                            <DollarSign size={14} color="var(--accent-cyan)" />
-                          </div>
-                          <div className="rich-suggestion-title">Prato / Oferta do Dia</div>
-                          <div className="rich-suggestion-desc">Itens com preço promocional para hoje.</div>
-                        </div>
-
-                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Crie uma mensagem persuasiva para divulgar nossa promoção de pizza no WhatsApp.')}>
-                          <div className="rich-suggestion-header">
-                            <span className="rich-suggestion-badge">Copywriting</span>
-                            <Share2 size={14} color="var(--accent-cyan)" />
-                          </div>
-                          <div className="rich-suggestion-title">Gerador de Copy para WhatsApp</div>
-                          <div className="rich-suggestion-desc">Texto magnético para envio em massa ou lista VIP.</div>
-                        </div>
-
-                        <div className="rich-suggestion-card" onClick={() => handleSendMessage('Como funciona nosso programa de pontos e fidelidade?')}>
-                          <div className="rich-suggestion-header">
-                            <span className="rich-suggestion-badge">Fidelidade</span>
-                            <Star size={14} color="var(--accent-cyan)" />
-                          </div>
-                          <div className="rich-suggestion-title">Fidelização de Clientes</div>
-                          <div className="rich-suggestion-desc">Como incentivar compras recorrentes e reter compradores.</div>
-                        </div>
-                      </>
-                    )}
-
-                  </div>
-                </div>
+                <ConversationEmptyState className="min-h-[58vh] p-4">
+                  <img src={atomLogo} alt="Multiplex IA" className="mb-3 size-12 rounded-xl object-cover" />
+                  <h1 className="text-2xl font-semibold sm:text-3xl">Como posso ajudar?</h1>
+                </ConversationEmptyState>
               ) : (
-                currentChat && currentChat.messages.map(msg => (
-                  <div key={msg.id} className={`message-row ${msg.role}`}>
-                    {msg.role === 'assistant' && (
-                      <div className="message-avatar-ai" style={{ padding: 0, overflow: 'hidden', background: 'transparent', border: '1px solid rgba(0, 210, 255, 0.45)', width: 32, height: 32, minWidth: 32, borderRadius: '50%', boxShadow: '0 0 14px rgba(0, 210, 255, 0.25)' }}>
-                        <img src={atomLogo} alt="Multiplex IA" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
-                      </div>
-                    )}
+                currentChat?.messages.map((msg) => (
+                  <Message key={msg.id} from={msg.role}>
+                    <MessageContent className="text-[0.95rem] leading-7">
+                      {msg.role === 'assistant' ? <MessageResponse>{msg.content}</MessageResponse> : msg.content}
 
-                    <div className={msg.role === 'user' ? 'message-bubble-user' : 'message-body-ai'}>
-                      {msg.toolsUsed && msg.toolsUsed.length > 0 && (
-                        <div style={{ marginBottom: 10 }}>
-                          {msg.toolsUsed.map((toolCall, idx) => (
-                            <div key={idx} className="tool-badge-chip">
-                              <Sliders size={12} />
-                              <span>Executou função: <strong>{toolCall.tool}</strong></span>
-                              <span style={{ opacity: 0.6, fontSize: '0.68rem' }}>● Concluído</span>
-                            </div>
-                          ))}
-                        </div>
-                      )}
+                      {msg.toolsUsed?.map((toolCall, index) => (
+                        <Tool key={`${msg.id}-${index}`} defaultOpen={false}>
+                          <ToolHeader
+                            type="dynamic-tool"
+                            toolName={toolCall.tool}
+                            title={toolCall.tool}
+                            state="output-available"
+                          />
+                          <ToolContent>
+                            <ToolInput input={toolCall.input ?? {}} />
+                            <ToolOutput output={toolCall.result} errorText={undefined} />
+                          </ToolContent>
+                        </Tool>
+                      ))}
 
-                      <div style={{ whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>
-                        {msg.content}
-                      </div>
-
-                      {/* CARDS VISUAIS DO CONSULTOR INTELIGENTE DE CATÁLOGO */}
                       {msg.catalogCards && msg.catalogCards.length > 0 && (
-                        <div style={{ marginTop: 14, display: 'flex', flexDirection: 'column', gap: 10 }}>
-                          {msg.catalogCards.map((card: any, cIdx: number) => (
-                            <div 
-                              key={card.id || cIdx} 
-                              className="catalog-result-card"
-                              style={{
-                                background: theme === 'dark' ? 'rgba(15, 23, 42, 0.85)' : '#ffffff',
-                                border: theme === 'dark' ? '1px solid rgba(0, 210, 255, 0.35)' : '1px solid #cbd5e1',
-                                borderRadius: 12,
-                                padding: 12,
-                                display: 'flex',
-                                gap: 12,
-                                alignItems: 'center',
-                                boxShadow: theme === 'light' ? '0 4px 12px rgba(0,0,0,0.06)' : '0 4px 20px rgba(0,0,0,0.3)'
-                              }}
-                            >
-                              {(card.image || (card.images && card.images[0])) && (
-                                <div style={{ width: 72, height: 72, minWidth: 72, borderRadius: 8, overflow: 'hidden', background: '#0f172a' }}>
-                                  <img 
-                                    src={card.image || card.images[0]} 
-                                    alt={card.name} 
-                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-                                    onError={(e) => { (e.target as any).style.display = 'none'; }}
-                                  />
-                                </div>
+                        <div className="mt-3 grid gap-2">
+                          {msg.catalogCards.map((card: any, cardIndex: number) => (
+                            <article key={card.id || cardIndex} className="flex gap-3 rounded-md border border-border bg-card p-3 text-card-foreground">
+                              {(card.image || card.images?.[0]) && (
+                                <img
+                                  src={card.image || card.images[0]}
+                                  alt={card.name || 'Item'}
+                                  className="size-16 shrink-0 rounded-md object-cover"
+                                  loading="lazy"
+                                />
                               )}
-                              <div style={{ flex: 1, minWidth: 0 }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
-                                  <span style={{ fontWeight: 700, fontSize: '0.94rem', color: theme === 'light' ? '#0f172a' : '#f8fafc' }}>
-                                    {cIdx + 1}. {card.name}
-                                  </span>
-                                  <span style={{ fontWeight: 700, color: '#10b981', fontSize: '0.9rem', whiteSpace: 'nowrap' }}>
+                              <div className="min-w-0 flex-1">
+                                <div className="flex items-start justify-between gap-3">
+                                  <strong className="text-sm">{card.name}</strong>
+                                  <span className="whitespace-nowrap text-sm font-semibold text-primary">
                                     {card.formatted_price || (card.price ? `R$ ${Number(card.price).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : 'Sob consulta')}
                                   </span>
                                 </div>
-
-                                {card.description && (
-                                  <p style={{ margin: '4px 0 8px 0', fontSize: '0.8rem', color: theme === 'light' ? '#475569' : 'var(--text-muted)', lineHeight: 1.4 }}>
-                                    {card.description.length > 130 ? card.description.slice(0, 130) + '...' : card.description}
-                                  </p>
+                                {card.description && <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{card.description}</p>}
+                                {card.source_url && (
+                                  <Button className="mt-2" size="sm" variant="outline" onClick={() => handleCatalogClick(card.id, card.source_url, card.name)}>
+                                    <ExternalLink />
+                                    Abrir
+                                  </Button>
                                 )}
-
-                                <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-                                  {card.source_url && (
-                                    <button 
-                                      className="btn-primary"
-                                      style={{ padding: '4px 12px', fontSize: '0.78rem', display: 'flex', alignItems: 'center', gap: 5 }}
-                                      onClick={() => handleCatalogClick(card.id, card.source_url, card.name)}
-                                    >
-                                      <Globe size={13} />
-                                      <span>{card.cta_label || 'Ver no Site'}</span>
-                                      <ExternalLink size={12} />
-                                    </button>
-                                  )}
-                                  <button 
-                                    className="btn-secondary"
-                                    style={{ padding: '4px 10px', fontSize: '0.76rem' }}
-                                    onClick={() => handleSendMessage(`Gostei da opção ${cIdx + 1}: ${card.name}. Pode me dar mais informações?`)}
-                                  >
-                                    Quero este
-                                  </button>
-                                </div>
                               </div>
-                            </div>
+                            </article>
                           ))}
                         </div>
                       )}
+                    </MessageContent>
 
-                      {/* Barra de Acoes na Resposta da IA */}
-                      {msg.role === 'assistant' && (
-                        <div className="message-actions-bar">
-                          <button 
-                            className={`msg-action-btn ${copiedMsgId === msg.id ? 'active' : ''}`}
-                            onClick={() => handleCopyMessage(msg.id, msg.content)}
-                            title="Copiar resposta"
-                          >
-                            {copiedMsgId === msg.id ? <Check size={13} color="#10b981" /> : <Copy size={13} />}
-                            <span>{copiedMsgId === msg.id ? 'Copiado!' : 'Copiar'}</span>
-                          </button>
-
-                          <button 
-                            className={`msg-action-btn ${speakingMsgId === msg.id ? 'active' : ''}`}
-                            onClick={() => handleSpeakMessage(msg.id, msg.content)}
-                            title={speakingMsgId === msg.id ? "Parar leitura" : "Ouvir em voz alta"}
-                          >
-                            {speakingMsgId === msg.id ? <VolumeX size={13} color="#f87171" /> : <Volume2 size={13} />}
-                            <span>{speakingMsgId === msg.id ? 'Parar Voz' : 'Ouvir'}</span>
-                          </button>
-
-                          <button 
-                            className={`msg-action-btn ${feedbackMap[msg.id] === 'liked' ? 'active' : ''}`}
-                            onClick={() => handleFeedback(msg.id, 'liked')}
-                            title="Resposta útil"
-                          >
-                            <ThumbsUp size={13} />
-                            <span>{feedbackMap[msg.id] === 'liked' ? 'Útil 👍' : ''}</span>
-                          </button>
-
-                          <button 
-                            className={`msg-action-btn ${feedbackMap[msg.id] === 'disliked' ? 'active' : ''}`}
-                            onClick={() => handleFeedback(msg.id, 'disliked')}
-                            title="Precisa melhorar"
-                          >
-                            <ThumbsDown size={13} />
-                          </button>
-
-                          <button 
-                            className="msg-action-btn"
-                            onClick={handleRegenerateLastMessage}
-                            title="Regenerar resposta"
-                          >
-                            <RefreshCw size={13} />
-                            <span>Regenerar</span>
-                          </button>
-
-                          <span style={{ marginLeft: 'auto', fontSize: '0.7rem', color: 'var(--text-dim)' }}>
-                            {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
+                    {msg.role === 'assistant' && (
+                      <MessageActions>
+                        <MessageAction tooltip="Copiar" onClick={() => handleCopyMessage(msg.id, msg.content)}>
+                          {copiedMsgId === msg.id ? <Check /> : <Copy />}
+                        </MessageAction>
+                        <MessageAction tooltip="Ouvir" onClick={() => handleSpeakMessage(msg.id, msg.content)}>
+                          {speakingMsgId === msg.id ? <VolumeX /> : <Volume2 />}
+                        </MessageAction>
+                        <MessageAction tooltip="Resposta útil" onClick={() => handleFeedback(msg.id, 'liked')}>
+                          <ThumbsUp />
+                        </MessageAction>
+                        <MessageAction tooltip="Resposta ruim" onClick={() => handleFeedback(msg.id, 'disliked')}>
+                          <ThumbsDown />
+                        </MessageAction>
+                        <MessageAction tooltip="Gerar novamente" onClick={handleRegenerateLastMessage}>
+                          <RefreshCw />
+                        </MessageAction>
+                      </MessageActions>
+                    )}
+                  </Message>
                 ))
               )}
 
               {isSendingMessage && (
-                <div className="message-row assistant">
-                  <div className="message-avatar-ai" style={{ padding: 0, overflow: 'hidden', background: 'transparent', border: '1px solid rgba(0, 210, 255, 0.45)', width: 32, height: 32, minWidth: 32, borderRadius: '50%' }}>
-                    <img src={atomLogo} alt="Multiplex IA" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
-                  </div>
-                  <div className="message-body-ai" style={{ display: 'flex', alignItems: 'center', gap: 10, color: 'var(--text-dim)', padding: '6px 0' }}>
-                    <RefreshCw size={16} className="animate-spin" color="var(--accent-cyan)" />
-                    <span style={{ fontSize: '0.9rem' }}>
-                      Multiplex IA consultando base, executando regras e gerando resposta...
-                    </span>
-                  </div>
+                <Message from="assistant">
+                  <MessageContent><Shimmer>Processando...</Shimmer></MessageContent>
+                </Message>
+              )}
+            </ConversationContent>
+            <ConversationScrollButton />
+          </Conversation>
+
+          <div className="shrink-0 bg-background px-3 pb-4 pt-2 sm:px-6 sm:pb-6">
+            <div className="mx-auto w-full max-w-3xl">
+              {attachedFile && (
+                <div className="mb-2 flex items-center justify-between rounded-md border border-border bg-muted px-3 py-2 text-xs">
+                  <span className="truncate"><Paperclip className="mr-2 inline size-3.5" />{attachedFile.name}</span>
+                  <Button variant="ghost" size="icon-sm" title="Remover anexo" onClick={() => setAttachedFile(null)}><X /></Button>
                 </div>
               )}
-            </div>
-          </div>
-
-          {/* Capsula Flutuante de Prompt Inteligente */}
-          <div className="chatgpt-bottom-wrapper">
-            {/* Popover de Atalhos Rápidos (Slash Commands) */}
-            {showSlashMenu && (
-              <div className="slash-commands-popup">
-                <div style={{ fontSize: '0.72rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.6px', color: 'var(--text-dim)', padding: '6px 10px' }}>
-                  Comandos Rápidos do Multiplex IA
-                </div>
-                {SLASH_COMMANDS.map((item, idx) => (
-                  <div key={idx} className="slash-item" onClick={() => handleSelectSlash(item.prompt)}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <Terminal size={14} color="var(--accent-cyan)" />
-                      <span style={{ fontWeight: 700, fontSize: '0.84rem', color: 'var(--text-main)', fontFamily: 'monospace' }}>{item.cmd}</span>
-                    </div>
-                    <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{item.desc}</span>
+              <PromptInput className="rounded-2xl border-border bg-card shadow-sm" onSubmit={() => handleSendMessage()}>
+                <PromptInputTextarea
+                  autoFocus
+                  className="min-h-14 px-4 py-3 text-base"
+                  disabled={isSendingMessage}
+                  onChange={(event) => setChatInput(event.target.value)}
+                  placeholder="Escreva o que você precisa"
+                  value={chatInput}
+                />
+                <PromptInputFooter className="px-2 pb-2">
+                  <div className="flex items-center gap-1">
+                    <Button variant="ghost" size="icon-sm" title="Anexar arquivo" onClick={() => setShowAttachModal(true)}><Paperclip /></Button>
+                    <Button variant="ghost" size="icon-sm" title="Ditar por voz" onClick={handleToggleVoiceRecording}>{isRecordingVoice ? <MicOff /> : <Mic />}</Button>
                   </div>
-                ))}
-              </div>
-            )}
-
-            {/* Banner de Gravação por Voz Ativa */}
-            {isRecordingVoice && (
-              <div style={{ marginBottom: 8 }}>
-                <span className="audio-recording-indicator">
-                  <Mic size={14} /> Gravando sua voz... Fale agora para ditar sua pergunta
-                </span>
-              </div>
-            )}
-
-            {/* Arquivo Anexado Preview */}
-            {attachedFile && (
-              <div style={{ width: '100%', maxWidth: 780, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 14px', borderRadius: 8, background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.3)', marginBottom: 8 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.8rem', color: 'var(--accent-cyan)' }}>
-                  <Paperclip size={14} />
-                  <span>Anexado: <strong>{attachedFile.name}</strong> ({attachedFile.size})</span>
-                </div>
-                <button 
-                  onClick={() => setAttachedFile(null)} 
-                  style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
-                >
-                  <X size={14} />
-                </button>
-              </div>
-            )}
-
-            <div className="chatgpt-capsule-box" style={{ position: 'relative' }}>
-              {/* Botão Anexar Cardápio ou Documento */}
-              <button 
-                className="icon-btn" 
-                title="Anexar foto do cardápio ou documento"
-                onClick={() => setShowAttachModal(true)}
-              >
-                <Paperclip size={18} />
-              </button>
-
-              {/* Botão de Comandos Rápidos */}
-              <button 
-                className={`icon-btn ${showSlashMenu ? 'active' : ''}`}
-                title="Comandos rápidos (/)"
-                onClick={() => setShowSlashMenu(!showSlashMenu)}
-                style={{ fontSize: '0.9rem', fontWeight: 800, fontFamily: 'monospace' }}
-              >
-                /
-              </button>
-
-              <input 
-                type="text"
-                className="capsule-input"
-                placeholder={
-                  selectedAIMode === 'cardapio' 
-                    ? "Pergunte sobre pratos, ingredientes, preços e combos..." 
-                    : selectedAIMode === 'logistica' 
-                    ? "Calcule frete, consulte raio de entrega e tempo estimado..." 
-                    : selectedAIMode === 'agendamento' 
-                    ? "Simule reservas de mesa e agendamento de serviços..." 
-                    : `Pergunte qualquer coisa ao Multiplex IA (${selectedModel.toUpperCase()})...`
-                }
-                value={chatInput}
-                onChange={(e) => setChatInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    handleSendMessage();
-                  }
-                  if (e.key === '/' && chatInput === '') {
-                    setShowSlashMenu(true);
-                  }
-                }}
-                disabled={isSendingMessage}
-                autoFocus
-              />
-
-              {/* Botão de Ditado por Voz / Microfone */}
-              <button 
-                className={`icon-btn ${isRecordingVoice ? 'active' : ''}`}
-                title={isRecordingVoice ? "Gravando voz..." : "Ditar por voz (microfone)"}
-                onClick={handleToggleVoiceRecording}
-                style={{ color: isRecordingVoice ? '#f87171' : 'inherit' }}
-              >
-                <Mic size={18} />
-              </button>
-
-              {/* Botão de Regras */}
-              <button 
-                className="icon-btn" 
-                title="Configurar regras de negócio e personalidade"
-                onClick={() => setActiveView('personality')}
-              >
-                <Sliders size={18} />
-              </button>
-
-
-              {/* Botão Enviar */}
-              <button 
-                className="btn-send-circular"
-                disabled={!chatInput.trim() || isSendingMessage}
-                onClick={() => handleSendMessage()}
-                title="Enviar mensagem (Enter)"
-              >
-                <ArrowUp size={18} />
-              </button>
+                  <PromptInputSubmit disabled={!chatInput.trim() || isSendingMessage} status={isSendingMessage ? 'submitted' : 'ready'} />
+                </PromptInputFooter>
+              </PromptInput>
+              <p className="mt-2 text-center text-xs text-muted-foreground">Confira informações importantes antes de tomar decisões.</p>
             </div>
           </div>
         </main>
