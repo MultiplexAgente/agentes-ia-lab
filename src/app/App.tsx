@@ -8,7 +8,7 @@ import {
   Globe, Facebook, Twitter, Copy, ExternalLink, HelpCircle, CheckCircle2,
   User, Shield, Bell, CreditCard, LogOut, ChevronRight, Settings,
   Lock, Mail, Phone, Building2, UserPlus, LogIn, ArrowRight, ArrowLeft, Zap, Star, ShieldCheck, Key,
-  Mic, MicOff, Volume2, VolumeX, ThumbsUp, ThumbsDown, FileText, Paperclip, ChevronDown, Bot, Cpu, ShoppingBag, Truck, Calendar, Clock, DollarSign, Share2, Download, Terminal, Layers, Wand2, BarChart3
+  Mic, MicOff, Volume2, VolumeX, ThumbsUp, ThumbsDown, FileText, Paperclip, ChevronDown, Bot, Cpu, ShoppingBag, Truck, Calendar, Clock, DollarSign, Share2, Download, Terminal, Layers, Wand2, BarChart3, History as HistoryIcon
 } from 'lucide-react';
 import atomLogo from '@/assets/multiplex-atom.jpg';
 import { AIBuilderView } from './components/builder/AIBuilderView';
@@ -2730,7 +2730,7 @@ export default function App() {
 
               {/* 2. NOVO CHAT */}
               <div 
-                className={`sidebar-item ${activeView === 'chat' ? 'active' : ''}`}
+                className="sidebar-item"
                 onClick={handleCreateNewChat}
               >
                 <div className="item-main">
@@ -2911,7 +2911,7 @@ export default function App() {
               {pinnedChats.map(chat => (
                 <div 
                   key={chat.id} 
-                  className={`sidebar-item ${activeChatId === chat.id && activeView === 'chat' ? 'active' : ''}`}
+                  className={`sidebar-item ${activeChatId === chat.id ? 'active' : ''}`}
                   onClick={() => {
                     setActiveChatId(chat.id);
                     setActiveView('chat');
@@ -3079,7 +3079,7 @@ export default function App() {
               {filteredChats.map(chat => (
                 <div 
                   key={chat.id} 
-                  className={`sidebar-item ${activeChatId === chat.id && activeView === 'chat' ? 'active' : ''}`}
+                  className={`sidebar-item ${activeChatId === chat.id ? 'active' : ''}`}
                   onClick={() => {
                     setActiveChatId(chat.id);
                     setActiveView('chat');
@@ -3395,7 +3395,7 @@ export default function App() {
                 <Button variant="secondary" className="justify-start" onClick={() => { handleCreateNewChat(); setChatNavigationOpen(false); }}>
                   <Plus /> Novo chat
                 </Button>
-                <div className="mt-7 flex items-center gap-2 px-2 text-xs font-medium text-muted-foreground"><History className="size-4" /> Conversas</div>
+                <div className="mt-7 flex items-center gap-2 px-2 text-xs font-medium text-muted-foreground"><HistoryIcon className="size-4" /> Conversas</div>
                 <div className="mt-3 min-h-0 flex-1 space-y-1 overflow-y-auto">
                   {filteredChats.map((chat) => (
                     <Button key={chat.id} variant={activeChatId === chat.id ? 'secondary' : 'ghost'} className="w-full justify-start truncate" onClick={() => { setActiveChatId(chat.id); setChatNavigationOpen(false); }}>
