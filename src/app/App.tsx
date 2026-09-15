@@ -252,7 +252,7 @@ export default function App() {
   const [selectedFolderFilter, setSelectedFolderFilter] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => window.innerWidth <= 768);
 
   // Pastas
   const [isCreatingFolder, setIsCreatingFolder] = useState(false);
