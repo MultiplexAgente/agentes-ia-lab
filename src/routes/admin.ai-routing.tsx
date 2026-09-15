@@ -35,6 +35,7 @@ interface AuditLog {
 
 interface AdminPayload {
   company: { id: string; name: string };
+  companies: Array<{ id: string; name: string }>;
   settings: {
     strategy: string;
     categoryStrategies: Record<string, string>;
@@ -88,16 +89,19 @@ function AiRoutingAdminPage() {
   const [saving, setSaving] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const [draft, setDraft] = useState<AdminPayload["settings"] | null>(null);
+  const [companyId, setCompanyId] = useState<string>("");
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (selected?: string) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch("/api/admin/ai-routing?limit=100");
+      const query = selected ? `&companyId=${selected}` : "";
+      const response = await fetch(`/api/admin/ai-routing?limit=100${query}`);
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error ?? "Falha ao carregar a auditoria.");
       setData(payload as AdminPayload);
       setDraft((payload as AdminPayload).settings);
+      setCompanyId((payload as AdminPayload).company.id);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Falha ao carregar a auditoria.");
     } finally {
@@ -117,12 +121,12 @@ function AiRoutingAdminPage() {
       const response = await fetch("/api/admin/ai-routing", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ settings: draft }),
+        body: JSON.stringify({ settings: draft, companyId }),
       });
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error ?? "Falha ao salvar.");
       setNotice("Prioridades salvas.");
-      await load();
+      await load(companyId);
     } catch (err) {
       setNotice(err instanceof Error ? err.message : "Falha ao salvar.");
     } finally {
@@ -146,6 +150,26 @@ function AiRoutingAdminPage() {
           Visível apenas ao administrador: modelo real escolhido em cada conversa, tokens, custo, latência e as
           prioridades de roteamento da empresa.
         </p>
+
+        {data && data.companies.length > 1 && (
+          <label className="mt-4 block max-w-sm text-sm">
+            <span className="mb-1 block font-medium">Empresa</span>
+            <select
+              className="w-full rounded-md border border-input bg-background p-2"
+              value={companyId}
+              onChange={(event) => {
+                setCompanyId(event.target.value);
+                void load(event.target.value);
+              }}
+            >
+              {data.companies.map((item) => (
+                <option key={item.id} value={item.id}>
+                  {item.name}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
       </header>
 
       {loading && <p className="text-sm text-muted-foreground">Carregando…</p>}
@@ -314,6 +338,7 @@ function AiRoutingAdminPage() {
                   <thead className="text-muted-foreground">
                     <tr>
                       <th className="p-2">Quando</th>
+                      <th className="p-2">Canal</th>
                       <th className="p-2">Tarefa</th>
                       <th className="p-2">Prioridade</th>
                       <th className="p-2">Modelo usado</th>
@@ -328,6 +353,9 @@ function AiRoutingAdminPage() {
                       <tr key={log.id} className="border-t border-border align-top">
                         <td className="p-2 whitespace-nowrap">
                           {new Date(log.created_at).toLocaleString("pt-BR")}
+                        </td>
+                        <td className="p-2 whitespace-nowrap">
+                          {log.channel === "whatsapp" ? "WhatsApp" : "Chat web"}
                         </td>
                         <td className="p-2">
                           {log.task_category} · {log.complexity}
