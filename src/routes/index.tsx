@@ -6,17 +6,17 @@ const App = lazy(() => import("@/app/App"));
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Multiplex IA | Agentes de IA para WhatsApp e Instagram" },
+      { title: "Multiplex IA | Assistente inteligente" },
       {
         name: "description",
         content:
-          "Plataforma de agentes de IA omnichannel: atendimento e vendas no WhatsApp, Instagram, Telegram e site, com catálogo, memória e painel executivo.",
+          "Converse com a Multiplex IA para obter informações e realizar tarefas.",
       },
-      { property: "og:title", content: "Multiplex IA | Agentes de IA Omnichannel" },
+      { property: "og:title", content: "Multiplex IA | Assistente inteligente" },
       {
         property: "og:description",
         content:
-          "Crie, treine e publique agentes de IA para atendimento e vendas em WhatsApp, Instagram e Telegram.",
+          "Converse com a Multiplex IA para obter informações e realizar tarefas.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
