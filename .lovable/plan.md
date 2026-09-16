@@ -68,8 +68,9 @@ Só considero concluído quando: APIs reais respondem, Supabase conectado, IA re
 - Todo backend novo entra como rota TanStack (`src/routes/api/...`) ou server function, usando os módulos já existentes em `src/lib/multiplex/*`. Nenhum servidor paralelo.
 - Migration `db/007_customers_orders.sql`: GRANTs explícitos, RLS ligado e policies por `company_users`, aplicada via `psql` no projeto `mbjqzjipiuwtgmoxsqfu`.
 - Ferramentas da IA registradas no pipeline atual (`pipeline.server.ts`) com esquemas estritos; empresa sempre derivada da sessão no servidor.
-- `App.tsx` substituído por um shell enxuto com rotas dedicadas por seção; `LandingChatPage` reaproveitado para o chat público.
+- `App.tsx` dá lugar a um shell enxuto com rotas dedicadas por seção, migrando o que tem implementação real; `LandingChatPage` segue no chat público.
 - Sem fallback textual: falha de IA vira erro visível, nunca resposta fingida.
+- Nenhuma tabela, coluna, variável ou endereço interno é renomeado por causa da identidade visual.
 
 ## Relatório final
-Ao terminar entrego: endereços 404 e a causa de cada um, correções feitas, origem da identidade da hamburgueria, confirmação da remoção de "Multiplex IA", motor real usado, arquivos alterados, testes executados com resultados e o que ficou pendente.
+Entrego separado em quatro blocos — **IMPLEMENTADO**, **TESTADO**, **NÃO IMPLEMENTADO**, **PENDENTE** — cobrindo: os 11 endereços 404 e a causa de cada um, o que foi corrigido, a origem da identidade da Hamburgueria, confirmação da remoção de "Multiplex IA" da interface, o motor real usado com `response.id`/`response.model`/tokens, arquivos alterados, testes executados e seus resultados. Nada entra em IMPLEMENTADO sem teste real.
