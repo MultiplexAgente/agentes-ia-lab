@@ -1,4 +1,4 @@
-import { Router, Request, Response } from 'express';
+﻿import { Router, Request, Response } from 'express';
 import { store } from '../config/database.js';
 import { Product, ProductCategory } from '../types/index.js';
 import { v4 as uuidv4 } from 'uuid';
@@ -104,7 +104,7 @@ productsRouter.post('/categories', (req: Request, res: Response) => {
   return res.status(201).json(category);
 });
 
-// Extrair múltiplos produtos a partir de texto colado com Multiplex IA (GPT-4o)
+// Extrair múltiplos produtos a partir de texto colado com Multiplex (GPT-4o)
 productsRouter.post('/parse-ai', async (req: Request, res: Response) => {
   const { text } = req.body;
   if (!text || typeof text !== 'string' || text.trim().length === 0) {
@@ -117,7 +117,7 @@ productsRouter.post('/parse-ai', async (req: Request, res: Response) => {
     if (process.env.OPENAI_API_KEY) {
       const { OpenAI } = await import('openai');
       const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-      const prompt = `Você é o extrator inteligente do Multiplex IA.
+      const prompt = `Você é o extrator inteligente do Multiplex.
 O usuário copiou e colou uma lista, cardápio ou trecho de site de produtos com nomes, valores e descrições.
 Sua tarefa é analisar o texto, identificar cada produto individual e extrair:
 - name: Nome claro do produto (string)
@@ -234,7 +234,7 @@ productsRouter.post('/batch', (req: Request, res: Response) => {
   });
 });
 
-// Extrair produtos, imóveis e catálogo completo direto de um site/link com Multiplex IA
+// Extrair produtos, imóveis e catálogo completo direto de um site/link com Multiplex
 productsRouter.post('/scrape-website', async (req: Request, res: Response) => {
   let { url, companyId, autoSave } = req.body;
   if (!url || typeof url !== 'string' || url.trim().length === 0) {
@@ -327,7 +327,7 @@ productsRouter.post('/scrape-website', async (req: Request, res: Response) => {
         const { OpenAI } = await import('openai');
         const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
         
-        const prompt = `Você é o extrator avançado do Multiplex IA para catálogo web comercial.
+        const prompt = `Você é o extrator avançado do Multiplex para catálogo web comercial.
 O cliente forneceu o link do site: "${targetUrl}".
 Título do site: "${siteTitle}".
 Descrição: "${siteDescription}".

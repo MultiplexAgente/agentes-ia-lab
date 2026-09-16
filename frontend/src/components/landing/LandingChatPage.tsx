@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+﻿import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Send, Sparkles, Zap, MessageSquare, Globe, Bot, Sun, Moon,
   BarChart3, Shield, Clock, Check, Loader2, User, LogIn, UserPlus,
@@ -11,7 +11,7 @@ const API_BASE = typeof window !== 'undefined' && window.location.port === '5173
   : '';
 
 const LANDING_SUGGESTIONS = [
-  '💬 O que é o Multiplex IA e como funciona?',
+  '💬 O que é o Multiplex e como funciona?',
   '📦 Como faço para cadastrar meu catálogo de produtos?',
   '📱 Quais canais posso conectar — WhatsApp, Instagram?',
   '⚡ Quanto tempo leva para ativar meu agente de IA?',
@@ -22,7 +22,7 @@ const INITIAL_LANDING_MESSAGE = `Olá! Sou a **IA do Multiplex** 👋
 
 Estou aqui para apresentar nossa plataforma e responder todas as suas dúvidas.
 
-O **Multiplex IA** é uma plataforma de agentes de atendimento multicanal — ela conecta seu negócio ao WhatsApp, Instagram e Telegram com uma IA treinada para vender, tirar dúvidas e converter clientes em tempo real.
+O **Multiplex** é uma plataforma de agentes de atendimento multicanal — ela conecta seu negócio ao WhatsApp, Instagram e Telegram com uma IA treinada para vender, tirar dúvidas e converter clientes em tempo real.
 
 O que você gostaria de saber? Pode me perguntar qualquer coisa! 🚀`;
 
@@ -97,7 +97,7 @@ export const LandingChatPage: React.FC<LandingChatPageProps> = ({
             page: 'landing_page',
             action: 'descoberta_produto',
             entity: 'multiplex_ia',
-            entity_name: 'Multiplex IA - Landing Page'
+            entity_name: 'Multiplex - Landing Page'
           }
         })
       });
@@ -207,14 +207,14 @@ export const LandingChatPage: React.FC<LandingChatPageProps> = ({
         borderBottom: d ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.07)'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <img src={atomLogo} alt="Multiplex IA" style={{
+          <img src={atomLogo} alt="Multiplex" style={{
             width: 32, height: 32, borderRadius: 10, objectFit: 'cover',
             border: '1px solid rgba(99,102,241,0.4)', boxShadow: '0 0 14px rgba(99,102,241,0.3)'
           }} />
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <span style={{ fontSize: '1rem', fontWeight: 800, color: d ? '#fff' : '#0f172a', letterSpacing: '-0.3px' }}>
-                Multiplex IA
+                Multiplex
               </span>
               <span style={{
                 fontSize: '0.63rem', color: '#06b6d4',
@@ -322,7 +322,7 @@ export const LandingChatPage: React.FC<LandingChatPageProps> = ({
               }} />
               <Bot size={14} color="#818cf8" />
               <span style={{ fontSize: '0.82rem', fontWeight: 700, color: d ? '#a5b4fc' : '#6366f1' }}>
-                Multiplex IA
+                Multiplex
               </span>
               <span style={{ fontSize: '0.7rem', color: d ? '#475569' : '#94a3b8' }}>
                 · online agora
@@ -425,7 +425,7 @@ export const LandingChatPage: React.FC<LandingChatPageProps> = ({
                   color: d ? '#f1f5f9' : '#0f172a', minHeight: 24, maxHeight: 120,
                   fontFamily: 'inherit', caretColor: '#6366f1'
                 }}
-                placeholder="Pergunte qualquer coisa sobre o Multiplex IA..."
+                placeholder="Pergunte qualquer coisa sobre o Multiplex..."
                 value={inputText}
                 onChange={e => {
                   setInputText(e.target.value);
@@ -624,7 +624,7 @@ export const LandingChatPage: React.FC<LandingChatPageProps> = ({
         <span style={{ fontWeight: 800, letterSpacing: 1, fontSize: '0.7rem', color: d ? '#334155' : '#cbd5e1' }}>
           BONASOFT
         </span>
-        {' · '}Multiplex IA {new Date().getFullYear()} · Todos os direitos reservados
+        {' · '}Multiplex {new Date().getFullYear()} · Todos os direitos reservados
       </footer>
     </div>
   );

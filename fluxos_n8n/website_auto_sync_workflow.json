@@ -1,5 +1,5 @@
-{
-  "name": "Multiplex IA - Sincronização Automática de Sites",
+﻿{
+  "name": "Multiplex - Sincronização Automática de Sites",
   "nodes": [
     {
       "parameters": {
@@ -80,7 +80,7 @@
           "string": [
             {
               "name": "log",
-              "value": "=Multiplex IA: Sincronização concluída com sucesso. {{ $json.changes_count }} alterações detectadas no site. Itens ativos no catálogo: {{ $json.total_catalog_items }}."
+              "value": "=Multiplex: Sincronização concluída com sucesso. {{ $json.changes_count }} alterações detectadas no site. Itens ativos no catálogo: {{ $json.total_catalog_items }}."
             }
           ]
         },

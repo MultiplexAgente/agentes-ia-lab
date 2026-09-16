@@ -1,4 +1,4 @@
-import { Router, Request, Response } from 'express';
+﻿import { Router, Request, Response } from 'express';
 
 export const channelsRouter = Router();
 
@@ -42,7 +42,7 @@ export const channelStates: Record<string, {
     setupInstructions: [
       'Acesse o portal Meta for Developers (developers.facebook.com) e entre no seu App.',
       'Vá em "Instagram Graph API" > "Configuração do Webhook".',
-      'Cole a URL do Webhook do Multiplex IA abaixo no campo "URL de Retorno de Chamada".',
+      'Cole a URL do Webhook do Multiplex abaixo no campo "URL de Retorno de Chamada".',
       'Ative a assinatura do campo "messages" e "messaging_postbacks".',
       'Cole o Token de Acesso da Página do Instagram abaixo.'
     ],
@@ -62,7 +62,7 @@ export const channelStates: Record<string, {
     setupInstructions: [
       'Acesse o Meta for Developers e selecione seu aplicativo empresarial.',
       'Adicione o produto "Messenger" nas configurações.',
-      'Adicione a URL do Webhook do Multiplex IA na seção "Webhooks do Messenger".',
+      'Adicione a URL do Webhook do Multiplex na seção "Webhooks do Messenger".',
       'Selecione sua Página do Facebook e gere o Token de Acesso da Página.',
       'Cole o Token abaixo e clique em Salvar e Conectar.'
     ],
@@ -83,7 +83,7 @@ export const channelStates: Record<string, {
       'Abra o Telegram e pesquise pelo usuário oficial @BotFather.',
       'Envie o comando /newbot e siga as instruções para escolher nome e username do bot.',
       'O @BotFather fornecerá o HTTP API Token (ex: 712345678:AAH...).',
-      'Cole esse Token no campo abaixo. O Multiplex IA configurará o Webhook automaticamente!'
+      'Cole esse Token no campo abaixo. O Multiplex configurará o Webhook automaticamente!'
     ],
     fields: [
       { key: 'accountName', label: 'Username do Bot (@)', placeholder: 'ex: @MultiplexAtendimentoBot' },
@@ -116,11 +116,11 @@ export const channelStates: Record<string, {
     connected: true,
     accountName: 'Widget Ativo no Site',
     webhookUrl: 'http://localhost:3000/api/chat/message',
-    description: 'Balão flutuante de chat com Multiplex IA para colocar em qualquer site ou página de vendas.',
+    description: 'Balão flutuante de chat com Multiplex para colocar em qualquer site ou página de vendas.',
     setupInstructions: [
       'Copie o código do script JavaScript fornecido abaixo.',
       'Cole o código antes da tag </body> no arquivo HTML do seu site ou no painel da sua loja (Shopify, WordPress, Nuvemshop, etc.).',
-      'O balão do Multiplex IA aparecerá no canto inferior direito do seu site automaticamente!'
+      'O balão do Multiplex aparecerá no canto inferior direito do seu site automaticamente!'
     ],
     fields: [
       { key: 'accountName', label: 'Domínio do Site', placeholder: 'ex: https://meusite.com.br' }
@@ -188,7 +188,7 @@ channelsRouter.post('/:type/ai-guide', async (req: Request, res: Response) => {
     if (process.env.OPENAI_API_KEY) {
       const { OpenAI } = await import('openai');
       const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-      const prompt = `Você é o especialista técnico de conexões e integrações da Multiplex IA.
+      const prompt = `Você é o especialista técnico de conexões e integrações da Multiplex.
 O usuário está configurando a integração do canal "${channel.name}" (${channel.type}).
 Webhook oficial gerado para o cliente: ${channel.webhookUrl}
 
@@ -205,7 +205,7 @@ Instruções para sua resposta:
       const completion = await openai.chat.completions.create({
         model: process.env.OPENAI_MODEL || 'gpt-4o',
         messages: [
-          { role: 'system', content: 'Você é o guia técnico de integrações da Multiplex IA. PROIBIDO usar emojis. Seja didático, claro e objetivo.' },
+          { role: 'system', content: 'Você é o guia técnico de integrações da Multiplex. PROIBIDO usar emojis. Seja didático, claro e objetivo.' },
           { role: 'user', content: prompt }
         ],
         temperature: 0.2

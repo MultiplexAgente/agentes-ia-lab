@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { 
   Check, X, ThumbsUp, ThumbsDown, Sparkles, Layers,
   ChevronRight, ArrowRight, ShieldCheck, AlertCircle, RefreshCw, Eye,
@@ -346,7 +346,7 @@ export const AIConversationMessages: React.FC<AIConversationMessagesProps> = ({
             }}
           >
             <RefreshCw size={14} className="spin-animation" style={{ color: 'var(--accent-cyan)' }} />
-            <span>{statusText || 'Multiplex IA está analisando...'}</span>
+            <span>{statusText || 'Multiplex está analisando...'}</span>
           </div>
         </div>
       )}
