@@ -14,16 +14,19 @@ O que existe e funciona hoje, ligado ao seu Supabase externo:
 | `/api/company/login`, `/workspace`, `/settings` | acesso e configuração da empresa |
 | `/api/public/whatsapp/webhook` | canal WhatsApp |
 
-**Origem de "Hamburgueria Artesanal Anthony":** não é código nem resposta inventada. Está no seu Supabase — a empresa `1111...1111` chama-se "Hamburgueria Artesanal Anthony" e a instrução do agente `2222...2222` começa com "Você é o assistente virtual da Hamburgueria Artesanal Anthony". O nome entra no contexto enviado ao modelo. Será renomeado para Multiplex.
+**Origem de "Hamburgueria Artesanal Anthony":** não é código nem resposta inventada. Está no seu Supabase — a empresa `1111...1111` chama-se "Hamburgueria Artesanal Anthony" e a instrução do agente `2222...2222` começa com "Você é o assistente virtual da Hamburgueria Artesanal Anthony". O nome entra no contexto enviado ao modelo porque é a empresa do tenant autenticado. **Nada será renomeado no banco sem sua confirmação** de que essa empresa é só teste/seed.
 
-**"Multiplex IA" na interface:** já não aparece em nenhum arquivo do app. Restam textos institucionais em documentos e no código morto — serão limpos junto.
+**"Multiplex IA" na interface:** já não aparece em nenhum arquivo do app. Restam textos institucionais em documentos e no código antigo — serão limpos. Nomes técnicos internos (tabelas, colunas, variáveis, endereços) ficam como estão.
 
 ## O que vou fazer
 
-### 1. Fim dos 404 (sem mock, sem dado falso)
-- Aposentar as telas mortas que só existiam para o servidor antigo: Ensinar IA, Builder de módulos, Fontes/Crawler, Faturamento, Logs antigos, Dashboard antigo, Canais antigos. Nenhuma delas lê dados reais hoje.
-- Apagar o código morto (`legacy-backend/`, `src/server/services/…`) que contém respostas prontas e prompts com identidade de outra empresa.
-- Depois disso não sobra nenhuma chamada para endereço inexistente. Vou provar rodando o app e conferindo a rede: zero 404.
+### 1. Fim dos 404, uma rota por vez (sem mock, sem endpoint de fachada)
+Para cada um dos 11 endereços, decido nesta ordem:
+1. **Existe implementação real equivalente hoje?** Se sim (catálogo, logs de conversa, configurações de empresa), aponto a tela para ela. Nada novo é criado.
+2. **Não existe e a tela também não tem funcionalidade real?** Removo apenas a chamada morta e a tela vazia.
+3. **A tela tem funcionalidade real mas falta o backend?** Mantenho a tela e registro como PENDENTE no relatório, com o que falta. Não crio endpoint só para virar 200, nem preencho com dado inventado.
+
+Nenhum código funcional é apagado. O código antigo (`legacy-backend/`, `src/server/services/…`) só sai depois de eu confirmar, arquivo por arquivo, que nada ativo o usa. A prova é a rede do navegador: zero 404 nas rotas ainda usadas.
 
 ### 2. Tabelas que faltam (clientes e pedidos)
 Migration nova no seu Supabase: `customers` e `orders` + `order_items`, com empresa obrigatória, permissões e políticas por vínculo em `company_users` — mesma regra já usada nas outras tabelas. Sem nenhuma linha de exemplo; começa vazio.
