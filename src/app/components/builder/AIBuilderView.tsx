@@ -202,7 +202,7 @@ export const AIBuilderView: React.FC<AIBuilderViewProps> = ({ onOpenModule, apiB
         <AIConversationPanel
           apiBase={apiBase}
           context={{ page: 'builder', module: 'builder' }}
-          initialMessage="Olá! Sou a **Multiplex IA**, seu arquiteto inteligente de funcionalidades.\n\nO que você gostaria de criar ou aprimorar no seu painel hoje? Você pode pedir novas áreas, relatórios ou ajustes em funcionalidades existentes."
+          initialMessage="Olá! Sou a **Multiplex**, seu arquiteto inteligente de funcionalidades.\n\nO que você gostaria de criar ou aprimorar no seu painel hoje? Você pode pedir novas áreas, relatórios ou ajustes em funcionalidades existentes."
           suggestions={[
             'Quero uma área para acompanhar meus leads.',
             'Crie uma área financeira com faturamento, despesas e pedidos.',

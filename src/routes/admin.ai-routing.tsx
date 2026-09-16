@@ -63,13 +63,13 @@ interface AdminPayload {
 export const Route = createFileRoute("/admin/ai-routing")({
   head: () => ({
     meta: [
-      { title: "Auditoria de roteamento · Multiplex IA" },
+      { title: "Auditoria de roteamento · Multiplex" },
       {
         name: "description",
         content:
-          "Painel administrativo do Multiplex IA: logs de cada conversa, modelo escolhido, tokens, custo e prioridades de roteamento por empresa.",
+          "Painel administrativo do Multiplex: logs de cada conversa, modelo escolhido, tokens, custo e prioridades de roteamento por empresa.",
       },
-      { property: "og:title", content: "Auditoria de roteamento · Multiplex IA" },
+      { property: "og:title", content: "Auditoria de roteamento · Multiplex" },
       {
         property: "og:description",
         content: "Logs de conversas, modelo escolhido, custo e prioridades de roteamento por empresa.",

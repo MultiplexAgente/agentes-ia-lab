@@ -297,7 +297,7 @@ export const AIConversationMessages: React.FC<AIConversationMessagesProps> = ({
             }}
           >
             <RefreshCw size={14} className="spin-animation" style={{ color: 'var(--accent-cyan)' }} />
-            <span>Multiplex IA está analisando dados e formulando resposta...</span>
+            <span>Multiplex está analisando dados e formulando resposta...</span>
           </div>
         </div>
       )}

@@ -57,13 +57,13 @@ interface Workspace {
 export const Route = createFileRoute("/empresa")({
   head: () => ({
     meta: [
-      { title: "Painel da empresa · Multiplex IA" },
+      { title: "Painel da empresa · Multiplex" },
       {
         name: "description",
         content:
-          "Cada empresa configura seu próprio catálogo, prioridades de atendimento da Multiplex IA e preço por token.",
+          "Cada empresa configura seu próprio catálogo, prioridades de atendimento da Multiplex e preço por token.",
       },
-      { property: "og:title", content: "Painel da empresa · Multiplex IA" },
+      { property: "og:title", content: "Painel da empresa · Multiplex" },
       {
         property: "og:description",
         content: "Configure catálogo, prioridades de atendimento e preço por token da sua empresa.",
@@ -291,7 +291,7 @@ function CompanyPage() {
       <section className="mb-8 rounded-lg border border-border p-4">
         <h2 className="mb-1 text-lg font-medium">Catálogo</h2>
         <p className="mb-4 text-sm text-muted-foreground">
-          A Multiplex IA responde sobre preço e disponibilidade usando exatamente o que está aqui.
+          A Multiplex responde sobre preço e disponibilidade usando exatamente o que está aqui.
         </p>
 
         <div className="mb-4 flex flex-wrap items-center gap-2">
@@ -439,7 +439,7 @@ function CompanyPage() {
         <section className="rounded-lg border border-border p-4">
           <h2 className="mb-1 text-lg font-medium">Prioridades de atendimento e custo</h2>
           <p className="mb-4 text-sm text-muted-foreground">
-            Quem conversa nunca escolhe nada: a Multiplex IA decide sozinha. Aqui você define o que ela deve
+            Quem conversa nunca escolhe nada: a Multiplex decide sozinha. Aqui você define o que ela deve
             priorizar em cada tipo de pedido e o preço por 1 milhão de tokens.
           </p>
 

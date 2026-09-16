@@ -6,17 +6,17 @@ const App = lazy(() => import("@/app/App"));
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Multiplex IA | Assistente inteligente" },
+      { title: "Multiplex | Assistente inteligente" },
       {
         name: "description",
         content:
-          "Converse com a Multiplex IA para obter informações e realizar tarefas.",
+          "Converse com a Multiplex para obter informações e realizar tarefas.",
       },
-      { property: "og:title", content: "Multiplex IA | Assistente inteligente" },
+      { property: "og:title", content: "Multiplex | Assistente inteligente" },
       {
         property: "og:description",
         content:
-          "Converse com a Multiplex IA para obter informações e realizar tarefas.",
+          "Converse com a Multiplex para obter informações e realizar tarefas.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

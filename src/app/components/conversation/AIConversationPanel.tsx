@@ -18,7 +18,7 @@ interface AIConversationPanelProps {
 export const AIConversationPanel: React.FC<AIConversationPanelProps> = ({
   apiBase,
   context = {},
-  initialMessage = 'Olá! Sou a **Multiplex IA**, sua assistente inteligente. Como posso ajudar você no sistema hoje?',
+  initialMessage = 'Olá! Sou a **Multiplex**, sua assistente inteligente. Como posso ajudar você no sistema hoje?',
   suggestions = [],
   placeholder = 'Converse com a IA do Multiplex...',
   onActionCompleted,
@@ -200,7 +200,7 @@ export const AIConversationPanel: React.FC<AIConversationPanelProps> = ({
           </div>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ fontWeight: 700, fontSize: '0.95rem', color: '#f8fafc' }}>Multiplex IA</span>
+              <span style={{ fontWeight: 700, fontSize: '0.95rem', color: '#f8fafc' }}>Multiplex</span>
               <span className="badge" style={{ fontSize: '0.68rem', background: 'rgba(16, 185, 129, 0.15)', color: '#10b981', padding: '2px 6px' }}>
                 Diálogo Ativo
               </span>
