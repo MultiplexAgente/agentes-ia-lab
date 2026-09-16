@@ -47,3 +47,17 @@
 ## Fase 19 — Relatório
 - [ ] IMPLEMENTADO / TESTADO / NÃO IMPLEMENTADO / PENDENTE / 404 / IA / IDENTIDADE /
       ARQUIVOS ALTERADOS / REMOVIDOS / BANCO / SEGURANÇA / REDE
+
+## Multi-provider (GPT/CLAUDE/DEEPSEEK) + ícone
+- [ ] Ícone multiplex-atom na mesma linha da saudação; remover bolinha verde
+- [ ] Avatar multiplex-atom nas respostas (remover "MX")
+- [ ] Tema escuro padrão + botão dark/light persistido
+- [ ] Aviso de login discreto (sem bloco vermelho)
+- [ ] Segredos ANTHROPIC_API_KEY e DEEPSEEK_API_KEY
+- [ ] model-registry.server.ts + ProviderCapabilityService + resolução de flagship
+- [ ] Providers OpenAI/Anthropic/DeepSeek com interface única + tool adapters
+- [ ] AIModelRouter + TaskModelSelector + modelo auxiliar + fallback registrado
+- [ ] Migration: user_ai_preferences, ai_background_jobs, colunas de usage
+- [ ] Seletor GPT/CLAUDE/DEEPSEEK no chat e em Configurações
+- [ ] Painel admin separado por provider
+- [ ] Testes reais ponta a ponta + relatório final
