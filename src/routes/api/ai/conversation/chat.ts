@@ -2,7 +2,12 @@ import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 
 import { getOptionalCompanySession } from "@/lib/multiplex/company-auth.server";
-import { ensureWebConversation, loadPersistedHistory, persistMessage } from "@/lib/multiplex/conversation.server";
+import {
+  ensureConversationTitle,
+  ensureWebConversation,
+  loadPersistedHistory,
+  persistMessage,
+} from "@/lib/multiplex/conversation.server";
 import { runMultiplexTurn } from "@/lib/multiplex/pipeline.server";
 import { getServiceClient, resolvePublicCompany } from "@/lib/multiplex/supabase.server";
 
@@ -64,6 +69,7 @@ export const Route = createFileRoute("/api/ai/conversation/chat")({
           messageId: incoming.id,
           agentId: conversation.agentId,
           requestContext: parsed.data.context,
+          toolScope: session ? "authenticated" : "public",
         });
         if (!result.ok) {
           return Response.json({ error: result.error, conversation: { id: conversation.id } }, { status: result.status });
@@ -82,8 +88,14 @@ export const Route = createFileRoute("/api/ai/conversation/chat")({
         });
         if (!assistant) return Response.json({ error: "A resposta real foi recebida, mas não pôde ser registrada." }, { status: 500 });
 
+        const conversationTitle = await ensureConversationTitle(supabase, {
+          companyId: company.id,
+          conversationId: conversation.id,
+          firstUserMessage: history.find((item) => item.role === "user")?.content ?? parsed.data.message,
+        });
+
         return Response.json({
-          conversation: { id: conversation.id, company_id: company.id },
+          conversation: { id: conversation.id, company_id: company.id, title: conversationTitle },
           assistantMessage: { id: assistant.id, role: "assistant", content: result.text },
           routing: {
             task: result.routing.category,
@@ -94,6 +106,7 @@ export const Route = createFileRoute("/api/ai/conversation/chat")({
           },
           usage: result.usage,
           context: result.context,
+          toolCalls: result.toolCalls.map((call) => ({ name: call.name, ok: call.ok })),
           auditPersisted: result.auditPersisted,
         });
       },
