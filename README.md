@@ -1,27 +1,45 @@
-# 🚀 Laboratório & Fábrica de Agentes de I.A. (Instagram & WhatsApp)
+# Multiplex 🚀
 
-Projeto criado para o desenvolvimento, testes e empacotamento de **Agentes de Inteligência Artificial** para atendimento e captação de clientes.
+Plataforma SaaS & Fábrica de Agentes de IA Omnichannel (WhatsApp, Instagram, Web) integrada ao Supabase, n8n e modelos de IA de última geração.
 
----
-
-## 🎯 Objetivos do Projeto
-
-1. **Laboratório Próprio (Fase 1):**
-   - Implementar um agente de IA no próprio perfil do Instagram (@Anthony) para validar a tecnologia.
-   - Usar o agente próprio como **vitrine/portfólio vivo** para atrair novos clientes.
-   - Dominar a integração entre **Instagram Graph API / Webhooks**, **n8n** e a **API do Google Gemini**.
-
-2. **Empacotamento Comercial (Fase 2):**
-   - Vender agentes de IA prontos para empresas locais (restaurantes, comércios, clínicas, prestadores de serviços).
-   - **Modelo de Cobrança:**
-     - Setup de implantação: R$ 1.500 a R$ 5.000
-     - Mensalidade recorrente: R$ 300 a R$ 1.200/mês
+- **Repositório Oficial:** [MultiplexAgente/gravity-hug](https://github.com/MultiplexAgente/gravity-hug)
+- **Live App (Lovable):** [gravity-hug.lovable.app](https://gravity-hug.lovable.app)
+- **Supabase Organization:** [Dashboard Supabase](https://supabase.com/dashboard/org/npkdkomqdaxeqqlkqusn)
 
 ---
 
-## 🏗️ Estrutura de Pastas
+## 🎯 Arquitetura & Módulos
 
-* `docs/`: Documentação de estratégias, conversas e evolução do projeto.
-* `prompts/`: Prompts de sistema (System Instructions) para diferentes nichos de negócio.
-* `fluxos_n8n/`: Arquivos `.json` com os workflows exportados do n8n prontos para importar e reutilizar.
-* `scripts/`: Scripts auxiliares de conexão com APIs e utilitários.
+1. **Frontend & App TanStack Start / Lovable (`src/`):**
+   - Chat-first workspace interativo e responsivo.
+   - Rotas empresariais: Catálogo, Clientes, Pedidos, Integrações, Admin de Roteamento de IA.
+   - Design moderno com Tailwind CSS v4, Lucide Icons, Radix UI e componentes de IA.
+
+2. **Backend & Agente Omnichannel (`backend/` & `src/lib/multiplex/`):**
+   - Sistema de IA conversacional e auto-recuperação contextual.
+   - Memória empresarial de longo prazo (Episódica, Semântica e Perfil de Cliente).
+   - Catálogo Universal de Negócios (Restaurantes, Clínicas, Hotéis, Cursos, Vagas, Eventos).
+   - Webhooks WhatsApp / Instagram e integração com fluxos n8n.
+
+3. **Banco de Dados & Migrations (`supabase/migrations/` & `db/`):**
+   - `001_initial_schema.sql`: Estrutura base de multi-tenant e conversas.
+   - `002_seed_demo_data.sql`: Dados de demonstração.
+   - `003_ai_app_builder.sql`: Configurações de construtor de agentes.
+   - `004_memory_enterprise.sql`: Motor de memória empresarial profunda.
+   - `005_catalog_universal.sql`: Catálogo universal de produtos, serviços e vagas.
+
+---
+
+## 🛠️ Desenvolvimento Local
+
+```sh
+# Instalação de dependências
+npm install
+
+# Rodar servidor de desenvolvimento (TanStack Start / Vite)
+npm run dev
+
+# Ou rodar módulos específicos:
+npm run dev:backend   # API Express e Webhooks
+npm run dev:frontend  # Dashboard frontend legado / standalone
+```
