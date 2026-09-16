@@ -1,7 +1,14 @@
-import { Info, Loader2, Paperclip, Plus, Search, SendHorizontal, Trash2 } from "lucide-react";
+import { Check, Info, Loader2, Paperclip, Plus, Search, SendHorizontal, Trash2 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+import multiplexIcon from "@/assets/multiplex-atom.jpg";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { api, getPublicSessionId, getToken, relativeGroup, shortTime } from "@/lib/multiplex/client";
@@ -31,6 +38,25 @@ const QUICK_ACTIONS = [
 ];
 
 const GROUPS = ["Hoje", "Ontem", "Esta semana", "Mais antigas"] as const;
+
+type ModelAlias = "gpt" | "claude" | "deepseek";
+
+interface ModelOption {
+  alias: ModelAlias;
+  label: string;
+  available: boolean;
+  unavailableReason: string | null;
+}
+
+export function MultiplexMark({ className }: { className?: string }) {
+  return (
+    <img
+      src={multiplexIcon}
+      alt="Multiplex"
+      className={cn("shrink-0 rounded-full object-cover", className)}
+    />
+  );
+}
 
 export const NEW_CHAT_EVENT = "multiplex:new-chat";
 
@@ -79,6 +105,8 @@ export function useChatWorkspace() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState("");
+  const [models, setModels] = useState<ModelOption[]>([]);
+  const [alias, setAlias] = useState<ModelAlias>("gpt");
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -95,6 +123,15 @@ export function useChatWorkspace() {
   useEffect(() => {
     void loadConversations();
   }, [loadConversations]);
+
+  useEffect(() => {
+    api<{ options: ModelOption[]; selected: ModelAlias }>("/api/ai/models")
+      .then((data) => {
+        setModels(data.options);
+        setAlias(data.selected);
+      })
+      .catch(() => setModels([]));
+  }, []);
 
   useEffect(() => {
     const handler = () => startNewChat();
@@ -155,6 +192,7 @@ export function useChatWorkspace() {
         body: JSON.stringify({
           message: content,
           conversationId,
+          modelAlias: alias,
           ...(authenticated ? {} : { publicSessionId: getPublicSessionId() }),
         }),
       });
@@ -275,10 +313,10 @@ export function useChatWorkspace() {
         <div className="mx-auto w-full max-w-3xl px-5 py-6">
           {messages.length === 0 ? (
             <div className="pt-16 text-center">
-              <h1 className="font-display text-2xl font-semibold tracking-tight">Como posso ajudar?</h1>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Converse com o Multiplex para administrar suas operações.
-              </p>
+              <div className="flex items-center justify-center gap-3">
+                <MultiplexMark className="size-9" />
+                <h1 className="font-display text-2xl font-semibold tracking-tight">Como posso ajudar?</h1>
+              </div>
             </div>
           ) : (
             <div className="space-y-6">
@@ -291,9 +329,7 @@ export function useChatWorkspace() {
                   </div>
                 ) : (
                   <div key={message.id} className="flex gap-3">
-                    <div className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-full bg-primary/15 text-[10px] font-bold tracking-tight text-primary">
-                      MX
-                    </div>
+                    <MultiplexMark className="mt-0.5 size-7" />
                     <div className="min-w-0 flex-1">
                       <Markdownish text={message.content} />
                     </div>
@@ -351,7 +387,34 @@ export function useChatWorkspace() {
               {busy ? <Loader2 className="size-4 animate-spin" /> : <SendHorizontal className="size-4" />}
             </Button>
           </form>
-          <div className="mt-2 flex flex-wrap gap-1.5">
+          <div className="mt-2 flex flex-wrap items-center gap-1.5">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  type="button"
+                  className="rounded-full border border-border/60 px-3 py-1 text-xs font-medium text-foreground/80 transition-colors hover:border-primary/50"
+                >
+                  {models.find((option) => option.alias === alias)?.label ?? "GPT"}
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-48">
+                {models.map((option) => (
+                  <DropdownMenuItem
+                    key={option.alias}
+                    disabled={!option.available}
+                    onSelect={() => setAlias(option.alias)}
+                    className="justify-between"
+                  >
+                    <span>{option.label}</span>
+                    {option.alias === alias ? (
+                      <Check className="size-3.5" />
+                    ) : !option.available ? (
+                      <span className="text-[10px] text-muted-foreground">indisponível</span>
+                    ) : null}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
             {QUICK_ACTIONS.map((action) => (
               <button
                 key={action.label}
