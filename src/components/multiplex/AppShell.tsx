@@ -5,6 +5,7 @@ import {
   LogOut,
   MessageSquare,
   Plug,
+  Plus,
   Settings,
   ShoppingBag,
   Users,
@@ -14,7 +15,6 @@ import {
 import { useEffect, useState, type ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { MultiplexMark, NEW_CHAT_EVENT } from "@/components/multiplex/ChatWorkspace";
 import { ThemeToggle } from "@/components/multiplex/ThemeToggle";
@@ -59,13 +59,12 @@ export function AppShell({ children, secondary }: { children: ReactNode; seconda
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const { profile } = useProfile();
   const [navOpen, setNavOpen] = useState(false);
-  const [listOpen, setListOpen] = useState(false);
 
   useEffect(() => {
     setNavOpen(false);
-    setListOpen(false);
   }, [pathname]);
 
+  const accountName = profile?.user.email?.split("@")[0] ?? null;
   const initials = (profile?.user.email ?? "?").slice(0, 2).toLocaleUpperCase("pt-BR");
 
   return (
@@ -73,12 +72,12 @@ export function AppShell({ children, secondary }: { children: ReactNode; seconda
       {/* SIDEBAR */}
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-40 flex w-[240px] flex-col border-r border-border/60 bg-card/60 backdrop-blur-xl transition-transform lg:static lg:translate-x-0",
+          "fixed inset-y-0 left-0 z-40 flex w-[280px] flex-col border-r border-border/60 bg-card/50 backdrop-blur-xl transition-transform lg:static lg:translate-x-0",
           navOpen ? "translate-x-0" : "-translate-x-full",
         )}
       >
-        <div className="flex h-14 items-center justify-between px-4">
-          <span className="flex items-center gap-2 font-display text-lg font-semibold tracking-[0.14em] text-foreground">
+        <div className="flex h-14 shrink-0 items-center justify-between px-4">
+          <span className="flex items-center gap-2 text-[15px] font-semibold tracking-[0.12em] text-foreground">
             <MultiplexMark className="size-6" />
             MULTIPLEX
           </span>
@@ -92,54 +91,54 @@ export function AppShell({ children, secondary }: { children: ReactNode; seconda
 
         <div className="px-3">
           <Button
-            className="w-full justify-start gap-2"
+            variant="outline"
+            className="w-full justify-start gap-2 font-medium"
             onClick={async () => {
               if (pathname !== "/") await navigate({ to: "/" });
               window.dispatchEvent(new Event(NEW_CHAT_EVENT));
             }}
           >
-            <MessageSquare className="size-4" />
+            <Plus className="size-4" />
             Novo chat
           </Button>
         </div>
 
-        <ScrollArea className="mt-4 flex-1 px-2">
-          <nav className="flex flex-col gap-0.5 pb-4">
-            {NAV.map((item) => {
-              const active = item.to === "/" ? pathname === "/" : pathname.startsWith(item.to);
-              return (
-                <Link
-                  key={item.to}
-                  to={item.to}
-                  className={cn(
-                    "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
-                    active
-                      ? "bg-primary/12 text-foreground"
-                      : "text-muted-foreground hover:bg-muted/40 hover:text-foreground",
-                  )}
-                >
-                  <item.icon className={cn("size-4", active && "text-primary")} />
-                  {item.label}
-                </Link>
-              );
-            })}
-          </nav>
-        </ScrollArea>
+        <nav className="mt-3 flex shrink-0 flex-col gap-0.5 px-2">
+          {NAV.map((item) => {
+            const active = item.to === "/" ? pathname === "/" : pathname.startsWith(item.to);
+            return (
+              <Link
+                key={item.to}
+                to={item.to}
+                className={cn(
+                  "flex items-center gap-3 rounded-lg px-3 py-1.5 text-[13px] font-medium transition-colors",
+                  active
+                    ? "bg-primary/12 text-foreground"
+                    : "text-muted-foreground hover:bg-muted/40 hover:text-foreground",
+                )}
+              >
+                <item.icon className={cn("size-4", active && "text-primary")} />
+                {item.label}
+              </Link>
+            );
+          })}
+        </nav>
+
+        {/* HISTÓRICO DENTRO DA SIDEBAR */}
+        {secondary ? (
+          <div className="mt-3 flex min-h-0 flex-1 flex-col border-t border-border/50">{secondary}</div>
+        ) : (
+          <div className="flex-1" />
+        )}
 
         <Separator />
-        <div className="p-3">
+        <div className="p-2">
           {profile ? (
-            <div className="flex items-center gap-3">
-              <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/15 text-xs font-semibold text-primary">
+            <div className="flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-muted/40">
+              <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/15 text-[11px] font-semibold text-primary">
                 {initials}
               </div>
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium">{profile.company.name}</p>
-                <p className="truncate text-xs text-muted-foreground">{profile.user.email}</p>
-                <p className="truncate text-[11px] uppercase tracking-wide text-muted-foreground/70">
-                  {profile.user.role}
-                </p>
-              </div>
+              <p className="min-w-0 flex-1 truncate text-[13px] font-medium">{accountName}</p>
               <Button
                 variant="ghost"
                 size="icon"
@@ -153,48 +152,28 @@ export function AppShell({ children, secondary }: { children: ReactNode; seconda
               </Button>
             </div>
           ) : (
-            <Button variant="outline" className="w-full" onClick={() => navigate({ to: "/entrar" })}>
+            <Button variant="ghost" className="w-full text-[13px]" onClick={() => navigate({ to: "/entrar" })}>
               Entrar na minha empresa
             </Button>
           )}
         </div>
       </aside>
 
-      {(navOpen || listOpen) && (
+      {navOpen && (
         <button
           aria-label="Fechar menu"
           className="fixed inset-0 z-30 bg-background/70 backdrop-blur-sm lg:hidden"
-          onClick={() => {
-            setNavOpen(false);
-            setListOpen(false);
-          }}
+          onClick={() => setNavOpen(false)}
         />
-      )}
-
-      {/* COLUNA SECUNDÁRIA */}
-      {secondary && (
-        <div
-          className={cn(
-            "fixed inset-y-0 left-0 z-40 flex w-[300px] flex-col border-r border-border/60 bg-card/40 backdrop-blur-xl transition-transform lg:static lg:translate-x-0 xl:w-[300px]",
-            listOpen ? "translate-x-0" : "-translate-x-full",
-          )}
-        >
-          {secondary}
-        </div>
       )}
 
       {/* CONTEÚDO */}
       <main className="flex min-w-0 flex-1 flex-col">
-        <div className="flex h-14 items-center gap-2 border-b border-border/60 px-3 lg:hidden">
+        <div className="flex h-12 shrink-0 items-center gap-2 border-b border-border/60 px-3 lg:hidden">
           <Button variant="ghost" size="icon" onClick={() => setNavOpen(true)}>
             <Menu className="size-4" />
           </Button>
-          {secondary && (
-            <Button variant="ghost" size="sm" onClick={() => setListOpen(true)}>
-              Conversas
-            </Button>
-          )}
-          <span className="font-display text-sm font-semibold tracking-[0.14em]">MULTIPLEX</span>
+          <span className="text-sm font-semibold tracking-[0.12em]">MULTIPLEX</span>
         </div>
         {children}
       </main>
