@@ -5,10 +5,8 @@ import {
   Loader2,
   LogIn,
   MoreHorizontal,
-  Paperclip,
   Plus,
   Search,
-  Sparkles,
   Trash2,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -21,7 +19,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   api,
@@ -50,11 +47,12 @@ interface ChatMessage {
 
 const GUEST_CHATS_STORAGE_KEY = "multiplex.guest.conversations";
 
+// Sugestões inteligentes de IA geral (estilo ChatGPT)
 const QUICK_ACTIONS = [
-  { label: "🍔 Cardápio & Preços", prompt: "Quais são os produtos do cardápio e seus valores?" },
-  { label: "🕒 Horário de atendimento", prompt: "Qual é o horário de atendimento e funcionamento?" },
-  { label: "📦 Como fazer um pedido", prompt: "Como posso fazer um pedido aqui?" },
-  { label: "❓ Dúvidas sobre entrega", prompt: "Vocês fazem entrega? Quais são as taxas?" },
+  { label: "💡 Ideias e planejamento", prompt: "Me ajude a estruturar um plano estratégico para um novo projeto." },
+  { label: "✍️ Redigir ou revisar texto", prompt: "Poderia me ajudar a escrever um texto profissional e persuasivo?" },
+  { label: "💻 Programação e código", prompt: "Explique como estruturar uma solução eficiente em TypeScript e React." },
+  { label: "📊 Análise e produtividade", prompt: "Quais são as melhores metodologias para otimizar processos com automação e IA?" },
 ];
 
 const GROUPS = ["Hoje", "Ontem", "Esta semana", "Mais antigas"] as const;
@@ -139,7 +137,7 @@ export function useChatWorkspace() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Carrega histórico: do servidor se autenticado, ou do localStorage se visitante
+  // Carrega histórico: do servidor se logado, ou do localStorage se visitante
   const loadConversations = useCallback(async () => {
     if (authenticated) {
       try {
@@ -174,7 +172,7 @@ export function useChatWorkspace() {
         if (data.selected) setAlias(data.selected);
       })
       .catch(() => {
-        // Fallback já presente no estado inicial
+        // Fallback padrão
       });
   }, []);
 
@@ -216,7 +214,6 @@ export function useChatWorkspace() {
         setError(err instanceof Error ? err.message : "Não foi possível abrir a conversa.");
       }
     } else {
-      // Abre do localStorage
       if (item.messages && Array.isArray(item.messages)) {
         setMessages(item.messages);
       } else {
@@ -297,7 +294,6 @@ export function useChatWorkspace() {
       if (authenticated) {
         void loadConversations();
       } else {
-        // Salva conversa local no localStorage do visitante
         try {
           const raw = window.localStorage.getItem(GUEST_CHATS_STORAGE_KEY);
           const currentList = raw ? (JSON.parse(raw) as ConversationItem[]) : [];
@@ -353,21 +349,22 @@ export function useChatWorkspace() {
   // SIDEBAR - LISTA DE CONVERSAS (Estilo ChatGPT)
   const list = (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="p-2.5">
+      <div className="p-3">
         <div className="relative">
           <Search className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
-          <Input
+          <input
+            type="text"
             value={filter}
             onChange={(event) => setFilter(event.target.value)}
             placeholder="Buscar conversas..."
-            className="h-8 rounded-xl border-border/50 bg-muted/30 pl-9 pr-3 text-xs focus-visible:ring-1"
+            className="h-8 w-full rounded-xl border border-border/50 bg-muted/30 pl-9 pr-3 text-xs text-foreground placeholder:text-muted-foreground outline-none focus:border-border transition-colors"
           />
         </div>
       </div>
 
       <ScrollArea className="min-h-0 flex-1 px-2 pb-2">
         {grouped.length === 0 ? (
-          <div className="px-3 py-8 text-center">
+          <div className="px-3 py-6 text-center">
             <p className="text-xs text-muted-foreground">Nenhuma conversa recente</p>
             <Button
               variant="link"
@@ -426,11 +423,11 @@ export function useChatWorkspace() {
     </div>
   );
 
-  // COMPOSER CAPSULE (Estilo ChatGPT: rounded-3xl com toolbar interna)
+  // COMPOSER CAPSULE (Estilo ChatGPT: limpo, com textarea expansível e botão de envio)
   const composer = (
     <div className="mx-auto w-full max-w-[740px]">
       <form
-        className="flex flex-col rounded-[26px] border border-border/70 bg-card/80 p-2.5 shadow-lg backdrop-blur-xl transition-all focus-within:border-border/90"
+        className="flex flex-col rounded-[26px] border border-border/70 bg-card/90 p-3 shadow-lg backdrop-blur-xl transition-all focus-within:border-border/90"
         onSubmit={(event) => {
           event.preventDefault();
           void send(input);
@@ -441,7 +438,7 @@ export function useChatWorkspace() {
           value={input}
           rows={1}
           placeholder="Pergunte qualquer coisa..."
-          className="max-h-44 min-h-[38px] w-full resize-none bg-transparent px-2 py-1 text-[15px] leading-relaxed text-foreground outline-none placeholder:text-muted-foreground"
+          className="max-h-44 min-h-[40px] w-full resize-none bg-transparent px-2 py-1 text-[15px] leading-relaxed text-foreground outline-none placeholder:text-muted-foreground"
           onChange={(event) => {
             setInput(event.target.value);
             const node = event.target;
@@ -458,51 +455,16 @@ export function useChatWorkspace() {
 
         <div className="flex items-center justify-between pt-1">
           <div className="flex items-center gap-1.5">
-            {/* ANEXO / PLUS BUTTON */}
             <button
               type="button"
               className="flex size-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
-              title="Anexar arquivo"
-              onClick={() => {
-                // Feature visual compatível com ChatGPT
-              }}
+              title="Anexar ou adicionar"
+              onClick={() => {}}
             >
               <Plus className="size-4" />
             </button>
-
-            {/* SELETOR DE MODELO INTERNO NO COMPOSER */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button
-                  type="button"
-                  className="flex items-center gap-1 rounded-full border border-border/60 bg-muted/20 px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
-                >
-                  <Sparkles className="size-3 text-primary" />
-                  <span>{currentModel?.label ?? "GPT-4o"}</span>
-                  <ChevronDown className="size-3 opacity-60" />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-48 rounded-xl">
-                {models.map((option) => (
-                  <DropdownMenuItem
-                    key={option.alias}
-                    disabled={!option.available}
-                    onSelect={() => setAlias(option.alias)}
-                    className="justify-between text-xs"
-                  >
-                    <span>{option.label}</span>
-                    {option.alias === alias ? (
-                      <Check className="size-3.5 text-primary" />
-                    ) : !option.available ? (
-                      <span className="text-[10px] text-muted-foreground">indisponível</span>
-                    ) : null}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
           </div>
 
-          {/* BOTÃO ENVIAR */}
           <Button
             type="submit"
             size="icon"
@@ -519,32 +481,32 @@ export function useChatWorkspace() {
     </div>
   );
 
-  // TOP BAR DO CHAT
+  // TOP BAR DO CHAT (Seletor de Modelo único e botão de login)
   const topBar = (
-    <header className="flex h-13 shrink-0 items-center justify-between border-b border-border/50 px-4 sm:px-6">
+    <header className="flex h-14 shrink-0 items-center justify-between border-b border-border/50 px-4 sm:px-6">
       <div className="flex items-center gap-2">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button
               type="button"
-              className="flex items-center gap-1.5 rounded-xl px-2.5 py-1 text-base font-semibold text-foreground transition-colors hover:bg-muted/40"
+              className="flex items-center gap-1.5 rounded-xl px-2.5 py-1.5 text-base font-semibold text-foreground transition-colors hover:bg-muted/40"
             >
-              <span>{currentModel?.label ?? "Multiplex"}</span>
-              <ChevronDown className="size-3.5 text-muted-foreground" />
+              <span>{currentModel?.label ?? "GPT-4o"}</span>
+              <ChevronDown className="size-4 text-muted-foreground" />
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-52 rounded-xl">
+          <DropdownMenuContent align="start" className="w-56 rounded-xl">
             {models.map((option) => (
               <DropdownMenuItem
                 key={option.alias}
                 disabled={!option.available}
                 onSelect={() => setAlias(option.alias)}
-                className="justify-between py-2 text-xs"
+                className="justify-between py-2.5 text-xs"
               >
                 <div>
-                  <p className="font-medium">{option.label}</p>
-                  <p className="text-[10px] text-muted-foreground">
-                    {option.alias === "gpt" ? "Raciocínio rápido" : option.alias === "claude" ? "Respostas detalhadas" : "Alta performance"}
+                  <p className="font-medium text-[13px]">{option.label}</p>
+                  <p className="text-[11px] text-muted-foreground">
+                    {option.alias === "gpt" ? "Rápido e inteligente" : option.alias === "claude" ? "Respostas detalhadas" : "Alta performance"}
                   </p>
                 </div>
                 {option.alias === alias && <Check className="size-4 text-primary" />}
@@ -559,7 +521,7 @@ export function useChatWorkspace() {
           <Button
             variant="outline"
             size="sm"
-            className="h-8 gap-1.5 rounded-full border-border/70 text-xs font-medium hover:bg-muted/50"
+            className="h-8 gap-1.5 rounded-full border-border/70 text-xs font-semibold px-4 hover:bg-muted/50"
             onClick={() => window.location.assign("/entrar")}
           >
             <LogIn className="size-3.5" />
@@ -580,11 +542,11 @@ export function useChatWorkspace() {
     messages.length === 0 ? (
       <div className="flex min-h-0 flex-1 flex-col">
         {topBar}
-        <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-8 px-4 py-8">
+        <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-6 px-4 py-8">
           {/* EMPTY STATE HERO */}
           <div className="flex flex-col items-center gap-3 text-center">
             <div className="relative">
-              <MultiplexMark className="size-14 rounded-full shadow-[0_0_28px_rgba(59,130,246,0.2)]" />
+              <MultiplexMark className="size-16 rounded-full shadow-[0_0_32px_rgba(59,130,246,0.25)] ring-2 ring-primary/20" />
             </div>
             <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-foreground">
               Como posso ajudar hoje?
@@ -594,17 +556,22 @@ export function useChatWorkspace() {
           {/* COMPOSER CENTRALIZADO */}
           <div className="w-full px-2">{composer}</div>
 
-          {/* QUICK ACTIONS PILLS */}
-          <div className="flex max-w-[640px] flex-wrap items-center justify-center gap-2">
+          {/* QUICK ACTIONS CARDS (Estilo ChatGPT) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-w-[740px] w-full px-2">
             {QUICK_ACTIONS.map((action) => (
               <button
                 key={action.label}
                 type="button"
                 disabled={busy}
                 onClick={() => void send(action.prompt)}
-                className="rounded-full border border-border/60 bg-card/40 px-3.5 py-1.5 text-xs text-muted-foreground transition-all hover:border-border hover:bg-muted/60 hover:text-foreground disabled:opacity-50"
+                className="flex items-center justify-between rounded-xl border border-border/60 bg-card/50 hover:bg-muted/50 p-3 text-left transition-all hover:border-border cursor-pointer group"
               >
-                {action.label}
+                <span className="text-xs font-medium text-foreground/90 group-hover:text-foreground">
+                  {action.label}
+                </span>
+                <span className="text-[10px] text-muted-foreground opacity-60 group-hover:opacity-100">
+                  Perguntar →
+                </span>
               </button>
             ))}
           </div>
