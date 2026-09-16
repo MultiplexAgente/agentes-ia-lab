@@ -92,6 +92,11 @@ export const Route = createFileRoute("/api/ai/conversation/chat")({
           companyId: company.id,
           conversationId: conversation.id,
           firstUserMessage: history.find((item) => item.role === "user")?.content ?? parsed.data.message,
+          transcript: [
+            ...history.map((item) => ({ role: item.role, content: item.content })),
+            { role: "user", content: parsed.data.message },
+            { role: "assistant", content: result.text },
+          ],
         });
 
         return Response.json({
