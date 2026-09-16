@@ -140,7 +140,7 @@ export const DynamicModuleView: React.FC<DynamicModuleViewProps> = ({
               <div style={{ width: 14, height: 14, borderRadius: '50%', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <img src={atomLogo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               </div>
-              <span>Criado com Multiplex IA</span>
+              <span>Criado com Multiplex</span>
             </div>
           </div>
 

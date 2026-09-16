@@ -284,7 +284,7 @@ export default function App() {
   const [newProductPrice, setNewProductPrice] = useState('');
   const [newProductDesc, setNewProductDesc] = useState('');
 
-  // Importacao de Cardapio e Catalogo com Multiplex IA (Texto, Web Scraper, Configuracoes e Analytics)
+  // Importacao de Cardapio e Catalogo com Multiplex (Texto, Web Scraper, Configuracoes e Analytics)
   const [catalogImportMode, setCatalogImportMode] = useState<'url' | 'text' | 'settings' | 'analytics'>('url');
   const [clientWebsiteUrl, setClientWebsiteUrl] = useState('');
   const [isScrapingWebsite, setIsScrapingWebsite] = useState(false);
@@ -541,7 +541,7 @@ export default function App() {
     };
   });
 
-  // Multiplex IA: o usuário conversa com UMA IA. A escolha do modelo é feita
+  // Multiplex: o usuário conversa com UMA IA. A escolha do modelo é feita
   // automaticamente pelo roteador no servidor e nunca aparece na interface.
   const [lastRouting, setLastRouting] = useState<{ taskLabel: string; complexity: string } | null>(null);
   const [promptCategory, setPromptCategory] = useState<'destaques' | 'cardapio' | 'frete' | 'horarios' | 'agendamento' | 'promocoes'>('destaques');
@@ -1032,7 +1032,7 @@ export default function App() {
     }
   };
 
-  // Funcoes Avancadas de Interacao com a Multiplex IA
+  // Funcoes Avancadas de Interacao com a Multiplex
   const handleSpeakMessage = (msgId: string, text: string) => {
     if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
       alert('Sintese de voz nao suportada neste navegador.');
@@ -1222,14 +1222,14 @@ export default function App() {
     }
   };
 
-  // Extrair produtos, imóveis e catálogo completo direto de um site/link com Multiplex IA
+  // Extrair produtos, imóveis e catálogo completo direto de um site/link com Multiplex
   const handleScrapeWebsite = async (autoSave = false) => {
     if (!clientWebsiteUrl.trim()) {
       alert('Por favor, informe a URL ou link do site do cliente (ex: https://sualoja.com.br, https://imobiliaria.com.br, etc.)');
       return;
     }
     setIsScrapingWebsite(true);
-    setScrapeStatusText('Acessando o site do cliente, mapeando páginas e extraindo catálogo com Multiplex IA...');
+    setScrapeStatusText('Acessando o site do cliente, mapeando páginas e extraindo catálogo com Multiplex...');
     setBatchSuccessMsg('');
     try {
       const res = await fetch(`${API_BASE}/api/products/scrape-website`, {
@@ -1257,14 +1257,14 @@ export default function App() {
       }
     } catch (e: any) {
       console.error(e);
-      alert('Erro ao conectar com o site ou servidor da Multiplex IA.');
+      alert('Erro ao conectar com o site ou servidor da Multiplex.');
     } finally {
       setIsScrapingWebsite(false);
       setScrapeStatusText('');
     }
   };
 
-  // Extrair produtos de texto com Multiplex IA (GPT-4o)
+  // Extrair produtos de texto com Multiplex (GPT-4o)
   const handleParseMenuWithAI = async () => {
     if (!rawMenuText.trim()) return;
     setIsParsingMenu(true);
@@ -1283,7 +1283,7 @@ export default function App() {
       }
     } catch (e) {
       console.error(e);
-      alert('Erro de comunicação com a API da Multiplex IA.');
+      alert('Erro de comunicação com a API da Multiplex.');
     } finally {
       setIsParsingMenu(false);
     }
@@ -1655,7 +1655,7 @@ export default function App() {
         }
 
         setSyncProgressPercent(100);
-        setSyncStepText('Catálogo estruturado e sincronizado com o Multiplex IA!');
+        setSyncStepText('Catálogo estruturado e sincronizado com o Multiplex!');
         setSyncDetailText(`${syncData.run?.items_found || 0} itens processados.`);
 
         await refreshSourcesAndCatalog();
@@ -1856,12 +1856,12 @@ export default function App() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <img 
               src={atomLogo} 
-              alt="Multiplex IA" 
+              alt="Multiplex" 
               style={{ width: 34, height: 34, borderRadius: 10, objectFit: 'cover', border: '1px solid rgba(0, 210, 255, 0.4)', boxShadow: '0 0 12px rgba(0, 210, 255, 0.25)' }} 
             />
             <div>
               <div style={{ fontWeight: 800, fontSize: '1.05rem', letterSpacing: '-0.3px', display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ color: theme === 'light' ? '#0f172a' : '#ffffff' }}>Multiplex IA</span>
+                <span style={{ color: theme === 'light' ? '#0f172a' : '#ffffff' }}>Multiplex</span>
                 <span style={{ fontSize: '0.68rem', color: '#06b6d4', background: 'rgba(6, 182, 212, 0.12)', border: '1px solid rgba(6, 182, 212, 0.3)', padding: '2px 8px', borderRadius: 10, fontWeight: 700 }}>v1.2 GPT-4o</span>
               </div>
               <div style={{ fontSize: '0.72rem', color: theme === 'light' ? '#475569' : '#94a3b8', fontWeight: 500 }}>Plataforma de Agentes Multicanal | BONASOFT</div>
@@ -2023,7 +2023,7 @@ export default function App() {
               <div style={{ marginBottom: 20 }}>
                 <h2 style={{ fontSize: '1.4rem', fontWeight: 700, margin: '0 0 6px 0' }}>Entrar na sua Conta</h2>
                 <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: 0 }}>
-                  Informe seus dados para acessar o painel do Multiplex IA.
+                  Informe seus dados para acessar o painel do Multiplex.
                 </p>
               </div>
 
@@ -2094,7 +2094,7 @@ export default function App() {
                   ) : (
                     <>
                       <LogIn size={18} />
-                      <span>Entrar no Multiplex IA</span>
+                      <span>Entrar no Multiplex</span>
                     </>
                   )}
                 </button>
@@ -2177,7 +2177,7 @@ export default function App() {
             {/* ETAPA 1: DADOS CADASTRAIS */}
             {authStep === 1 && (
               <div>
-                <h2 style={{ fontSize: '1.35rem', fontWeight: 700, margin: '0 0 6px 0' }}>Crie sua conta Multiplex IA</h2>
+                <h2 style={{ fontSize: '1.35rem', fontWeight: 700, margin: '0 0 6px 0' }}>Crie sua conta Multiplex</h2>
                 <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: '0 0 20px 0' }}>
                   Preencha seus dados para configurar seu ambiente de atendimento automatizado.
                 </p>
@@ -2668,8 +2668,8 @@ export default function App() {
           {/* Cabecalho */}
           <div className="chatgpt-sidebar-header">
             <div className="chatgpt-brand" onClick={() => setActiveView('chat')} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10 }}>
-              <img src={atomLogo} alt="Multiplex IA" style={{ width: 26, height: 26, borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(0, 210, 255, 0.4)' }} />
-              <span>Multiplex IA</span>
+              <img src={atomLogo} alt="Multiplex" style={{ width: 26, height: 26, borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(0, 210, 255, 0.4)' }} />
+              <span>Multiplex</span>
             </div>
             <div className="chatgpt-header-actions">
               <button 
@@ -3282,7 +3282,7 @@ export default function App() {
                       <button className="user-popup-item" onClick={() => { setActiveView('chat'); setShowUserPopup(false); }}>
                         <span>Central de ajuda</span>
                       </button>
-                      <button className="user-popup-item" onClick={() => alert('Multiplex IA v1.2.0 - GPT-4o')}>
+                      <button className="user-popup-item" onClick={() => alert('Multiplex v1.2.0 - GPT-4o')}>
                         <span>Notas de versão</span>
                       </button>
                       <button className="user-popup-item" onClick={() => alert('Termos de uso da plataforma')}>
@@ -3376,7 +3376,7 @@ export default function App() {
               <button type="button" className="absolute inset-0 z-40 bg-overlay backdrop-blur-sm" onClick={() => setChatNavigationOpen(false)} aria-label="Fechar navegação" />
               <aside className="absolute inset-y-0 left-0 z-50 flex w-[min(88vw,320px)] flex-col border-r border-border bg-popover/95 p-4 shadow-2xl backdrop-blur-2xl">
                 <div className="mb-8 flex items-center justify-between px-1">
-                  <span className="font-display text-base font-semibold">Multiplex IA</span>
+                  <span className="font-display text-base font-semibold">Multiplex</span>
                   <Button variant="ghost" size="icon" onClick={() => setChatNavigationOpen(false)} aria-label="Fechar"><X /></Button>
                 </div>
                 <Button variant="secondary" className="justify-start" onClick={() => { handleCreateNewChat(); setChatNavigationOpen(false); }}>
@@ -3504,7 +3504,7 @@ export default function App() {
                   className="min-h-24 px-5 pt-5 text-[15px] leading-6 sm:min-h-28"
                   disabled={isSendingMessage}
                   onChange={(event) => setChatInput(event.target.value)}
-                  placeholder="Mensagem para a Multiplex IA"
+                  placeholder="Mensagem para a Multiplex"
                   value={chatInput}
                 />
                 <PromptInputFooter className="px-3 pb-3">
@@ -3527,7 +3527,7 @@ export default function App() {
             <div className="modal-header">
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <Paperclip size={20} color="var(--accent-cyan)" />
-                <h2 style={{ fontSize: '1.15rem', fontWeight: 700, margin: 0 }}>Anexar Arquivo para o Multiplex IA</h2>
+                <h2 style={{ fontSize: '1.15rem', fontWeight: 700, margin: 0 }}>Anexar Arquivo para o Multiplex</h2>
               </div>
               <button onClick={() => setShowAttachModal(false)} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
                 <X size={20} />
@@ -3535,7 +3535,7 @@ export default function App() {
             </div>
             <div className="modal-body" style={{ padding: 20 }}>
               <p style={{ fontSize: '0.86rem', color: 'var(--text-muted)', marginBottom: 16, lineHeight: 1.5 }}>
-                Envie fotos de cardápios impressos, tabelas de preços ou documentos em PDF para que o Multiplex IA analise e integre automaticamente.
+                Envie fotos de cardápios impressos, tabelas de preços ou documentos em PDF para que o Multiplex analise e integre automaticamente.
               </p>
 
               <div 
@@ -3656,7 +3656,7 @@ export default function App() {
           <div className="page-header" style={{ marginBottom: 16 }}>
             <div>
               <h1 className="page-title">Catálogo, Produtos e Imóveis</h1>
-              <p className="page-desc">Importe produtos, imóveis e catálogo completo direto do site do cliente via URL ou colando texto. A Multiplex IA extrai e cadastra tudo automaticamente.</p>
+              <p className="page-desc">Importe produtos, imóveis e catálogo completo direto do site do cliente via URL ou colando texto. A Multiplex extrai e cadastra tudo automaticamente.</p>
             </div>
             <button className="btn-secondary" onClick={() => setActiveView('chat')}>
               <MessageSquare size={16} /> Voltar ao Chat
@@ -3744,14 +3744,14 @@ export default function App() {
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                   <div style={{ width: 34, height: 34, borderRadius: '50%', overflow: 'hidden', border: theme === 'dark' ? '1px solid rgba(0, 210, 255, 0.5)' : '1px solid #cbd5e1', minWidth: 34 }}>
-                    <img src={atomLogo} alt="Multiplex IA" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <img src={atomLogo} alt="Multiplex" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   </div>
                   <div>
                     <h2 style={{ fontSize: '1.15rem', fontWeight: 700, margin: 0, color: theme === 'light' ? '#0f172a' : '#f8fafc' }}>
                       Extrair Catálogo Completo Direto do Site do Cliente
                     </h2>
                     <span style={{ fontSize: '0.84rem', color: theme === 'light' ? '#334155' : 'var(--text-muted)', fontWeight: 500 }}>
-                      Cole o link da loja virtual, imobiliária, cardápio digital ou catálogo. A Multiplex IA acessa e extrai todos os itens automaticamente.
+                      Cole o link da loja virtual, imobiliária, cardápio digital ou catálogo. A Multiplex acessa e extrai todos os itens automaticamente.
                     </span>
                   </div>
                 </div>
@@ -3817,14 +3817,14 @@ export default function App() {
                   {isScrapingWebsite ? (
                     <>
                       <RefreshCw size={16} className="animate-spin" />
-                      <span>Multiplex IA rastreando site...</span>
+                      <span>Multiplex rastreando site...</span>
                     </>
                   ) : (
                     <>
                       <div style={{ width: 18, height: 18, borderRadius: '50%', overflow: 'hidden', border: '1px solid rgba(0, 210, 255, 0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         <img src={atomLogo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                       </div>
-                      <span>Rastrear Site e Extrair Tudo com Multiplex IA</span>
+                      <span>Rastrear Site e Extrair Tudo com Multiplex</span>
                     </>
                   )}
                 </button>
@@ -3861,7 +3861,7 @@ export default function App() {
                   </div>
                   <div>
                     <div style={{ fontWeight: 700, fontSize: '0.9rem', color: theme === 'light' ? '#0f172a' : '#f8fafc' }}>
-                      Multiplex IA acessando e processando o site do cliente...
+                      Multiplex acessando e processando o site do cliente...
                     </div>
                     <div style={{ fontSize: '0.8rem', color: theme === 'light' ? '#334155' : 'var(--text-muted)' }}>
                       {scrapeStatusText}
@@ -3894,11 +3894,11 @@ export default function App() {
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                   <div style={{ width: 32, height: 32, borderRadius: '50%', overflow: 'hidden', border: theme === 'dark' ? '1px solid rgba(0, 210, 255, 0.4)' : '1px solid #cbd5e1', minWidth: 32 }}>
-                    <img src={atomLogo} alt="Multiplex IA" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <img src={atomLogo} alt="Multiplex" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   </div>
                   <div>
                     <h2 style={{ fontSize: '1.15rem', fontWeight: 700, margin: 0, color: theme === 'light' ? '#0f172a' : '#f8fafc' }}>
-                      Importar Texto ou Lista de Produtos com Multiplex IA
+                      Importar Texto ou Lista de Produtos com Multiplex
                     </h2>
                     <span style={{ fontSize: '0.84rem', color: theme === 'light' ? '#334155' : 'var(--text-muted)', fontWeight: 500 }}>
                       Cole texto corrido, lista de preços, descrições ou mensagens
@@ -3915,7 +3915,7 @@ export default function App() {
               {/(?:https?:\/\/|www\.)[^\s]+/i.test(rawMenuText) && (
                 <div style={{ marginBottom: 12, padding: '10px 14px', borderRadius: 8, background: 'rgba(0, 210, 255, 0.12)', border: '1px solid rgba(0, 210, 255, 0.3)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
                   <span style={{ fontSize: '0.85rem', color: theme === 'light' ? '#0f172a' : '#f8fafc' }}>
-                    🔗 Detectamos um link de site no seu texto! Deseja que a Multiplex IA rastreie e copie todos os produtos/imóveis do site automaticamente?
+                    🔗 Detectamos um link de site no seu texto! Deseja que a Multiplex rastreie e copie todos os produtos/imóveis do site automaticamente?
                   </span>
                   <button 
                     className="btn-primary"
@@ -3960,7 +3960,7 @@ export default function App() {
                   {isParsingMenu ? (
                     <>
                       <RefreshCw size={16} className="animate-spin" />
-                      <span>Multiplex IA separando produtos...</span>
+                      <span>Multiplex separando produtos...</span>
                     </>
                   ) : (
                     <>
@@ -4492,7 +4492,7 @@ export default function App() {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14, flexWrap: 'wrap', gap: 10 }}>
                 <div>
                   <h3 style={{ fontSize: '1.05rem', fontWeight: 700, margin: 0, color: theme === 'light' ? '#0f172a' : '#f8fafc' }}>
-                    {parsedProducts.length} Itens (Produtos / Imóveis) Identificados pela Multiplex IA
+                    {parsedProducts.length} Itens (Produtos / Imóveis) Identificados pela Multiplex
                   </h3>
                   <span style={{ fontSize: '0.82rem', color: theme === 'light' ? '#334155' : 'var(--text-muted)' }}>
                     Confira os dados extraídos do site do cliente antes de confirmar a gravação no catálogo
@@ -4624,7 +4624,7 @@ export default function App() {
               </h2>
               {products.length > 0 && (
                 <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                  Itens ativos consultados pela Multiplex IA durante conversas
+                  Itens ativos consultados pela Multiplex durante conversas
                 </span>
               )}
             </div>
@@ -4643,7 +4643,7 @@ export default function App() {
                   fontSize: '0.92rem'
                 }}
               >
-                Nenhum produto cadastrado ainda. Cole a lista do seu cardápio acima para que a Multiplex IA organize tudo em segundos.
+                Nenhum produto cadastrado ainda. Cole a lista do seu cardápio acima para que a Multiplex organize tudo em segundos.
               </div>
             ) : (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 14 }}>
@@ -4904,7 +4904,7 @@ export default function App() {
                     </div>
                     <div>
                       <div style={{ fontWeight: 600, fontSize: '0.92rem', color: 'var(--text-main)' }}>
-                        {agentIdentity.display_name || 'Multiplex IA'}
+                        {agentIdentity.display_name || 'Multiplex'}
                       </div>
                       <div style={{ fontSize: '0.74rem', color: '#10b981', display: 'flex', alignItems: 'center', gap: 4 }}>
                         <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#10b981' }}></span>
@@ -5090,7 +5090,7 @@ export default function App() {
                   </div>
                   <h3 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0 }}>Nenhum site ou fonte conectado ainda</h3>
                   <p style={{ maxWidth: 520, color: 'var(--text-muted)', fontSize: '0.9rem', lineHeight: 1.5, margin: 0 }}>
-                    Informe a URL do seu site (restaurante, loja, imobiliária, clínica ou serviços) e o Multiplex IA descobrirá o catálogo, normalizará os itens e manterá preços e disponibilidades atualizados.
+                    Informe a URL do seu site (restaurante, loja, imobiliária, clínica ou serviços) e o Multiplex descobrirá o catálogo, normalizará os itens e manterá preços e disponibilidades atualizados.
                   </p>
                   <button 
                     className="btn-primary" 
@@ -5445,7 +5445,7 @@ export default function App() {
                 </div>
 
                 <p style={{ fontSize: '0.84rem', color: 'var(--text-muted)', margin: '0 0 16px 0' }}>
-                  Escolha o tipo de fonte para ensinar o Multiplex IA:
+                  Escolha o tipo de fonte para ensinar o Multiplex:
                 </p>
 
                 {/* Seleção do Tipo de Fonte */}
@@ -5658,7 +5658,7 @@ export default function App() {
                 </div>
 
                 <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: 18 }}>
-                  O Multiplex IA processou o site e atualizou a base de conhecimento com os dados estruturados mais recentes.
+                  O Multiplex processou o site e atualizou a base de conhecimento com os dados estruturados mais recentes.
                 </p>
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 18 }}>
@@ -5813,7 +5813,7 @@ export default function App() {
           <div className="page-header" style={{ marginBottom: 18 }}>
             <div>
               <h1 className="page-title">Conectar Redes Sociais e Canais</h1>
-              <p className="page-desc">Atendimento simultaneo pelo Multiplex IA no WhatsApp, Instagram, Facebook, Telegram, X e Site. A IA auxilia você passo a passo na conexão.</p>
+              <p className="page-desc">Atendimento simultaneo pelo Multiplex no WhatsApp, Instagram, Facebook, Telegram, X e Site. A IA auxilia você passo a passo na conexão.</p>
             </div>
             <button className="btn-secondary" onClick={() => setActiveView('chat')}>
               <MessageSquare size={16} /> Voltar ao Chat
@@ -5909,7 +5909,7 @@ export default function App() {
                     </div>
 
                     <p style={{ fontSize: '0.84rem', color: 'var(--text-muted)', lineHeight: '1.45', marginBottom: 16 }}>
-                      {channel.description || 'Integracao multicanal com respostas do Multiplex IA.'}
+                      {channel.description || 'Integracao multicanal com respostas do Multiplex.'}
                     </p>
                   </div>
 
@@ -5964,14 +5964,14 @@ export default function App() {
                 <div className="modal-header">
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                     <div style={{ width: 34, height: 34, borderRadius: '50%', overflow: 'hidden', border: '1px solid rgba(0, 210, 255, 0.4)', minWidth: 34 }}>
-                      <img src={atomLogo} alt="Multiplex IA" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      <img src={atomLogo} alt="Multiplex" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     </div>
                     <div>
                       <h2 style={{ fontSize: '1.15rem', fontWeight: 700, margin: 0 }}>
                         Assistente de Conexao: {selectedChannel.name}
                       </h2>
                       <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                        Multiplex IA orienta você no passo a passo exato da integracao
+                        Multiplex orienta você no passo a passo exato da integracao
                       </span>
                     </div>
                   </div>
@@ -6141,7 +6141,7 @@ export default function App() {
                     <div>
                       <div style={{ marginBottom: 14 }}>
                         <h4 style={{ fontSize: '1rem', fontWeight: 700, margin: 0 }}>
-                          Assistente Tecnico Multiplex IA (GPT-4o)
+                          Assistente Tecnico Multiplex (GPT-4o)
                         </h4>
                         <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginTop: 4 }}>
                           Pergunte qualquer duvida sobre onde clicar, como achar os tokens ou solucionar erros na conexao deste canal.
@@ -6167,7 +6167,7 @@ export default function App() {
                         <button 
                           className="btn-secondary" 
                           style={{ fontSize: '0.78rem', padding: '5px 10px' }}
-                          onClick={() => handleAskChannelAi('Como faco para testar se as mensagens estao chegando ao Multiplex IA?')}
+                          onClick={() => handleAskChannelAi('Como faco para testar se as mensagens estao chegando ao Multiplex?')}
                         >
                           Como testar mensagens?
                         </button>
@@ -6200,9 +6200,9 @@ export default function App() {
                         <div style={{ padding: 18, borderRadius: 10, background: 'rgba(0, 0, 0, 0.4)', border: '1px solid rgba(0, 210, 255, 0.3)', whiteSpace: 'pre-wrap', fontSize: '0.88rem', lineHeight: '1.55' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10, color: 'var(--accent-cyan)', fontWeight: 700 }}>
                             <div style={{ width: 22, height: 22, borderRadius: '50%', overflow: 'hidden' }}>
-                              <img src={atomLogo} alt="Multiplex IA" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                              <img src={atomLogo} alt="Multiplex" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                             </div>
-                            <span>Instrucoes da Multiplex IA:</span>
+                            <span>Instrucoes da Multiplex:</span>
                           </div>
                           {channelAiReply}
                         </div>
@@ -6234,7 +6234,7 @@ export default function App() {
                           </span>
                         </div>
                         <p style={{ fontSize: '0.82rem', color: 'var(--text-dim)', margin: 0 }}>
-                          Quando ativo, todas as mensagens recebidas neste canal são respondidas automaticamente pelo Multiplex IA respeitando o cardápio e regras cadastradas.
+                          Quando ativo, todas as mensagens recebidas neste canal são respondidas automaticamente pelo Multiplex respeitando o cardápio e regras cadastradas.
                         </p>
                       </div>
 
@@ -6941,7 +6941,7 @@ export default function App() {
                 </p>
                 <ul style={{ fontSize: '0.82rem', color: 'var(--text-muted)', paddingLeft: 18, lineHeight: '1.5' }}>
                   <li>Seu acesso permanecerá ativo até <strong>07 de outubro de 2026</strong>.</li>
-                  <li>Após esta data, o agente Multiplex IA será pausado em todos os canais.</li>
+                  <li>Após esta data, o agente Multiplex será pausado em todos os canais.</li>
                   <li>Você perderá o histórico de conversas e integrações ativas.</li>
                 </ul>
 
@@ -7021,7 +7021,7 @@ export default function App() {
               <div>
                 <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0 }}>Deseja sair da sua conta?</h3>
                 <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: 8 }}>
-                  Você precisará fazer login novamente para acessar o painel do Multiplex IA.
+                  Você precisará fazer login novamente para acessar o painel do Multiplex.
                 </p>
                 <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 20 }}>
                   <button className="btn-secondary" onClick={() => setConfirmModal(null)}>

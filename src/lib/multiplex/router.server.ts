@@ -1,5 +1,5 @@
 /**
- * Multiplex IA — roteador autônomo de modelos.
+ * Multiplex — roteador autônomo de modelos.
  *
  * O usuário nunca escolhe modelo: esta camada classifica a tarefa, estima a
  * complexidade e escolhe o modelo real de acordo com a estratégia da empresa.

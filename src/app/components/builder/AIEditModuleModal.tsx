@@ -36,7 +36,7 @@ export const AIEditModuleModal: React.FC<AIEditModuleModalProps> = ({
     {
       id: 'msg-welcome',
       sender: 'assistant',
-      text: `Olá! Sou a **Multiplex IA**, seu construtor inteligente de funcionalidades.\n\nEstou com o contexto completo do módulo **${module.name} (versão v${module.version})** carregado. O que você gostaria de adicionar, remover ou ajustar neste painel agora?`,
+      text: `Olá! Sou a **Multiplex**, seu construtor inteligente de funcionalidades.\n\nEstou com o contexto completo do módulo **${module.name} (versão v${module.version})** carregado. O que você gostaria de adicionar, remover ou ajustar neste painel agora?`,
       timestamp: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
     }
   ]);
@@ -202,13 +202,13 @@ export const AIEditModuleModal: React.FC<AIEditModuleModalProps> = ({
               background: '#07090e',
               flexShrink: 0
             }}>
-              <img src={atomLogo} alt="Multiplex IA" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <img src={atomLogo} alt="Multiplex" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             </div>
 
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <h3 style={{ fontSize: '1.15rem', fontWeight: 800, margin: 0, color: 'var(--text-main)' }}>
-                  Chat Multiplex IA: {module.name}
+                  Chat Multiplex: {module.name}
                 </h3>
                 <span style={{ fontSize: '0.72rem', padding: '2px 8px', borderRadius: 8, background: 'rgba(99, 102, 241, 0.25)', color: '#818cf8', fontWeight: 800 }}>
                   v{module.version}
@@ -258,7 +258,7 @@ export const AIEditModuleModal: React.FC<AIEditModuleModalProps> = ({
                   width: '100%'
                 }}
               >
-                {/* Avatar da Multiplex IA */}
+                {/* Avatar da Multiplex */}
                 {isAI && (
                   <div style={{ 
                     width: 34, 
@@ -270,7 +270,7 @@ export const AIEditModuleModal: React.FC<AIEditModuleModalProps> = ({
                     flexShrink: 0,
                     marginTop: 2
                   }}>
-                    <img src={atomLogo} alt="Multiplex IA" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <img src={atomLogo} alt="Multiplex" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   </div>
                 )}
 
@@ -329,7 +329,7 @@ export const AIEditModuleModal: React.FC<AIEditModuleModalProps> = ({
                           <DynamicRenderer schema={m.plan.suggested_schema} data={m.previewData || {}} />
                         </div>
 
-                        {/* Botão de Confirmação com Ícone da Multiplex IA */}
+                        {/* Botão de Confirmação com Ícone da Multiplex */}
                         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
                           <button
                             className="btn-primary"
@@ -393,7 +393,7 @@ export const AIEditModuleModal: React.FC<AIEditModuleModalProps> = ({
           {isTyping && (
             <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
               <div style={{ width: 30, height: 30, borderRadius: '50%', overflow: 'hidden', border: '1px solid rgba(0, 210, 255, 0.5)' }}>
-                <img src={atomLogo} alt="Multiplex IA" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <img src={atomLogo} alt="Multiplex" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               </div>
               <div style={{ 
                 padding: '10px 16px', 
@@ -407,7 +407,7 @@ export const AIEditModuleModal: React.FC<AIEditModuleModalProps> = ({
                 gap: 8
               }}>
                 <RefreshCw size={14} className="spin-slow" />
-                <span>Multiplex IA analisando o módulo e construindo a pré-visualização...</span>
+                <span>Multiplex analisando o módulo e construindo a pré-visualização...</span>
               </div>
             </div>
           )}

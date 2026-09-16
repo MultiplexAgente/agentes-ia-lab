@@ -121,7 +121,7 @@ export const LandingChatPage: React.FC<LandingChatPageProps> = ({
         autoFocus
         disabled={isTyping}
         name="message"
-        placeholder="Mensagem para a Multiplex IA"
+        placeholder="Mensagem para a Multiplex"
         className="min-h-24 px-5 pt-5 text-[15px] leading-6 sm:min-h-28"
       />
       <PromptInputFooter className="px-3 pb-3">
@@ -203,7 +203,7 @@ export const LandingChatPage: React.FC<LandingChatPageProps> = ({
           />
           <aside className="absolute inset-y-0 left-0 z-50 flex w-[min(88vw,320px)] flex-col border-r border-border bg-popover/95 p-4 shadow-2xl backdrop-blur-2xl">
             <div className="mb-8 flex items-center justify-between px-1">
-              <span className="font-display text-base font-semibold">Multiplex IA</span>
+              <span className="font-display text-base font-semibold">Multiplex</span>
               <Button variant="ghost" size="icon" onClick={() => setNavigationOpen(false)} aria-label="Fechar">
                 <X />
               </Button>
