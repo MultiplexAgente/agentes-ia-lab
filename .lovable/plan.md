@@ -83,4 +83,8 @@ Só considero concluído com todos estes itens verificados: Supabase real, auten
 - Nenhuma tabela, coluna, variável ou endereço interno é renomeado por causa da identidade visual.
 
 ## Relatório final
-Entrego separado em quatro blocos — **IMPLEMENTADO**, **TESTADO**, **NÃO IMPLEMENTADO**, **PENDENTE** — cobrindo: os 11 endereços 404 e a causa de cada um, o que foi corrigido, a origem da identidade da Hamburgueria, confirmação da remoção de "Multiplex IA" da interface, o motor real usado com `response.id`/`response.model`/tokens, arquivos alterados, testes executados e seus resultados. Nada entra em IMPLEMENTADO sem teste real.
+Entrego em blocos separados, na ordem:
+
+**IMPLEMENTADO** (funcionalidade, arquivos, banco, API, teste, resultado) · **TESTADO** (teste, entrada, resultado, status, com `response.id`, `response.model` e tokens quando cabível) · **NÃO IMPLEMENTADO** · **PENDENTE** (o que depende de confirmação, credencial, integração externa ou decisão) · **404** (endereço, causa, destino, ação) · **IA** (provedor, motor, `response.id`, tokens de entrada/saída/total) · **IDENTIDADE** (produto visual = MULTIPLEX e de onde veio a identidade da empresa autenticada) · **ARQUIVOS ALTERADOS** · **ARQUIVOS REMOVIDOS** (com justificativa e prova de que estavam mortos) · **BANCO** (migrations, tabelas, políticas, confirmação de zero dado falso) · **SEGURANÇA** (401, 403, 404, políticas, isolamento entre empresas) · **REDE** (quantidade de 404 antes e depois).
+
+Nada entra em IMPLEMENTADO sem teste real.
