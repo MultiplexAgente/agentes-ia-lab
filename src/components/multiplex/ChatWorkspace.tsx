@@ -1,4 +1,4 @@
-import { Check, Info, Loader2, Paperclip, Plus, Search, SendHorizontal, Trash2 } from "lucide-react";
+import { ArrowUp, Check, Loader2, MoreHorizontal, Search, Trash2 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import multiplexIcon from "@/assets/multiplex-atom.jpg";
@@ -59,6 +59,7 @@ export function MultiplexMark({ className }: { className?: string }) {
 }
 
 export const NEW_CHAT_EVENT = "multiplex:new-chat";
+export const CLOSE_SIDEBAR_EVENT = "multiplex:close-sidebar";
 
 function Markdownish({ text }: { text: string }) {
   const blocks = text.split(/\n{2,}/);
@@ -227,28 +228,25 @@ export function useChatWorkspace() {
 
   const list = (
     <>
-      <div className="flex h-14 items-center gap-2 px-3">
+      <div className="flex items-center gap-2 px-3 py-2">
         <div className="relative flex-1">
           <Search className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             value={filter}
             onChange={(event) => setFilter(event.target.value)}
-            placeholder="Buscar conversas..."
-            className="h-9 pl-8"
+            placeholder="Buscar conversas"
+            className="h-8 pl-8 text-[13px]"
           />
         </div>
-        <Button variant="ghost" size="icon" title="Novo chat" onClick={startNewChat}>
-          <Plus className="size-4" />
-        </Button>
       </div>
-      <ScrollArea className="flex-1 px-2 pb-3">
+      <ScrollArea className="min-h-0 flex-1 px-2 pb-3">
         {!authenticated ? (
-          <p className="px-3 py-6 text-sm text-muted-foreground">
+          <p className="px-3 py-6 text-[13px] text-muted-foreground">
             Entre na sua empresa para ver o histórico de conversas.
           </p>
         ) : grouped.length === 0 ? (
           <div className="px-3 py-6">
-            <p className="text-sm text-muted-foreground">Nenhuma conversa ainda</p>
+            <p className="text-[13px] text-muted-foreground">Nenhuma conversa ainda</p>
             <Button variant="link" className="mt-1 h-auto p-0 text-primary" onClick={startNewChat}>
               + Novo chat
             </Button>
@@ -263,10 +261,13 @@ export function useChatWorkspace() {
                 <div
                   key={item.id}
                   className={cn(
-                    "group flex cursor-pointer items-start gap-2 rounded-lg px-3 py-2 transition-colors",
+                    "group flex cursor-pointer items-start gap-2 rounded-lg px-3 py-1.5 transition-colors",
                     conversationId === item.id ? "bg-primary/12" : "hover:bg-muted/40",
                   )}
-                  onClick={() => void openConversation(item)}
+                  onClick={() => {
+                    void openConversation(item);
+                    window.dispatchEvent(new Event(CLOSE_SIDEBAR_EVENT));
+                  }}
                 >
                   <div className="min-w-0 flex-1">
                     <div className="flex items-baseline justify-between gap-2">
@@ -297,124 +298,89 @@ export function useChatWorkspace() {
     </>
   );
 
-  const chat = (
-    <div className="flex min-h-0 flex-1 flex-col">
-      <header className="flex h-14 shrink-0 items-center justify-between border-b border-border/60 px-5">
-        <div className="min-w-0">
-          <p className="truncate text-sm font-medium">{conversationTitle}</p>
-          <p className="text-xs text-muted-foreground">Multiplex</p>
-        </div>
-        <Button variant="ghost" size="icon" title="Sobre esta conversa">
-          <Info className="size-4 text-muted-foreground" />
-        </Button>
-      </header>
+  const currentModel = models.find((option) => option.alias === alias);
 
-      <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto">
-        <div className="mx-auto w-full max-w-3xl px-5 py-6">
-          {messages.length === 0 ? (
-            <div className="pt-16 text-center">
-              <div className="flex items-center justify-center gap-3">
-                <MultiplexMark className="size-9" />
-                <h1 className="font-display text-2xl font-semibold tracking-tight">Como posso ajudar?</h1>
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-6">
-              {messages.map((message) =>
-                message.role === "user" ? (
-                  <div key={message.id} className="flex justify-end">
-                    <div className="max-w-[80%] rounded-2xl rounded-br-md bg-primary/15 px-4 py-2.5 text-[15px] leading-relaxed">
-                      {message.content}
-                    </div>
-                  </div>
-                ) : (
-                  <div key={message.id} className="flex gap-3">
-                    <MultiplexMark className="mt-0.5 size-7" />
-                    <div className="min-w-0 flex-1">
-                      <Markdownish text={message.content} />
-                    </div>
-                  </div>
-                ),
-              )}
-              {busy && (
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Loader2 className="size-4 animate-spin" />
-                  Multiplex está trabalhando...
-                </div>
-              )}
-            </div>
-          )}
-          {error && (
-            <div className="mt-6 rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-              {error}
-            </div>
-          )}
-        </div>
-      </div>
-
-      <div className="shrink-0 border-t border-border/60 px-5 py-3">
-        <div className="mx-auto w-full max-w-3xl">
-          <form
-            className="flex items-end gap-2 rounded-2xl border border-border/70 bg-card/50 px-2 py-1.5 backdrop-blur"
-            onSubmit={(event) => {
+  const composer = (
+    <div className="mx-auto w-full max-w-[820px] px-4">
+      <form
+        className="flex items-end gap-1.5 rounded-[26px] border border-border/70 bg-card/60 px-2 py-1.5 shadow-sm backdrop-blur"
+        onSubmit={(event) => {
+          event.preventDefault();
+          void send(input);
+        }}
+      >
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              type="button"
+              className="mb-1 shrink-0 rounded-full px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
+            >
+              {currentModel?.label ?? "GPT"} ▾
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="w-44">
+            {models.map((option) => (
+              <DropdownMenuItem
+                key={option.alias}
+                disabled={!option.available}
+                onSelect={() => setAlias(option.alias)}
+                className="justify-between"
+              >
+                <span>{option.label}</span>
+                {option.alias === alias ? (
+                  <Check className="size-3.5" />
+                ) : !option.available ? (
+                  <span className="text-[10px] text-muted-foreground">indisponível</span>
+                ) : null}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+        <textarea
+          ref={textareaRef}
+          value={input}
+          rows={1}
+          placeholder="Mensagem para o Multiplex"
+          className="max-h-40 min-h-[36px] flex-1 resize-none bg-transparent py-2 text-[15px] leading-relaxed outline-none placeholder:text-muted-foreground"
+          onChange={(event) => {
+            setInput(event.target.value);
+            const node = event.target;
+            node.style.height = "auto";
+            node.style.height = `${Math.min(node.scrollHeight, 160)}px`;
+          }}
+          onKeyDown={(event) => {
+            if (event.key === "Enter" && !event.shiftKey) {
               event.preventDefault();
               void send(input);
-            }}
-          >
-            <Button type="button" variant="ghost" size="icon" title="Anexar" disabled>
-              <Paperclip className="size-4 text-muted-foreground" />
-            </Button>
-            <textarea
-              ref={textareaRef}
-              value={input}
-              rows={1}
-              placeholder="Envie uma mensagem para o Multiplex"
-              className="max-h-40 min-h-[38px] flex-1 resize-none bg-transparent py-2 text-[15px] outline-none placeholder:text-muted-foreground"
-              onChange={(event) => {
-                setInput(event.target.value);
-                const node = event.target;
-                node.style.height = "auto";
-                node.style.height = `${Math.min(node.scrollHeight, 160)}px`;
-              }}
-              onKeyDown={(event) => {
-                if (event.key === "Enter" && !event.shiftKey) {
-                  event.preventDefault();
-                  void send(input);
-                }
-              }}
-            />
-            <Button type="submit" size="icon" disabled={busy || !input.trim()} title="Enviar">
-              {busy ? <Loader2 className="size-4 animate-spin" /> : <SendHorizontal className="size-4" />}
-            </Button>
-          </form>
-          <div className="mt-2 flex flex-wrap items-center gap-1.5">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button
-                  type="button"
-                  className="rounded-full border border-border/60 px-3 py-1 text-xs font-medium text-foreground/80 transition-colors hover:border-primary/50"
-                >
-                  {models.find((option) => option.alias === alias)?.label ?? "GPT"}
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-48">
-                {models.map((option) => (
-                  <DropdownMenuItem
-                    key={option.alias}
-                    disabled={!option.available}
-                    onSelect={() => setAlias(option.alias)}
-                    className="justify-between"
-                  >
-                    <span>{option.label}</span>
-                    {option.alias === alias ? (
-                      <Check className="size-3.5" />
-                    ) : !option.available ? (
-                      <span className="text-[10px] text-muted-foreground">indisponível</span>
-                    ) : null}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
+            }
+          }}
+        />
+        <Button
+          type="submit"
+          size="icon"
+          className="mb-0.5 size-9 shrink-0 rounded-full"
+          disabled={busy || !input.trim()}
+          title="Enviar"
+        >
+          {busy ? <Loader2 className="size-4 animate-spin" /> : <ArrowUp className="size-4" />}
+        </Button>
+      </form>
+      {error && (
+        <p className="mt-2 text-center text-xs text-destructive">{error}</p>
+      )}
+    </div>
+  );
+
+  const chat =
+    messages.length === 0 ? (
+      <div className="flex min-h-0 flex-1 flex-col">
+        <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-6 px-4">
+          <div className="flex items-center justify-center gap-3">
+            <MultiplexMark className="size-9" />
+            <h1 className="text-2xl font-semibold tracking-tight">Como posso ajudar?</h1>
+          </div>
+          <div className="w-full">{composer}</div>
+          <div className="flex flex-wrap justify-center gap-1.5">
             {QUICK_ACTIONS.map((action) => (
               <button
                 key={action.label}
@@ -429,8 +395,45 @@ export function useChatWorkspace() {
           </div>
         </div>
       </div>
-    </div>
-  );
+    ) : (
+      <div className="flex min-h-0 flex-1 flex-col">
+        <header className="flex h-12 shrink-0 items-center justify-between border-b border-border/60 px-5">
+          <p className="truncate text-[13px] font-medium">{conversationTitle}</p>
+          <Button variant="ghost" size="icon" title="Sobre esta conversa">
+            <MoreHorizontal className="size-4 text-muted-foreground" />
+          </Button>
+        </header>
+
+        <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto">
+          <div className="mx-auto w-full max-w-[760px] space-y-6 px-5 py-8">
+            {messages.map((message) =>
+              message.role === "user" ? (
+                <div key={message.id} className="flex justify-end">
+                  <div className="max-w-[80%] rounded-2xl rounded-br-md bg-primary/15 px-4 py-2.5 text-[15px] leading-relaxed">
+                    {message.content}
+                  </div>
+                </div>
+              ) : (
+                <div key={message.id} className="flex gap-3">
+                  <MultiplexMark className="mt-0.5 size-7" />
+                  <div className="min-w-0 flex-1">
+                    <Markdownish text={message.content} />
+                  </div>
+                </div>
+              ),
+            )}
+            {busy && (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Loader2 className="size-4 animate-spin" />
+                Multiplex está trabalhando...
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="shrink-0 pb-4 pt-2">{composer}</div>
+      </div>
+    );
 
   return { list, chat };
 }

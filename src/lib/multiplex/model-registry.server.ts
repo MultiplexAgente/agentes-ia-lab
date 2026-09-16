@@ -10,8 +10,8 @@ export type ModelAlias = (typeof MODEL_ALIASES)[number];
 
 export const ALIAS_LABELS: Record<ModelAlias, string> = {
   gpt: "GPT",
-  claude: "CLAUDE",
-  deepseek: "DEEPSEEK",
+  claude: "Claude",
+  deepseek: "DeepSeek",
 };
 
 export type ProviderId = "openai" | "anthropic" | "deepseek";
