@@ -1,90 +1,70 @@
-# Multiplex — correção da infraestrutura + nova interface
+# MULTIPLEX — Ícone na saudação + GPT / CLAUDE / DEEPSEEK
 
-## O que a auditoria encontrou
+## 1. Correção visual imediata
 
-**Causa única de todos os 404:** a tela grande atual (`src/app/App.tsx`, 7.113 linhas) foi escrita para um servidor Express antigo que não existe mais neste projeto. Ela chama 40+ endereços (`/api/knowledge`, `/api/dashboard`, `/api/billing/current`, `/api/sources`, `/api/logs`, `/api/channels`, `/api/agent/config`, `/api/builder/modules`, `/api/teach/history`, `/api/sources/catalog/items`, `/api/billing/plans`) que nunca foram reconstruídos aqui.
+- O ponto verde some. No lugar dele, o ícone do Multiplex (a imagem `multiplex-atom` já existente no projeto) aparece **na mesma linha da frase**, à esquerda do texto: `[ícone] Como posso ajudar?`.
+- O mesmo ícone passa a ser o avatar das respostas do Multiplex, substituindo as letras "MX".
+- Tema escuro por padrão em todas as telas, com botão de troca para claro no topo.
+- Os avisos de "entre na sua empresa" deixam de ser um bloco vermelho: passam a ser um aviso discreto com o botão Entrar, no padrão do resto do app.
 
-O que existe e funciona hoje, ligado ao seu Supabase externo:
+## 2. Escolha do modelo: apenas 3 opções
 
-| Endereço real | Função |
-|---|---|
-| `/api/ai/conversation/chat` | conversa com a IA real (OpenAI), grava mensagens, auditoria e consumo |
-| `/api/admin/ai-routing` | painel administrativo com motor escolhido, tokens e custo |
-| `/api/products`, `/api/company/products` | catálogo real |
-| `/api/company/login`, `/workspace`, `/settings` | acesso e configuração da empresa |
-| `/api/public/whatsapp/webhook` | canal WhatsApp |
+Na conversa (troca rápida) e em Configurações (padrão da empresa), aparecem somente:
 
-**Origem de "Hamburgueria Artesanal Anthony":** não é código nem resposta inventada. Está no seu Supabase — a empresa `1111...1111` chama-se "Hamburgueria Artesanal Anthony" e a instrução do agente `2222...2222` começa com "Você é o assistente virtual da Hamburgueria Artesanal Anthony". O nome entra no contexto enviado ao modelo porque é a empresa do tenant autenticado. **Nada será renomeado no banco sem sua confirmação** de que essa empresa é só teste/seed.
+```text
+┌──────────┐  ┌──────────┐  ┌────────────┐
+│ GPT      │  │ CLAUDE   │  │ DEEPSEEK   │
+└──────────┘  └──────────┘  └────────────┘
+```
 
-**"Multiplex IA" na interface:** já não aparece em nenhum arquivo do app. Restam textos institucionais em documentos e no código antigo — serão limpos. Nomes técnicos internos (tabelas, colunas, variáveis, endereços) ficam como estão.
+Nenhum nome técnico de modelo aparece para o usuário. A opção escolhida fica salva por usuário/empresa.
 
-## O que vou fazer
+## 3. Como o sistema escolhe
 
-### 0. Inventário antes de qualquer alteração
-Levanto tudo primeiro — telas, rotas, funções de servidor, banco, autenticação, políticas de acesso, integrações, componentes e o núcleo do agente — e monto uma matriz interna: arquivo | usado por | função | ativo? | pode remover? Nenhum arquivo é apagado nessa fase. Só avanço depois que a matriz estiver completa, e cada remoção posterior entra no relatório com a prova de que estava morto.
+- O modelo escolhido é **sempre o primeiro a responder** e é ele que gera a resposta final: conversa, decisões, uso de ferramentas, confirmações.
+- Modelos auxiliares (mais rápidos/baratos) só entram em trabalho pesado de apoio: lotes grandes de texto, classificação, extração, resumo intermediário, preparação de contexto. O resultado volta para o modelo principal, que escreve a resposta.
+- Nunca trocar o modelo principal por um mais barato. Troca só acontece por falha real (erro, indisponibilidade, limite de uso), registrada como "fallback" com motivo, provedor original e provedor usado.
+- Modo automático existe internamente e só é usado quando a empresa ligar essa opção.
 
-### 1. Fim dos 404, uma rota por vez (sem mock, sem endpoint de fachada)
-Para cada um dos 11 endereços, decido nesta ordem:
-1. **Existe implementação real equivalente hoje?** Se sim (catálogo, logs de conversa, configurações de empresa), aponto a tela para ela. Nada novo é criado.
-2. **Não existe e a tela também não tem funcionalidade real?** Removo apenas a chamada morta e a tela vazia.
-3. **A tela tem funcionalidade real mas falta o backend?** Mantenho a tela e registro como PENDENTE no relatório, com o que falta. Não crio endpoint só para virar 200, nem preencho com dado inventado.
+## 4. Um só cérebro para os três
 
-Nenhum código funcional é apagado. O código antigo (`legacy-backend/`, `src/server/services/…`) só sai depois de eu confirmar, arquivo por arquivo, que nada ativo o usa. A prova é a rede do navegador: zero 404 nas rotas ainda usadas.
+Memória, conhecimento, catálogo, clientes, pedidos, permissões e histórico continuam sendo do Multiplex. Trocar de GPT para Claude ou DeepSeek no meio da conversa **não recomeça nada**: o contexto e a memória seguem. As mesmas 9 ferramentas já criadas valem para os três.
 
-### 2. Tabelas que faltam (clientes e pedidos) — só depois do seu OK
-Antes de tocar no banco, eu te mostro exatamente o que vai ser criado e confirmo que nada existente é alterado ou apagado. A mudança é **apenas aditiva**: três tabelas novas (`customers`, `orders`, `order_items`) com empresa obrigatória, permissões e políticas por vínculo em `company_users`. Nenhuma tabela existente é alterada, nenhuma linha é removida, nenhuma linha de exemplo é inserida — começa vazio.
+## 5. Chaves e segurança
 
-### 3. Ferramentas reais da IA
-Nove ferramentas ligadas ao seu banco: buscar produtos, ver produto, cadastrar cliente, atualizar cliente, buscar clientes, criar pedido, ver pedido, buscar pedidos e resumir a operação. Cada uma com esquema estrito, validação, autenticação, autorização, empresa derivada da sessão no servidor, tratamento de erro e registro em auditoria. Sem dados no banco, a resposta é o estado vazio honesto — nunca um número inventado.
+- Vou pedir as chaves da Anthropic e da DeepSeek em formulário seguro; elas ficam somente no servidor.
+- Nenhuma chave em tela, endereço, histórico do navegador ou registro. O app recebe apenas: qual opção está ativa e se está disponível.
+- Se um modelo pedido não existir na conta, eu leio a lista real do provedor e uso o mais avançado disponível daquele mesmo serviço, registrando qual foi. Nada é inventado.
 
-**A IA pergunta antes de agir.** Faltando informação, ela pede: "Qual o nome do cliente?", depois telefone, e-mail, confirma e só então executa. Nunca completa um cadastro ou pedido com valor inventado, e nunca inventa produto.
+## 6. Registro e painel administrativo
 
-### 4. Nova interface de três colunas
-- **Coluna 1 (230px):** MULTIPLEX, "+ Novo chat", e apenas o que existe: Início, Conversas, Clientes, Catálogo, Pedidos, Integrações, Configurações. Página ativa destacada. No pé: nome, e-mail e plano vindos do login real (nada fixo).
-- **Coluna 2 (290px):** busca + conversas reais agrupadas em Hoje / Ontem / Esta semana / Mais antigas, com título, prévia e hora. Vazio → "Nenhuma conversa ainda" + "+ Novo chat".
-- **Coluna 3:** o chat ocupa o resto. Cabeçalho compacto com o nome da conversa e "Multiplex". Mensagens com avatar, markdown, listas e links. Compositor de 64px que cresce sozinho; Enter envia, Shift+Enter quebra linha. Ações rápidas discretas embaixo. Produtos vindos de busca real aparecem em cards com imagem, preço e disponibilidade.
-- Tela nova: "Como posso ajudar?" com subtexto curto, sem título gigante.
-- Tablet: colunas recolhíveis. Celular: uma área por vez, com gavetas.
-- Visual escuro sofisticado, reaproveitando os componentes e tokens que já existem — sem gradientes, brilhos ou neon.
+Cada conversa passa a registrar provedor, modelo real, identificador da resposta, tokens de entrada/saída, custo estimado, tempo de resposta, tarefa identificada, motivo da escolha e se houve fallback. O painel administrativo passa a mostrar isso separado por GPT, CLAUDE e DEEPSEEK.
 
-### 5. Conversas reais, título automático e IA em todo campo de conversa
-- "+ Novo chat" cria conversa de verdade (empresa, usuário, agente, datas, título). Clicar numa conversa existente abre aquela; contextos nunca se misturam.
-- O título é gerado a partir do conteúdo real depois das primeiras mensagens; nunca fica "Novo chat" com conteúdo dentro.
-- Todo campo onde você escreve para o Multiplex fala com a IA real: cria conversa se não houver ativa, continua a existente quando há contexto, salva a mensagem, atualiza o histórico. Nunca reaproveita silenciosamente outra conversa.
+Para o custo sair em dinheiro, os preços por milhão de tokens de cada provedor ficam configuráveis em Configurações — sem isso, o custo continua marcado como não configurado.
 
-### 5b. Contexto enviado ao modelo
-Medição do que vai em cada turno: instrução do sistema, histórico, memória, conhecimento, ferramentas, catálogo e dados da empresa/agente. O banco nunca vai inteiro: histórico com limite, conhecimento e memória por relevância, catálogo consultado por ferramenta só quando a pergunta pede.
+## 7. Identidade
 
-### 6. Identidade
-- Na interface, o produto e o assistente aparecem apenas como **MULTIPLEX**. Nunca "Multiplex IA", nunca menção a GPT/Claude/Gemini.
-- A identidade da empresa e do agente vem sempre do tenant autenticado, lida do banco no servidor. Nenhum nome de empresa fica fixo no código nem serve de identidade global.
-- Nada é renomeado no banco. Se você confirmar que a Hamburgueria é só seed, aí sim eu ajusto.
+Na interface e nas respostas, o nome é **MULTIPLEX**. Nada de "Powered by GPT/Claude/DeepSeek". Se a empresa autorizar revelar o modelo, é mostrado o modelo real que atendeu — nunca um nome diferente do que respondeu.
 
-### 7. Fallbacks genéricos
-Varredura por `defaultResponse`, `fallbackResponse`, `genericResponse`, `safeResponse`, `assistantResponse`, `defaultMessage`, `fallbackMessage` e por frases tipo "Entendido…", "Posso ajudar você…", "Como você deseja prosseguir…". Tudo que substitua a resposta real é removido; falha da IA vira erro visível.
+## 8. Testes reais antes de dizer que está pronto
 
-### 8. Provas antes de dizer que está pronto
-Rastreio completo, camada por camada: usuário → tela → servidor → núcleo do agente → provedor → `response.id` → `response.model` → tokens → resposta original → banco → tela. Comparo por hash a resposta original com a gravada no banco e com a exibida, provando que nenhuma camada troca o texto. Registro também conversa, mensagem, agente, empresa, provedor, tempo de resposta e motivo de término — nunca chaves, senhas, cookies ou segredos.
+1. "Olá" em GPT, Claude e DeepSeek — conferindo provedor, modelo real, identificador da resposta e tokens.
+2. Contexto: dizer o nome no GPT, perguntar de novo, trocar para Claude e depois DeepSeek — todos devem lembrar.
+3. "Quais produtos tenho?" nos três — todos consultando o mesmo catálogo real.
+4. Cadastro de cliente e criação de pedido — a IA pergunta o que falta e não inventa produto nem preço.
+5. Trabalho pesado: modelo auxiliar processa, principal conclui.
+6. Falha simulada de um provedor — fallback registrado com motivo.
+7. Segurança: sem login 401, sem permissão 403, empresa falsa negada, nenhuma chave acessível pelo navegador.
+8. Comparação resposta do provedor x banco x tela, e varredura para garantir zero resposta pronta escondida.
+9. Telas em desktop, tablet e celular.
 
-- Sete mensagens reais: "oi", "qual modelo é vc?", "como funciona?", "quais produtos tenho?", "quero cadastrar um cliente", "quero criar um pedido", "consulte meus pedidos". Para cada uma: status HTTP, `response.id`, `response.model`, tokens, conteúdo, conversa, mensagem, registro no banco e o que aparece na tela.
-- Catálogo: com produtos, responde os reais; sem produtos, diz que não há cadastrados.
-- Cadastro de cliente e criação de pedido conferidos direto nas tabelas.
-- Segurança: sem sessão → 401; sem permissão → 403; recurso inexistente → 404; empresa forjada → recusa; empresa A tentando ler B → recusa. As políticas do banco barram mesmo se a tela tiver bug.
-- Navegador em 1920x1080, 1440x900, tablet e celular, percorrendo Início, Conversas, Clientes, Catálogo, Pedidos, Integrações, Configurações, chat, novo chat e busca, com a rede aberta: zero 404 nas rotas usadas. Nenhum erro escondido por interceptador.
-
-Só considero concluído com todos estes itens verificados: Supabase real, autenticação real, políticas de acesso reais, núcleo do agente real, provedor e motor real identificados, `response.id` e tokens comprovados, resposta original comparada com a exibida, sem fallback textual, sem mock, sem dado falso, clientes/pedidos/catálogo reais, ferramentas reais, conversas persistidas, novo chat funcionando, contexto entre mensagens, IA perguntando quando falta informação, multi-empresa testado, zero 404 nas rotas usadas, desktop/tablet/celular testados e relatório entregue. Build passar ou página abrir não conta.
+Relatório final separado em IMPLEMENTADO / TESTADO / NÃO IMPLEMENTADO / PENDENTE / ERROS, com provedor, modelo, identificador, tokens e tempo de cada teste.
 
 ## Detalhes técnicos
-- Todo backend novo entra como rota TanStack (`src/routes/api/...`) ou server function, usando os módulos já existentes em `src/lib/multiplex/*`. Nenhum servidor paralelo.
-- Migration `db/007_customers_orders.sql`: GRANTs explícitos, RLS ligado e policies por `company_users`, aplicada via `psql` no projeto `mbjqzjipiuwtgmoxsqfu`.
-- Ferramentas da IA registradas no pipeline atual (`pipeline.server.ts`) com esquemas estritos; empresa sempre derivada da sessão no servidor.
-- `App.tsx` dá lugar a um shell enxuto com rotas dedicadas por seção, migrando o que tem implementação real; `LandingChatPage` segue no chat público.
-- Sem fallback textual: falha de IA vira erro visível, nunca resposta fingida.
-- Nenhuma tabela, coluna, variável ou endereço interno é renomeado por causa da identidade visual.
 
-## Relatório final
-Entrego em blocos separados, na ordem:
-
-**IMPLEMENTADO** (funcionalidade, arquivos, banco, API, teste, resultado) · **TESTADO** (teste, entrada, resultado, status, com `response.id`, `response.model` e tokens quando cabível) · **NÃO IMPLEMENTADO** · **PENDENTE** (o que depende de confirmação, credencial, integração externa ou decisão) · **404** (endereço, causa, destino, ação) · **IA** (provedor, motor, `response.id`, tokens de entrada/saída/total) · **IDENTIDADE** (produto visual = MULTIPLEX e de onde veio a identidade da empresa autenticada) · **ARQUIVOS ALTERADOS** · **ARQUIVOS REMOVIDOS** (com justificativa e prova de que estavam mortos) · **BANCO** (migrations, tabelas, políticas, confirmação de zero dado falso) · **SEGURANÇA** (401, 403, 404, políticas, isolamento entre empresas) · **REDE** (quantidade de 404 antes e depois).
-
-Nada entra em IMPLEMENTADO sem teste real.
+- Novo `src/lib/multiplex/model-registry.server.ts`: aliases `gpt` / `claude` / `deepseek` → `{ provider, modelId, tier, status, capabilities, contextWindow, toolCalling, vision, reasoning, streaming, latencyClass }` + `ModelPricingRegistry`. IDs configuráveis por tabela de configuração, nunca espalhados no código. Validação contra a API de cada provedor no boot da rota (lista de modelos), com resolução para o flagship disponível quando o ID pedido não existir; `deprecated`/`retired`/`disabled` nunca são escolhidos automaticamente.
+- Provedores via AI SDK: `@ai-sdk/openai` (já instalado, Responses API), `@ai-sdk/anthropic`, `@ai-sdk/deepseek` (`https://api.deepseek.com`). Adapters normalizam tool calls para `{ id, name, arguments }`; `buildTools` e o Agent Core (`pipeline.server.ts`) continuam únicos.
+- `router.server.ts` vira `AIModelRouter` + `TaskModelSelector`: classificação da tarefa (SIMPLE_CHAT, CATALOG_SEARCH, TOOL_EXECUTION, CREATE_ORDER, DOCUMENT_ANALYSIS, BATCH_PROCESSING, etc.), ordem de decisão capacidade → qualidade → confiabilidade → velocidade → custo, e prioridade absoluta do alias escolhido pelo usuário para a resposta final.
+- Migração aditiva no Supabase externo: `user_ai_preferences` (user_id, company_id, primary_provider, primary_model_alias) com GRANTs e políticas por `is_company_member`; colunas novas em `ai_routing_audit`/`ai_usage` para `provider`, `model_alias`, `fallback_triggered`, `fallback_from`, `fallback_reason`, `task_type`, `routing_reason`. Nada é renomeado ou removido.
+- Segredos `ANTHROPIC_API_KEY` e `DEEPSEEK_API_KEY` lidos apenas dentro dos handlers; rota única `/api/ai/conversation/chat` mantida.
+- Fila simples `ai_background_jobs` para processamento pesado assíncrono, com resultado consultado pelo modelo principal.
