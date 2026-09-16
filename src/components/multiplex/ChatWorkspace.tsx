@@ -1,4 +1,4 @@
-import { Check, Info, Loader2, Paperclip, Plus, Search, SendHorizontal, Trash2 } from "lucide-react";
+import { ArrowUp, Check, Loader2, MoreHorizontal, Search, Trash2 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import multiplexIcon from "@/assets/multiplex-atom.jpg";
@@ -59,6 +59,7 @@ export function MultiplexMark({ className }: { className?: string }) {
 }
 
 export const NEW_CHAT_EVENT = "multiplex:new-chat";
+export const CLOSE_SIDEBAR_EVENT = "multiplex:close-sidebar";
 
 function Markdownish({ text }: { text: string }) {
   const blocks = text.split(/\n{2,}/);

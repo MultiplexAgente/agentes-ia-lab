@@ -16,7 +16,7 @@ import { useEffect, useState, type ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { MultiplexMark, NEW_CHAT_EVENT } from "@/components/multiplex/ChatWorkspace";
+import { CLOSE_SIDEBAR_EVENT, MultiplexMark, NEW_CHAT_EVENT } from "@/components/multiplex/ChatWorkspace";
 import { ThemeToggle } from "@/components/multiplex/ThemeToggle";
 import { api, clearToken, getToken } from "@/lib/multiplex/client";
 import { cn } from "@/lib/utils";
@@ -63,6 +63,12 @@ export function AppShell({ children, secondary }: { children: ReactNode; seconda
   useEffect(() => {
     setNavOpen(false);
   }, [pathname]);
+
+  useEffect(() => {
+    const handler = () => setNavOpen(false);
+    window.addEventListener(CLOSE_SIDEBAR_EVENT, handler);
+    return () => window.removeEventListener(CLOSE_SIDEBAR_EVENT, handler);
+  }, []);
 
   const accountName = profile?.user.email?.split("@")[0] ?? null;
   const initials = (profile?.user.email ?? "?").slice(0, 2).toLocaleUpperCase("pt-BR");
