@@ -4,18 +4,17 @@ import {
   LayoutDashboard,
   LogOut,
   MessageSquare,
+  Menu,
   Plug,
   Plus,
   Settings,
   ShoppingBag,
   Users,
-  Menu,
   X,
 } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import { CLOSE_SIDEBAR_EVENT, MultiplexMark, NEW_CHAT_EVENT } from "@/components/multiplex/ChatWorkspace";
 import { ThemeToggle } from "@/components/multiplex/ThemeToggle";
 import { api, clearToken, getToken } from "@/lib/multiplex/client";
@@ -60,6 +59,8 @@ export function AppShell({ children, secondary }: { children: ReactNode; seconda
   const { profile } = useProfile();
   const [navOpen, setNavOpen] = useState(false);
 
+  const isChat = pathname === "/";
+
   useEffect(() => {
     setNavOpen(false);
   }, [pathname]);
@@ -70,35 +71,55 @@ export function AppShell({ children, secondary }: { children: ReactNode; seconda
     return () => window.removeEventListener(CLOSE_SIDEBAR_EVENT, handler);
   }, []);
 
+  const accountInitials = (profile?.user.email ?? "?").slice(0, 2).toLocaleUpperCase("pt-BR");
   const accountName = profile?.user.email?.split("@")[0] ?? null;
-  const initials = (profile?.user.email ?? "?").slice(0, 2).toLocaleUpperCase("pt-BR");
+  const companyName = profile?.company.name ?? null;
 
   return (
     <div className="flex h-dvh w-full overflow-hidden bg-background text-foreground">
-      {/* SIDEBAR */}
+
+      {/* ── MOBILE OVERLAY ────────────────────────────────────────────────── */}
+      {navOpen && (
+        <button
+          aria-label="Fechar menu"
+          className="fixed inset-0 z-30 bg-black/50 backdrop-blur-sm lg:hidden"
+          onClick={() => setNavOpen(false)}
+        />
+      )}
+
+      {/* ── SIDEBAR ───────────────────────────────────────────────────────── */}
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-40 flex w-[280px] flex-col border-r border-border/60 bg-card/50 backdrop-blur-xl transition-transform lg:static lg:translate-x-0",
+          "fixed inset-y-0 left-0 z-40 flex w-[260px] flex-col bg-[oklch(0.115_0.018_240)] transition-transform duration-200 lg:static lg:translate-x-0",
           navOpen ? "translate-x-0" : "-translate-x-full",
         )}
       >
+        {/* Logo + controls */}
         <div className="flex h-14 shrink-0 items-center justify-between px-4">
-          <span className="flex items-center gap-2 text-[15px] font-semibold tracking-[0.12em] text-foreground">
+          <div className="flex items-center gap-2.5">
             <MultiplexMark className="size-6" />
-            MULTIPLEX
-          </span>
-          <div className="flex items-center">
+            <span className="text-[13px] font-semibold tracking-[0.15em] text-white/90">
+              MULTIPLEX
+            </span>
+          </div>
+          <div className="flex items-center gap-0.5">
             <ThemeToggle />
-            <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setNavOpen(false)}>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-8 text-white/50 hover:text-white lg:hidden"
+              onClick={() => setNavOpen(false)}
+            >
               <X className="size-4" />
             </Button>
           </div>
         </div>
 
-        <div className="px-3">
-          <Button
-            variant="outline"
-            className="w-full justify-start gap-2 font-medium"
+        {/* New chat */}
+        <div className="shrink-0 px-3 pb-2">
+          <button
+            id="multiplex-new-chat"
+            className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] font-medium text-white/70 transition-colors hover:bg-white/8 hover:text-white"
             onClick={async () => {
               if (pathname !== "/") await navigate({ to: "/" });
               window.dispatchEvent(new Event(NEW_CHAT_EVENT));
@@ -106,10 +127,11 @@ export function AppShell({ children, secondary }: { children: ReactNode; seconda
           >
             <Plus className="size-4" />
             Novo chat
-          </Button>
+          </button>
         </div>
 
-        <nav className="mt-3 flex shrink-0 flex-col gap-0.5 px-2">
+        {/* Nav */}
+        <nav className="shrink-0 px-3">
           {NAV.map((item) => {
             const active = item.to === "/" ? pathname === "/" : pathname.startsWith(item.to);
             return (
@@ -117,70 +139,81 @@ export function AppShell({ children, secondary }: { children: ReactNode; seconda
                 key={item.to}
                 to={item.to}
                 className={cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-1.5 text-[13px] font-medium transition-colors",
+                  "flex items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] font-medium transition-colors",
                   active
-                    ? "bg-primary/12 text-foreground"
-                    : "text-muted-foreground hover:bg-muted/40 hover:text-foreground",
+                    ? "bg-white/10 text-white"
+                    : "text-white/55 hover:bg-white/6 hover:text-white/85",
                 )}
               >
-                <item.icon className={cn("size-4", active && "text-primary")} />
+                <item.icon className="size-4 shrink-0" />
                 {item.label}
               </Link>
             );
           })}
         </nav>
 
-        {/* HISTÓRICO DENTRO DA SIDEBAR */}
-        {secondary ? (
-          <div className="mt-3 flex min-h-0 flex-1 flex-col border-t border-border/50">{secondary}</div>
+        {/* Conversation history (only injected on chat page) */}
+        {isChat && secondary ? (
+          <div className="mt-2 flex min-h-0 flex-1 flex-col border-t border-white/[0.06] pt-1 [&_input]:text-white/70 [&_input]:placeholder:text-white/35">
+            {secondary}
+          </div>
         ) : (
           <div className="flex-1" />
         )}
 
-        <Separator />
-        <div className="p-2">
+        {/* Footer */}
+        <div className="shrink-0 border-t border-white/[0.06] p-3">
           {profile ? (
-            <div className="flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-muted/40">
-              <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/15 text-[11px] font-semibold text-primary">
-                {initials}
+            <div className="flex items-center gap-2.5 rounded-lg px-2 py-2">
+              {/* Avatar */}
+              <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary/30 text-[11px] font-bold text-primary">
+                {accountInitials}
               </div>
-              <p className="min-w-0 flex-1 truncate text-[13px] font-medium">{accountName}</p>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-[13px] font-medium text-white/80">{accountName}</p>
+                {companyName && (
+                  <p className="truncate text-[11px] text-white/40">{companyName}</p>
+                )}
+              </div>
               <Button
                 variant="ghost"
                 size="icon"
                 title="Sair"
+                className="size-7 shrink-0 text-white/40 hover:text-white"
                 onClick={() => {
                   clearToken();
                   window.location.assign("/entrar");
                 }}
               >
-                <LogOut className="size-4" />
+                <LogOut className="size-3.5" />
               </Button>
             </div>
           ) : (
-            <Button variant="ghost" className="w-full text-[13px]" onClick={() => navigate({ to: "/entrar" })}>
+            <button
+              className="flex w-full items-center justify-center gap-2 rounded-lg border border-white/10 px-3 py-2 text-[13px] font-medium text-white/60 transition-colors hover:border-white/20 hover:text-white/90"
+              onClick={() => navigate({ to: "/entrar" })}
+            >
               Entrar na minha empresa
-            </Button>
+            </button>
           )}
         </div>
       </aside>
 
-      {navOpen && (
-        <button
-          aria-label="Fechar menu"
-          className="fixed inset-0 z-30 bg-background/70 backdrop-blur-sm lg:hidden"
-          onClick={() => setNavOpen(false)}
-        />
-      )}
-
-      {/* CONTEÚDO */}
-      <main className="flex min-w-0 flex-1 flex-col">
-        <div className="flex h-12 shrink-0 items-center gap-2 border-b border-border/60 px-3 lg:hidden">
-          <Button variant="ghost" size="icon" onClick={() => setNavOpen(true)}>
+      {/* ── MAIN CONTENT ──────────────────────────────────────────────────── */}
+      <main className="flex min-w-0 flex-1 flex-col overflow-hidden">
+        {/* Mobile topbar */}
+        <div className="flex h-12 shrink-0 items-center gap-2 border-b border-border/40 px-3 lg:hidden">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-8"
+            onClick={() => setNavOpen(true)}
+          >
             <Menu className="size-4" />
           </Button>
-          <span className="text-sm font-semibold tracking-[0.12em]">MULTIPLEX</span>
+          <span className="text-[13px] font-semibold tracking-[0.15em]">MULTIPLEX</span>
         </div>
+
         {children}
       </main>
     </div>
