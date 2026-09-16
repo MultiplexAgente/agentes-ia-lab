@@ -47,8 +47,13 @@ Nove ferramentas ligadas ao seu banco: buscar produtos, ver produto, cadastrar c
 - Tablet: colunas recolhíveis. Celular: uma área por vez, com gavetas.
 - Visual escuro sofisticado, reaproveitando os componentes e tokens que já existem — sem gradientes, brilhos ou neon.
 
-### 5. Conversas reais e título automático
-"+ Novo chat" cria conversa de verdade (empresa, usuário, agente, datas, título). O título é gerado a partir do conteúdo real depois das primeiras mensagens; nunca fica "Novo chat" com conteúdo dentro.
+### 5. Conversas reais, título automático e IA em todo campo de conversa
+- "+ Novo chat" cria conversa de verdade (empresa, usuário, agente, datas, título). Clicar numa conversa existente abre aquela; contextos nunca se misturam.
+- O título é gerado a partir do conteúdo real depois das primeiras mensagens; nunca fica "Novo chat" com conteúdo dentro.
+- Todo campo onde você escreve para o Multiplex fala com a IA real: cria conversa se não houver ativa, continua a existente quando há contexto, salva a mensagem, atualiza o histórico. Nunca reaproveita silenciosamente outra conversa.
+
+### 5b. Contexto enviado ao modelo
+Medição do que vai em cada turno: instrução do sistema, histórico, memória, conhecimento, ferramentas, catálogo e dados da empresa/agente. O banco nunca vai inteiro: histórico com limite, conhecimento e memória por relevância, catálogo consultado por ferramenta só quando a pergunta pede.
 
 ### 6. Identidade
 - Na interface, o produto e o assistente aparecem apenas como **MULTIPLEX**. Nunca "Multiplex IA", nunca menção a GPT/Claude/Gemini.
@@ -59,15 +64,15 @@ Nove ferramentas ligadas ao seu banco: buscar produtos, ver produto, cadastrar c
 Varredura por `defaultResponse`, `fallbackResponse`, `genericResponse`, `safeResponse`, `assistantResponse`, `defaultMessage`, `fallbackMessage` e por frases tipo "Entendido…", "Posso ajudar você…", "Como você deseja prosseguir…". Tudo que substitua a resposta real é removido; falha da IA vira erro visível.
 
 ### 8. Provas antes de dizer que está pronto
-Rastreio completo, camada por camada: usuário → tela → servidor → núcleo do agente → OpenAI → `response.id` → `response.model` → tokens → resposta original → banco → tela. Comparo por hash a resposta original com a gravada no banco e com a exibida, provando que nenhuma camada troca o texto.
+Rastreio completo, camada por camada: usuário → tela → servidor → núcleo do agente → provedor → `response.id` → `response.model` → tokens → resposta original → banco → tela. Comparo por hash a resposta original com a gravada no banco e com a exibida, provando que nenhuma camada troca o texto. Registro também conversa, mensagem, agente, empresa, provedor, tempo de resposta e motivo de término — nunca chaves, senhas, cookies ou segredos.
 
-- Cinco mensagens reais: "oi", "qual modelo é vc?", "como funciona?", "quais produtos tenho?", "quero cadastrar um cliente".
-- Em "qual modelo é vc?" registro `response.id`, `response.model`, tokens de entrada, de saída e total.
+- Sete mensagens reais: "oi", "qual modelo é vc?", "como funciona?", "quais produtos tenho?", "quero cadastrar um cliente", "quero criar um pedido", "consulte meus pedidos". Para cada uma: status HTTP, `response.id`, `response.model`, tokens, conteúdo, conversa, mensagem, registro no banco e o que aparece na tela.
+- Catálogo: com produtos, responde os reais; sem produtos, diz que não há cadastrados.
 - Cadastro de cliente e criação de pedido conferidos direto nas tabelas.
-- Isolamento: sem sessão → 401; sem permissão → 403; recurso inexistente → 404; empresa forjada → recusa.
-- Navegador em 1920x1080, 1440x900, tablet e celular, com a rede aberta para confirmar zero 404 nas rotas usadas.
+- Segurança: sem sessão → 401; sem permissão → 403; recurso inexistente → 404; empresa forjada → recusa; empresa A tentando ler B → recusa. As políticas do banco barram mesmo se a tela tiver bug.
+- Navegador em 1920x1080, 1440x900, tablet e celular, percorrendo Início, Conversas, Clientes, Catálogo, Pedidos, Integrações, Configurações, chat, novo chat e busca, com a rede aberta: zero 404 nas rotas usadas. Nenhum erro escondido por interceptador.
 
-Só considero concluído quando: APIs reais respondem, Supabase conectado, IA real responde, motor real identificado, dados reais, autenticação e RLS funcionando, sem 404 nas rotas usadas, sem dado falso, layout implementado e testes passando. Página carregar não conta.
+Só considero concluído com todos estes itens verificados: Supabase real, autenticação real, políticas de acesso reais, núcleo do agente real, provedor e motor real identificados, `response.id` e tokens comprovados, resposta original comparada com a exibida, sem fallback textual, sem mock, sem dado falso, clientes/pedidos/catálogo reais, ferramentas reais, conversas persistidas, novo chat funcionando, contexto entre mensagens, IA perguntando quando falta informação, multi-empresa testado, zero 404 nas rotas usadas, desktop/tablet/celular testados e relatório entregue. Build passar ou página abrir não conta.
 
 ## Detalhes técnicos
 - Todo backend novo entra como rota TanStack (`src/routes/api/...`) ou server function, usando os módulos já existentes em `src/lib/multiplex/*`. Nenhum servidor paralelo.
