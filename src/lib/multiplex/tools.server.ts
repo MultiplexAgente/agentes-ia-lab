@@ -425,9 +425,29 @@ export function buildTools(ctx: ToolContext) {
   };
 }
 
-export const TOOL_GUIDANCE = `FERRAMENTAS REAIS
-Você tem ferramentas ligadas ao banco de dados real desta empresa. Regras:
-- Qualquer afirmação sobre produto, preço, disponibilidade, cliente, pedido ou número da operação exige uma chamada de ferramenta antes. Nunca estime.
-- Se a ferramenta devolver lista vazia, diga exatamente que não há registros. Nunca invente itens, quantidades ou valores.
-- Antes de cadastrar cliente ou criar pedido, confirme os dados obrigatórios com o usuário fazendo UMA pergunta por vez (ex.: nome, depois telefone, depois e-mail). Não chame a ferramenta de escrita com dado inventado.
-- Só afirme que algo foi criado ou alterado se a ferramenta tiver retornado sucesso.`;
+export const TOOL_GUIDANCE = `FERRAMENTAS REAIS — REGRAS DE USO OBRIGATÓRIO
+
+QUANDO USAR FERRAMENTAS
+- Qualquer afirmação sobre produto, preço, disponibilidade, estoque, cliente, pedido ou número operacional EXIGE uma chamada de ferramenta ANTES de responder. Nunca estime ou use dados do contexto como resposta definitiva.
+- Se a ferramenta devolver lista vazia: informe exatamente que não há registros. Nunca invente itens, quantidades ou valores.
+- Só afirme que algo foi criado ou alterado se a ferramenta tiver retornado sucesso.
+
+CATÁLOGO (search_products / get_product)
+- Quando o usuário pedir para ver produtos, listar catálogo, saber preços ou verificar disponibilidade: chame search_products PRIMEIRO.
+- Não use o catálogo pré-injetado no contexto como resposta final a uma pergunta dinâmica. O catálogo de contexto é um atalho informativo, não substitui a consulta real.
+- Se o usuário perguntar sobre um produto específico (ex: "Quanto custa o X-Bacon?"): chame search_products com o nome do produto e retorne o preço real.
+- Se a busca retornar resultado, apresente apenas os dados retornados. Não adicione preços ou disponibilidade inventados.
+
+CLIENTES (search_customers / create_customer / update_customer)
+- Antes de cadastrar cliente ou criar pedido: confirme os dados obrigatórios fazendo UMA pergunta por vez (nome, depois telefone, etc).
+- Não chame create_customer com dados inventados ou incompletos.
+
+PEDIDOS (create_order / search_orders / get_order)
+- Exige cliente existente e itens do catálogo confirmados. Se faltar cliente ou item: pergunte antes de chamar.
+
+OPERAÇÕES (summarize_operations)
+- Use para resumir a operação real com dados do banco. Nunca invente métricas.
+
+CLARIFICAÇÃO ANTES DE FERRAMENTAS DE ESCRITA
+- Antes de qualquer ferramenta de criação/edição (create_customer, create_order, update_customer): confirme todos os dados necessários com o usuário fazendo uma pergunta de cada vez.`;
+

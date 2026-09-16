@@ -77,23 +77,24 @@ export async function buildCompanyContext(
       .limit(80);
     const ranked = ((data ?? []) as unknown as ProductRow[])
       .map((row) => ({ row, score: rankText(`${row.name} ${row.description ?? ""} ${row.product_categories?.name ?? ""}`, queryTerms) }))
-      .sort((a, b) => b.score - a.score || a.row.name.localeCompare(b.row.name))
-      .filter((entry, index) => entry.score > 0 || index < 12)
+      .filter((entry) => entry.score > 0) // SOMENTE itens com relevância real para a mensagem
+      .sort((a, b) => b.score - a.score)
       .slice(0, 12)
       .map((entry) => entry.row);
     productCount = ranked.length;
     if (ranked.length) {
       sources.push("products");
-      blocks.push("CATÁLOGO RELEVANTE (dados atuais):\n" + ranked.map((item) => {
+      blocks.push("CATÁLOGO RELEVANTE (dados atuais do banco — use search_products para consultas dinâmicas):\n" + ranked.map((item) => {
         const status = item.available === false ? "indisponível" : "disponível";
         const categoryName = item.product_categories?.name ? ` · ${item.product_categories.name}` : "";
         const prep = item.preparation_time_minutes ? ` · preparo ~${item.preparation_time_minutes}min` : "";
         return `- ${item.name}: ${money(item.price)} · ${status}${categoryName}${prep}${item.description ? ` — ${item.description}` : ""}`;
       }).join("\n"));
-    } else {
-      blocks.push("CATÁLOGO: não há produto relevante cadastrado. Não invente itens ou preços.");
     }
+    // Se não houver itens relevantes, NÃO injetar catálogo vazio nem lista genérica.
+    // A IA deve usar search_products quando o usuário pedir explicitamente.
   }
+
 
   if (category === "operacoes" || /hor[aá]rio|aberto|fecha|funciona/i.test(message)) {
     const { data: hours } = await supabase

@@ -121,16 +121,31 @@ const KEYWORDS: Array<{ category: TaskCategory; words: string[] }> = [
   },
 ];
 
-export function classifyTask(message: string): { category: TaskCategory; matched: string[] } {
-  const text = message.toLowerCase();
-  let best: { category: TaskCategory; matched: string[] } = { category: "geral", matched: [] };
+export function classifyTask(message: string, historyLength = 0): { category: TaskCategory; matched: string[] } {
+  const text = message.toLowerCase().trim();
+  const wordCount = text.split(/\s+/).filter(Boolean).length;
+  let best: { category: TaskCategory; matched: string[]; score: number } = { category: "geral", matched: [], score: 0 };
 
   for (const entry of KEYWORDS) {
     const matched = entry.words.filter((word) => text.includes(word));
-    if (matched.length > best.matched.length) best = { category: entry.category, matched };
+    if (matched.length > best.score) {
+      best = { category: entry.category, matched, score: matched.length };
+    }
   }
 
-  return best;
+  // Mensagens muito curtas (1-2 palavras) com baixa evidência de intenção
+  // não devem classificar automaticamente em catalogo ou vendas,
+  // pois isso causaria injeção desnecessária de catálogo no contexto.
+  // Exceção: se há histórico de conversa (historyLength > 0), o contexto já existe.
+  const isTerse = wordCount <= 2;
+  const isAmbiguousCategory = best.category === "catalogo" || best.category === "vendas";
+  const needsMoreContext = isTerse && isAmbiguousCategory && best.score < 2 && historyLength === 0;
+
+  if (needsMoreContext) {
+    return { category: "geral", matched: [] };
+  }
+
+  return { category: best.category, matched: best.matched };
 }
 
 export function estimateComplexity(message: string, historyLength: number): Complexity {
@@ -195,7 +210,8 @@ export function routeModel(
   historyLength: number,
   settings: RoutingSettings,
 ): RoutingDecision {
-  const { category, matched } = classifyTask(message);
+  const { category, matched } = classifyTask(message, historyLength);
+
   const complexity = estimateComplexity(message, historyLength);
   const strategy = settings.categoryStrategies[category] ?? settings.strategy;
   const tier = pickTier(category, complexity, strategy);
