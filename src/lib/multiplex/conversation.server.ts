@@ -176,7 +176,12 @@ export async function persistMessage(
  */
 export async function ensureConversationTitle(
   supabase: SupabaseClient,
-  args: { companyId: string; conversationId: string; firstUserMessage: string },
+  args: {
+    companyId: string;
+    conversationId: string;
+    firstUserMessage: string;
+    transcript?: Array<{ role: string; content: string }>;
+  },
 ): Promise<string | null> {
   const { data } = await supabase
     .from("conversations")
@@ -192,15 +197,7 @@ export async function ensureConversationTitle(
   if (aiTitled && currentTitle) return currentTitle;
 
   // Após algumas mensagens, o título passa a ser gerado a partir do conteúdo real da conversa.
-  const { data: recent } = await supabase
-    .from("messages")
-    .select("role, content")
-    .eq("company_id", args.companyId)
-    .eq("conversation_id", args.conversationId)
-    .order("created_at", { ascending: true })
-    .limit(6);
-  const rows = (recent ?? []) as Array<{ role: string; content: string | null }>;
-  console.log("[multiplex] titulo: mensagens carregadas =", rows.length);
+  const rows = args.transcript ?? [];
   if (rows.length >= 4) {
     const aiTitle = await generateConversationTitle(rows);
     if (aiTitle) {
