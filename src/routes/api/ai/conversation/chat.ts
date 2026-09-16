@@ -9,6 +9,8 @@ import {
   persistMessage,
 } from "@/lib/multiplex/conversation.server";
 import { runMultiplexTurn } from "@/lib/multiplex/pipeline.server";
+import { sanitizeAlias } from "@/lib/multiplex/model-registry.server";
+import { saveUserAlias } from "@/lib/multiplex/preferences.server";
 import { getServiceClient, resolvePublicCompany } from "@/lib/multiplex/supabase.server";
 
 const BodySchema = z.object({
@@ -17,6 +19,7 @@ const BodySchema = z.object({
   publicSessionId: z.string().uuid().optional(),
   channel: z.enum(["web"]).default("web"),
   context: z.record(z.unknown()).optional(),
+  modelAlias: z.enum(["gpt", "claude", "deepseek"]).optional(),
 });
 
 export const Route = createFileRoute("/api/ai/conversation/chat")({
@@ -70,7 +73,12 @@ export const Route = createFileRoute("/api/ai/conversation/chat")({
           agentId: conversation.agentId,
           requestContext: parsed.data.context,
           toolScope: session ? "authenticated" : "public",
+          requestedAlias: sanitizeAlias(parsed.data.modelAlias),
+          userId: session?.userId ?? null,
         });
+        if (session && parsed.data.modelAlias) {
+          await saveUserAlias(supabase, company.id, session.userId, parsed.data.modelAlias);
+        }
         if (!result.ok) {
           return Response.json({ error: result.error, conversation: { id: conversation.id } }, { status: result.status });
         }
@@ -109,6 +117,7 @@ export const Route = createFileRoute("/api/ai/conversation/chat")({
             strategy: result.routing.strategy,
             reason: result.routing.publicReason,
           },
+          model: { alias: result.providerInfo.alias, label: result.providerInfo.aliasLabel },
           usage: result.usage,
           context: result.context,
           toolCalls: result.toolCalls.map((call) => ({ name: call.name, ok: call.ok })),
