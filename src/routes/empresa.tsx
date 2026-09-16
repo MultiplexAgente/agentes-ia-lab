@@ -237,6 +237,7 @@ function CompanyPage() {
           <input
             type="email"
             required
+            autoComplete="email"
             placeholder="E-mail"
             className="w-full rounded-md border border-input bg-background p-2"
             value={email}
@@ -245,6 +246,7 @@ function CompanyPage() {
           <input
             type="password"
             required
+            autoComplete="current-password"
             placeholder="Senha"
             className="w-full rounded-md border border-input bg-background p-2"
             value={password}
