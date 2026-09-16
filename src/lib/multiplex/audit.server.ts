@@ -29,6 +29,15 @@ export interface AuditRecord {
   contextSources: string[];
   requestMetadata: Record<string, unknown>;
   error?: string | null;
+  provider?: string | null;
+  modelAlias?: string | null;
+  taskType?: string | null;
+  routingReason?: string | null;
+  fallbackFrom?: string | null;
+  fallbackTo?: string | null;
+  fallbackReason?: string | null;
+  auxiliaryModels?: Array<Record<string, unknown>>;
+  userId?: string | null;
 }
 
 export async function saveAudit(
@@ -72,6 +81,15 @@ export async function saveAudit(
     request_metadata: record.requestMetadata,
     response_hash: responseHash,
     error: record.error ?? null,
+    provider: record.provider ?? null,
+    model_alias: record.modelAlias ?? null,
+    task_type: record.taskType ?? null,
+    routing_reason: record.routingReason ?? null,
+    fallback_triggered: record.fallbackUsed,
+    fallback_from: record.fallbackFrom ?? null,
+    fallback_to: record.fallbackTo ?? null,
+    fallback_reason: record.fallbackReason ?? null,
+    auxiliary_models: record.auxiliaryModels ?? [],
   });
   if (error) return { persisted: false, error: error.message };
 
@@ -86,6 +104,17 @@ export async function saveAudit(
     output_tokens: record.completionTokens,
     total_tokens: record.totalTokens,
     estimated_cost: record.costUsd,
+    provider: record.provider ?? null,
+    model_alias: record.modelAlias ?? null,
+    user_id: isUuid(record.userId) ? record.userId : null,
+    response_id: record.responseId ?? null,
+    latency_ms: record.latencyMs,
+    task_type: record.taskType ?? null,
+    routing_reason: record.routingReason ?? null,
+    fallback_triggered: record.fallbackUsed,
+    fallback_from: record.fallbackFrom ?? null,
+    fallback_to: record.fallbackTo ?? null,
+    fallback_reason: record.fallbackReason ?? null,
   });
   return usageError ? { persisted: false, error: usageError.message } : { persisted: true };
 }

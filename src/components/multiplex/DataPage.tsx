@@ -76,14 +76,17 @@ export function StateBlock({
     );
   }
   if (error) {
-    return (
+    const needsLogin = error.startsWith("Entre na");
+    return needsLogin ? (
+      <div className="flex flex-wrap items-center gap-3 rounded-lg border border-border/60 bg-muted/20 px-4 py-3 text-sm text-muted-foreground">
+        <span>Entre na sua empresa para visualizar estes dados.</span>
+        <Button size="sm" variant="outline" onClick={() => window.location.assign("/entrar")}>
+          Entrar
+        </Button>
+      </div>
+    ) : (
       <div className="rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
         {error}
-        <div className="mt-3">
-          <Button size="sm" variant="outline" onClick={() => window.location.assign("/entrar")}>
-            Entrar
-          </Button>
-        </div>
       </div>
     );
   }

@@ -61,3 +61,17 @@
 - [ ] Seletor GPT/CLAUDE/DEEPSEEK no chat e em Configurações
 - [ ] Painel admin separado por provider
 - [ ] Testes reais ponta a ponta + relatório final
+
+## Multi-provider (concluído nesta execução)
+- [x] Ícone multiplex-atom na mesma linha da saudação + avatar das respostas
+- [x] Tema escuro padrão com botão dark/light persistido
+- [x] Aviso de login discreto
+- [x] ModelRegistry + ProviderCapabilityService + resolução de flagship
+- [x] Providers OpenAI/Anthropic/DeepSeek com interface única + tool adapters
+- [x] Router por tarefa (25 tipos) + modelo auxiliar + fallback registrado
+- [x] Migration 007 (user_ai_preferences, ai_background_jobs, colunas de provider/fallback)
+- [x] Seletor GPT/CLAUDE/DEEPSEEK no chat e padrão em Configurações
+- [x] Painel admin com resumo por provider
+- [x] Testes reais GPT e DeepSeek, fallback do Claude, auxiliar em texto longo, 4 resoluções
+- [ ] CLAUDE ativo: depende de chave Anthropic válida
+- [ ] Custo em dinheiro: depende do preço por milhão de tokens

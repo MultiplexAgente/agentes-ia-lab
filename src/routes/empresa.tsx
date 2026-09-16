@@ -38,6 +38,7 @@ interface Settings {
   categoryStrategies: Record<string, string>;
   modelPrices: Record<string, { input: number; output: number }>;
   monthlyBudgetUsd: number | null;
+  defaultModelAlias?: "gpt" | "claude" | "deepseek";
 }
 
 interface Workspace {
@@ -442,6 +443,21 @@ function CompanyPage() {
             Quem conversa nunca escolhe nada: a Multiplex decide sozinha. Aqui você define o que ela deve
             priorizar em cada tipo de pedido e o preço por 1 milhão de tokens.
           </p>
+
+          <label className="mb-4 block max-w-sm text-sm">
+            <span className="mb-1 block font-medium">Inteligência padrão da empresa</span>
+            <select
+              className="w-full rounded-md border border-input bg-background p-2"
+              value={draft.defaultModelAlias ?? "gpt"}
+              onChange={(event) =>
+                setDraft({ ...draft, defaultModelAlias: event.target.value as Settings["defaultModelAlias"] })
+              }
+            >
+              <option value="gpt">GPT</option>
+              <option value="claude">CLAUDE</option>
+              <option value="deepseek">DEEPSEEK</option>
+            </select>
+          </label>
 
           <label className="mb-4 block max-w-sm text-sm">
             <span className="mb-1 block font-medium">Prioridade geral</span>

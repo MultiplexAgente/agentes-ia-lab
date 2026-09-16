@@ -16,7 +16,8 @@ import { useEffect, useState, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { NEW_CHAT_EVENT } from "@/components/multiplex/ChatWorkspace";
+import { MultiplexMark, NEW_CHAT_EVENT } from "@/components/multiplex/ChatWorkspace";
+import { ThemeToggle } from "@/components/multiplex/ThemeToggle";
 import { api, clearToken, getToken } from "@/lib/multiplex/client";
 import { cn } from "@/lib/utils";
 
@@ -77,10 +78,16 @@ export function AppShell({ children, secondary }: { children: ReactNode; seconda
         )}
       >
         <div className="flex h-14 items-center justify-between px-4">
-          <span className="font-display text-lg font-semibold tracking-[0.14em] text-foreground">MULTIPLEX</span>
-          <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setNavOpen(false)}>
-            <X className="size-4" />
-          </Button>
+          <span className="flex items-center gap-2 font-display text-lg font-semibold tracking-[0.14em] text-foreground">
+            <MultiplexMark className="size-6" />
+            MULTIPLEX
+          </span>
+          <div className="flex items-center">
+            <ThemeToggle />
+            <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setNavOpen(false)}>
+              <X className="size-4" />
+            </Button>
+          </div>
         </div>
 
         <div className="px-3">

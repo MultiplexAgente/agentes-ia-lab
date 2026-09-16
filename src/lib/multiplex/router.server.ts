@@ -64,8 +64,12 @@ export interface RoutingSettings {
   /** Estratégia específica por tarefa; sobrepõe `strategy`. */
   categoryStrategies: Partial<Record<TaskCategory, RoutingStrategy>>;
   /** Preço por 1M de tokens em USD, informado pelo administrador. */
-  modelPrices: Record<string, { input: number; output: number }>;
+  modelPrices: Record<string, { input: number; cachedInput?: number; output: number }>;
   monthlyBudgetUsd: number | null;
+  /** Alias público padrão da empresa: gpt | claude | deepseek. */
+  defaultModelAlias: "gpt" | "claude" | "deepseek";
+  /** Modo automático interno (só quando a empresa habilita). */
+  autoModeEnabled: boolean;
 }
 
 export const DEFAULT_SETTINGS: RoutingSettings = {
@@ -78,6 +82,8 @@ export const DEFAULT_SETTINGS: RoutingSettings = {
   },
   modelPrices: {},
   monthlyBudgetUsd: null,
+  defaultModelAlias: "gpt",
+  autoModeEnabled: false,
 };
 
 const KEYWORDS: Array<{ category: TaskCategory; words: string[] }> = [

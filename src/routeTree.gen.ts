@@ -20,6 +20,7 @@ import { Route as PedidosRouteImport } from './routes/pedidos'
 import { Route as AdminAiRoutingRouteImport } from './routes/admin.ai-routing'
 import { Route as ApiProductsRouteImport } from './routes/api/products'
 import { Route as ApiAdminAiRoutingRouteImport } from './routes/api/admin/ai-routing'
+import { Route as ApiAiModelsRouteImport } from './routes/api/ai/models'
 import { Route as ApiCompanyConversationsRouteImport } from './routes/api/company/conversations'
 import { Route as ApiCompanyCustomersRouteImport } from './routes/api/company/customers'
 import { Route as ApiCompanyLoginRouteImport } from './routes/api/company/login'
@@ -85,6 +86,11 @@ const ApiProductsRoute = ApiProductsRouteImport.update({
 const ApiAdminAiRoutingRoute = ApiAdminAiRoutingRouteImport.update({
   id: '/api/admin/ai-routing',
   path: '/api/admin/ai-routing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAiModelsRoute = ApiAiModelsRouteImport.update({
+  id: '/api/ai/models',
+  path: '/api/ai/models',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiCompanyConversationsRoute = ApiCompanyConversationsRouteImport.update({
@@ -156,6 +162,7 @@ export interface FileRoutesByFullPath {
   '/admin/ai-routing': typeof AdminAiRoutingRoute
   '/api/products': typeof ApiProductsRoute
   '/api/admin/ai-routing': typeof ApiAdminAiRoutingRoute
+  '/api/ai/models': typeof ApiAiModelsRoute
   '/api/company/conversations': typeof ApiCompanyConversationsRoute
   '/api/company/customers': typeof ApiCompanyCustomersRoute
   '/api/company/login': typeof ApiCompanyLoginRoute
@@ -180,6 +187,7 @@ export interface FileRoutesByTo {
   '/admin/ai-routing': typeof AdminAiRoutingRoute
   '/api/products': typeof ApiProductsRoute
   '/api/admin/ai-routing': typeof ApiAdminAiRoutingRoute
+  '/api/ai/models': typeof ApiAiModelsRoute
   '/api/company/conversations': typeof ApiCompanyConversationsRoute
   '/api/company/customers': typeof ApiCompanyCustomersRoute
   '/api/company/login': typeof ApiCompanyLoginRoute
@@ -205,6 +213,7 @@ export interface FileRoutesById {
   '/admin/ai-routing': typeof AdminAiRoutingRoute
   '/api/products': typeof ApiProductsRoute
   '/api/admin/ai-routing': typeof ApiAdminAiRoutingRoute
+  '/api/ai/models': typeof ApiAiModelsRoute
   '/api/company/conversations': typeof ApiCompanyConversationsRoute
   '/api/company/customers': typeof ApiCompanyCustomersRoute
   '/api/company/login': typeof ApiCompanyLoginRoute
@@ -231,6 +240,7 @@ export interface FileRouteTypes {
     | '/admin/ai-routing'
     | '/api/products'
     | '/api/admin/ai-routing'
+    | '/api/ai/models'
     | '/api/company/conversations'
     | '/api/company/customers'
     | '/api/company/login'
@@ -255,6 +265,7 @@ export interface FileRouteTypes {
     | '/admin/ai-routing'
     | '/api/products'
     | '/api/admin/ai-routing'
+    | '/api/ai/models'
     | '/api/company/conversations'
     | '/api/company/customers'
     | '/api/company/login'
@@ -279,6 +290,7 @@ export interface FileRouteTypes {
     | '/admin/ai-routing'
     | '/api/products'
     | '/api/admin/ai-routing'
+    | '/api/ai/models'
     | '/api/company/conversations'
     | '/api/company/customers'
     | '/api/company/login'
@@ -304,6 +316,7 @@ export interface RootRouteChildren {
   AdminAiRoutingRoute: typeof AdminAiRoutingRoute
   ApiProductsRoute: typeof ApiProductsRoute
   ApiAdminAiRoutingRoute: typeof ApiAdminAiRoutingRoute
+  ApiAiModelsRoute: typeof ApiAiModelsRoute
   ApiCompanyConversationsRoute: typeof ApiCompanyConversationsRoute
   ApiCompanyCustomersRoute: typeof ApiCompanyCustomersRoute
   ApiCompanyLoginRoute: typeof ApiCompanyLoginRoute
@@ -394,6 +407,13 @@ declare module '@tanstack/react-router' {
       path: '/api/admin/ai-routing'
       fullPath: '/api/admin/ai-routing'
       preLoaderRoute: typeof ApiAdminAiRoutingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/ai/models': {
+      id: '/api/ai/models'
+      path: '/api/ai/models'
+      fullPath: '/api/ai/models'
+      preLoaderRoute: typeof ApiAiModelsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/company/conversations': {
@@ -488,6 +508,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminAiRoutingRoute: AdminAiRoutingRoute,
   ApiProductsRoute: ApiProductsRoute,
   ApiAdminAiRoutingRoute: ApiAdminAiRoutingRoute,
+  ApiAiModelsRoute: ApiAiModelsRoute,
   ApiCompanyConversationsRoute: ApiCompanyConversationsRoute,
   ApiCompanyCustomersRoute: ApiCompanyCustomersRoute,
   ApiCompanyLoginRoute: ApiCompanyLoginRoute,
