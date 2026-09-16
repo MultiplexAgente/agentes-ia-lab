@@ -28,8 +28,8 @@ Para cada um dos 11 endereços, decido nesta ordem:
 
 Nenhum código funcional é apagado. O código antigo (`legacy-backend/`, `src/server/services/…`) só sai depois de eu confirmar, arquivo por arquivo, que nada ativo o usa. A prova é a rede do navegador: zero 404 nas rotas ainda usadas.
 
-### 2. Tabelas que faltam (clientes e pedidos)
-Migration nova no seu Supabase: `customers` e `orders` + `order_items`, com empresa obrigatória, permissões e políticas por vínculo em `company_users` — mesma regra já usada nas outras tabelas. Sem nenhuma linha de exemplo; começa vazio.
+### 2. Tabelas que faltam (clientes e pedidos) — só depois do seu OK
+Antes de tocar no banco, eu te mostro exatamente o que vai ser criado e confirmo que nada existente é alterado ou apagado. A mudança é **apenas aditiva**: três tabelas novas (`customers`, `orders`, `order_items`) com empresa obrigatória, permissões e políticas por vínculo em `company_users`. Nenhuma tabela existente é alterada, nenhuma linha é removida, nenhuma linha de exemplo é inserida — começa vazio.
 
 ### 3. Ações que funcionam de verdade
 A IA passa a ter ferramentas reais: buscar produtos, cadastrar cliente, criar pedido, consultar pedidos, resumir números da operação. Cada uma escreve/lê no seu Supabase, sempre pela empresa do usuário autenticado (nunca pela empresa enviada pelo navegador). Sem dados, a resposta é estado vazio honesto.
@@ -46,13 +46,23 @@ A IA passa a ter ferramentas reais: buscar produtos, cadastrar cliente, criar pe
 "+ Novo chat" cria conversa de verdade (empresa, usuário, agente, datas, título). O título é gerado a partir do conteúdo real depois das primeiras mensagens; nunca fica "Novo chat" com conteúdo dentro.
 
 ### 6. Identidade
-Empresa e instrução do agente renomeadas para Multiplex no seu Supabase, mantendo o catálogo. Em nenhum lugar aparece "Multiplex IA", nem menção a GPT/Claude/Gemini.
+- Na interface, o produto e o assistente aparecem apenas como **MULTIPLEX**. Nunca "Multiplex IA", nunca menção a GPT/Claude/Gemini.
+- A identidade da empresa e do agente vem sempre do tenant autenticado, lida do banco no servidor. Nenhum nome de empresa fica fixo no código nem serve de identidade global.
+- Nada é renomeado no banco. Se você confirmar que a Hamburgueria é só seed, aí sim eu ajusto.
 
-### 7. Testes antes de dizer que está pronto
-- Cinco mensagens reais: "oi", "qual modelo é vc?", "como funciona?", "quais produtos tenho?", "quero cadastrar um cliente" — cada uma passando pela IA real, com identificador da resposta, tokens e motor conferidos no banco.
+### 7. Fallbacks genéricos
+Varredura por `defaultResponse`, `fallbackResponse`, `genericResponse`, `safeResponse`, `assistantResponse`, `defaultMessage`, `fallbackMessage` e por frases tipo "Entendido…", "Posso ajudar você…", "Como você deseja prosseguir…". Tudo que substitua a resposta real é removido; falha da IA vira erro visível.
+
+### 8. Provas antes de dizer que está pronto
+Rastreio completo, camada por camada: usuário → tela → servidor → núcleo do agente → OpenAI → `response.id` → `response.model` → tokens → resposta original → banco → tela. Comparo por hash a resposta original com a gravada no banco e com a exibida, provando que nenhuma camada troca o texto.
+
+- Cinco mensagens reais: "oi", "qual modelo é vc?", "como funciona?", "quais produtos tenho?", "quero cadastrar um cliente".
+- Em "qual modelo é vc?" registro `response.id`, `response.model`, tokens de entrada, de saída e total.
 - Cadastro de cliente e criação de pedido conferidos direto nas tabelas.
-- Isolamento entre empresas: sem sessão → 401; empresa forjada → recusa.
-- Navegador em 1920x1080, 1440x900, tablet e celular, com a rede aberta para confirmar zero 404.
+- Isolamento: sem sessão → 401; sem permissão → 403; recurso inexistente → 404; empresa forjada → recusa.
+- Navegador em 1920x1080, 1440x900, tablet e celular, com a rede aberta para confirmar zero 404 nas rotas usadas.
+
+Só considero concluído quando: APIs reais respondem, Supabase conectado, IA real responde, motor real identificado, dados reais, autenticação e RLS funcionando, sem 404 nas rotas usadas, sem dado falso, layout implementado e testes passando. Página carregar não conta.
 
 ## Detalhes técnicos
 - Todo backend novo entra como rota TanStack (`src/routes/api/...`) ou server function, usando os módulos já existentes em `src/lib/multiplex/*`. Nenhum servidor paralelo.
