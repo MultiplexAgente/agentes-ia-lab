@@ -47,17 +47,17 @@ interface ChatMessage {
 
 const GUEST_CHATS_STORAGE_KEY = "multiplex.guest.conversations";
 
-// Sugestões inteligentes de IA geral (estilo ChatGPT)
+// Sugestões limpas sem emojis
 const QUICK_ACTIONS = [
-  { label: "💡 Ideias e planejamento", prompt: "Me ajude a estruturar um plano estratégico para um novo projeto." },
-  { label: "✍️ Redigir ou revisar texto", prompt: "Poderia me ajudar a escrever um texto profissional e persuasivo?" },
-  { label: "💻 Programação e código", prompt: "Explique como estruturar uma solução eficiente em TypeScript e React." },
-  { label: "📊 Análise e produtividade", prompt: "Quais são as melhores metodologias para otimizar processos com automação e IA?" },
+  { label: "Ideias e planejamento", prompt: "Me ajude a estruturar um plano estratégico para um novo projeto." },
+  { label: "Redigir ou revisar texto", prompt: "Poderia me ajudar a escrever um texto profissional e persuasivo?" },
+  { label: "Programação e desenvolvimento", prompt: "Explique como estruturar uma solução eficiente em TypeScript e React." },
+  { label: "Análise e produtividade", prompt: "Quais são as melhores metodologias para otimizar processos com automação e IA?" },
 ];
 
 const GROUPS = ["Hoje", "Ontem", "Esta semana", "Mais antigas"] as const;
 
-type ModelAlias = "gpt" | "claude" | "deepseek";
+type ModelAlias = "gpt" | "deepseek";
 
 interface ModelOption {
   alias: ModelAlias;
@@ -131,7 +131,6 @@ export function useChatWorkspace() {
   const [models, setModels] = useState<ModelOption[]>([
     { alias: "gpt", label: "GPT-4o", available: true, unavailableReason: null },
     { alias: "deepseek", label: "DeepSeek V3", available: true, unavailableReason: null },
-    { alias: "claude", label: "Claude 3.5", available: true, unavailableReason: null },
   ]);
   const [alias, setAlias] = useState<ModelAlias>("gpt");
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -165,11 +164,20 @@ export function useChatWorkspace() {
     void loadConversations();
   }, [loadConversations]);
 
+  // Carrega modelos ignorando Claude
   useEffect(() => {
-    api<{ options: ModelOption[]; selected: ModelAlias }>("/api/ai/models")
+    api<{ options: Array<{ alias: string; label: string; available: boolean; unavailableReason: string | null }>; selected: string }>("/api/ai/models")
       .then((data) => {
-        if (data.options && data.options.length > 0) setModels(data.options);
-        if (data.selected) setAlias(data.selected);
+        const filtered = (data.options || [])
+          .filter((opt) => opt.alias !== "claude")
+          .map((opt) => ({
+            alias: opt.alias as ModelAlias,
+            label: opt.alias === "gpt" ? "GPT-4o" : opt.alias === "deepseek" ? "DeepSeek V3" : opt.label,
+            available: opt.available,
+            unavailableReason: opt.unavailableReason,
+          }));
+        if (filtered.length > 0) setModels(filtered);
+        if (data.selected && data.selected !== "claude") setAlias(data.selected as ModelAlias);
       })
       .catch(() => {
         // Fallback padrão
@@ -346,18 +354,18 @@ export function useChatWorkspace() {
 
   const currentModel = models.find((option) => option.alias === alias) ?? models[0];
 
-  // SIDEBAR - LISTA DE CONVERSAS (Estilo ChatGPT)
+  // SIDEBAR - LISTA DE CONVERSAS COM BUSCA FLEXÍVEL (Ícone e texto sem sobreposição)
   const list = (
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="p-3">
-        <div className="relative">
-          <Search className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
+        <div className="flex h-9 w-full items-center gap-2.5 rounded-xl border border-border/60 bg-muted/30 px-3 transition-colors focus-within:border-border">
+          <Search className="size-3.5 shrink-0 text-muted-foreground" />
           <input
             type="text"
             value={filter}
             onChange={(event) => setFilter(event.target.value)}
             placeholder="Buscar conversas..."
-            className="h-8 w-full rounded-xl border border-border/50 bg-muted/30 pl-9 pr-3 text-xs text-foreground placeholder:text-muted-foreground outline-none focus:border-border transition-colors"
+            className="h-full flex-1 border-0 bg-transparent p-0 text-xs text-foreground placeholder:text-muted-foreground outline-none focus:ring-0"
           />
         </div>
       </div>
@@ -457,7 +465,7 @@ export function useChatWorkspace() {
           <div className="flex items-center gap-1.5">
             <button
               type="button"
-              className="flex size-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
+              className="flex size-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground cursor-pointer"
               title="Anexar ou adicionar"
               onClick={() => {}}
             >
@@ -481,35 +489,35 @@ export function useChatWorkspace() {
     </div>
   );
 
-  // TOP BAR DO CHAT (Seletor de Modelo único e botão de login)
+  // TOP BAR DO CHAT COM ESPAÇAMENTO GENEROSO (Seletor de Modelo limpo e botão de login)
   const topBar = (
     <header className="flex h-14 shrink-0 items-center justify-between border-b border-border/50 px-4 sm:px-6">
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-3">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button
               type="button"
-              className="flex items-center gap-1.5 rounded-xl px-2.5 py-1.5 text-base font-semibold text-foreground transition-colors hover:bg-muted/40"
+              className="flex items-center gap-2 rounded-xl border border-border/60 bg-muted/30 px-3.5 py-1.5 text-sm font-semibold text-foreground transition-all hover:bg-muted/60 hover:border-border cursor-pointer shadow-xs"
             >
               <span>{currentModel?.label ?? "GPT-4o"}</span>
-              <ChevronDown className="size-4 text-muted-foreground" />
+              <ChevronDown className="size-3.5 text-muted-foreground" />
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-56 rounded-xl">
+          <DropdownMenuContent align="start" side="bottom" sideOffset={8} className="w-56 rounded-xl border border-border/70 bg-popover/95 p-1.5 shadow-2xl backdrop-blur-xl">
             {models.map((option) => (
               <DropdownMenuItem
                 key={option.alias}
                 disabled={!option.available}
                 onSelect={() => setAlias(option.alias)}
-                className="justify-between py-2.5 text-xs"
+                className="justify-between py-2.5 px-3 text-xs rounded-lg cursor-pointer"
               >
                 <div>
-                  <p className="font-medium text-[13px]">{option.label}</p>
+                  <p className="font-semibold text-[13px]">{option.label}</p>
                   <p className="text-[11px] text-muted-foreground">
-                    {option.alias === "gpt" ? "Rápido e inteligente" : option.alias === "claude" ? "Respostas detalhadas" : "Alta performance"}
+                    {option.alias === "gpt" ? "Rápido, versátil e inteligente" : "Alta performance e raciocínio"}
                   </p>
                 </div>
-                {option.alias === alias && <Check className="size-4 text-primary" />}
+                {option.alias === alias && <Check className="size-4 text-primary shrink-0 ml-2" />}
               </DropdownMenuItem>
             ))}
           </DropdownMenuContent>
@@ -519,9 +527,9 @@ export function useChatWorkspace() {
       <div className="flex items-center gap-2">
         {!authenticated ? (
           <Button
-            variant="outline"
+            variant="default"
             size="sm"
-            className="h-8 gap-1.5 rounded-full border-border/70 text-xs font-semibold px-4 hover:bg-muted/50"
+            className="h-8 gap-1.5 rounded-full px-4 text-xs font-semibold shadow-xs"
             onClick={() => window.location.assign("/entrar")}
           >
             <LogIn className="size-3.5" />
@@ -530,7 +538,7 @@ export function useChatWorkspace() {
         ) : (
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <span className="size-2 rounded-full bg-emerald-500" />
-            <span className="hidden sm:inline font-medium">Empresa Conectada</span>
+            <span className="hidden sm:inline font-medium">Conectado</span>
           </div>
         )}
       </div>
@@ -556,7 +564,7 @@ export function useChatWorkspace() {
           {/* COMPOSER CENTRALIZADO */}
           <div className="w-full px-2">{composer}</div>
 
-          {/* QUICK ACTIONS CARDS (Estilo ChatGPT) */}
+          {/* QUICK ACTIONS CARDS (Estilo ChatGPT sem emojis) */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-w-[740px] w-full px-2">
             {QUICK_ACTIONS.map((action) => (
               <button

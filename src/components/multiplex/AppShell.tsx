@@ -184,18 +184,17 @@ export function AppShell({ children, secondary }: { children: ReactNode; seconda
             </div>
           ) : (
             <div className="rounded-xl border border-border/60 bg-muted/20 p-3">
-              <p className="text-xs font-semibold text-foreground">Painel da Empresa</p>
-              <p className="mt-1 text-[11px] leading-snug text-muted-foreground">
-                Entre para gerenciar catálogo, clientes, pedidos e WhatsApp.
+              <p className="text-xs font-semibold text-foreground">Acesse sua conta</p>
+              <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
+                Faça login para salvar suas conversas, personalizar respostas e acessar ferramentas.
               </p>
               <Button
                 size="sm"
-                variant="outline"
                 className="mt-2.5 w-full justify-center gap-1.5 rounded-lg text-xs font-medium"
                 onClick={() => navigate({ to: "/entrar" })}
               >
                 <LogIn className="size-3.5" />
-                <span>Entrar na empresa</span>
+                <span>Entrar</span>
               </Button>
             </div>
           )}

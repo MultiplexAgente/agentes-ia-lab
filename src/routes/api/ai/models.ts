@@ -28,7 +28,7 @@ export const Route = createFileRoute("/api/ai/models")({
           : await resolvePublicCompany(supabase);
 
         const options = await Promise.all(
-          MODEL_ALIASES.map(async (alias) => {
+          MODEL_ALIASES.filter((alias) => alias !== "claude").map(async (alias) => {
             const resolved = await resolveAlias(alias);
             return {
               alias,
