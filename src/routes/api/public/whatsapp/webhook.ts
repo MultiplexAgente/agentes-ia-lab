@@ -148,6 +148,7 @@ export const Route = createFileRoute("/api/public/whatsapp/webhook")({
             history,
             channel: "whatsapp",
             conversationId,
+            toolScope: "channel",
           });
 
           const reply = turn.ok ? turn.text : turn.error;

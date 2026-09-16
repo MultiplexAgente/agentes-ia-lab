@@ -10,11 +10,22 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CatalogoRouteImport } from './routes/catalogo'
+import { Route as ClientesRouteImport } from './routes/clientes'
 import { Route as EmpresaRouteImport } from './routes/empresa'
+import { Route as EntrarRouteImport } from './routes/entrar'
+import { Route as InicioRouteImport } from './routes/inicio'
+import { Route as IntegracoesRouteImport } from './routes/integracoes'
+import { Route as PedidosRouteImport } from './routes/pedidos'
 import { Route as AdminAiRoutingRouteImport } from './routes/admin.ai-routing'
 import { Route as ApiProductsRouteImport } from './routes/api/products'
 import { Route as ApiAdminAiRoutingRouteImport } from './routes/api/admin/ai-routing'
+import { Route as ApiCompanyConversationsRouteImport } from './routes/api/company/conversations'
+import { Route as ApiCompanyCustomersRouteImport } from './routes/api/company/customers'
 import { Route as ApiCompanyLoginRouteImport } from './routes/api/company/login'
+import { Route as ApiCompanyMessagesRouteImport } from './routes/api/company/messages'
+import { Route as ApiCompanyOrdersRouteImport } from './routes/api/company/orders'
+import { Route as ApiCompanyOverviewRouteImport } from './routes/api/company/overview'
 import { Route as ApiCompanyProductsRouteImport } from './routes/api/company/products'
 import { Route as ApiCompanySettingsRouteImport } from './routes/api/company/settings'
 import { Route as ApiCompanyWorkspaceRouteImport } from './routes/api/company/workspace'
@@ -26,9 +37,39 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CatalogoRoute = CatalogoRouteImport.update({
+  id: '/catalogo',
+  path: '/catalogo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ClientesRoute = ClientesRouteImport.update({
+  id: '/clientes',
+  path: '/clientes',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EmpresaRoute = EmpresaRouteImport.update({
   id: '/empresa',
   path: '/empresa',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EntrarRoute = EntrarRouteImport.update({
+  id: '/entrar',
+  path: '/entrar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InicioRoute = InicioRouteImport.update({
+  id: '/inicio',
+  path: '/inicio',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IntegracoesRoute = IntegracoesRouteImport.update({
+  id: '/integracoes',
+  path: '/integracoes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PedidosRoute = PedidosRouteImport.update({
+  id: '/pedidos',
+  path: '/pedidos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminAiRoutingRoute = AdminAiRoutingRouteImport.update({
@@ -46,9 +87,34 @@ const ApiAdminAiRoutingRoute = ApiAdminAiRoutingRouteImport.update({
   path: '/api/admin/ai-routing',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiCompanyConversationsRoute = ApiCompanyConversationsRouteImport.update({
+  id: '/api/company/conversations',
+  path: '/api/company/conversations',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiCompanyCustomersRoute = ApiCompanyCustomersRouteImport.update({
+  id: '/api/company/customers',
+  path: '/api/company/customers',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiCompanyLoginRoute = ApiCompanyLoginRouteImport.update({
   id: '/api/company/login',
   path: '/api/company/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiCompanyMessagesRoute = ApiCompanyMessagesRouteImport.update({
+  id: '/api/company/messages',
+  path: '/api/company/messages',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiCompanyOrdersRoute = ApiCompanyOrdersRouteImport.update({
+  id: '/api/company/orders',
+  path: '/api/company/orders',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiCompanyOverviewRoute = ApiCompanyOverviewRouteImport.update({
+  id: '/api/company/overview',
+  path: '/api/company/overview',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiCompanyProductsRoute = ApiCompanyProductsRouteImport.update({
@@ -80,11 +146,22 @@ const ApiPublicWhatsappWebhookRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/catalogo': typeof CatalogoRoute
+  '/clientes': typeof ClientesRoute
   '/empresa': typeof EmpresaRoute
+  '/entrar': typeof EntrarRoute
+  '/inicio': typeof InicioRoute
+  '/integracoes': typeof IntegracoesRoute
+  '/pedidos': typeof PedidosRoute
   '/admin/ai-routing': typeof AdminAiRoutingRoute
   '/api/products': typeof ApiProductsRoute
   '/api/admin/ai-routing': typeof ApiAdminAiRoutingRoute
+  '/api/company/conversations': typeof ApiCompanyConversationsRoute
+  '/api/company/customers': typeof ApiCompanyCustomersRoute
   '/api/company/login': typeof ApiCompanyLoginRoute
+  '/api/company/messages': typeof ApiCompanyMessagesRoute
+  '/api/company/orders': typeof ApiCompanyOrdersRoute
+  '/api/company/overview': typeof ApiCompanyOverviewRoute
   '/api/company/products': typeof ApiCompanyProductsRoute
   '/api/company/settings': typeof ApiCompanySettingsRoute
   '/api/company/workspace': typeof ApiCompanyWorkspaceRoute
@@ -93,11 +170,22 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/catalogo': typeof CatalogoRoute
+  '/clientes': typeof ClientesRoute
   '/empresa': typeof EmpresaRoute
+  '/entrar': typeof EntrarRoute
+  '/inicio': typeof InicioRoute
+  '/integracoes': typeof IntegracoesRoute
+  '/pedidos': typeof PedidosRoute
   '/admin/ai-routing': typeof AdminAiRoutingRoute
   '/api/products': typeof ApiProductsRoute
   '/api/admin/ai-routing': typeof ApiAdminAiRoutingRoute
+  '/api/company/conversations': typeof ApiCompanyConversationsRoute
+  '/api/company/customers': typeof ApiCompanyCustomersRoute
   '/api/company/login': typeof ApiCompanyLoginRoute
+  '/api/company/messages': typeof ApiCompanyMessagesRoute
+  '/api/company/orders': typeof ApiCompanyOrdersRoute
+  '/api/company/overview': typeof ApiCompanyOverviewRoute
   '/api/company/products': typeof ApiCompanyProductsRoute
   '/api/company/settings': typeof ApiCompanySettingsRoute
   '/api/company/workspace': typeof ApiCompanyWorkspaceRoute
@@ -107,11 +195,22 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/catalogo': typeof CatalogoRoute
+  '/clientes': typeof ClientesRoute
   '/empresa': typeof EmpresaRoute
+  '/entrar': typeof EntrarRoute
+  '/inicio': typeof InicioRoute
+  '/integracoes': typeof IntegracoesRoute
+  '/pedidos': typeof PedidosRoute
   '/admin/ai-routing': typeof AdminAiRoutingRoute
   '/api/products': typeof ApiProductsRoute
   '/api/admin/ai-routing': typeof ApiAdminAiRoutingRoute
+  '/api/company/conversations': typeof ApiCompanyConversationsRoute
+  '/api/company/customers': typeof ApiCompanyCustomersRoute
   '/api/company/login': typeof ApiCompanyLoginRoute
+  '/api/company/messages': typeof ApiCompanyMessagesRoute
+  '/api/company/orders': typeof ApiCompanyOrdersRoute
+  '/api/company/overview': typeof ApiCompanyOverviewRoute
   '/api/company/products': typeof ApiCompanyProductsRoute
   '/api/company/settings': typeof ApiCompanySettingsRoute
   '/api/company/workspace': typeof ApiCompanyWorkspaceRoute
@@ -122,11 +221,22 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/catalogo'
+    | '/clientes'
     | '/empresa'
+    | '/entrar'
+    | '/inicio'
+    | '/integracoes'
+    | '/pedidos'
     | '/admin/ai-routing'
     | '/api/products'
     | '/api/admin/ai-routing'
+    | '/api/company/conversations'
+    | '/api/company/customers'
     | '/api/company/login'
+    | '/api/company/messages'
+    | '/api/company/orders'
+    | '/api/company/overview'
     | '/api/company/products'
     | '/api/company/settings'
     | '/api/company/workspace'
@@ -135,11 +245,22 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/catalogo'
+    | '/clientes'
     | '/empresa'
+    | '/entrar'
+    | '/inicio'
+    | '/integracoes'
+    | '/pedidos'
     | '/admin/ai-routing'
     | '/api/products'
     | '/api/admin/ai-routing'
+    | '/api/company/conversations'
+    | '/api/company/customers'
     | '/api/company/login'
+    | '/api/company/messages'
+    | '/api/company/orders'
+    | '/api/company/overview'
     | '/api/company/products'
     | '/api/company/settings'
     | '/api/company/workspace'
@@ -148,11 +269,22 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/catalogo'
+    | '/clientes'
     | '/empresa'
+    | '/entrar'
+    | '/inicio'
+    | '/integracoes'
+    | '/pedidos'
     | '/admin/ai-routing'
     | '/api/products'
     | '/api/admin/ai-routing'
+    | '/api/company/conversations'
+    | '/api/company/customers'
     | '/api/company/login'
+    | '/api/company/messages'
+    | '/api/company/orders'
+    | '/api/company/overview'
     | '/api/company/products'
     | '/api/company/settings'
     | '/api/company/workspace'
@@ -162,11 +294,22 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CatalogoRoute: typeof CatalogoRoute
+  ClientesRoute: typeof ClientesRoute
   EmpresaRoute: typeof EmpresaRoute
+  EntrarRoute: typeof EntrarRoute
+  InicioRoute: typeof InicioRoute
+  IntegracoesRoute: typeof IntegracoesRoute
+  PedidosRoute: typeof PedidosRoute
   AdminAiRoutingRoute: typeof AdminAiRoutingRoute
   ApiProductsRoute: typeof ApiProductsRoute
   ApiAdminAiRoutingRoute: typeof ApiAdminAiRoutingRoute
+  ApiCompanyConversationsRoute: typeof ApiCompanyConversationsRoute
+  ApiCompanyCustomersRoute: typeof ApiCompanyCustomersRoute
   ApiCompanyLoginRoute: typeof ApiCompanyLoginRoute
+  ApiCompanyMessagesRoute: typeof ApiCompanyMessagesRoute
+  ApiCompanyOrdersRoute: typeof ApiCompanyOrdersRoute
+  ApiCompanyOverviewRoute: typeof ApiCompanyOverviewRoute
   ApiCompanyProductsRoute: typeof ApiCompanyProductsRoute
   ApiCompanySettingsRoute: typeof ApiCompanySettingsRoute
   ApiCompanyWorkspaceRoute: typeof ApiCompanyWorkspaceRoute
@@ -183,11 +326,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/catalogo': {
+      id: '/catalogo'
+      path: '/catalogo'
+      fullPath: '/catalogo'
+      preLoaderRoute: typeof CatalogoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/clientes': {
+      id: '/clientes'
+      path: '/clientes'
+      fullPath: '/clientes'
+      preLoaderRoute: typeof ClientesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/empresa': {
       id: '/empresa'
       path: '/empresa'
       fullPath: '/empresa'
       preLoaderRoute: typeof EmpresaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/entrar': {
+      id: '/entrar'
+      path: '/entrar'
+      fullPath: '/entrar'
+      preLoaderRoute: typeof EntrarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/inicio': {
+      id: '/inicio'
+      path: '/inicio'
+      fullPath: '/inicio'
+      preLoaderRoute: typeof InicioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/integracoes': {
+      id: '/integracoes'
+      path: '/integracoes'
+      fullPath: '/integracoes'
+      preLoaderRoute: typeof IntegracoesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pedidos': {
+      id: '/pedidos'
+      path: '/pedidos'
+      fullPath: '/pedidos'
+      preLoaderRoute: typeof PedidosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/ai-routing': {
@@ -211,11 +396,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAdminAiRoutingRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/company/conversations': {
+      id: '/api/company/conversations'
+      path: '/api/company/conversations'
+      fullPath: '/api/company/conversations'
+      preLoaderRoute: typeof ApiCompanyConversationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/company/customers': {
+      id: '/api/company/customers'
+      path: '/api/company/customers'
+      fullPath: '/api/company/customers'
+      preLoaderRoute: typeof ApiCompanyCustomersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/company/login': {
       id: '/api/company/login'
       path: '/api/company/login'
       fullPath: '/api/company/login'
       preLoaderRoute: typeof ApiCompanyLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/company/messages': {
+      id: '/api/company/messages'
+      path: '/api/company/messages'
+      fullPath: '/api/company/messages'
+      preLoaderRoute: typeof ApiCompanyMessagesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/company/orders': {
+      id: '/api/company/orders'
+      path: '/api/company/orders'
+      fullPath: '/api/company/orders'
+      preLoaderRoute: typeof ApiCompanyOrdersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/company/overview': {
+      id: '/api/company/overview'
+      path: '/api/company/overview'
+      fullPath: '/api/company/overview'
+      preLoaderRoute: typeof ApiCompanyOverviewRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/company/products': {
@@ -258,11 +478,22 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CatalogoRoute: CatalogoRoute,
+  ClientesRoute: ClientesRoute,
   EmpresaRoute: EmpresaRoute,
+  EntrarRoute: EntrarRoute,
+  InicioRoute: InicioRoute,
+  IntegracoesRoute: IntegracoesRoute,
+  PedidosRoute: PedidosRoute,
   AdminAiRoutingRoute: AdminAiRoutingRoute,
   ApiProductsRoute: ApiProductsRoute,
   ApiAdminAiRoutingRoute: ApiAdminAiRoutingRoute,
+  ApiCompanyConversationsRoute: ApiCompanyConversationsRoute,
+  ApiCompanyCustomersRoute: ApiCompanyCustomersRoute,
   ApiCompanyLoginRoute: ApiCompanyLoginRoute,
+  ApiCompanyMessagesRoute: ApiCompanyMessagesRoute,
+  ApiCompanyOrdersRoute: ApiCompanyOrdersRoute,
+  ApiCompanyOverviewRoute: ApiCompanyOverviewRoute,
   ApiCompanyProductsRoute: ApiCompanyProductsRoute,
   ApiCompanySettingsRoute: ApiCompanySettingsRoute,
   ApiCompanyWorkspaceRoute: ApiCompanyWorkspaceRoute,

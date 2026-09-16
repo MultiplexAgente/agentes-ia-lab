@@ -1,34 +1,31 @@
-import { createFileRoute, ClientOnly } from "@tanstack/react-router";
-import { lazy } from "react";
+import { createFileRoute } from "@tanstack/react-router";
 
-const App = lazy(() => import("@/app/App"));
+import { AppShell } from "@/components/multiplex/AppShell";
+import { useChatWorkspace } from "@/components/multiplex/ChatWorkspace";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Multiplex | Assistente inteligente" },
+      { title: "Multiplex | Plataforma conversacional de operações" },
       {
         name: "description",
         content:
-          "Converse com a Multiplex para obter informações e realizar tarefas.",
+          "Converse com o Multiplex para consultar catálogo, cadastrar clientes, criar pedidos e acompanhar sua operação.",
       },
-      { property: "og:title", content: "Multiplex | Assistente inteligente" },
+      { property: "og:title", content: "Multiplex | Plataforma conversacional de operações" },
       {
         property: "og:description",
         content:
-          "Converse com a Multiplex para obter informações e realizar tarefas.",
+          "Converse com o Multiplex para consultar catálogo, cadastrar clientes, criar pedidos e acompanhar sua operação.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  component: Index,
+  component: ChatPage,
 });
 
-function Index() {
-  return (
-    <ClientOnly fallback={<div className="min-h-screen" />}>
-      <App />
-    </ClientOnly>
-  );
+function ChatPage() {
+  const { list, chat } = useChatWorkspace();
+  return <AppShell secondary={list}>{chat}</AppShell>;
 }
