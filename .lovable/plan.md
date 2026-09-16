@@ -20,6 +20,9 @@ O que existe e funciona hoje, ligado ao seu Supabase externo:
 
 ## O que vou fazer
 
+### 0. Inventário antes de qualquer alteração
+Levanto tudo primeiro — telas, rotas, funções de servidor, banco, autenticação, políticas de acesso, integrações, componentes e o núcleo do agente — e monto uma matriz interna: arquivo | usado por | função | ativo? | pode remover? Nenhum arquivo é apagado nessa fase. Só avanço depois que a matriz estiver completa, e cada remoção posterior entra no relatório com a prova de que estava morto.
+
 ### 1. Fim dos 404, uma rota por vez (sem mock, sem endpoint de fachada)
 Para cada um dos 11 endereços, decido nesta ordem:
 1. **Existe implementação real equivalente hoje?** Se sim (catálogo, logs de conversa, configurações de empresa), aponto a tela para ela. Nada novo é criado.
@@ -31,8 +34,10 @@ Nenhum código funcional é apagado. O código antigo (`legacy-backend/`, `src/s
 ### 2. Tabelas que faltam (clientes e pedidos) — só depois do seu OK
 Antes de tocar no banco, eu te mostro exatamente o que vai ser criado e confirmo que nada existente é alterado ou apagado. A mudança é **apenas aditiva**: três tabelas novas (`customers`, `orders`, `order_items`) com empresa obrigatória, permissões e políticas por vínculo em `company_users`. Nenhuma tabela existente é alterada, nenhuma linha é removida, nenhuma linha de exemplo é inserida — começa vazio.
 
-### 3. Ações que funcionam de verdade
-A IA passa a ter ferramentas reais: buscar produtos, cadastrar cliente, criar pedido, consultar pedidos, resumir números da operação. Cada uma escreve/lê no seu Supabase, sempre pela empresa do usuário autenticado (nunca pela empresa enviada pelo navegador). Sem dados, a resposta é estado vazio honesto.
+### 3. Ferramentas reais da IA
+Nove ferramentas ligadas ao seu banco: buscar produtos, ver produto, cadastrar cliente, atualizar cliente, buscar clientes, criar pedido, ver pedido, buscar pedidos e resumir a operação. Cada uma com esquema estrito, validação, autenticação, autorização, empresa derivada da sessão no servidor, tratamento de erro e registro em auditoria. Sem dados no banco, a resposta é o estado vazio honesto — nunca um número inventado.
+
+**A IA pergunta antes de agir.** Faltando informação, ela pede: "Qual o nome do cliente?", depois telefone, e-mail, confirma e só então executa. Nunca completa um cadastro ou pedido com valor inventado, e nunca inventa produto.
 
 ### 4. Nova interface de três colunas
 - **Coluna 1 (230px):** MULTIPLEX, "+ Novo chat", e apenas o que existe: Início, Conversas, Clientes, Catálogo, Pedidos, Integrações, Configurações. Página ativa destacada. No pé: nome, e-mail e plano vindos do login real (nada fixo).
