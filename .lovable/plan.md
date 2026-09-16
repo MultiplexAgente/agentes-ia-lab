@@ -14,19 +14,22 @@ O que existe e funciona hoje, ligado ao seu Supabase externo:
 | `/api/company/login`, `/workspace`, `/settings` | acesso e configuração da empresa |
 | `/api/public/whatsapp/webhook` | canal WhatsApp |
 
-**Origem de "Hamburgueria Artesanal Anthony":** não é código nem resposta inventada. Está no seu Supabase — a empresa `1111...1111` chama-se "Hamburgueria Artesanal Anthony" e a instrução do agente `2222...2222` começa com "Você é o assistente virtual da Hamburgueria Artesanal Anthony". O nome entra no contexto enviado ao modelo. Será renomeado para Multiplex.
+**Origem de "Hamburgueria Artesanal Anthony":** não é código nem resposta inventada. Está no seu Supabase — a empresa `1111...1111` chama-se "Hamburgueria Artesanal Anthony" e a instrução do agente `2222...2222` começa com "Você é o assistente virtual da Hamburgueria Artesanal Anthony". O nome entra no contexto enviado ao modelo porque é a empresa do tenant autenticado. **Nada será renomeado no banco sem sua confirmação** de que essa empresa é só teste/seed.
 
-**"Multiplex IA" na interface:** já não aparece em nenhum arquivo do app. Restam textos institucionais em documentos e no código morto — serão limpos junto.
+**"Multiplex IA" na interface:** já não aparece em nenhum arquivo do app. Restam textos institucionais em documentos e no código antigo — serão limpos. Nomes técnicos internos (tabelas, colunas, variáveis, endereços) ficam como estão.
 
 ## O que vou fazer
 
-### 1. Fim dos 404 (sem mock, sem dado falso)
-- Aposentar as telas mortas que só existiam para o servidor antigo: Ensinar IA, Builder de módulos, Fontes/Crawler, Faturamento, Logs antigos, Dashboard antigo, Canais antigos. Nenhuma delas lê dados reais hoje.
-- Apagar o código morto (`legacy-backend/`, `src/server/services/…`) que contém respostas prontas e prompts com identidade de outra empresa.
-- Depois disso não sobra nenhuma chamada para endereço inexistente. Vou provar rodando o app e conferindo a rede: zero 404.
+### 1. Fim dos 404, uma rota por vez (sem mock, sem endpoint de fachada)
+Para cada um dos 11 endereços, decido nesta ordem:
+1. **Existe implementação real equivalente hoje?** Se sim (catálogo, logs de conversa, configurações de empresa), aponto a tela para ela. Nada novo é criado.
+2. **Não existe e a tela também não tem funcionalidade real?** Removo apenas a chamada morta e a tela vazia.
+3. **A tela tem funcionalidade real mas falta o backend?** Mantenho a tela e registro como PENDENTE no relatório, com o que falta. Não crio endpoint só para virar 200, nem preencho com dado inventado.
 
-### 2. Tabelas que faltam (clientes e pedidos)
-Migration nova no seu Supabase: `customers` e `orders` + `order_items`, com empresa obrigatória, permissões e políticas por vínculo em `company_users` — mesma regra já usada nas outras tabelas. Sem nenhuma linha de exemplo; começa vazio.
+Nenhum código funcional é apagado. O código antigo (`legacy-backend/`, `src/server/services/…`) só sai depois de eu confirmar, arquivo por arquivo, que nada ativo o usa. A prova é a rede do navegador: zero 404 nas rotas ainda usadas.
+
+### 2. Tabelas que faltam (clientes e pedidos) — só depois do seu OK
+Antes de tocar no banco, eu te mostro exatamente o que vai ser criado e confirmo que nada existente é alterado ou apagado. A mudança é **apenas aditiva**: três tabelas novas (`customers`, `orders`, `order_items`) com empresa obrigatória, permissões e políticas por vínculo em `company_users`. Nenhuma tabela existente é alterada, nenhuma linha é removida, nenhuma linha de exemplo é inserida — começa vazio.
 
 ### 3. Ações que funcionam de verdade
 A IA passa a ter ferramentas reais: buscar produtos, cadastrar cliente, criar pedido, consultar pedidos, resumir números da operação. Cada uma escreve/lê no seu Supabase, sempre pela empresa do usuário autenticado (nunca pela empresa enviada pelo navegador). Sem dados, a resposta é estado vazio honesto.
@@ -43,20 +46,31 @@ A IA passa a ter ferramentas reais: buscar produtos, cadastrar cliente, criar pe
 "+ Novo chat" cria conversa de verdade (empresa, usuário, agente, datas, título). O título é gerado a partir do conteúdo real depois das primeiras mensagens; nunca fica "Novo chat" com conteúdo dentro.
 
 ### 6. Identidade
-Empresa e instrução do agente renomeadas para Multiplex no seu Supabase, mantendo o catálogo. Em nenhum lugar aparece "Multiplex IA", nem menção a GPT/Claude/Gemini.
+- Na interface, o produto e o assistente aparecem apenas como **MULTIPLEX**. Nunca "Multiplex IA", nunca menção a GPT/Claude/Gemini.
+- A identidade da empresa e do agente vem sempre do tenant autenticado, lida do banco no servidor. Nenhum nome de empresa fica fixo no código nem serve de identidade global.
+- Nada é renomeado no banco. Se você confirmar que a Hamburgueria é só seed, aí sim eu ajusto.
 
-### 7. Testes antes de dizer que está pronto
-- Cinco mensagens reais: "oi", "qual modelo é vc?", "como funciona?", "quais produtos tenho?", "quero cadastrar um cliente" — cada uma passando pela IA real, com identificador da resposta, tokens e motor conferidos no banco.
+### 7. Fallbacks genéricos
+Varredura por `defaultResponse`, `fallbackResponse`, `genericResponse`, `safeResponse`, `assistantResponse`, `defaultMessage`, `fallbackMessage` e por frases tipo "Entendido…", "Posso ajudar você…", "Como você deseja prosseguir…". Tudo que substitua a resposta real é removido; falha da IA vira erro visível.
+
+### 8. Provas antes de dizer que está pronto
+Rastreio completo, camada por camada: usuário → tela → servidor → núcleo do agente → OpenAI → `response.id` → `response.model` → tokens → resposta original → banco → tela. Comparo por hash a resposta original com a gravada no banco e com a exibida, provando que nenhuma camada troca o texto.
+
+- Cinco mensagens reais: "oi", "qual modelo é vc?", "como funciona?", "quais produtos tenho?", "quero cadastrar um cliente".
+- Em "qual modelo é vc?" registro `response.id`, `response.model`, tokens de entrada, de saída e total.
 - Cadastro de cliente e criação de pedido conferidos direto nas tabelas.
-- Isolamento entre empresas: sem sessão → 401; empresa forjada → recusa.
-- Navegador em 1920x1080, 1440x900, tablet e celular, com a rede aberta para confirmar zero 404.
+- Isolamento: sem sessão → 401; sem permissão → 403; recurso inexistente → 404; empresa forjada → recusa.
+- Navegador em 1920x1080, 1440x900, tablet e celular, com a rede aberta para confirmar zero 404 nas rotas usadas.
+
+Só considero concluído quando: APIs reais respondem, Supabase conectado, IA real responde, motor real identificado, dados reais, autenticação e RLS funcionando, sem 404 nas rotas usadas, sem dado falso, layout implementado e testes passando. Página carregar não conta.
 
 ## Detalhes técnicos
 - Todo backend novo entra como rota TanStack (`src/routes/api/...`) ou server function, usando os módulos já existentes em `src/lib/multiplex/*`. Nenhum servidor paralelo.
 - Migration `db/007_customers_orders.sql`: GRANTs explícitos, RLS ligado e policies por `company_users`, aplicada via `psql` no projeto `mbjqzjipiuwtgmoxsqfu`.
 - Ferramentas da IA registradas no pipeline atual (`pipeline.server.ts`) com esquemas estritos; empresa sempre derivada da sessão no servidor.
-- `App.tsx` substituído por um shell enxuto com rotas dedicadas por seção; `LandingChatPage` reaproveitado para o chat público.
+- `App.tsx` dá lugar a um shell enxuto com rotas dedicadas por seção, migrando o que tem implementação real; `LandingChatPage` segue no chat público.
 - Sem fallback textual: falha de IA vira erro visível, nunca resposta fingida.
+- Nenhuma tabela, coluna, variável ou endereço interno é renomeado por causa da identidade visual.
 
 ## Relatório final
-Ao terminar entrego: endereços 404 e a causa de cada um, correções feitas, origem da identidade da hamburgueria, confirmação da remoção de "Multiplex IA", motor real usado, arquivos alterados, testes executados com resultados e o que ficou pendente.
+Entrego separado em quatro blocos — **IMPLEMENTADO**, **TESTADO**, **NÃO IMPLEMENTADO**, **PENDENTE** — cobrindo: os 11 endereços 404 e a causa de cada um, o que foi corrigido, a origem da identidade da Hamburgueria, confirmação da remoção de "Multiplex IA" da interface, o motor real usado com `response.id`/`response.model`/tokens, arquivos alterados, testes executados e seus resultados. Nada entra em IMPLEMENTADO sem teste real.
