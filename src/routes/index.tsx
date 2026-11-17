@@ -8,9 +8,9 @@ import monolith from "@/assets/monolith.jpg";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "VENDRA — Seu negócio, em outra órbita" },
+      { title: "MULTIPLEX — Seu negócio, em outra órbita" },
       { name: "description", content: "Vendas, estoque e atendimento inteligente em uma única plataforma. Simples de usar, pronta para crescer." },
-      { property: "og:title", content: "VENDRA — Seu negócio, em outra órbita" },
+      { property: "og:title", content: "MULTIPLEX — Seu negócio, em outra órbita" },
       { property: "og:description", content: "Vendas, estoque e atendimento inteligente em uma única plataforma." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -52,8 +52,8 @@ function Landing() {
     <div className="dark min-h-screen bg-background font-sans text-foreground antialiased selection:bg-primary/30">
       {/* NAV */}
       <header className="fixed inset-x-0 top-0 z-50">
-        <div className="mx-auto flex h-20 max-w-[1400px] items-center justify-between px-6 md:px-10">
-          <Link to="/" className="text-[15px] font-medium tracking-[0.5em] text-foreground">VENDRA</Link>
+        <div className="mx-auto flex h-16 max-w-[1400px] items-center justify-between px-5 sm:h-20 sm:px-6 md:px-10">
+          <Link to="/" className="text-[13px] font-medium tracking-[0.35em] sm:text-[15px] sm:tracking-[0.5em] text-foreground">MULTIPLEX</Link>
           <nav className="hidden gap-10 text-[13px] tracking-wide text-muted-foreground md:flex">
             <a href="#plataforma" className="transition-colors hover:text-foreground">Plataforma</a>
             <a href="#inteligencia" className="transition-colors hover:text-foreground">Inteligência</a>
@@ -73,18 +73,18 @@ function Landing() {
           className="absolute inset-0 h-full w-full object-cover object-[50%_60%]"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-transparent to-background" />
-        <motion.div style={{ y: textY, opacity: fade }} className="relative z-10 flex h-full flex-col items-center justify-start px-6 pt-[22vh] text-center">
+        <motion.div style={{ y: textY, opacity: fade }} className="relative z-10 flex h-full flex-col items-center justify-start px-5 pt-[24svh] text-center sm:px-6 sm:pt-[22vh]">
           <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1.5, delay: 0.3 }}
-            className="mb-8 text-[11px] uppercase tracking-[0.6em] text-primary">
+            className="mb-6 text-[10px] uppercase tracking-[0.4em] sm:mb-8 sm:text-[11px] sm:tracking-[0.6em] text-primary">
             Plataforma comercial inteligente
           </motion.p>
           <motion.h1 initial={{ opacity: 0, y: 30, filter: "blur(12px)" }} animate={{ opacity: 1, y: 0, filter: "blur(0px)" }} transition={{ duration: 1.6, ease, delay: 0.5 }}
-            className="max-w-5xl text-[clamp(2.75rem,8vw,7.5rem)] font-medium leading-[0.95] tracking-[-0.04em]">
+            className="max-w-5xl text-[clamp(2.5rem,11vw,7.5rem)] font-medium leading-[0.95] tracking-[-0.04em]">
             Seu negócio,<br /><span className="text-muted-foreground">em outra órbita.</span>
           </motion.h1>
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1.2, ease, delay: 1.1 }}
-            className="mt-12 flex flex-col items-center gap-4 sm:flex-row">
-            <Link to="/entrar" className="group inline-flex items-center gap-3 rounded-full bg-foreground px-8 py-4 text-sm font-medium text-background transition hover:bg-primary">
+            className="mt-10 flex w-full flex-col items-center gap-2 sm:mt-12 sm:w-auto sm:flex-row sm:gap-4">
+            <Link to="/entrar" onClick={() => window.__lovableEvents?.track?.("project.cta_clicked", { cta: "comecar_agora" })} className="group inline-flex w-full max-w-xs justify-center items-center gap-3 sm:w-auto rounded-full bg-foreground px-8 py-4 text-sm font-medium text-background transition hover:bg-primary">
               Começar agora <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Link>
             <a href="#plataforma" className="px-6 py-4 text-sm text-muted-foreground transition hover:text-foreground">Conhecer a plataforma</a>
@@ -96,7 +96,7 @@ function Landing() {
       </section>
 
       {/* STATEMENT */}
-      <section id="plataforma" className="mx-auto max-w-[1400px] px-6 py-40 md:px-10 md:py-56">
+      <section id="plataforma" className="mx-auto max-w-[1400px] px-6 py-24 sm:py-40 md:px-10 md:py-56">
         <Reveal>
           <p className="max-w-4xl text-[clamp(1.75rem,4vw,3.5rem)] font-normal leading-[1.15] tracking-[-0.03em]">
             Tudo que sua empresa precisa para vender.
@@ -104,12 +104,12 @@ function Landing() {
           </p>
         </Reveal>
 
-        <div className="mt-32 grid gap-px overflow-hidden rounded-2xl border border-border bg-border md:grid-cols-3">
+        <div className="mt-16 sm:mt-32 grid gap-px overflow-hidden rounded-2xl border border-border bg-border md:grid-cols-3">
           {PILLARS.map((p, i) => (
             <Reveal key={p.n} delay={i * 0.15}>
-              <div className="group h-full bg-background p-10 transition-colors duration-700 hover:bg-card md:p-12">
+              <div className="group h-full bg-background p-8 sm:p-10 transition-colors duration-700 hover:bg-card md:p-12">
                 <span className="font-mono text-xs text-primary">{p.n}</span>
-                <h3 className="mt-16 text-3xl font-medium tracking-[-0.02em]">{p.t}</h3>
+                <h3 className="mt-10 sm:mt-16 text-2xl sm:text-3xl font-medium tracking-[-0.02em]">{p.t}</h3>
                 <p className="mt-4 max-w-xs text-[15px] leading-relaxed text-muted-foreground">{p.d}</p>
               </div>
             </Reveal>
@@ -118,16 +118,16 @@ function Landing() {
       </section>
 
       {/* CINEMATIC BAND */}
-      <section id="inteligencia" className="relative h-[110vh] overflow-hidden">
+      <section id="inteligencia" className="relative h-[85svh] sm:h-[110vh] overflow-hidden">
         <img src={monolith} alt="Monólito de vidro escuro iluminado" loading="lazy" width={1920} height={1088} className="absolute inset-0 h-full w-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-b from-background via-transparent to-background" />
-        <div className="relative z-10 mx-auto flex h-full max-w-[1400px] items-end px-6 pb-32 md:px-10">
+        <div className="relative z-10 mx-auto flex h-full max-w-[1400px] items-end px-6 pb-20 sm:pb-32 md:px-10">
           <Reveal>
             <p className="mb-6 text-[11px] uppercase tracking-[0.6em] text-primary">Inteligência</p>
             <h2 className="max-w-2xl text-[clamp(2.25rem,5vw,4.5rem)] font-medium leading-[1] tracking-[-0.04em]">
               Você pede.<br />Ela executa.
             </h2>
-            <p className="mt-8 max-w-md text-[17px] leading-relaxed text-muted-foreground">
+            <p className="mt-6 max-w-md text-[16px] sm:mt-8 sm:text-[17px] leading-relaxed text-muted-foreground">
               Cadastre clientes, consulte o catálogo e crie pedidos apenas conversando.
             </p>
           </Reveal>
@@ -135,13 +135,13 @@ function Landing() {
       </section>
 
       {/* CTA */}
-      <section id="comecar" className="relative overflow-hidden px-6 py-48 text-center md:py-64">
-        <div className="pointer-events-none absolute left-1/2 top-1/2 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/10 blur-[140px]" />
+      <section id="comecar" className="relative overflow-hidden px-6 py-32 text-center sm:py-48 md:py-64">
+        <div className="pointer-events-none absolute left-1/2 top-1/2 h-[360px] w-[360px] sm:h-[600px] sm:w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/10 blur-[140px]" />
         <Reveal>
           <h2 className="relative mx-auto max-w-4xl text-[clamp(2.5rem,7vw,6rem)] font-medium leading-[0.95] tracking-[-0.045em]">
             O futuro do seu<br />negócio começa aqui.
           </h2>
-          <Link to="/entrar" className="group relative mt-14 inline-flex items-center gap-3 rounded-full bg-foreground px-9 py-4 text-sm font-medium text-background transition hover:bg-primary">
+          <Link to="/entrar" onClick={() => window.__lovableEvents?.track?.("project.cta_clicked", { cta: "criar_conta" })} className="group relative mt-10 sm:mt-14 inline-flex items-center gap-3 rounded-full bg-foreground px-9 py-4 text-sm font-medium text-background transition hover:bg-primary">
             Criar minha conta <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
           </Link>
         </Reveal>
@@ -149,8 +149,8 @@ function Landing() {
 
       <footer className="border-t border-border">
         <div className="mx-auto flex max-w-[1400px] flex-col items-center justify-between gap-4 px-6 py-10 text-xs text-muted-foreground md:flex-row md:px-10">
-          <span className="tracking-[0.5em] text-foreground">VENDRA</span>
-          <span>© {new Date().getFullYear()} BonaSoft</span>
+          <span className="tracking-[0.5em] text-foreground">MULTIPLEX</span>
+          <span>© {new Date().getFullYear()} MULTIPLEX</span>
         </div>
       </footer>
     </div>

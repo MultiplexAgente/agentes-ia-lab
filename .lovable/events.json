@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "events": {
+    "project.cta_clicked": {
+      "event_schema_version": 1,
+      "description": "A visitor clicked a sign-up button on the home page (Começar agora or Criar minha conta).",
+      "privacy": {
+        "contains_pii": false,
+        "purpose": "product_analytics"
+      },
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "cta"
+        ],
+        "properties": {
+          "cta": {
+            "type": "string",
+            "enum": [
+              "comecar_agora",
+              "criar_conta"
+            ]
+          }
+        }
+      }
+    }
+  }
+}
