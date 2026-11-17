@@ -210,3 +210,28 @@ iframe[src*="lovable"] {
   z-index: -99999 !important;
 }
 
+
+/* Bloqueio absoluto e remocao total de badges, tags e scripts da Lovable */
+#lovable-badge,
+[id*="lovable" i],
+[class*="lovable" i],
+[data-lovable],
+[data-lovable-badge],
+a[href*="lovable.dev"],
+iframe[src*="lovable"],
+button[aria-label*="lovable" i],
+div:has(> a[href*="lovable.dev"]) {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  max-width: 0 !important;
+  max-height: 0 !important;
+  overflow: hidden !important;
+  position: absolute !important;
+  left: -99999px !important;
+  top: -99999px !important;
+  z-index: -99999 !important;
+}
