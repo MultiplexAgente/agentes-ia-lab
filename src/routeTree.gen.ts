@@ -16,6 +16,7 @@ import { Route as EmpresaRouteImport } from './routes/empresa'
 import { Route as EntrarRouteImport } from './routes/entrar'
 import { Route as InicioRouteImport } from './routes/inicio'
 import { Route as IntegracoesRouteImport } from './routes/integracoes'
+import { Route as PdvRouteImport } from './routes/pdv'
 import { Route as PedidosRouteImport } from './routes/pedidos'
 import { Route as AdminAiRoutingRouteImport } from './routes/admin.ai-routing'
 import { Route as ApiProductsRouteImport } from './routes/api/products'
@@ -31,6 +32,9 @@ import { Route as ApiCompanyProductsRouteImport } from './routes/api/company/pro
 import { Route as ApiCompanySettingsRouteImport } from './routes/api/company/settings'
 import { Route as ApiCompanyWorkspaceRouteImport } from './routes/api/company/workspace'
 import { Route as ApiAiConversationChatRouteImport } from './routes/api/ai/conversation/chat'
+import { Route as ApiCompanyPdvCheckoutRouteImport } from './routes/api/company/pdv/checkout'
+import { Route as ApiCompanyPdvSalesRouteImport } from './routes/api/company/pdv/sales'
+import { Route as ApiCompanyPdvSessionRouteImport } from './routes/api/company/pdv/session'
 import { Route as ApiPublicWhatsappWebhookRouteImport } from './routes/api/public/whatsapp/webhook'
 
 const IndexRoute = IndexRouteImport.update({
@@ -66,6 +70,11 @@ const InicioRoute = InicioRouteImport.update({
 const IntegracoesRoute = IntegracoesRouteImport.update({
   id: '/integracoes',
   path: '/integracoes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PdvRoute = PdvRouteImport.update({
+  id: '/pdv',
+  path: '/pdv',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PedidosRoute = PedidosRouteImport.update({
@@ -143,6 +152,21 @@ const ApiAiConversationChatRoute = ApiAiConversationChatRouteImport.update({
   path: '/api/ai/conversation/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiCompanyPdvCheckoutRoute = ApiCompanyPdvCheckoutRouteImport.update({
+  id: '/api/company/pdv/checkout',
+  path: '/api/company/pdv/checkout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiCompanyPdvSalesRoute = ApiCompanyPdvSalesRouteImport.update({
+  id: '/api/company/pdv/sales',
+  path: '/api/company/pdv/sales',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiCompanyPdvSessionRoute = ApiCompanyPdvSessionRouteImport.update({
+  id: '/api/company/pdv/session',
+  path: '/api/company/pdv/session',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicWhatsappWebhookRoute =
   ApiPublicWhatsappWebhookRouteImport.update({
     id: '/api/public/whatsapp/webhook',
@@ -158,6 +182,7 @@ export interface FileRoutesByFullPath {
   '/entrar': typeof EntrarRoute
   '/inicio': typeof InicioRoute
   '/integracoes': typeof IntegracoesRoute
+  '/pdv': typeof PdvRoute
   '/pedidos': typeof PedidosRoute
   '/admin/ai-routing': typeof AdminAiRoutingRoute
   '/api/products': typeof ApiProductsRoute
@@ -173,6 +198,9 @@ export interface FileRoutesByFullPath {
   '/api/company/settings': typeof ApiCompanySettingsRoute
   '/api/company/workspace': typeof ApiCompanyWorkspaceRoute
   '/api/ai/conversation/chat': typeof ApiAiConversationChatRoute
+  '/api/company/pdv/checkout': typeof ApiCompanyPdvCheckoutRoute
+  '/api/company/pdv/sales': typeof ApiCompanyPdvSalesRoute
+  '/api/company/pdv/session': typeof ApiCompanyPdvSessionRoute
   '/api/public/whatsapp/webhook': typeof ApiPublicWhatsappWebhookRoute
 }
 export interface FileRoutesByTo {
@@ -183,6 +211,7 @@ export interface FileRoutesByTo {
   '/entrar': typeof EntrarRoute
   '/inicio': typeof InicioRoute
   '/integracoes': typeof IntegracoesRoute
+  '/pdv': typeof PdvRoute
   '/pedidos': typeof PedidosRoute
   '/admin/ai-routing': typeof AdminAiRoutingRoute
   '/api/products': typeof ApiProductsRoute
@@ -198,6 +227,9 @@ export interface FileRoutesByTo {
   '/api/company/settings': typeof ApiCompanySettingsRoute
   '/api/company/workspace': typeof ApiCompanyWorkspaceRoute
   '/api/ai/conversation/chat': typeof ApiAiConversationChatRoute
+  '/api/company/pdv/checkout': typeof ApiCompanyPdvCheckoutRoute
+  '/api/company/pdv/sales': typeof ApiCompanyPdvSalesRoute
+  '/api/company/pdv/session': typeof ApiCompanyPdvSessionRoute
   '/api/public/whatsapp/webhook': typeof ApiPublicWhatsappWebhookRoute
 }
 export interface FileRoutesById {
@@ -209,6 +241,7 @@ export interface FileRoutesById {
   '/entrar': typeof EntrarRoute
   '/inicio': typeof InicioRoute
   '/integracoes': typeof IntegracoesRoute
+  '/pdv': typeof PdvRoute
   '/pedidos': typeof PedidosRoute
   '/admin/ai-routing': typeof AdminAiRoutingRoute
   '/api/products': typeof ApiProductsRoute
@@ -224,6 +257,9 @@ export interface FileRoutesById {
   '/api/company/settings': typeof ApiCompanySettingsRoute
   '/api/company/workspace': typeof ApiCompanyWorkspaceRoute
   '/api/ai/conversation/chat': typeof ApiAiConversationChatRoute
+  '/api/company/pdv/checkout': typeof ApiCompanyPdvCheckoutRoute
+  '/api/company/pdv/sales': typeof ApiCompanyPdvSalesRoute
+  '/api/company/pdv/session': typeof ApiCompanyPdvSessionRoute
   '/api/public/whatsapp/webhook': typeof ApiPublicWhatsappWebhookRoute
 }
 export interface FileRouteTypes {
@@ -236,6 +272,7 @@ export interface FileRouteTypes {
     | '/entrar'
     | '/inicio'
     | '/integracoes'
+    | '/pdv'
     | '/pedidos'
     | '/admin/ai-routing'
     | '/api/products'
@@ -251,6 +288,9 @@ export interface FileRouteTypes {
     | '/api/company/settings'
     | '/api/company/workspace'
     | '/api/ai/conversation/chat'
+    | '/api/company/pdv/checkout'
+    | '/api/company/pdv/sales'
+    | '/api/company/pdv/session'
     | '/api/public/whatsapp/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -261,6 +301,7 @@ export interface FileRouteTypes {
     | '/entrar'
     | '/inicio'
     | '/integracoes'
+    | '/pdv'
     | '/pedidos'
     | '/admin/ai-routing'
     | '/api/products'
@@ -276,6 +317,9 @@ export interface FileRouteTypes {
     | '/api/company/settings'
     | '/api/company/workspace'
     | '/api/ai/conversation/chat'
+    | '/api/company/pdv/checkout'
+    | '/api/company/pdv/sales'
+    | '/api/company/pdv/session'
     | '/api/public/whatsapp/webhook'
   id:
     | '__root__'
@@ -286,6 +330,7 @@ export interface FileRouteTypes {
     | '/entrar'
     | '/inicio'
     | '/integracoes'
+    | '/pdv'
     | '/pedidos'
     | '/admin/ai-routing'
     | '/api/products'
@@ -301,6 +346,9 @@ export interface FileRouteTypes {
     | '/api/company/settings'
     | '/api/company/workspace'
     | '/api/ai/conversation/chat'
+    | '/api/company/pdv/checkout'
+    | '/api/company/pdv/sales'
+    | '/api/company/pdv/session'
     | '/api/public/whatsapp/webhook'
   fileRoutesById: FileRoutesById
 }
@@ -312,6 +360,7 @@ export interface RootRouteChildren {
   EntrarRoute: typeof EntrarRoute
   InicioRoute: typeof InicioRoute
   IntegracoesRoute: typeof IntegracoesRoute
+  PdvRoute: typeof PdvRoute
   PedidosRoute: typeof PedidosRoute
   AdminAiRoutingRoute: typeof AdminAiRoutingRoute
   ApiProductsRoute: typeof ApiProductsRoute
@@ -327,6 +376,9 @@ export interface RootRouteChildren {
   ApiCompanySettingsRoute: typeof ApiCompanySettingsRoute
   ApiCompanyWorkspaceRoute: typeof ApiCompanyWorkspaceRoute
   ApiAiConversationChatRoute: typeof ApiAiConversationChatRoute
+  ApiCompanyPdvCheckoutRoute: typeof ApiCompanyPdvCheckoutRoute
+  ApiCompanyPdvSalesRoute: typeof ApiCompanyPdvSalesRoute
+  ApiCompanyPdvSessionRoute: typeof ApiCompanyPdvSessionRoute
   ApiPublicWhatsappWebhookRoute: typeof ApiPublicWhatsappWebhookRoute
 }
 
@@ -379,6 +431,13 @@ declare module '@tanstack/react-router' {
       path: '/integracoes'
       fullPath: '/integracoes'
       preLoaderRoute: typeof IntegracoesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pdv': {
+      id: '/pdv'
+      path: '/pdv'
+      fullPath: '/pdv'
+      preLoaderRoute: typeof PdvRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pedidos': {
@@ -486,6 +545,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAiConversationChatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/company/pdv/checkout': {
+      id: '/api/company/pdv/checkout'
+      path: '/api/company/pdv/checkout'
+      fullPath: '/api/company/pdv/checkout'
+      preLoaderRoute: typeof ApiCompanyPdvCheckoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/company/pdv/sales': {
+      id: '/api/company/pdv/sales'
+      path: '/api/company/pdv/sales'
+      fullPath: '/api/company/pdv/sales'
+      preLoaderRoute: typeof ApiCompanyPdvSalesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/company/pdv/session': {
+      id: '/api/company/pdv/session'
+      path: '/api/company/pdv/session'
+      fullPath: '/api/company/pdv/session'
+      preLoaderRoute: typeof ApiCompanyPdvSessionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/whatsapp/webhook': {
       id: '/api/public/whatsapp/webhook'
       path: '/api/public/whatsapp/webhook'
@@ -504,6 +584,7 @@ const rootRouteChildren: RootRouteChildren = {
   EntrarRoute: EntrarRoute,
   InicioRoute: InicioRoute,
   IntegracoesRoute: IntegracoesRoute,
+  PdvRoute: PdvRoute,
   PedidosRoute: PedidosRoute,
   AdminAiRoutingRoute: AdminAiRoutingRoute,
   ApiProductsRoute: ApiProductsRoute,
@@ -519,6 +600,9 @@ const rootRouteChildren: RootRouteChildren = {
   ApiCompanySettingsRoute: ApiCompanySettingsRoute,
   ApiCompanyWorkspaceRoute: ApiCompanyWorkspaceRoute,
   ApiAiConversationChatRoute: ApiAiConversationChatRoute,
+  ApiCompanyPdvCheckoutRoute: ApiCompanyPdvCheckoutRoute,
+  ApiCompanyPdvSalesRoute: ApiCompanyPdvSalesRoute,
+  ApiCompanyPdvSessionRoute: ApiCompanyPdvSessionRoute,
   ApiPublicWhatsappWebhookRoute: ApiPublicWhatsappWebhookRoute,
 }
 export const routeTree = rootRouteImport

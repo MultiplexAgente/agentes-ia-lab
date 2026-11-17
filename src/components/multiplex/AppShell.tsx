@@ -8,6 +8,7 @@ import {
   Plus,
   Settings,
   ShoppingBag,
+  Store,
   Users,
   Menu,
   X,
@@ -23,6 +24,7 @@ import { cn } from "@/lib/utils";
 
 const ENTERPRISE_NAV = [
   { to: "/inicio", label: "Início", icon: LayoutDashboard },
+  { to: "/pdv", label: "Frente de Caixa", icon: Store },
   { to: "/", label: "Conversas", icon: MessageSquare },
   { to: "/clientes", label: "Clientes", icon: Users },
   { to: "/catalogo", label: "Catálogo", icon: Boxes },
@@ -72,7 +74,7 @@ export function AppShell({ children, secondary }: { children: ReactNode; seconda
 
   // Proteção de rotas da empresa: visitantes são direcionados para /entrar
   useEffect(() => {
-    const isProtected = ["/inicio", "/clientes", "/catalogo", "/pedidos", "/integracoes", "/empresa"].some(
+    const isProtected = ["/inicio", "/pdv", "/clientes", "/catalogo", "/pedidos", "/integracoes", "/empresa"].some(
       (path) => pathname === path || pathname.startsWith(`${path}/`),
     );
     if (isProtected && !loading && !getToken()) {
