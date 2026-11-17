@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import horizon from "@/assets/hero-horizon.jpg";
 import monolith from "@/assets/monolith.jpg";
+import hugLogo from "@/assets/hug-icon.jpg";
 import { BonaParticleAtom } from "@/components/bonasoft/BonaLogo";
 
 export const Route = createFileRoute("/")({
@@ -288,9 +289,9 @@ function Landing() {
             className="flex items-center gap-2.5 text-[14px] font-medium tracking-[0.45em] sm:text-[16px] sm:tracking-[0.55em] text-foreground transition-colors hover:text-white"
           >
             <img
-              src="/images/hug-icon.jpg"
+              src={hugLogo}
               alt="HUG"
-              className="h-7 w-7 rounded-full object-cover shadow-sm ring-1 ring-emerald-500/40"
+              className="h-8 w-8 rounded-full object-cover shadow-sm ring-1 ring-emerald-500/40"
             />
             <span>HUG</span>
           </Link>

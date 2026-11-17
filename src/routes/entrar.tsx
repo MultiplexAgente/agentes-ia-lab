@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { api, setToken } from "@/lib/multiplex/client";
-import { BonaParticleAtom } from "@/components/bonasoft/BonaLogo";
+import hugLogo from "@/assets/hug-icon.jpg";
 
 export const Route = createFileRoute("/entrar")({
   head: () => ({
@@ -51,10 +51,14 @@ function LoginPage() {
   return (
     <main className="flex min-h-dvh items-center justify-center bg-background px-4">
       <div className="w-full max-w-sm">
-        <div className="mb-8 flex flex-col items-center justify-center gap-1.5">
-          <BonaParticleAtom className="h-10 w-10 text-emerald-400 mb-1" />
+        <div className="mb-8 flex flex-col items-center justify-center gap-2">
+          <img
+            src={hugLogo}
+            alt="HUG"
+            className="size-16 rounded-3xl object-cover shadow-xl ring-1 ring-border shrink-0"
+          />
           <p className="font-display text-2xl font-bold tracking-[0.3em] text-foreground">HUG</p>
-          <p className="text-xs text-muted-foreground mt-0.5">Seu negócio, em outra órbita.</p>
+          <p className="text-xs text-muted-foreground">Seu negócio, em outra órbita.</p>
         </div>
         <form onSubmit={submit} className="space-y-4 rounded-2xl border border-border/60 bg-card/50 p-6 backdrop-blur">
           <h1 className="text-lg font-semibold">Entrar na sua conta</h1>
