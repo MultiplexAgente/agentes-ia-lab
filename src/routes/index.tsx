@@ -10,7 +10,6 @@ import {
   Check,
   ChevronRight,
   Clock,
-  Cpu,
   CreditCard,
   DollarSign,
   Globe,
@@ -39,6 +38,10 @@ import {
   Laptop,
   CheckCircle2,
   ArrowUpRight,
+  Search,
+  SlidersHorizontal,
+  Bell,
+  Cpu,
 } from "lucide-react";
 
 export const Route = createFileRoute("/")({
@@ -48,7 +51,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Uma plataforma para conectar vendas, estoque, financeiro e inteligência empresarial em todas as operações da sua empresa. by BonaSoft.",
+          "Plataforma completa de gestão empresarial, frente de caixa ágil (PDV), estoque multissegmento e inteligência artificial unificada. by BonaSoft.",
       },
       { property: "og:title", content: "VENDRA | Seu negócio merece uma gestão extraordinária" },
       {
@@ -63,7 +66,7 @@ export const Route = createFileRoute("/")({
   component: LandingPage,
 });
 
-// Os 5 Produtos Vendra
+// Os 5 Produtos Vendra do Ecossistema
 const ECOSYSTEM_PRODUCTS = [
   {
     id: "erp",
@@ -73,45 +76,51 @@ const ECOSYSTEM_PRODUCTS = [
     description:
       "Controle completo de compras, estoques múltiplos, contas a pagar e receber, fluxo de caixa e relatórios gerenciais consolidados em tempo real.",
     highlights: [
-      "Visão consolidada de matriz e filiais",
-      "Controle financeiro com fluxo de caixa diário",
-      "Gestão de compras e giro de estoque",
-      "Cadastros unificados de produtos e parceiros",
+      "Visão consolidada de matriz e filiais em tempo real",
+      "Fluxo de caixa diário com conciliação automática",
+      "Gestão de compras calculada pelo giro de estoque",
+      "Cadastros unificados de parceiros, clientes e itens",
     ],
     metricLabel: "Visibilidade Financeira",
     metricValue: "Tempo Real",
+    statNumber: "€ 48.250",
+    statDesc: "Consolidado hoje nas filiais",
   },
   {
     id: "pos",
     name: "Vendra POS",
     category: "Frente de Caixa Ágil",
-    tagline: "Velocidade e precisão no momento da venda",
+    tagline: "Velocidade instantânea no momento da venda",
     description:
-      "Frente de caixa intuitiva para telas touchscreen, teclado e leitor de código de barras. Suporta venda fracionada por balança e múltiplos meios de pagamento.",
+      "Frente de caixa ágil e resiliente para balcão, teclado, tela touchscreen e leitor de código de barras. Suporta pesáveis de balança e divisão de pagamentos.",
     highlights: [
-      "Leitura instantânea de código de barras e EAN",
-      "Operação com pesáveis e venda fracionada",
-      "Abertura, suprimento, sangria e fechamento seguro",
-      "Divisão de pagamentos (Dinheiro, Cartão, PIX)",
+      "Leitura de código de barras EAN-13 em menos de 20ms",
+      "Operação com pesáveis e venda fracionada por balança",
+      "Abertura, sangria, suprimento e fechamento seguro de caixa",
+      "Múltiplas formas de pagamento no mesmo cupom fiscal",
     ],
-    metricLabel: "Agilidade no Caixa",
-    metricValue: "Instantâneo",
+    metricLabel: "Velocidade no Checkout",
+    metricValue: "18ms",
+    statNumber: "184 pedidos",
+    statDesc: "Processados sem fila de espera",
   },
   {
     id: "mobile",
     name: "Vendra Mobile",
     category: "Gestão na Palma da Mão",
-    tagline: "Acompanhe sua empresa de onde estiver",
+    tagline: "Acompanhe sua empresa de qualquer lugar",
     description:
-      "Aplicativo para gestores e equipes operacionais consultarem indicadores de vendas, aprovarem pedidos e receberem notificações críticas de estoque.",
+      "Aplicativo nativo para gestores consultarem indicadores em tempo real, aprovarem ordens de compra e receberem alertas críticos de ruptura de estoque.",
     highlights: [
-      "Dashboard executivo em smartphones",
-      "Notificações de metas e fechamento diário",
-      "Consulta ágil de preços e disponibilidade",
-      "Aprovações operacionais a distância",
+      "Dashboard executivo em smartphones iOS e Android",
+      "Notificações instantâneas de metas e fechamento de caixa",
+      "Consulta ágil de estoque e preços em trânsito",
+      "Aprovações gerenciais remotas com um toque",
     ],
-    metricLabel: "Mobilidade",
+    metricLabel: "Disponibilidade",
     metricValue: "iOS & Android",
+    statNumber: "100%",
+    statDesc: "Operações sincronizadas na nuvem",
   },
   {
     id: "store",
@@ -119,15 +128,17 @@ const ECOSYSTEM_PRODUCTS = [
     category: "Comércio Digital Integrado",
     tagline: "Suas vendas físicas e digitais sincronizadas",
     description:
-      "Catálogo online e canal de vendas digital sincronizado com o estoque físico do ERP, permitindo receber pedidos direto na operação da loja.",
+      "Catálogo digital e canal de vendas online conectado ao estoque físico da loja. Cada venda realizada no balcão atualiza o canal web automaticamente.",
     highlights: [
-      "Catálogo digital responsivo e elegante",
-      "Estoque compartilhado com a loja física",
-      "Recebimento de pedidos integrado ao ERP",
-      "Experiência de compra fluida para o cliente",
+      "Catálogo online responsivo integrado ao ERP",
+      "Estoque físico e virtual com baixa em tempo real",
+      "Recebimento de pedidos direto na expedição da loja",
+      "Checkout otimizado para aumentar a conversão",
     ],
-    metricLabel: "Canais de Venda",
+    metricLabel: "Sincronização",
     metricValue: "Omnichannel",
+    statNumber: "€ 8.940",
+    statDesc: "Faturamento digital integrado",
   },
   {
     id: "ai",
@@ -135,15 +146,17 @@ const ECOSYSTEM_PRODUCTS = [
     category: "Inteligência Empresarial",
     tagline: "Respostas estratégicas com base nos seus dados reais",
     description:
-      "Motor inteligente integrado ao ERP (powered by Multiplex) que analisa vendas, margens e estoque para responder perguntas gerenciais em linguagem natural.",
+      "Motor analítico empresarial integrado à sua base de dados (powered by Multiplex) que responde dúvidas de faturamento, margem e estoque em linguagem natural.",
     highlights: [
-      "Consultas em linguagem natural sobre o negócio",
-      "Identificação precoce de ruptura de estoque",
-      "Análise de rentabilidade e produtos líderes",
-      "Segurança e isolamento dos dados da empresa",
+      "Consultas em linguagem natural sobre finanças e estoque",
+      "Identificação preditiva de rupturas antes que ocorram",
+      "Diagnósticos de rentabilidade por linha de produto",
+      "Isolamento completo e segurança dos dados por empresa",
     ],
-    metricLabel: "Decisões Estratégicas",
-    metricValue: "Motor Analítico",
+    metricLabel: "Motor de IA",
+    metricValue: "Multiplex",
+    statNumber: "41,8%",
+    statDesc: "Margem média auditada pela IA",
   },
 ];
 
@@ -153,13 +166,13 @@ const SEGMENTS_DATA = [
     id: "farmacia",
     name: "Farmácias",
     title: "Farmácias & Drogarias",
-    focus: "Rastreabilidade e controle de lotes",
+    focus: "Rastreabilidade e controle rigoroso de lotes",
     description:
-      "Controle rigoroso de datas de validade, lotes de medicamentos, princípio ativo, dosagens e retenção de receitas médicas em conformidade com órgãos reguladores.",
+      "Controle de datas de validade, lotes de medicamentos, princípio ativo, dosagens e retenção de receitas médicas em conformidade com órgãos reguladores.",
     attributes: [
       { label: "Controle de Lote", detail: "Rastreio completo da entrada à dispensação" },
       { label: "Data de Validade", detail: "Alertas automáticos antes do vencimento" },
-      { label: "Princípio Ativo", detail: "Busca rápida de similares e genéricos" },
+      { label: "Princípio Ativo", detail: "Busca ágil de similares e genéricos" },
       { label: "Receituário", detail: "Registro de prescrição quando aplicável" },
     ],
     previewKpi: "Lotes Monitorados",
@@ -381,62 +394,66 @@ function LandingPage() {
   const selectedAiDemo = AI_DEMO_CASES[activeAiDemoIndex];
 
   return (
-    <div className="min-h-screen bg-[#04060A] text-slate-100 font-sans antialiased selection:bg-cyan-500/25 selection:text-cyan-200 overflow-x-hidden relative">
-      {/* AURORA LUMINESCENTE & ILUMINAÇÃO DE FUNDO CINEMATOGRÁFICA (REFERÊNCIA CUNDO / NEXUSAI) */}
+    <div className="min-h-screen bg-[#03060C] text-slate-100 font-sans antialiased selection:bg-cyan-500/25 selection:text-cyan-200 overflow-x-hidden relative">
+      {/* 
+        ========================================================================
+        ILUMINAÇÃO DE FUNDO EDITORIAL & ECLIPSE AURORA (REFS: CUNDO & NEXUSAI)
+        ========================================================================
+      */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-        {/* Glow Superior Centralizado no Topo / Hero */}
-        <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[90vw] max-w-[1100px] h-[550px] bg-[radial-gradient(ellipse_at_center,rgba(6,182,212,0.18),rgba(20,184,166,0.12)_40%,rgba(59,130,246,0.06)_70%,transparent_80%)] blur-[120px] rounded-full" />
+        {/* Glow Superior Centralizado tipo Aurora Boreal */}
+        <div className="absolute -top-36 left-1/2 -translate-x-1/2 w-[95vw] max-w-[1200px] h-[600px] bg-[radial-gradient(ellipse_at_top,rgba(20,184,166,0.22),rgba(6,182,212,0.18)_35%,rgba(59,130,246,0.08)_65%,transparent_80%)] blur-[120px] rounded-full" />
         
-        {/* Colunas Verticais Orgânicas de Luz Azul Profunda / Navy (NexusAI) */}
-        <div className="absolute top-10 left-[15%] w-[350px] h-[700px] bg-blue-700/[0.04] blur-[150px] rounded-full" />
-        <div className="absolute top-20 right-[15%] w-[350px] h-[700px] bg-teal-600/[0.05] blur-[150px] rounded-full" />
+        {/* Colunas Arquiteturais de Luz em Azul e Teal */}
+        <div className="absolute top-20 left-[12%] w-[420px] h-[750px] bg-blue-600/[0.04] blur-[160px] rounded-full" />
+        <div className="absolute top-24 right-[12%] w-[420px] h-[750px] bg-teal-500/[0.05] blur-[160px] rounded-full" />
         
-        {/* Glow Lateral Suave para Profundidade */}
-        <div className="absolute top-[45%] right-[-5%] w-[600px] h-[600px] bg-cyan-600/[0.04] blur-[180px] rounded-full" />
-        <div className="absolute top-[75%] left-[-5%] w-[600px] h-[600px] bg-emerald-600/[0.04] blur-[180px] rounded-full" />
-        
-        {/* Grid Sutil de Precisão */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_75%_55%_at_50%_0%,#000_65%,transparent_100%)] opacity-40" />
+        {/* Micro-malha geométrica de alta definição */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_80%_60%_at_50%_0%,#000_65%,transparent_100%)] opacity-35" />
       </div>
 
-      {/* NAVBAR MINIMALISTA, DISCRETA E ELEGANTE */}
-      <header className="sticky top-0 z-50 w-full border-b border-white/[0.06] bg-[#04060A]/80 backdrop-blur-xl transition-all">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between">
-          {/* LOGOTIPO */}
-          <Link to="/" className="flex items-center gap-2.5 group">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-400 via-teal-400 to-emerald-400 p-[1px] shadow-sm">
-              <div className="w-full h-full bg-[#04060A] rounded-[7px] flex items-center justify-center font-black text-cyan-400 text-sm">
+      {/* 
+        ========================================================================
+        NAVBAR EDITORIAL & DISCRETA
+        ========================================================================
+      */}
+      <header className="sticky top-0 z-50 w-full border-b border-white/[0.08] bg-[#03060C]/85 backdrop-blur-xl">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+          {/* LOGOTIPO OFICIAL */}
+          <Link to="/" className="flex items-center gap-3 group">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-cyan-400 via-teal-400 to-emerald-400 p-[1.5px] shadow-[0_0_20px_rgba(45,212,191,0.25)]">
+              <div className="w-full h-full bg-[#03060C] rounded-[10px] flex items-center justify-center font-black text-cyan-400 text-base">
                 V
               </div>
             </div>
             <div className="flex flex-col">
-              <span className="font-extrabold text-base tracking-tight text-white leading-tight">
+              <span className="font-extrabold text-lg tracking-tight text-white leading-tight">
                 VENDRA
               </span>
-              <span className="text-[9px] text-slate-400 tracking-wider uppercase font-medium">
+              <span className="text-[10px] text-slate-400 tracking-wider uppercase font-semibold">
                 by BonaSoft
               </span>
             </div>
           </Link>
 
-          {/* LINKS DE NAVEGAÇÃO */}
-          <nav className="hidden md:flex items-center gap-8 text-xs font-medium text-slate-300">
-            <a href="#produtos" className="hover:text-white transition-colors">
+          {/* NAVEGAÇÃO CENTRAL */}
+          <nav className="hidden md:flex items-center gap-8 text-xs font-semibold text-slate-300">
+            <a href="#produtos" className="hover:text-cyan-400 transition-colors">
               Produtos
             </a>
-            <a href="#gestao" className="hover:text-white transition-colors">
+            <a href="#gestao" className="hover:text-cyan-400 transition-colors">
               Plataforma
             </a>
-            <a href="#segmentos" className="hover:text-white transition-colors">
+            <a href="#segmentos" className="hover:text-cyan-400 transition-colors">
               Segmentos
             </a>
-            <a href="#ia" className="hover:text-white transition-colors">
+            <a href="#ia" className="hover:text-cyan-400 transition-colors">
               Vendra AI
             </a>
-            <a href="#multiplataforma" className="hover:text-white transition-colors">
+            <a href="#multiplataforma" className="hover:text-cyan-400 transition-colors">
               Multiplataforma
             </a>
-            <a href="#planos" className="hover:text-white transition-colors">
+            <a href="#planos" className="hover:text-cyan-400 transition-colors">
               Planos
             </a>
           </nav>
@@ -445,13 +462,13 @@ function LandingPage() {
           <div className="flex items-center gap-3">
             <Link
               to="/entrar"
-              className="text-xs font-medium text-slate-300 hover:text-white px-3.5 py-2 rounded-lg transition-colors"
+              className="text-xs font-semibold text-slate-300 hover:text-white px-3.5 py-2 rounded-lg transition-colors"
             >
               Entrar
             </Link>
             <Link
               to="/entrar"
-              className="px-4 py-2 rounded-full bg-white/[0.08] hover:bg-white/[0.14] border border-white/15 text-white text-xs font-semibold tracking-wide transition-all active:scale-95 flex items-center gap-1.5 shadow-sm hover:border-cyan-500/30"
+              className="px-4 py-2 rounded-full bg-white/[0.08] hover:bg-white/[0.14] border border-white/15 text-white text-xs font-semibold tracking-wide transition-all active:scale-95 flex items-center gap-2 shadow-sm hover:border-cyan-500/40"
             >
               Solicitar demonstração <ChevronRight className="w-3.5 h-3.5 text-cyan-400" />
             </Link>
@@ -459,34 +476,38 @@ function LandingPage() {
         </div>
       </header>
 
-      {/* SEÇÃO 1: HERO SECTION CINEMATOGRÁFICA (COM REFERÊNCIAS NATIONFLY, NEXUSAI E CUNDO) */}
-      <section className="relative z-10 pt-16 pb-20 md:pt-24 md:pb-32 overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative">
+      {/* 
+        ========================================================================
+        HERO SECTION: ECLIPSE AURORA COM MOCKUP MASTER CENTRALIZADO (PÁGINA DE MILHÕES)
+        ========================================================================
+      */}
+      <section className="relative z-10 pt-16 pb-24 md:pt-24 md:pb-36 text-center">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           
-          {/* PILL BADGE ELEGANTE COM PONTO LUMINOSO (ESTÉTICA NATIONFLY & CUNDO) */}
+          {/* PILL BADGE ELEGANTE COM PONTO DE PULSO LUMINOSO (ESTÉTICA NATIONFLY & CUNDO) */}
           <motion.div
-            initial={{ opacity: 0, y: 12 }}
+            initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
-            className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-white/[0.04] border border-white/10 backdrop-blur-md text-[11px] font-medium text-slate-300 shadow-[0_0_20px_rgba(0,0,0,0.5)] mb-7 hover:border-cyan-500/30 transition-all cursor-default"
+            className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-white/[0.04] border border-white/10 backdrop-blur-md text-xs font-medium text-slate-200 shadow-[0_0_25px_rgba(0,0,0,0.6)] mb-8 hover:border-cyan-500/35 transition-all"
           >
-            <span className="relative flex h-2 w-2">
+            <span className="relative flex h-2.5 w-2.5">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-400 shadow-[0_0_8px_#22d3ee]"></span>
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-cyan-400 shadow-[0_0_10px_#22d3ee]"></span>
             </span>
-            <span className="tracking-wider uppercase text-[10px] font-semibold text-slate-200">
+            <span className="tracking-wider uppercase text-[10px] font-extrabold text-slate-100">
               VENDRA BY BONASOFT
             </span>
             <span className="text-white/20">|</span>
             <span className="text-slate-400 font-normal">Plataforma Empresarial Unificada</span>
           </motion.div>
 
-          {/* HEADLINE PRINCIPAL COM TIPOGRAFIA DE ALTO IMPACTO */}
+          {/* HEADLINE MONUMENTAL & EDITORIAL COM TEXT-BALANCE */}
           <motion.h1
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-[-0.03em] text-white max-w-4xl mx-auto leading-[1.08]"
+            className="text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-[-0.035em] text-white max-w-4xl mx-auto leading-[1.08] text-balance"
           >
             Seu negócio merece uma <br className="hidden sm:inline" />
             <span className="bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">
@@ -494,167 +515,143 @@ function LandingPage() {
             </span>
           </motion.h1>
 
-          {/* SUBHEADLINE EQUILIBRADA E EDITORIAL */}
+          {/* SUBHEADLINE CLARA E BEM ESPAÇADA */}
           <motion.p
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="mt-6 text-base sm:text-lg text-slate-400 max-w-2xl mx-auto leading-relaxed font-normal"
+            className="mt-6 text-base sm:text-lg md:text-xl text-slate-400 max-w-2xl mx-auto leading-relaxed font-normal text-balance"
           >
             Uma plataforma para conectar vendas, estoque, financeiro e inteligência empresarial em todas as operações
             da sua empresa.
           </motion.p>
 
-          {/* BOTÕES DE AÇÃO COM ESTÉTICA DE ALTA PRODUÇÃO */}
+          {/* BOTÕES DE AÇÃO DE ALTO PADRÃO */}
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
-            className="mt-9 flex flex-col sm:flex-row items-center justify-center gap-3.5"
+            className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4"
           >
             <a
               href="#produtos"
-              className="w-full sm:w-auto px-7 py-3.5 rounded-full bg-gradient-to-r from-cyan-400 via-teal-400 to-cyan-500 hover:brightness-110 text-slate-950 font-bold text-xs tracking-wide shadow-[0_0_30px_rgba(34,211,238,0.35)] transition-all flex items-center justify-center gap-2 active:scale-95"
+              className="w-full sm:w-auto px-8 py-4 rounded-full bg-gradient-to-r from-cyan-400 via-teal-400 to-emerald-400 hover:brightness-110 text-slate-950 font-extrabold text-xs tracking-wider uppercase shadow-[0_0_35px_rgba(45,212,191,0.35)] transition-all flex items-center justify-center gap-2 active:scale-95"
             >
               Conhecer a plataforma <ArrowRight className="w-4 h-4" />
             </a>
 
             <Link
               to="/entrar"
-              className="w-full sm:w-auto px-7 py-3.5 rounded-full border border-white/10 hover:border-white/20 bg-white/[0.04] hover:bg-white/[0.08] text-white font-medium text-xs backdrop-blur-md transition-all flex items-center justify-center gap-2.5 active:scale-95 group"
+              className="w-full sm:w-auto px-8 py-4 rounded-full border border-white/12 hover:border-white/25 bg-white/[0.04] hover:bg-white/[0.08] text-white font-semibold text-xs tracking-wide backdrop-blur-md transition-all flex items-center justify-center gap-2.5 active:scale-95 group"
             >
-              <span className="w-5 h-5 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-white/20 transition-colors">
+              <span className="w-5 h-5 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-cyan-500/20 transition-colors">
                 <Play className="w-2.5 h-2.5 text-cyan-400 fill-cyan-400 ml-0.5" />
               </span>
               Solicitar demonstração
             </Link>
           </motion.div>
 
-          {/* ELEMENTO ESCULTURAL IRIDESCENTE / 3D FLUID RIBBON (NATIONFLY AESTHETIC - ZERO ÍCONES DE IA) */}
-          <div className="absolute right-4 top-1/4 -translate-y-1/2 w-48 h-48 md:w-64 md:h-64 pointer-events-none opacity-40 md:opacity-60 hidden lg:block">
-            <svg
-              viewBox="0 0 200 200"
-              className="w-full h-full drop-shadow-[0_15px_30px_rgba(6,182,212,0.3)] animate-pulse"
-              style={{ animationDuration: "6s" }}
-            >
-              <defs>
-                <linearGradient id="fluid-ribbon-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#22d3ee" stopOpacity="0.9" />
-                  <stop offset="35%" stopColor="#2dd4bf" stopOpacity="0.8" />
-                  <stop offset="70%" stopColor="#3b82f6" stopOpacity="0.7" />
-                  <stop offset="100%" stopColor="#818cf8" stopOpacity="0.8" />
-                </linearGradient>
-                <linearGradient id="fluid-sheen-grad" x1="100%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stopColor="#ffffff" stopOpacity="0.6" />
-                  <stop offset="50%" stopColor="#67e8f9" stopOpacity="0.2" />
-                  <stop offset="100%" stopColor="#04060a" stopOpacity="0.8" />
-                </linearGradient>
-              </defs>
-              {/* Geometria escultural fluida (curvas harmoniosas representando fluxo contínuo de gestão) */}
-              <path
-                d="M 40 100 C 40 40, 100 30, 140 60 C 180 90, 170 150, 120 160 C 70 170, 40 130, 80 100 C 120 70, 150 110, 130 140"
-                fill="none"
-                stroke="url(#fluid-ribbon-grad)"
-                strokeWidth="18"
-                strokeLinecap="round"
-              />
-              <path
-                d="M 45 95 C 45 45, 98 35, 136 63 C 172 90, 164 146, 118 155"
-                fill="none"
-                stroke="url(#fluid-sheen-grad)"
-                strokeWidth="4"
-                strokeLinecap="round"
-              />
-            </svg>
-          </div>
-
-          {/* MOCKUP DO SOFTWARE COM AURORA HALO DE FUNDO (REFERÊNCIA CUNDO & NEXUSAI) */}
+          {/* 
+            ========================================================================
+            MOCKUP MASTER DO SOFTWARE COM AURORA HALO DE FUNDO (REFERÊNCIA CUNDO)
+            ========================================================================
+          */}
           <motion.div
-            initial={{ opacity: 0, y: 35 }}
+            initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.4 }}
-            className="mt-16 sm:mt-20 max-w-5xl mx-auto relative"
+            className="mt-16 sm:mt-24 max-w-5xl mx-auto relative text-left"
           >
-            {/* LUZ AURORA HALO DIRETAMENTE ATRÁS DO DASHBOARD (ESTÉTICA CUNDO) */}
-            <div className="absolute -top-16 left-1/2 -translate-x-1/2 w-[85%] max-w-3xl h-[280px] bg-gradient-to-r from-emerald-500/25 via-cyan-400/30 to-blue-600/25 blur-[110px] rounded-full pointer-events-none z-0" />
+            {/* LUZ AURORA HALO VERDE/CIANO QUE CRIA O EFEITO DE ECLIPSE (ESTÉTICA CUNDO) */}
+            <div className="absolute -top-16 left-1/2 -translate-x-1/2 w-[88%] max-w-3xl h-[280px] bg-[radial-gradient(ellipse_at_center,rgba(45,212,191,0.35),rgba(6,182,212,0.25)_35%,rgba(16,185,129,0.12)_65%,transparent_80%)] blur-[95px] rounded-full pointer-events-none z-0" />
 
-            {/* MOLDURA DO SOFTWARE — VIDRO OBSIDIANO, BORDA HIGHLIGHT E PROFUNDIDADE */}
-            <div className="relative z-10 rounded-2xl border border-white/[0.12] bg-[#070A12]/95 backdrop-blur-2xl shadow-[0_30px_90px_rgba(0,0,0,0.85)] overflow-hidden text-left before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-cyan-400/60 before:to-transparent">
-              {/* BARRA SUPERIOR DO APLICATIVO */}
-              <div className="h-11 border-b border-white/[0.08] bg-[#05070E] px-4 sm:px-5 flex items-center justify-between">
+            {/* MOLDURA DO SOFTWARE DE LUXO */}
+            <div className="relative z-10 rounded-2xl border border-white/[0.14] bg-[#070A14]/95 backdrop-blur-2xl shadow-[0_30px_100px_rgba(0,0,0,0.9)] overflow-hidden before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-cyan-400/80 before:to-transparent">
+              
+              {/* BARRA SUPERIOR DO APLICATIVO COM ATRIBUTOS REAIS */}
+              <div className="h-12 border-b border-white/[0.08] bg-[#050811] px-4 sm:px-6 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="flex gap-1.5">
-                    <span className="w-2.5 h-2.5 rounded-full bg-rose-500/70" />
-                    <span className="w-2.5 h-2.5 rounded-full bg-amber-500/70" />
-                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/70" />
+                  <div className="flex gap-2">
+                    <span className="w-3 h-3 rounded-full bg-rose-500/80 shadow-[0_0_8px_rgba(244,63,94,0.4)]" />
+                    <span className="w-3 h-3 rounded-full bg-amber-500/80" />
+                    <span className="w-3 h-3 rounded-full bg-emerald-500/80 shadow-[0_0_8px_rgba(16,185,129,0.4)]" />
                   </div>
-                  <div className="hidden sm:flex items-center gap-2 pl-3 border-l border-white/[0.08]">
-                    <span className="px-2.5 py-0.5 rounded-full bg-white/[0.04] text-[11px] font-mono text-slate-300 border border-white/[0.06]">
-                      vendra.app · Painel Integrado
-                    </span>
+                  <div className="hidden sm:flex items-center gap-2 pl-4 border-l border-white/[0.08]">
+                    <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.05] border border-white/[0.08] text-[11px] font-mono text-slate-300">
+                      <Search className="w-3 h-3 text-slate-400" />
+                      <span>vendra.app/painel/operacoes</span>
+                      <span className="ml-2 px-1.5 py-0.2 rounded bg-white/[0.08] text-[9px] text-slate-400">⌘K</span>
+                    </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 text-[10px] text-slate-300 font-mono">
-                  <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]" />
-                  4 Filiais Conectadas · Operação ao Vivo
+
+                <div className="flex items-center gap-3 text-xs text-slate-300">
+                  <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-semibold">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    4 Filiais Online
+                  </span>
+                  <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-cyan-500 to-teal-400 text-slate-950 font-bold text-xs flex items-center justify-center">
+                    B
+                  </div>
                 </div>
               </div>
 
-              {/* CONTEÚDO VISUAL DO DASHBOARD */}
-              <div className="p-5 sm:p-7 space-y-6">
-                {/* LINHA DE INDICADORES PRINCIPAIS */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+              {/* CONTEÚDO VISUAL RICO DO DASHBOARD */}
+              <div className="p-6 sm:p-8 space-y-6">
+                {/* LINHA DE INDICADORES PRINCIPAIS COM DADOS REAIS */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   {[
-                    { label: "Faturamento Hoje", val: "€ 4.820,50", sub: "+18,4% vs média", icon: DollarSign, color: "text-cyan-400" },
-                    { label: "Vendas no Caixa", val: "142 pedidos", sub: "Liquidado em balcão", icon: Receipt, color: "text-teal-400" },
-                    { label: "Margem Bruta", val: "41,8%", sub: "Meta de rentabilidade", icon: TrendingUp, color: "text-emerald-400" },
-                    { label: "Alerta de Estoque", val: "3 produtos", sub: "Reposição indicada", icon: Boxes, color: "text-amber-400" },
+                    { label: "Faturamento Hoje", val: "€ 48.250,80", sub: "+24,6% vs ontem", icon: DollarSign, color: "text-cyan-400", badgeColor: "text-emerald-400 bg-emerald-500/10" },
+                    { label: "Vendas no Balcão", val: "184 pedidos", sub: "Liquidado em 1.2s", icon: Receipt, color: "text-teal-400", badgeColor: "text-teal-400 bg-teal-500/10" },
+                    { label: "Margem Operacional", val: "42,4%", sub: "+3,8% rentabilidade", icon: TrendingUp, color: "text-emerald-400", badgeColor: "text-cyan-400 bg-cyan-500/10" },
+                    { label: "Giro de Estoque", val: "99,4%", sub: "Ruptura zero auditada", icon: Boxes, color: "text-cyan-300", badgeColor: "text-emerald-400 bg-emerald-500/10" },
                   ].map((stat, idx) => {
                     const Icon = stat.icon;
                     return (
                       <div
                         key={idx}
-                        className="p-4 rounded-xl border border-white/[0.07] bg-white/[0.025] hover:bg-white/[0.04] transition-colors relative group"
+                        className="p-4.5 rounded-xl border border-white/[0.08] bg-white/[0.025] hover:bg-white/[0.045] transition-all relative group"
                       >
-                        <div className="flex items-center justify-between text-slate-400 text-[11px]">
+                        <div className="flex items-center justify-between text-slate-400 text-xs">
                           <span>{stat.label}</span>
-                          <Icon className={`w-3.5 h-3.5 ${stat.color}`} />
+                          <Icon className={`w-4 h-4 ${stat.color}`} />
                         </div>
-                        <div className="text-lg sm:text-2xl font-bold text-white mt-1.5 tracking-tight font-sans">
+                        <div className="text-xl sm:text-2xl font-extrabold text-white mt-2 tracking-tight">
                           {stat.val}
                         </div>
-                        <div className="text-[10px] text-slate-400 mt-1 flex items-center gap-1">
-                          <span className="w-1 h-1 rounded-full bg-cyan-400" />
-                          {stat.sub}
+                        <div className="mt-2 flex items-center gap-1.5">
+                          <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-md ${stat.badgeColor}`}>
+                            {stat.sub}
+                          </span>
                         </div>
                       </div>
                     );
                   })}
                 </div>
 
-                {/* VISÃO COMBINADA: GRÁFICO DE VENDAS + RESUMO DO PDV */}
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-                  {/* GRÁFICO ELEGANTE */}
-                  <div className="lg:col-span-8 p-5 rounded-xl border border-white/[0.07] bg-white/[0.02] flex flex-col justify-between">
+                {/* GRÁFICO DE VENDAS CONSOLIDADAS + LIVE FEED DE FRENTE DE CAIXA */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+                  {/* GRÁFICO COM EIXOS E BARRAS COM BRILHO */}
+                  <div className="lg:col-span-8 p-5 sm:p-6 rounded-xl border border-white/[0.08] bg-white/[0.02] flex flex-col justify-between">
                     <div className="flex items-center justify-between mb-4">
                       <div>
-                        <div className="text-xs font-bold text-white">Desempenho Comercial Consolidado</div>
-                        <div className="text-[11px] text-slate-400 mt-0.5">Vendas integradas por hora (PDV Balcão + Venda Digital)</div>
+                        <div className="text-sm font-bold text-white">Desempenho Comercial Consolidado</div>
+                        <div className="text-xs text-slate-400 mt-0.5">Vendas integradas por hora (PDV Balcão + Venda Digital)</div>
                       </div>
-                      <span className="text-[10px] font-mono px-2.5 py-1 rounded-full bg-white/[0.06] text-cyan-300 border border-cyan-500/20">
+                      <span className="text-xs font-mono px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 font-semibold">
                         Hoje · Tempo Real
                       </span>
                     </div>
 
                     {/* GRÁFICO EM BARRAS DE PROPORÇÃO ELEGANTE */}
-                    <div className="h-32 w-full flex items-end gap-2 pt-4">
-                      {[25, 38, 45, 30, 60, 52, 75, 68, 85, 92, 110, 98, 120, 105].map((h, i) => (
-                        <div key={i} className="flex-1 flex flex-col items-center gap-1.5 group">
+                    <div className="h-36 w-full flex items-end gap-2 sm:gap-2.5 pt-6">
+                      {[30, 45, 52, 40, 70, 64, 88, 80, 95, 110, 125, 115, 140, 128].map((h, i) => (
+                        <div key={i} className="flex-1 flex flex-col items-center gap-2 group cursor-pointer">
                           <div
-                            style={{ height: `${(h / 120) * 100}%` }}
-                            className="w-full rounded-t-sm bg-gradient-to-t from-cyan-500/20 via-teal-400/60 to-cyan-400 group-hover:to-cyan-300 transition-all shadow-[0_0_12px_rgba(34,211,238,0.2)]"
+                            style={{ height: `${(h / 140) * 100}%` }}
+                            className="w-full rounded-t-sm bg-gradient-to-t from-teal-500/20 via-cyan-400/60 to-cyan-400 group-hover:to-cyan-200 transition-all shadow-[0_0_15px_rgba(34,211,238,0.25)]"
                           />
-                          <span className="text-[8px] font-mono text-slate-400 hidden sm:inline">
+                          <span className="text-[9px] font-mono text-slate-400 hidden sm:inline">
                             {i + 8}h
                           </span>
                         </div>
@@ -662,36 +659,37 @@ function LandingPage() {
                     </div>
                   </div>
 
-                  {/* RESUMO DO CAIXA / PDV */}
-                  <div className="lg:col-span-4 p-5 rounded-xl border border-white/[0.07] bg-white/[0.02] flex flex-col justify-between space-y-3">
+                  {/* LIVE POS TERMINAL FEED */}
+                  <div className="lg:col-span-4 p-5 sm:p-6 rounded-xl border border-white/[0.08] bg-white/[0.02] flex flex-col justify-between space-y-4">
                     <div>
                       <div className="flex items-center justify-between text-xs font-bold text-white">
                         <span>Frente de Caixa (PDV)</span>
-                        <span className="text-[10px] text-emerald-400 font-mono px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20">
-                          Terminal 01
+                        <span className="text-[10px] text-emerald-400 font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+                          Terminal 01 · Ativo
                         </span>
                       </div>
-                      <div className="text-[11px] text-slate-400 mt-0.5">Última operação registrada</div>
+                      <div className="text-xs text-slate-400 mt-1">Última operação registrada no balcão</div>
 
-                      <div className="mt-3.5 space-y-2 text-xs">
+                      <div className="mt-4 space-y-2.5 text-xs">
                         <div className="flex justify-between text-slate-300">
-                          <span className="truncate pr-2">2x Dipirona 500mg</span>
+                          <span className="truncate pr-2 font-medium">2x Dipirona Monoidratada 500mg</span>
                           <span className="font-mono text-slate-400">€ 25,00</span>
                         </div>
                         <div className="flex justify-between text-slate-300">
-                          <span className="truncate pr-2">1x Protetor Solar FPS 50</span>
+                          <span className="truncate pr-2 font-medium">1x Protetor Solar Facial FPS 50</span>
                           <span className="font-mono text-slate-400">€ 42,50</span>
                         </div>
-                        <div className="pt-2.5 border-t border-white/[0.08] flex justify-between font-bold text-white">
+                        <div className="pt-3 border-t border-white/[0.08] flex justify-between font-bold text-white text-sm">
                           <span>Total da Venda</span>
-                          <span className="font-mono text-cyan-400 text-sm">€ 67,50</span>
+                          <span className="font-mono text-cyan-400 text-base">€ 67,50</span>
                         </div>
                       </div>
                     </div>
 
-                    <div className="pt-3 text-[10px] text-slate-400 flex items-center justify-between border-t border-white/[0.08]">
-                      <span className="text-emerald-400 font-medium flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" /> Liquidado via Cartão/PIX
+                    <div className="pt-3 text-[11px] text-slate-400 flex items-center justify-between border-t border-white/[0.08]">
+                      <span className="text-emerald-400 font-medium flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]" />
+                        Liquidado via Cartão/PIX
                       </span>
                       <span className="font-mono text-slate-400">Cupom #8492</span>
                     </div>
@@ -703,30 +701,34 @@ function LandingPage() {
         </div>
       </section>
 
-      {/* SEÇÃO 2: O ECOSSISTEMA VENDRA (5 PRODUTOS COM COMPOSIÇÃO PRÓPRIA) */}
-      <section id="produtos" className="relative z-10 py-24 md:py-32 border-t border-white/[0.06] bg-[#060810]/60">
+      {/* 
+        ========================================================================
+        SEÇÃO 2: O ECOSSISTEMA VENDRA (5 PRODUTOS COM ARQUITETURA UNIFICADA)
+        ========================================================================
+      */}
+      <section id="produtos" className="relative z-10 py-24 md:py-36 border-t border-white/[0.08] bg-[#040710]/70">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl mx-auto text-center mb-14">
-            <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-cyan-400">
+          <div className="max-w-3xl mx-auto text-center mb-16">
+            <span className="text-xs font-bold uppercase tracking-[0.25em] text-cyan-400">
               Arquitetura Unificada
             </span>
-            <h2 className="text-3xl sm:text-5xl font-bold text-white mt-2 tracking-tight">
+            <h2 className="text-3xl sm:text-5xl font-extrabold text-white mt-3 tracking-tight text-balance">
               Cinco pilares. Uma única base de dados.
             </h2>
-            <p className="text-slate-400 mt-4 text-sm sm:text-base leading-relaxed">
+            <p className="text-slate-400 mt-4 text-base sm:text-lg leading-relaxed text-balance">
               Cada produto resolve uma etapa fundamental da empresa, eliminando pontes frágeis entre softwares isolados.
             </p>
           </div>
 
-          {/* SELETOR EM ABAS DOS 5 PRODUTOS COM ESTÉTICA DE VIDRO */}
-          <div className="flex flex-wrap items-center justify-center gap-1.5 p-1.5 rounded-2xl bg-white/[0.03] border border-white/[0.08] max-w-2xl mx-auto mb-12 backdrop-blur-md">
+          {/* SELETOR EM ABAS DOS 5 PRODUTOS COM ESTÉTICA DE CÁPSULA */}
+          <div className="flex flex-wrap items-center justify-center gap-2 p-1.5 rounded-full bg-white/[0.03] border border-white/[0.08] max-w-2xl mx-auto mb-14 backdrop-blur-md">
             {ECOSYSTEM_PRODUCTS.map((prod) => (
               <button
                 key={prod.id}
                 onClick={() => setActiveProductTab(prod.id)}
-                className={`flex-1 min-w-[105px] py-2.5 px-3 rounded-xl text-xs font-semibold transition-all ${
+                className={`flex-1 min-w-[110px] py-3 px-4 rounded-full text-xs font-bold transition-all ${
                   activeProductTab === prod.id
-                    ? "bg-white/10 text-white shadow-sm border border-white/15"
+                    ? "bg-gradient-to-r from-cyan-500/20 via-teal-500/20 to-emerald-500/20 text-white border border-cyan-500/30 shadow-[0_0_20px_rgba(34,211,238,0.2)]"
                     : "text-slate-400 hover:text-white"
                 }`}
               >
@@ -736,26 +738,26 @@ function LandingPage() {
           </div>
 
           {/* DEMONSTRAÇÃO EDITORIAL DO PRODUTO ATIVO */}
-          <div className="rounded-2xl border border-white/[0.08] bg-[#070A12]/80 backdrop-blur-md p-6 sm:p-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center shadow-2xl relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-80 h-80 bg-cyan-500/10 blur-[100px] pointer-events-none" />
+          <div className="rounded-3xl border border-white/[0.1] bg-[#060914]/90 backdrop-blur-xl p-8 sm:p-12 grid grid-cols-1 lg:grid-cols-12 gap-10 items-center shadow-2xl relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-500/10 blur-[120px] pointer-events-none" />
 
             {/* LADO TEXTUAL */}
-            <div className="lg:col-span-6 space-y-5">
-              <span className="text-[11px] font-mono uppercase tracking-wider text-cyan-400 font-semibold px-2.5 py-1 rounded-md bg-cyan-500/10 border border-cyan-500/20">
+            <div className="lg:col-span-6 space-y-6 text-left">
+              <span className="text-xs font-mono uppercase tracking-wider text-cyan-400 font-bold px-3 py-1.5 rounded-md bg-cyan-500/10 border border-cyan-500/20 inline-block">
                 {selectedProduct.category}
               </span>
-              <h3 className="text-2xl sm:text-3xl font-bold text-white leading-tight">
+              <h3 className="text-2xl sm:text-4xl font-extrabold text-white leading-tight">
                 {selectedProduct.tagline}
               </h3>
-              <p className="text-sm text-slate-300 leading-relaxed font-normal">
+              <p className="text-base text-slate-300 leading-relaxed font-normal">
                 {selectedProduct.description}
               </p>
 
-              <div className="space-y-3 pt-2">
+              <div className="space-y-3.5 pt-2">
                 {selectedProduct.highlights.map((h, i) => (
-                  <div key={i} className="flex items-center gap-3 text-xs text-slate-300">
-                    <div className="w-4 h-4 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center shrink-0">
-                      <Check className="w-2.5 h-2.5" />
+                  <div key={i} className="flex items-center gap-3 text-sm text-slate-200">
+                    <div className="w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center shrink-0">
+                      <Check className="w-3 h-3" />
                     </div>
                     <span>{h}</span>
                   </div>
@@ -765,55 +767,66 @@ function LandingPage() {
               <div className="pt-4">
                 <Link
                   to="/entrar"
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-cyan-400 hover:text-cyan-300 transition-colors"
+                  className="inline-flex items-center gap-2 text-sm font-bold text-cyan-400 hover:text-cyan-300 transition-colors"
                 >
-                  Ver demonstração guiada do {selectedProduct.name} <ArrowRight className="w-3.5 h-3.5" />
+                  Ver demonstração guiada do {selectedProduct.name} <ArrowRight className="w-4 h-4" />
                 </Link>
               </div>
             </div>
 
             {/* LADO VISUAL / INTERFACE SIMULADA DO PRODUTO */}
-            <div className="lg:col-span-6 rounded-xl border border-white/[0.08] bg-[#0A0E18] p-5 space-y-4 shadow-xl">
-              <div className="flex items-center justify-between border-b border-white/[0.07] pb-3 text-xs">
-                <div className="font-bold text-white">{selectedProduct.name}</div>
-                <div className="text-[10px] text-slate-400 font-mono">
+            <div className="lg:col-span-6 rounded-2xl border border-white/[0.1] bg-[#080D1C] p-6 sm:p-8 space-y-5 shadow-2xl text-left">
+              <div className="flex items-center justify-between border-b border-white/[0.08] pb-4 text-sm">
+                <div className="font-extrabold text-white text-base">{selectedProduct.name}</div>
+                <div className="text-xs text-slate-400 font-mono">
                   {selectedProduct.metricLabel}: <span className="text-cyan-400 font-bold">{selectedProduct.metricValue}</span>
+                </div>
+              </div>
+
+              {/* STAT HIGHLIGHT CARD */}
+              <div className="p-4 rounded-xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-between">
+                <div>
+                  <div className="text-2xl font-extrabold text-white tracking-tight">{selectedProduct.statNumber}</div>
+                  <div className="text-xs text-slate-400 mt-0.5">{selectedProduct.statDesc}</div>
+                </div>
+                <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 flex items-center justify-center">
+                  <BarChart3 className="w-5 h-5" />
                 </div>
               </div>
 
               {/* DEMO CONTEXTUAL DEPENDENDO DO PRODUTO */}
               {selectedProduct.id === "erp" && (
                 <div className="space-y-3 text-xs">
-                  <div className="p-3.5 rounded-lg bg-white/[0.025] border border-white/[0.05] flex justify-between items-center">
+                  <div className="p-4 rounded-xl bg-white/[0.025] border border-white/[0.06] flex justify-between items-center">
                     <div>
-                      <div className="font-medium text-slate-200">Fluxo de Caixa Consolidado</div>
-                      <div className="text-[10px] text-slate-400">Entradas, saídas e projeção de saldo</div>
+                      <div className="font-semibold text-slate-200">Fluxo de Caixa Consolidado</div>
+                      <div className="text-[11px] text-slate-400">Entradas, saídas e projeção de saldo bancário</div>
                     </div>
                     <span className="font-mono text-emerald-400 font-bold text-sm">+ € 18.250,00</span>
                   </div>
-                  <div className="p-3.5 rounded-lg bg-white/[0.025] border border-white/[0.05] flex justify-between items-center">
+                  <div className="p-4 rounded-xl bg-white/[0.025] border border-white/[0.06] flex justify-between items-center">
                     <div>
-                      <div className="font-medium text-slate-200">Compras Programadas</div>
-                      <div className="text-[10px] text-slate-400">Sugestão automática com base no giro</div>
+                      <div className="font-semibold text-slate-200">Compras Programadas</div>
+                      <div className="text-[11px] text-slate-400">Sugestão calculada automaticamente pelo giro de estoque</div>
                     </div>
-                    <span className="font-mono text-slate-300 font-medium">4 ordens prontas</span>
+                    <span className="font-mono text-slate-300 font-semibold">4 ordens prontas</span>
                   </div>
                 </div>
               )}
 
               {selectedProduct.id === "pos" && (
                 <div className="space-y-3 text-xs">
-                  <div className="p-3.5 rounded-lg bg-white/[0.025] border border-white/[0.05] flex justify-between items-center">
+                  <div className="p-4 rounded-xl bg-white/[0.025] border border-white/[0.06] flex justify-between items-center">
                     <div>
-                      <div className="font-medium text-slate-200">Leitor de Código de Barras EAN-13</div>
-                      <div className="text-[10px] text-slate-400">Identificação instantânea de item e peso</div>
+                      <div className="font-semibold text-slate-200">Leitor de Código de Barras EAN-13</div>
+                      <div className="text-[11px] text-slate-400">Identificação instantânea de item e peso</div>
                     </div>
-                    <span className="text-cyan-400 font-mono font-bold">18ms</span>
+                    <span className="text-cyan-400 font-mono font-bold text-sm">18ms</span>
                   </div>
-                  <div className="p-3.5 rounded-lg bg-white/[0.025] border border-white/[0.05] flex justify-between items-center">
+                  <div className="p-4 rounded-xl bg-white/[0.025] border border-white/[0.06] flex justify-between items-center">
                     <div>
-                      <div className="font-medium text-slate-200">Fechamento com Divergência Zero</div>
-                      <div className="text-[10px] text-slate-400">Totalização por dinheiro, cartão e PIX</div>
+                      <div className="font-semibold text-slate-200">Fechamento com Divergência Zero</div>
+                      <div className="text-[11px] text-slate-400">Totalização por dinheiro, cartão e PIX auditada</div>
                     </div>
                     <span className="text-emerald-400 font-bold">Auditado</span>
                   </div>
@@ -822,17 +835,17 @@ function LandingPage() {
 
               {selectedProduct.id === "mobile" && (
                 <div className="space-y-3 text-xs">
-                  <div className="p-3.5 rounded-lg bg-white/[0.025] border border-white/[0.05] flex justify-between items-center">
+                  <div className="p-4 rounded-xl bg-white/[0.025] border border-white/[0.06] flex justify-between items-center">
                     <div>
-                      <div className="font-medium text-slate-200">Gestão Remota de Lojas</div>
-                      <div className="text-[10px] text-slate-400">Faturamento e pedidos em tempo real</div>
+                      <div className="font-semibold text-slate-200">Gestão Remota de Lojas</div>
+                      <div className="text-[11px] text-slate-400">Faturamento e pedidos em tempo real no smartphone</div>
                     </div>
                     <span className="text-cyan-400 font-semibold">Sincronizado</span>
                   </div>
-                  <div className="p-3.5 rounded-lg bg-white/[0.025] border border-white/[0.05] flex justify-between items-center">
+                  <div className="p-4 rounded-xl bg-white/[0.025] border border-white/[0.06] flex justify-between items-center">
                     <div>
-                      <div className="font-medium text-slate-200">Alertas Operacionais</div>
-                      <div className="text-[10px] text-slate-400">Notificação de metas atingidas e estoque baixo</div>
+                      <div className="font-semibold text-slate-200">Alertas Operacionais</div>
+                      <div className="text-[11px] text-slate-400">Notificação imediata de metas atingidas e estoque baixo</div>
                     </div>
                     <span className="text-slate-300 font-mono">Push ativo</span>
                   </div>
@@ -841,17 +854,17 @@ function LandingPage() {
 
               {selectedProduct.id === "store" && (
                 <div className="space-y-3 text-xs">
-                  <div className="p-3.5 rounded-lg bg-white/[0.025] border border-white/[0.05] flex justify-between items-center">
+                  <div className="p-4 rounded-xl bg-white/[0.025] border border-white/[0.06] flex justify-between items-center">
                     <div>
-                      <div className="font-medium text-slate-200">Estoque Unificado (Loja + Web)</div>
-                      <div className="text-[10px] text-slate-400">Item vendido no balcão atualiza a loja virtual</div>
+                      <div className="font-semibold text-slate-200">Estoque Unificado (Loja + Web)</div>
+                      <div className="text-[11px] text-slate-400">Item vendido no balcão atualiza o catálogo virtual na hora</div>
                     </div>
                     <span className="text-emerald-400 font-bold">100% Sincronizado</span>
                   </div>
-                  <div className="p-3.5 rounded-lg bg-white/[0.025] border border-white/[0.05] flex justify-between items-center">
+                  <div className="p-4 rounded-xl bg-white/[0.025] border border-white/[0.06] flex justify-between items-center">
                     <div>
-                      <div className="font-medium text-slate-200">Checkout Descomplicado</div>
-                      <div className="text-[10px] text-slate-400">Pagamento online com geração direta de pedido</div>
+                      <div className="font-semibold text-slate-200">Checkout Descomplicado</div>
+                      <div className="text-[11px] text-slate-400">Pagamento online com geração direta de pedido na expedição</div>
                     </div>
                     <span className="text-cyan-400 font-semibold">Integrado</span>
                   </div>
@@ -860,17 +873,17 @@ function LandingPage() {
 
               {selectedProduct.id === "ai" && (
                 <div className="space-y-3 text-xs">
-                  <div className="p-3.5 rounded-lg bg-white/[0.025] border border-white/[0.05] flex justify-between items-center">
+                  <div className="p-4 rounded-xl bg-white/[0.025] border border-white/[0.06] flex justify-between items-center">
                     <div>
-                      <div className="font-medium text-slate-200">Motor Multiplex Integrado</div>
-                      <div className="text-[10px] text-slate-400">Consultas analíticas diretamente na base de dados</div>
+                      <div className="font-semibold text-slate-200">Motor Multiplex Integrado</div>
+                      <div className="text-[11px] text-slate-400">Consultas analíticas diretamente na base de dados da empresa</div>
                     </div>
                     <span className="text-cyan-400 font-mono font-bold">Nativo</span>
                   </div>
-                  <div className="p-3.5 rounded-lg bg-white/[0.025] border border-white/[0.05] flex justify-between items-center">
+                  <div className="p-4 rounded-xl bg-white/[0.025] border border-white/[0.06] flex justify-between items-center">
                     <div>
-                      <div className="font-medium text-slate-200">Previsão de Ruptura de Gôndola</div>
-                      <div className="text-[10px] text-slate-400">Cálculo de esgotamento pelo ritmo de vendas</div>
+                      <div className="font-semibold text-slate-200">Previsão de Ruptura de Gôndola</div>
+                      <div className="text-[11px] text-slate-400">Cálculo de esgotamento pelo ritmo histórico de vendas</div>
                     </div>
                     <span className="text-emerald-400 font-semibold">Preditivo</span>
                   </div>
@@ -881,80 +894,85 @@ function LandingPage() {
         </div>
       </section>
 
-      {/* SEÇÃO 3: GESTÃO CENTRALIZADA (EDITORIAL COM GRANDE IMAGEM DO DASHBOARD) */}
-      <section id="gestao" className="relative z-10 py-24 md:py-32 border-t border-white/[0.06]">
+      {/* 
+        ========================================================================
+        SEÇÃO 3: GESTÃO CENTRALIZADA (RELATÓRIO EXECUTIVO & FILIAIS)
+        ========================================================================
+      */}
+      <section id="gestao" className="relative z-10 py-24 md:py-36 border-t border-white/[0.08]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
             {/* TEXTO EDITORIAL */}
-            <div className="lg:col-span-5 space-y-5 text-left">
-              <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-cyan-400">
+            <div className="lg:col-span-5 space-y-6 text-left">
+              <span className="text-xs font-bold uppercase tracking-[0.25em] text-cyan-400">
                 Centralização Operacional
               </span>
-              <h2 className="text-3xl sm:text-4xl font-bold text-white tracking-tight leading-tight">
+              <h2 className="text-3xl sm:text-5xl font-extrabold text-white tracking-tight leading-tight text-balance">
                 Vendas, estoque, compras e financeiro em sintonia.
               </h2>
-              <p className="text-sm text-slate-400 leading-relaxed font-normal">
+              <p className="text-base text-slate-400 leading-relaxed font-normal">
                 Quando uma venda é registrada no Vendra POS, a baixa no estoque é imediata, a conta a receber é alimentada
                 e o relatório financeiro do Vendra ERP é atualizado instantaneamente.
               </p>
-              <div className="space-y-3 pt-2">
+              <div className="space-y-3.5 pt-2">
                 {[
                   "Fim de reconciliações manuais no final do mês",
                   "Histórico transparente de cada movimento financeiro",
                   "Controle de acesso por função (caixa, estoquista, gerente)",
-                  "Relatórios exportáveis em formatos corporativos",
+                  "Relatórios executivos consolidados de todas as filiais",
                 ].map((item, idx) => (
-                  <div key={idx} className="flex items-center gap-3 text-xs text-slate-300">
-                    <CheckCircle2 className="w-4 h-4 text-cyan-400 shrink-0" />
+                  <div key={idx} className="flex items-center gap-3 text-sm text-slate-200">
+                    <CheckCircle2 className="w-5 h-5 text-cyan-400 shrink-0" />
                     <span>{item}</span>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* DEMONSTRAÇÃO VISUAL DO DASHBOARD */}
-            <div className="lg:col-span-7 rounded-2xl border border-white/[0.1] bg-[#070A12] p-6 sm:p-7 shadow-2xl relative overflow-hidden">
-              <div className="flex items-center justify-between border-b border-white/[0.08] pb-4 mb-4">
+            {/* DEMONSTRAÇÃO VISUAL DO DEMONSTRATIVO FINANCEIRO */}
+            <div className="lg:col-span-7 rounded-3xl border border-white/[0.1] bg-[#070A14] p-6 sm:p-8 shadow-2xl relative overflow-hidden text-left">
+              <div className="flex items-center justify-between border-b border-white/[0.08] pb-4 mb-5">
                 <div className="flex items-center gap-2.5">
-                  <BarChart3 className="w-4 h-4 text-cyan-400" />
-                  <span className="text-xs font-bold text-white">Demonstrativo Financeiro e Operacional</span>
+                  <BarChart3 className="w-5 h-5 text-cyan-400" />
+                  <span className="text-sm font-extrabold text-white">Demonstrativo Financeiro e Operacional</span>
                 </div>
-                <span className="text-[11px] font-mono text-slate-400">Atualização Contínua</span>
+                <span className="text-xs font-mono text-slate-400">Atualização Contínua</span>
               </div>
 
-              {/* TABELA DE OPERAÇÕES REAIS E LEGÍVEIS */}
-              <div className="space-y-3.5">
-                <div className="grid grid-cols-3 gap-3 text-center">
-                  <div className="p-3.5 rounded-xl bg-white/[0.025] border border-white/[0.06]">
-                    <div className="text-[10px] text-slate-400 uppercase tracking-wider">Receita Bruta</div>
-                    <div className="text-base font-bold text-white mt-1">€ 48.200,00</div>
+              {/* CARDS DE RECEITA E RESULTADO */}
+              <div className="space-y-4">
+                <div className="grid grid-cols-3 gap-3.5 text-center">
+                  <div className="p-4 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+                    <div className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Receita Bruta</div>
+                    <div className="text-lg font-bold text-white mt-1">€ 48.200,00</div>
                   </div>
-                  <div className="p-3.5 rounded-xl bg-white/[0.025] border border-white/[0.06]">
-                    <div className="text-[10px] text-slate-400 uppercase tracking-wider">Custo dos Produtos</div>
-                    <div className="text-base font-bold text-slate-300 mt-1">€ 28.100,00</div>
+                  <div className="p-4 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+                    <div className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Custo dos Produtos</div>
+                    <div className="text-lg font-bold text-slate-300 mt-1">€ 28.100,00</div>
                   </div>
-                  <div className="p-3.5 rounded-xl bg-white/[0.025] border border-white/[0.06]">
-                    <div className="text-[10px] text-slate-400 uppercase tracking-wider">Resultado Líquido</div>
-                    <div className="text-base font-bold text-emerald-400 mt-1">€ 20.100,00</div>
+                  <div className="p-4 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+                    <div className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Resultado Líquido</div>
+                    <div className="text-lg font-bold text-emerald-400 mt-1">€ 20.100,00</div>
                   </div>
                 </div>
 
-                <div className="rounded-xl border border-white/[0.07] overflow-hidden text-xs">
-                  <div className="bg-white/[0.03] px-4 py-2.5 font-semibold text-slate-400 text-[11px] flex justify-between">
+                {/* TABELA DE FILIAIS COM STATUS EM TEMPO REAL */}
+                <div className="rounded-xl border border-white/[0.08] overflow-hidden text-xs">
+                  <div className="bg-white/[0.04] px-4 py-3 font-bold text-slate-300 text-xs flex justify-between">
                     <span>Filial</span>
                     <span>Vendas Hoje</span>
-                    <span>Status</span>
+                    <span>Status Operacional</span>
                   </div>
-                  <div className="divide-y divide-white/[0.04]">
+                  <div className="divide-y divide-white/[0.05]">
                     {[
                       { filial: "Matriz Centro", vendas: "€ 3.110,00", status: "Caixa Aberto" },
                       { filial: "Filial Norte", vendas: "€ 1.710,50", status: "Caixa Aberto" },
                       { filial: "Loja Virtual (Store)", vendas: "€ 890,00", status: "Integrada" },
                     ].map((row, rIdx) => (
-                      <div key={rIdx} className="px-4 py-3 flex justify-between items-center text-slate-300">
-                        <span className="font-medium text-white">{row.filial}</span>
-                        <span className="font-mono">{row.vendas}</span>
-                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                      <div key={rIdx} className="px-4 py-3.5 flex justify-between items-center text-slate-300">
+                        <span className="font-semibold text-white">{row.filial}</span>
+                        <span className="font-mono text-slate-200">{row.vendas}</span>
+                        <span className="text-[10px] font-semibold px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                           {row.status}
                         </span>
                       </div>
@@ -967,30 +985,34 @@ function LandingPage() {
         </div>
       </section>
 
-      {/* SEÇÃO 4: SEGMENTOS (LAYOUT EDITORIAL COM TELAS ESPECÍFICAS) */}
-      <section id="segmentos" className="relative z-10 py-24 md:py-32 border-t border-white/[0.06] bg-[#060810]/60">
+      {/* 
+        ========================================================================
+        SEÇÃO 4: SEGMENTOS COMERCIAIS ESPECIALIZADOS
+        ========================================================================
+      */}
+      <section id="segmentos" className="relative z-10 py-24 md:py-36 border-t border-white/[0.08] bg-[#040710]/70">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl mx-auto text-center mb-12">
-            <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-cyan-400">
+          <div className="max-w-3xl mx-auto text-center mb-14">
+            <span className="text-xs font-bold uppercase tracking-[0.25em] text-cyan-400">
               Especialização Comercial
             </span>
-            <h2 className="text-3xl sm:text-5xl font-bold text-white mt-2 tracking-tight">
+            <h2 className="text-3xl sm:text-5xl font-extrabold text-white mt-3 tracking-tight text-balance">
               Uma plataforma adaptada para cada setor.
             </h2>
-            <p className="text-slate-400 mt-4 text-sm sm:text-base leading-relaxed">
+            <p className="text-slate-400 mt-4 text-base sm:text-lg leading-relaxed text-balance">
               Selecione seu segmento e veja como o VENDRA adapta seus fluxos para a realidade do seu balcão.
             </p>
           </div>
 
-          {/* NAVEGAÇÃO DE SEGMENTOS — BOTOES COMPACTOS */}
-          <div className="flex flex-wrap items-center justify-center gap-2 mb-10">
+          {/* NAVEGAÇÃO DE SEGMENTOS — BOTOES EM PÍLULA */}
+          <div className="flex flex-wrap items-center justify-center gap-2.5 mb-12">
             {SEGMENTS_DATA.map((seg) => (
               <button
                 key={seg.id}
                 onClick={() => setActiveSegmentId(seg.id)}
-                className={`px-4 py-2 rounded-full text-xs font-semibold transition-all ${
+                className={`px-5 py-2.5 rounded-full text-xs font-bold transition-all ${
                   activeSegmentId === seg.id
-                    ? "bg-white/10 text-white border border-white/20 shadow-sm"
+                    ? "bg-white/10 text-white border border-white/25 shadow-sm"
                     : "text-slate-400 hover:text-white border border-transparent"
                 }`}
               >
@@ -1000,34 +1022,34 @@ function LandingPage() {
           </div>
 
           {/* COMPOSIÇÃO EDITORIAL DO SEGMENTO ESCOLHIDO */}
-          <div className="rounded-2xl border border-white/[0.08] bg-[#070A12]/80 backdrop-blur-md p-6 sm:p-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center shadow-2xl">
-            <div className="lg:col-span-5 space-y-4 text-left">
-              <span className="text-[11px] font-mono text-cyan-400 uppercase tracking-wider font-semibold px-2.5 py-1 rounded bg-cyan-500/10 border border-cyan-500/20">
+          <div className="rounded-3xl border border-white/[0.1] bg-[#060914]/90 backdrop-blur-xl p-8 sm:p-12 grid grid-cols-1 lg:grid-cols-12 gap-10 items-center shadow-2xl">
+            <div className="lg:col-span-5 space-y-5 text-left">
+              <span className="text-xs font-mono text-cyan-400 uppercase tracking-wider font-bold px-3 py-1.5 rounded bg-cyan-500/10 border border-cyan-500/20 inline-block">
                 {selectedSegment.focus}
               </span>
-              <h3 className="text-2xl sm:text-3xl font-bold text-white">
+              <h3 className="text-2xl sm:text-4xl font-extrabold text-white">
                 {selectedSegment.title}
               </h3>
-              <p className="text-sm text-slate-300 leading-relaxed font-normal">
+              <p className="text-base text-slate-300 leading-relaxed font-normal">
                 {selectedSegment.description}
               </p>
 
-              <div className="pt-2">
+              <div className="pt-3">
                 <Link
                   to="/entrar"
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-cyan-400 hover:text-cyan-300"
+                  className="inline-flex items-center gap-2 text-sm font-bold text-cyan-400 hover:text-cyan-300"
                 >
-                  Conhecer solução para {selectedSegment.name} <ArrowRight className="w-3.5 h-3.5" />
+                  Conhecer solução para {selectedSegment.name} <ArrowRight className="w-4 h-4" />
                 </Link>
               </div>
             </div>
 
             {/* DEMONSTRAÇÃO VISUAL DOS ATRIBUTOS ESPECÍFICOS */}
-            <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+            <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4 text-left">
               {selectedSegment.attributes.map((attr, aIdx) => (
-                <div key={aIdx} className="p-4.5 rounded-xl border border-white/[0.07] bg-white/[0.025] hover:bg-white/[0.04] transition-colors">
-                  <div className="text-xs font-bold text-white">{attr.label}</div>
-                  <div className="text-[11px] text-slate-400 mt-1 leading-relaxed">{attr.detail}</div>
+                <div key={aIdx} className="p-5 rounded-2xl border border-white/[0.08] bg-white/[0.025] hover:bg-white/[0.045] transition-colors">
+                  <div className="text-sm font-bold text-white">{attr.label}</div>
+                  <div className="text-xs text-slate-400 mt-1.5 leading-relaxed font-normal">{attr.detail}</div>
                 </div>
               ))}
             </div>
@@ -1035,83 +1057,89 @@ function LandingPage() {
         </div>
       </section>
 
-      {/* SEÇÃO 5: VENDRA AI (CONVERSA VISUAL COM DEMONSTRAÇÃO CLARA) */}
-      <section id="ia" className="relative z-10 py-24 md:py-32 border-t border-white/[0.06]">
+      {/* 
+        ========================================================================
+        SEÇÃO 5: VENDRA AI (CONVERSA VISUAL COM DEMONSTRAÇÃO CLARA)
+        ========================================================================
+      */}
+      <section id="ia" className="relative z-10 py-24 md:py-36 border-t border-white/[0.08]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl mx-auto text-center mb-14">
-            <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-cyan-400">
+          <div className="max-w-3xl mx-auto text-center mb-16">
+            <span className="text-xs font-bold uppercase tracking-[0.25em] text-cyan-400">
               Vendra AI Engine (Powered by Multiplex)
             </span>
-            <h2 className="text-3xl sm:text-5xl font-bold text-white mt-2 tracking-tight">
+            <h2 className="text-3xl sm:text-5xl font-extrabold text-white mt-3 tracking-tight text-balance">
               A inteligência artificial que entende o seu negócio.
             </h2>
-            <p className="text-slate-400 mt-4 text-sm sm:text-base leading-relaxed">
+            <p className="text-slate-400 mt-4 text-base sm:text-lg leading-relaxed text-balance">
               Consulte seu faturamento, analise tendências de estoque e receba diagnósticos operacionais em linguagem
               natural direto da sua base de dados.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
             {/* SELEÇÃO DE PERGUNTAS DE GESTÃO */}
-            <div className="lg:col-span-5 space-y-3">
-              <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2">
+            <div className="lg:col-span-5 space-y-3.5 text-left">
+              <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
                 Perguntas Frequentes de Gestão:
               </div>
               {AI_DEMO_CASES.map((item, idx) => (
                 <button
                   key={idx}
                   onClick={() => setActiveAiDemoIndex(idx)}
-                  className={`w-full p-4 rounded-xl text-left text-xs font-medium border transition-all flex items-center justify-between ${
+                  className={`w-full p-4.5 rounded-2xl text-left text-xs font-semibold border transition-all flex items-center justify-between ${
                     idx === activeAiDemoIndex
-                      ? "border-cyan-500/40 bg-white/[0.05] text-white shadow-sm"
-                      : "border-white/[0.06] bg-white/[0.015] text-slate-400 hover:text-white"
+                      ? "border-cyan-500/50 bg-white/[0.06] text-white shadow-md shadow-cyan-500/10"
+                      : "border-white/[0.08] bg-white/[0.02] text-slate-400 hover:text-white"
                   }`}
                 >
-                  <span className="pr-2">&ldquo;{item.question}&rdquo;</span>
-                  <ChevronRight className="w-3.5 h-3.5 shrink-0 text-slate-500" />
+                  <span className="pr-2 leading-relaxed">&ldquo;{item.question}&rdquo;</span>
+                  <ChevronRight className="w-4 h-4 shrink-0 text-cyan-400" />
                 </button>
               ))}
             </div>
 
             {/* PAINEL DE DIÁLOGO E INDICADORES DA IA */}
-            <div className="lg:col-span-7 rounded-2xl border border-white/[0.08] bg-[#070A12] p-6 sm:p-7 space-y-4 shadow-2xl relative overflow-hidden">
-              <div className="flex items-center justify-between border-b border-white/[0.07] pb-3 text-xs">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-6 h-6 rounded-md bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold text-xs">
+            <div className="lg:col-span-7 rounded-3xl border border-white/[0.1] bg-[#070A14] p-7 sm:p-8 space-y-5 shadow-2xl relative overflow-hidden text-left">
+              <div className="flex items-center justify-between border-b border-white/[0.08] pb-4 text-xs">
+                <div className="flex items-center gap-3">
+                  <div className="w-7 h-7 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-extrabold text-xs">
                     V
                   </div>
-                  <span className="font-bold text-white">Vendra AI</span>
-                  <span className="text-[10px] text-slate-400 font-mono">Ambiente Demonstrativo</span>
+                  <span className="font-extrabold text-white text-sm">Vendra AI</span>
+                  <span className="text-[10px] text-slate-400 font-mono px-2 py-0.5 rounded bg-white/[0.05]">
+                    Ambiente Demonstrativo
+                  </span>
                 </div>
-                <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-white/[0.06] text-cyan-300 border border-cyan-500/20">
+                <span className="text-[10px] font-mono px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 font-semibold">
                   {selectedAiDemo.tag}
                 </span>
               </div>
 
               {/* PERGUNTA */}
-              <div className="p-3.5 rounded-xl bg-white/[0.025] border border-white/[0.05] text-xs text-slate-300">
+              <div className="p-4 rounded-xl bg-white/[0.03] border border-white/[0.06] text-xs text-slate-200">
                 <span className="text-slate-400 font-mono mr-2">Pergunta do Gestor:</span>
                 &ldquo;{selectedAiDemo.question}&rdquo;
               </div>
 
               {/* RESPOSTA ANALÍTICA */}
-              <div className="p-4.5 rounded-xl bg-cyan-500/[0.04] border border-cyan-500/25 space-y-3">
-                <p className="text-xs text-slate-200 leading-relaxed font-normal">
+              <div className="p-5 rounded-xl bg-cyan-500/[0.05] border border-cyan-500/30 space-y-4">
+                <p className="text-xs sm:text-sm text-slate-200 leading-relaxed font-normal">
                   {selectedAiDemo.answer}
                 </p>
 
-                <div className="grid grid-cols-3 gap-2 pt-2.5 border-t border-cyan-500/15">
+                <div className="grid grid-cols-3 gap-2 pt-3 border-t border-cyan-500/20">
                   {selectedAiDemo.details.map((d, i) => (
                     <div key={i} className="text-center">
                       <div className="text-[9px] text-slate-400 uppercase tracking-wider">{d.label}</div>
-                      <div className="text-xs font-bold text-cyan-300 mt-0.5 font-mono">{d.val}</div>
+                      <div className="text-xs sm:text-sm font-bold text-cyan-300 mt-0.5 font-mono">{d.val}</div>
                     </div>
                   ))}
                 </div>
               </div>
 
-              <div className="pt-2 text-[10px] text-slate-400 flex items-center gap-1.5">
-                <Lock className="w-3 h-3 text-cyan-400" />
+              <div className="pt-2 text-xs text-slate-400 flex items-center gap-2">
+                <Lock className="w-3.5 h-3.5 text-cyan-400" />
                 Seus dados empresariais operam em ambiente seguro e isolado por tenant.
               </div>
             </div>
@@ -1119,22 +1147,26 @@ function LandingPage() {
         </div>
       </section>
 
-      {/* SEÇÃO 6: MULTIPLATAFORMA (DESKTOP, PDV, TABLET E SMARTPHONE) */}
-      <section id="multiplataforma" className="relative z-10 py-24 md:py-32 border-t border-white/[0.06] bg-[#060810]/60">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="max-w-3xl mx-auto mb-14">
-            <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-cyan-400">
+      {/* 
+        ========================================================================
+        SEÇÃO 6: MULTIPLATAFORMA (DESKTOP, PDV, TABLET E SMARTPHONE)
+        ========================================================================
+      */}
+      <section id="multiplataforma" className="relative z-10 py-24 md:py-36 border-t border-white/[0.08] bg-[#040710]/70 text-center">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-3xl mx-auto mb-16">
+            <span className="text-xs font-bold uppercase tracking-[0.25em] text-cyan-400">
               Flexibilidade Operacional
             </span>
-            <h2 className="text-3xl sm:text-5xl font-bold text-white mt-2 tracking-tight">
+            <h2 className="text-3xl sm:text-5xl font-extrabold text-white mt-3 tracking-tight text-balance">
               Sua empresa opera em qualquer dispositivo.
             </h2>
-            <p className="text-slate-400 mt-4 text-sm sm:text-base leading-relaxed">
+            <p className="text-slate-400 mt-4 text-base sm:text-lg leading-relaxed text-balance">
               Do escritório de retaguarda ao balcão de vendas e à gestão em trânsito.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-left">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 text-left">
             {[
               {
                 title: "Painel Web",
@@ -1165,15 +1197,15 @@ function LandingPage() {
               return (
                 <div
                   key={i}
-                  className="p-6 rounded-2xl border border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.035] transition-all flex flex-col justify-between"
+                  className="p-7 rounded-2xl border border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.04] transition-all flex flex-col justify-between"
                 >
                   <div>
-                    <div className="w-10 h-10 rounded-xl bg-white/[0.05] border border-white/[0.08] flex items-center justify-center text-cyan-400 mb-4">
-                      <Icon className="w-5 h-5" />
+                    <div className="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 mb-5">
+                      <Icon className="w-6 h-6" />
                     </div>
-                    <div className="text-sm font-bold text-white">{d.title}</div>
-                    <div className="text-[10px] text-cyan-400 font-mono mt-0.5">{d.subtitle}</div>
-                    <p className="text-xs text-slate-400 mt-3 leading-relaxed font-normal">{d.desc}</p>
+                    <div className="text-base font-bold text-white">{d.title}</div>
+                    <div className="text-xs text-cyan-400 font-mono mt-0.5">{d.subtitle}</div>
+                    <p className="text-xs text-slate-400 mt-3.5 leading-relaxed font-normal">{d.desc}</p>
                   </div>
                 </div>
               );
@@ -1182,70 +1214,74 @@ function LandingPage() {
         </div>
       </section>
 
-      {/* SEÇÃO 7: PLANOS E PREÇOS TRANSPARENTES (SEM ALEGAÇÕES INDEVIDAS) */}
-      <section id="planos" className="relative z-10 py-24 md:py-32 border-t border-white/[0.06]">
+      {/* 
+        ========================================================================
+        SEÇÃO 7: PLANOS E PREÇOS TRANSPARENTES
+        ========================================================================
+      */}
+      <section id="planos" className="relative z-10 py-24 md:py-36 border-t border-white/[0.08]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl mx-auto text-center mb-14">
-            <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-cyan-400">
+          <div className="max-w-3xl mx-auto text-center mb-16">
+            <span className="text-xs font-bold uppercase tracking-[0.25em] text-cyan-400">
               Transparência Comercial
             </span>
-            <h2 className="text-3xl sm:text-5xl font-bold text-white mt-2 tracking-tight">
+            <h2 className="text-3xl sm:text-5xl font-extrabold text-white mt-3 tracking-tight text-balance">
               Planos objetivos para cada estágio do seu negócio.
             </h2>
-            <p className="text-slate-400 mt-4 text-sm leading-relaxed">
+            <p className="text-slate-400 mt-4 text-base leading-relaxed text-balance">
               Valores mensais sem IVA. Cancele ou altere a qualquer momento sem pegadinhas.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch max-w-5xl mx-auto text-left">
             {APPROVED_PLANS.map((plan, idx) => (
               <div
                 key={idx}
-                className={`rounded-2xl p-8 border flex flex-col justify-between transition-all relative ${
+                className={`rounded-3xl p-8 sm:p-9 border flex flex-col justify-between transition-all relative ${
                   plan.featured
-                    ? "border-cyan-500/40 bg-gradient-to-b from-white/[0.05] via-[#090D18] to-[#070A12] shadow-[0_0_50px_rgba(34,211,238,0.15)]"
+                    ? "border-cyan-500/50 bg-gradient-to-b from-white/[0.06] via-[#090D1A] to-[#060914] shadow-[0_0_60px_rgba(34,211,238,0.2)]"
                     : "border-white/[0.08] bg-white/[0.02]"
                 }`}
               >
                 {plan.badge && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3.5 py-0.5 rounded-full bg-gradient-to-r from-cyan-400 to-teal-400 text-slate-950 text-[10px] font-bold uppercase tracking-wider shadow-sm">
+                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-gradient-to-r from-cyan-400 to-teal-400 text-slate-950 text-[10px] font-extrabold uppercase tracking-wider shadow-md">
                     {plan.badge}
                   </div>
                 )}
 
                 <div>
-                  <h3 className="text-lg font-bold text-white">{plan.name}</h3>
-                  <div className="flex items-baseline gap-1 mt-3">
-                    <span className="text-4xl font-bold text-white tracking-tight">{plan.price}</span>
-                    <span className="text-slate-400 text-xs font-medium">{plan.period}</span>
+                  <h3 className="text-xl font-bold text-white">{plan.name}</h3>
+                  <div className="flex items-baseline gap-1.5 mt-4">
+                    <span className="text-4xl sm:text-5xl font-extrabold text-white tracking-tight">{plan.price}</span>
+                    <span className="text-slate-400 text-sm font-medium">{plan.period}</span>
                   </div>
-                  <p className="text-xs text-slate-400 mt-2.5 leading-relaxed font-normal">{plan.tagline}</p>
+                  <p className="text-xs text-slate-400 mt-3 leading-relaxed font-normal">{plan.tagline}</p>
 
-                  <div className="my-6 border-t border-white/[0.06]" />
+                  <div className="my-7 border-t border-white/[0.08]" />
 
-                  <div className="space-y-3">
-                    <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">
+                  <div className="space-y-3.5">
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">
                       Recursos inclusos:
                     </div>
                     {plan.features.map((feat, fIdx) => (
-                      <div key={fIdx} className="flex items-start gap-2.5 text-xs text-slate-300">
-                        <Check className="w-3.5 h-3.5 text-cyan-400 shrink-0 mt-0.5" />
+                      <div key={fIdx} className="flex items-start gap-3 text-xs text-slate-300">
+                        <Check className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
                         <span>{feat}</span>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                <div className="mt-8 pt-5 border-t border-white/[0.06]">
+                <div className="mt-9 pt-6 border-t border-white/[0.08]">
                   <Link
                     to="/entrar"
-                    className={`w-full py-3 rounded-full font-bold text-xs tracking-wide transition-all flex items-center justify-center gap-2 active:scale-95 ${
+                    className={`w-full py-3.5 rounded-full font-bold text-xs tracking-wider uppercase transition-all flex items-center justify-center gap-2 active:scale-95 ${
                       plan.featured
-                        ? "bg-gradient-to-r from-cyan-400 to-teal-400 hover:brightness-110 text-slate-950 shadow-md shadow-cyan-500/25"
-                        : "border border-white/10 hover:border-white/20 bg-white/[0.03] text-white"
+                        ? "bg-gradient-to-r from-cyan-400 to-teal-400 hover:brightness-110 text-slate-950 shadow-md shadow-cyan-500/30"
+                        : "border border-white/12 hover:border-white/25 bg-white/[0.04] text-white"
                     }`}
                   >
-                    {plan.cta} <ArrowRight className="w-3.5 h-3.5" />
+                    {plan.cta} <ArrowRight className="w-4 h-4" />
                   </Link>
                 </div>
               </div>
@@ -1254,29 +1290,33 @@ function LandingPage() {
         </div>
       </section>
 
-      {/* SEÇÃO 8: CONVERSÃO FINAL & RODAPÉ EDITORIAL */}
-      <section className="relative z-10 py-24 md:py-32 border-t border-white/[0.06] bg-[#060810]/60 relative overflow-hidden">
+      {/* 
+        ========================================================================
+        SEÇÃO 8: CONVERSÃO FINAL & RODAPÉ EDITORIAL
+        ========================================================================
+      */}
+      <section className="relative z-10 py-24 md:py-36 border-t border-white/[0.08] bg-[#040710]/70 text-center relative overflow-hidden">
         {/* Glow de fundo */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-cyan-500/10 blur-[130px] rounded-full pointer-events-none" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[650px] h-[350px] bg-cyan-500/10 blur-[140px] rounded-full pointer-events-none" />
 
-        <div className="max-w-4xl mx-auto px-4 text-center relative z-10">
-          <h2 className="text-3xl sm:text-5xl font-bold text-white tracking-tight">
+        <div className="max-w-4xl mx-auto px-4 relative z-10">
+          <h2 className="text-3xl sm:text-5xl font-extrabold text-white tracking-tight text-balance">
             Seu negócio merece o próximo nível.
           </h2>
-          <p className="mt-4 text-sm sm:text-base text-slate-400 max-w-xl mx-auto leading-relaxed">
+          <p className="mt-4 text-base sm:text-lg text-slate-400 max-w-xl mx-auto leading-relaxed text-balance">
             Centralize sua operação, simplifique processos de balcão e tome decisões respaldadas em dados reais.
           </p>
 
-          <div className="mt-9 flex flex-col sm:flex-row items-center justify-center gap-3.5">
+          <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
               to="/entrar"
-              className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-gradient-to-r from-cyan-400 via-teal-400 to-cyan-500 hover:brightness-110 text-slate-950 font-bold text-xs tracking-wide shadow-[0_0_30px_rgba(34,211,238,0.35)] transition-all flex items-center justify-center gap-2"
+              className="w-full sm:w-auto px-9 py-4 rounded-full bg-gradient-to-r from-cyan-400 via-teal-400 to-emerald-400 hover:brightness-110 text-slate-950 font-extrabold text-xs tracking-wider uppercase shadow-[0_0_35px_rgba(45,212,191,0.35)] transition-all flex items-center justify-center gap-2"
             >
               Começar agora <ArrowRight className="w-4 h-4" />
             </Link>
             <Link
               to="/entrar"
-              className="w-full sm:w-auto px-8 py-3.5 rounded-full border border-white/10 hover:border-white/20 bg-white/[0.04] text-white font-medium text-xs transition-all flex items-center justify-center gap-2"
+              className="w-full sm:w-auto px-9 py-4 rounded-full border border-white/12 hover:border-white/25 bg-white/[0.04] text-white font-semibold text-xs tracking-wide transition-all flex items-center justify-center gap-2"
             >
               Solicitar demonstração
             </Link>
@@ -1285,31 +1325,31 @@ function LandingPage() {
       </section>
 
       {/* RODAPÉ EDITORIAL ELEGANTE */}
-      <footer className="relative z-10 border-t border-white/[0.06] bg-[#04060A] py-16 text-xs text-slate-400">
+      <footer className="relative z-10 border-t border-white/[0.08] bg-[#020409] py-16 text-xs text-slate-400 text-left">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-8 mb-12">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-10 mb-12">
             {/* IDENTIDADE */}
-            <div className="col-span-2 space-y-3.5">
-              <div className="flex items-center gap-2.5">
-                <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-cyan-400 to-teal-400 text-slate-950 flex items-center justify-center font-black text-xs">
+            <div className="col-span-2 space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-cyan-400 to-teal-400 text-slate-950 flex items-center justify-center font-black text-sm">
                   V
                 </div>
                 <div className="flex flex-col">
-                  <span className="font-extrabold text-white text-sm">VENDRA</span>
-                  <span className="text-[9px] text-slate-400 uppercase tracking-widest font-medium">by BonaSoft</span>
+                  <span className="font-extrabold text-white text-base">VENDRA</span>
+                  <span className="text-[10px] text-slate-400 uppercase tracking-widest font-semibold">by BonaSoft</span>
                 </div>
               </div>
               <p className="text-slate-400 text-xs max-w-sm leading-relaxed">
                 Plataforma integrada de gestão comercial, ponto de venda e inteligência artificial empresarial.
               </p>
-              <div className="text-[11px] text-slate-400">
+              <div className="text-[11px] text-slate-500">
                 BonaSoft Technologies. Todos os direitos reservados.
               </div>
             </div>
 
             {/* PRODUTOS */}
-            <div className="space-y-2.5">
-              <div className="font-semibold text-white text-xs">Produtos</div>
+            <div className="space-y-3">
+              <div className="font-bold text-white text-xs uppercase tracking-wider">Produtos</div>
               <ul className="space-y-2 text-slate-400">
                 <li><a href="#produtos" className="hover:text-white transition-colors">Vendra ERP</a></li>
                 <li><a href="#produtos" className="hover:text-white transition-colors">Vendra POS</a></li>
@@ -1320,8 +1360,8 @@ function LandingPage() {
             </div>
 
             {/* SEGMENTOS */}
-            <div className="space-y-2.5">
-              <div className="font-semibold text-white text-xs">Segmentos</div>
+            <div className="space-y-3">
+              <div className="font-bold text-white text-xs uppercase tracking-wider">Segmentos</div>
               <ul className="space-y-2 text-slate-400">
                 <li><a href="#segmentos" className="hover:text-white transition-colors">Farmácias</a></li>
                 <li><a href="#segmentos" className="hover:text-white transition-colors">Supermercados</a></li>
@@ -1332,18 +1372,18 @@ function LandingPage() {
             </div>
 
             {/* INSTITUCIONAL */}
-            <div className="space-y-2.5">
-              <div className="font-semibold text-white text-xs">Institucional</div>
+            <div className="space-y-3">
+              <div className="font-bold text-white text-xs uppercase tracking-wider">Institucional</div>
               <ul className="space-y-2 text-slate-400">
                 <li><Link to="/entrar" className="hover:text-white transition-colors">Central de Acesso</Link></li>
                 <li><a href="#planos" className="hover:text-white transition-colors">Planos & Preços</a></li>
-                <li><span className="text-slate-400">Termos de Uso</span></li>
-                <li><span className="text-slate-400">Privacidade</span></li>
+                <li><span className="text-slate-500">Termos de Uso</span></li>
+                <li><span className="text-slate-500">Privacidade</span></li>
               </ul>
             </div>
           </div>
 
-          <div className="pt-8 border-t border-white/[0.06] flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-slate-400">
+          <div className="pt-8 border-t border-white/[0.06] flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-slate-500">
             <div>© {new Date().getFullYear()} VENDRA by BonaSoft. Gestão comercial e tecnologia empresarial.</div>
             <div>Brasil & Espanha</div>
           </div>
