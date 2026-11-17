@@ -187,3 +187,9 @@
 @media (prefers-reduced-motion: reduce) {
   .animate-chat-enter { animation: none; }
 }
+
+@utility font-hero {
+  font-family: "Syne", "Inter", ui-sans-serif, sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.035em;
+}
