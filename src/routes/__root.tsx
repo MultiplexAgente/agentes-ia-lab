@@ -96,7 +96,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;600&display=swap",
       },
-      { rel: "icon", href: "/images/multiplex-atom.jpg", type: "image/jpeg" },
+      { rel: "icon", href: "/favicon.ico" },
+      { rel: "icon", href: "/images/hug-icon.jpg", type: "image/jpeg" },
+      { rel: "apple-touch-icon", href: "/images/hug-icon.jpg" },
     ],
   }),
   shellComponent: RootShell,
@@ -117,6 +119,22 @@ function RootShell({ children }: { children: ReactNode }) {
           }}
         />
         
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){
+              function purge(){
+                var b=document.querySelectorAll('#lovable-badge,[id*="lovable"],[class*="lovable-badge"],[data-lovable-badge],a[href*="lovable.dev"]');
+                for(var i=0;i<b.length;i++){b[i].remove();}
+              }
+              try{
+                purge();
+                if(window.MutationObserver){
+                  new MutationObserver(purge).observe(document.documentElement,{childList:true,subtree:true});
+                }
+              }catch(e){}
+            })();`,
+          }}
+        />
       </head>
       <body>
         {children}

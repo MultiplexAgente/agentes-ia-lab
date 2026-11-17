@@ -285,9 +285,14 @@ function Landing() {
         <div className="mx-auto flex h-16 max-w-[1400px] items-center justify-between px-6 sm:h-20 sm:px-10">
           <Link
             to="/"
-            className="text-[14px] font-medium tracking-[0.45em] sm:text-[16px] sm:tracking-[0.55em] text-foreground transition-colors hover:text-white"
+            className="flex items-center gap-2.5 text-[14px] font-medium tracking-[0.45em] sm:text-[16px] sm:tracking-[0.55em] text-foreground transition-colors hover:text-white"
           >
-            HUG
+            <img
+              src="/images/hug-icon.jpg"
+              alt="HUG"
+              className="h-7 w-7 rounded-full object-cover shadow-sm ring-1 ring-emerald-500/40"
+            />
+            <span>HUG</span>
           </Link>
 
           <nav className="hidden items-center gap-9 text-xs tracking-wider uppercase text-muted-foreground/80 md:flex">
