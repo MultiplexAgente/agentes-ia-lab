@@ -24,7 +24,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "HUG by BonaSoft — Vendas, gestão, ponto de venda, catálogo e inteligência comercial integrados em uma única órbita tecnológica.",
+          "HUG by BonaSoft — Vendas, gestão, ponto de venda, catálogo e inteligência comercial integrados em uma única plataforma.",
       },
       { property: "og:title", content: "HUG — Seu negócio, em outra órbita" },
       {
@@ -361,7 +361,7 @@ function Landing() {
             className="mt-6 max-w-2xl text-base sm:text-lg md:text-xl leading-relaxed text-slate-300/90 font-light"
           >
             Vendas, estoque, gestão empresarial e inteligência comercial integrados em uma única
-            órbita tecnológica.
+            plataforma.
           </motion.p>
 
           <motion.div
