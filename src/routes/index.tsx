@@ -398,10 +398,7 @@ function Landing() {
       */}
       <section id="pilares" className="relative mx-auto max-w-[1400px] px-6 pt-8 pb-14 sm:pt-10 sm:pb-20 md:px-12">
         <Reveal className="max-w-4xl mb-8 sm:mb-10">
-          <span className="font-mono text-xs uppercase tracking-[0.4em] text-emerald-400">
-            ARQUITETURA COMERCIAL
-          </span>
-          <h2 className="mt-2.5 text-3xl sm:text-5xl md:text-6xl font-medium leading-[1.12] sm:leading-[1.08] tracking-[-0.03em] text-white">
+          <h2 className="text-3xl sm:text-5xl md:text-6xl font-medium leading-[1.12] sm:leading-[1.08] tracking-[-0.03em] text-white">
             Tudo que sua empresa precisa para vender.
             <br />
             <span className="text-muted-foreground">Nada que ela não precise.</span>
