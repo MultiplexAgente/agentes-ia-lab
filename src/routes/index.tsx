@@ -184,11 +184,11 @@ const COMMERCIAL_SECTORS = [
   },
   {
     id: "construcao",
-    name: "Construção",
-    title: "Materiais de Construção",
+    name: "Materiais & Ferramentas",
+    title: "Materiais de Construção & Ferramentas",
     narrative:
-      "Venda fracionada (m², kg, metro linear), carregamento por lote e logística ágil de pronta entrega.",
-    kpi: "Conversão de Unidades · Logística Ágil",
+      "Venda ágil no balcão e televendas, conversão fracionada de unidades (m², kg, metro linear, saco, barra de ferro), controle de estoque de ferramentas e expedição de entregas.",
+    kpi: "Balcão & Entregas · Venda Fracionada",
     image:
       "https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=1600&q=85",
   },

@@ -83,10 +83,10 @@ const EDITORIAL_SECTORS = [
   },
   {
     id: "construcao",
-    name: "Materiais de Construção",
-    title: "Home Centers & Depósitos",
-    tagline: "Venda fracionada (m², kg, metro linear), carregamento por lote e integração de pronta entrega.",
-    kpi: "Conversão de Unidades · Logística Ágil",
+    name: "Materiais & Ferramentas",
+    title: "Materiais de Construção & Ferramentas",
+    tagline: "Venda no balcão e televendas, conversão fracionada (m², kg, metro linear, saco, barra), controle de ferramentas e expedição de entregas.",
+    kpi: "Conversão de Unidades · Logística de Entrega",
     image:
       "https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=1600&q=85",
   },
