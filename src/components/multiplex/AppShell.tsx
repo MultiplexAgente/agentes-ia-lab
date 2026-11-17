@@ -25,7 +25,7 @@ import { cn } from "@/lib/utils";
 const ENTERPRISE_NAV = [
   { to: "/inicio", label: "Início", icon: LayoutDashboard },
   { to: "/pdv", label: "Frente de Caixa", icon: Store },
-  { to: "/", label: "Conversas", icon: MessageSquare },
+  { to: "/conversas", label: "Conversas & IA", icon: MessageSquare },
   { to: "/clientes", label: "Clientes", icon: Users },
   { to: "/catalogo", label: "Catálogo", icon: Boxes },
   { to: "/pedidos", label: "Pedidos", icon: ShoppingBag },
@@ -74,7 +74,7 @@ export function AppShell({ children, secondary }: { children: ReactNode; seconda
 
   // Proteção de rotas da empresa: visitantes são direcionados para /entrar
   useEffect(() => {
-    const isProtected = ["/inicio", "/pdv", "/clientes", "/catalogo", "/pedidos", "/integracoes", "/empresa"].some(
+    const isProtected = ["/inicio", "/pdv", "/conversas", "/clientes", "/catalogo", "/pedidos", "/integracoes", "/empresa"].some(
       (path) => pathname === path || pathname.startsWith(`${path}/`),
     );
     if (isProtected && !loading && !getToken()) {
@@ -136,7 +136,7 @@ export function AppShell({ children, secondary }: { children: ReactNode; seconda
               Operações
             </p>
             {ENTERPRISE_NAV.map((item) => {
-              const active = item.to === "/" ? pathname === "/" : pathname.startsWith(item.to);
+              const active = pathname === item.to || pathname.startsWith(`${item.to}/`);
               return (
                 <Link
                   key={item.to}

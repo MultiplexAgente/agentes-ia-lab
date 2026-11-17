@@ -10,8 +10,10 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppRouteImport } from './routes/app'
 import { Route as CatalogoRouteImport } from './routes/catalogo'
 import { Route as ClientesRouteImport } from './routes/clientes'
+import { Route as ConversasRouteImport } from './routes/conversas'
 import { Route as EmpresaRouteImport } from './routes/empresa'
 import { Route as EntrarRouteImport } from './routes/entrar'
 import { Route as InicioRouteImport } from './routes/inicio'
@@ -42,6 +44,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppRoute = AppRouteImport.update({
+  id: '/app',
+  path: '/app',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CatalogoRoute = CatalogoRouteImport.update({
   id: '/catalogo',
   path: '/catalogo',
@@ -50,6 +57,11 @@ const CatalogoRoute = CatalogoRouteImport.update({
 const ClientesRoute = ClientesRouteImport.update({
   id: '/clientes',
   path: '/clientes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConversasRoute = ConversasRouteImport.update({
+  id: '/conversas',
+  path: '/conversas',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EmpresaRoute = EmpresaRouteImport.update({
@@ -176,8 +188,10 @@ const ApiPublicWhatsappWebhookRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/app': typeof AppRoute
   '/catalogo': typeof CatalogoRoute
   '/clientes': typeof ClientesRoute
+  '/conversas': typeof ConversasRoute
   '/empresa': typeof EmpresaRoute
   '/entrar': typeof EntrarRoute
   '/inicio': typeof InicioRoute
@@ -205,8 +219,10 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/app': typeof AppRoute
   '/catalogo': typeof CatalogoRoute
   '/clientes': typeof ClientesRoute
+  '/conversas': typeof ConversasRoute
   '/empresa': typeof EmpresaRoute
   '/entrar': typeof EntrarRoute
   '/inicio': typeof InicioRoute
@@ -235,8 +251,10 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/app': typeof AppRoute
   '/catalogo': typeof CatalogoRoute
   '/clientes': typeof ClientesRoute
+  '/conversas': typeof ConversasRoute
   '/empresa': typeof EmpresaRoute
   '/entrar': typeof EntrarRoute
   '/inicio': typeof InicioRoute
@@ -266,8 +284,10 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/app'
     | '/catalogo'
     | '/clientes'
+    | '/conversas'
     | '/empresa'
     | '/entrar'
     | '/inicio'
@@ -295,8 +315,10 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/app'
     | '/catalogo'
     | '/clientes'
+    | '/conversas'
     | '/empresa'
     | '/entrar'
     | '/inicio'
@@ -324,8 +346,10 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/app'
     | '/catalogo'
     | '/clientes'
+    | '/conversas'
     | '/empresa'
     | '/entrar'
     | '/inicio'
@@ -354,8 +378,10 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AppRoute: typeof AppRoute
   CatalogoRoute: typeof CatalogoRoute
   ClientesRoute: typeof ClientesRoute
+  ConversasRoute: typeof ConversasRoute
   EmpresaRoute: typeof EmpresaRoute
   EntrarRoute: typeof EntrarRoute
   InicioRoute: typeof InicioRoute
@@ -391,6 +417,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app': {
+      id: '/app'
+      path: '/app'
+      fullPath: '/app'
+      preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/catalogo': {
       id: '/catalogo'
       path: '/catalogo'
@@ -403,6 +436,13 @@ declare module '@tanstack/react-router' {
       path: '/clientes'
       fullPath: '/clientes'
       preLoaderRoute: typeof ClientesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/conversas': {
+      id: '/conversas'
+      path: '/conversas'
+      fullPath: '/conversas'
+      preLoaderRoute: typeof ConversasRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/empresa': {
@@ -578,8 +618,10 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AppRoute: AppRoute,
   CatalogoRoute: CatalogoRoute,
   ClientesRoute: ClientesRoute,
+  ConversasRoute: ConversasRoute,
   EmpresaRoute: EmpresaRoute,
   EntrarRoute: EntrarRoute,
   InicioRoute: InicioRoute,
