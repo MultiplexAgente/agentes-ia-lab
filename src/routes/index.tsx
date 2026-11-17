@@ -45,7 +45,6 @@ const ease = [0.22, 1, 0.36, 1] as const;
 const NARRATIVE_PILLARS = [
   {
     step: "01",
-    tag: "VENDA FLUÍDA",
     title: "Venda em qualquer frente.",
     subtitle: "Do balcão físico ao catálogo online e canais de mensagem.",
     description:
@@ -60,7 +59,6 @@ const NARRATIVE_PILLARS = [
   },
   {
     step: "02",
-    tag: "CONTROLE OPERACIONAL",
     title: "Controle absoluto em tempo real.",
     subtitle: "Estoque, clientes e faturamento sem planilhas soltas.",
     description:
@@ -75,7 +73,6 @@ const NARRATIVE_PILLARS = [
   },
   {
     step: "03",
-    tag: "INTELIGÊNCIA REAL",
     title: "Inteligência que entende o seu negócio.",
     subtitle: "Uma assistente conectada à realidade dos seus dados.",
     description:
@@ -431,9 +428,6 @@ function Landing() {
 
                 {/* Conteúdo Editorial com Alto Espaço Negativo */}
                 <Reveal delay={0.2} className="w-full lg:w-2/5 space-y-4">
-                  <span className="text-xs font-mono uppercase tracking-[0.3em] text-emerald-400">
-                    {item.tag}
-                  </span>
                   <h3 className="text-2xl sm:text-3xl md:text-4xl font-medium tracking-tight text-white leading-tight">
                     {item.title}
                   </h3>
@@ -528,9 +522,6 @@ function Landing() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             {/* Texto de Apresentação */}
             <Reveal className="space-y-4 max-w-xl">
-              <span className="text-xs font-mono uppercase tracking-[0.4em] text-emerald-400">
-                HUG INTELLIGENCE
-              </span>
               <h2 className="text-3xl sm:text-5xl md:text-6xl font-medium leading-[1.08] tracking-[-0.03em] text-white">
                 Você pede.
                 <br />
@@ -602,10 +593,7 @@ function Landing() {
       */}
       <section id="segmentos" className="relative mx-auto max-w-[1400px] px-6 py-14 sm:py-18 md:px-12">
         <Reveal className="max-w-3xl mb-8 sm:mb-10">
-          <span className="font-mono text-xs uppercase tracking-[0.4em] text-emerald-400">
-            SEGMENTOS ATENDIDOS
-          </span>
-          <h2 className="mt-2.5 text-3xl sm:text-5xl font-medium tracking-tight text-white">
+          <h2 className="text-3xl sm:text-5xl font-medium tracking-tight text-white">
             Soluções especializadas para cada setor.
           </h2>
           <p className="mt-2 text-base sm:text-lg text-slate-400 font-light">
