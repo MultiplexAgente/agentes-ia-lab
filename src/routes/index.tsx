@@ -498,10 +498,7 @@ function Landing() {
       >
         <div className="mx-auto max-w-[1400px] px-6 md:px-12">
           <Reveal className="max-w-3xl mb-20">
-            <span className="font-mono text-xs uppercase tracking-[0.4em] text-emerald-400">
-              ECOSSISTEMA HUG
-            </span>
-            <h2 className="mt-4 text-3xl sm:text-5xl font-medium tracking-tight text-white">
+            <h2 className="text-3xl sm:text-5xl font-medium tracking-tight text-white">
               Cinco frentes sincronizadas.
               <br />
               <span className="text-muted-foreground">Uma única operação comercial.</span>
