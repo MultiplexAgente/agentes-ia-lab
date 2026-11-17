@@ -377,9 +377,6 @@ function Landing() {
               href={getBonaSoftWhatsAppUrl("Olá, BonaSoft! Quero começar a usar o HUG no meu negócio.")}
               target="_blank"
               rel="noopener noreferrer"
-              onClick={() =>
-                window.__lovableEvents?.track?.("project.cta_clicked", { cta: "comecar_agora_whatsapp" })
-              }
               className="group inline-flex w-full max-w-xs justify-center items-center gap-3 sm:w-auto rounded-full border border-white/15 bg-white/[0.05] px-8 py-4 text-sm font-medium text-white backdrop-blur-md transition-all duration-300 hover:border-emerald-400/60 hover:bg-white/[0.12] active:bg-zinc-700 active:border-zinc-500 active:text-zinc-200 active:scale-[0.98]"
             >
               <span>Começar no WhatsApp</span>
@@ -766,9 +763,6 @@ function Landing() {
               href={getBonaSoftWhatsAppUrl("Olá, BonaSoft! Quero levar a operação da minha empresa para a plataforma HUG.")}
               target="_blank"
               rel="noopener noreferrer"
-              onClick={() =>
-                window.__lovableEvents?.track?.("project.cta_clicked", { cta: "whatsapp_bonasoft_footer" })
-              }
               className="group relative inline-flex items-center gap-3 rounded-full border border-white/20 bg-white/[0.08] px-9 py-4 text-sm font-medium text-white backdrop-blur-md transition-all duration-300 hover:border-emerald-400/60 hover:bg-white/[0.16] hover:shadow-[0_0_25px_rgba(255,255,255,0.1)] active:bg-zinc-700 active:border-zinc-500 active:scale-[0.98]"
             >
               Falar no WhatsApp da BonaSoft

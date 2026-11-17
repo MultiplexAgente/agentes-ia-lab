@@ -187,3 +187,26 @@
 @media (prefers-reduced-motion: reduce) {
   .animate-chat-enter { animation: none; }
 }
+
+/* Ocultacao absoluta e remocao total de badges, tags e scripts da Lovable */
+#lovable-badge,
+[id*="lovable"],
+[class*="lovable-badge"],
+[data-lovable-badge],
+a[href*="lovable.dev"],
+iframe[src*="lovable"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  max-width: 0 !important;
+  max-height: 0 !important;
+  overflow: hidden !important;
+  position: absolute !important;
+  left: -99999px !important;
+  top: -99999px !important;
+  z-index: -99999 !important;
+}
+
