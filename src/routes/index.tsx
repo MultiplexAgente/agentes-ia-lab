@@ -449,11 +449,6 @@ function Landing() {
                       className="absolute inset-0 h-full w-full object-cover object-center brightness-[0.6] contrast-[1.05] transition-transform duration-1000 group-hover:scale-105"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-[#03060a] via-transparent to-transparent pointer-events-none" />
-                    <div className="absolute top-6 left-6 z-10 inline-flex items-center gap-2 rounded-full border border-white/15 bg-black/60 px-3.5 py-1 text-xs font-mono text-emerald-300 backdrop-blur-md">
-                      <span>ATO {item.step}</span>
-                      <span className="text-white/40">·</span>
-                      <span>{item.tag}</span>
-                    </div>
                   </div>
                 </Reveal>
 
