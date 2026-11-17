@@ -20,6 +20,7 @@ import { Route as InicioRouteImport } from './routes/inicio'
 import { Route as IntegracoesRouteImport } from './routes/integracoes'
 import { Route as PdvRouteImport } from './routes/pdv'
 import { Route as PedidosRouteImport } from './routes/pedidos'
+import { Route as PropostaRouteImport } from './routes/proposta'
 import { Route as AdminAiRoutingRouteImport } from './routes/admin.ai-routing'
 import { Route as ApiProductsRouteImport } from './routes/api/products'
 import { Route as ApiAdminAiRoutingRouteImport } from './routes/api/admin/ai-routing'
@@ -92,6 +93,11 @@ const PdvRoute = PdvRouteImport.update({
 const PedidosRoute = PedidosRouteImport.update({
   id: '/pedidos',
   path: '/pedidos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PropostaRoute = PropostaRouteImport.update({
+  id: '/proposta',
+  path: '/proposta',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminAiRoutingRoute = AdminAiRoutingRouteImport.update({
@@ -198,6 +204,7 @@ export interface FileRoutesByFullPath {
   '/integracoes': typeof IntegracoesRoute
   '/pdv': typeof PdvRoute
   '/pedidos': typeof PedidosRoute
+  '/proposta': typeof PropostaRoute
   '/admin/ai-routing': typeof AdminAiRoutingRoute
   '/api/products': typeof ApiProductsRoute
   '/api/admin/ai-routing': typeof ApiAdminAiRoutingRoute
@@ -229,6 +236,7 @@ export interface FileRoutesByTo {
   '/integracoes': typeof IntegracoesRoute
   '/pdv': typeof PdvRoute
   '/pedidos': typeof PedidosRoute
+  '/proposta': typeof PropostaRoute
   '/admin/ai-routing': typeof AdminAiRoutingRoute
   '/api/products': typeof ApiProductsRoute
   '/api/admin/ai-routing': typeof ApiAdminAiRoutingRoute
@@ -261,6 +269,7 @@ export interface FileRoutesById {
   '/integracoes': typeof IntegracoesRoute
   '/pdv': typeof PdvRoute
   '/pedidos': typeof PedidosRoute
+  '/proposta': typeof PropostaRoute
   '/admin/ai-routing': typeof AdminAiRoutingRoute
   '/api/products': typeof ApiProductsRoute
   '/api/admin/ai-routing': typeof ApiAdminAiRoutingRoute
@@ -294,6 +303,7 @@ export interface FileRouteTypes {
     | '/integracoes'
     | '/pdv'
     | '/pedidos'
+    | '/proposta'
     | '/admin/ai-routing'
     | '/api/products'
     | '/api/admin/ai-routing'
@@ -325,6 +335,7 @@ export interface FileRouteTypes {
     | '/integracoes'
     | '/pdv'
     | '/pedidos'
+    | '/proposta'
     | '/admin/ai-routing'
     | '/api/products'
     | '/api/admin/ai-routing'
@@ -356,6 +367,7 @@ export interface FileRouteTypes {
     | '/integracoes'
     | '/pdv'
     | '/pedidos'
+    | '/proposta'
     | '/admin/ai-routing'
     | '/api/products'
     | '/api/admin/ai-routing'
@@ -388,6 +400,7 @@ export interface RootRouteChildren {
   IntegracoesRoute: typeof IntegracoesRoute
   PdvRoute: typeof PdvRoute
   PedidosRoute: typeof PedidosRoute
+  PropostaRoute: typeof PropostaRoute
   AdminAiRoutingRoute: typeof AdminAiRoutingRoute
   ApiProductsRoute: typeof ApiProductsRoute
   ApiAdminAiRoutingRoute: typeof ApiAdminAiRoutingRoute
@@ -485,6 +498,13 @@ declare module '@tanstack/react-router' {
       path: '/pedidos'
       fullPath: '/pedidos'
       preLoaderRoute: typeof PedidosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/proposta': {
+      id: '/proposta'
+      path: '/proposta'
+      fullPath: '/proposta'
+      preLoaderRoute: typeof PropostaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/ai-routing': {
@@ -628,6 +648,7 @@ const rootRouteChildren: RootRouteChildren = {
   IntegracoesRoute: IntegracoesRoute,
   PdvRoute: PdvRoute,
   PedidosRoute: PedidosRoute,
+  PropostaRoute: PropostaRoute,
   AdminAiRoutingRoute: AdminAiRoutingRoute,
   ApiProductsRoute: ApiProductsRoute,
   ApiAdminAiRoutingRoute: ApiAdminAiRoutingRoute,
