@@ -4,6 +4,8 @@ import { useRef } from "react";
 import { ArrowRight } from "lucide-react";
 import horizon from "@/assets/hero-horizon.jpg";
 import monolith from "@/assets/monolith.jpg";
+import { BonaCard3D } from "@/components/bonasoft/BonaCard3D";
+import { BonaLogo } from "@/components/bonasoft/BonaLogo";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -111,11 +113,14 @@ function Landing() {
         <div className="mt-14 sm:mt-24 grid gap-px overflow-hidden rounded-2xl border border-border bg-border md:grid-cols-3">
           {PILLARS.map((p, i) => (
             <Reveal key={p.n} delay={i * 0.15}>
-              <div className="group h-full bg-background p-8 sm:p-10 transition-colors duration-700 hover:bg-card md:p-12">
+              <BonaCard3D
+                tiltIntensity={7.5}
+                className="group h-full bg-background p-8 sm:p-10 transition-colors duration-700 hover:bg-card md:p-12 cursor-pointer"
+              >
                 <span className="font-mono text-xs text-primary">{p.n}</span>
                 <h3 className="mt-8 sm:mt-12 text-xl sm:text-2xl md:text-3xl font-medium leading-snug tracking-[-0.02em]">{p.t}</h3>
                 <p className="mt-3.5 max-w-xs text-[15px] leading-relaxed text-muted-foreground">{p.d}</p>
-              </div>
+              </BonaCard3D>
             </Reveal>
           ))}
         </div>
@@ -153,8 +158,19 @@ function Landing() {
 
       <footer className="border-t border-border">
         <div className="mx-auto flex max-w-[1400px] flex-col items-center justify-between gap-4 px-6 py-10 text-xs text-muted-foreground md:flex-row md:px-10">
-          <span className="tracking-[0.5em] text-foreground">HUG</span>
-          <span>© {new Date().getFullYear()} HUG</span>
+          <div className="flex items-center gap-2.5">
+            <BonaLogo className="h-5 w-5 text-primary" />
+            <span className="font-sans font-light tracking-[0.24em] text-sm leading-none text-foreground uppercase">
+              BONASOFT
+            </span>
+            <span className="text-muted-foreground/40 pl-2 border-l border-border/60 text-[11px] font-mono">
+              HUG
+            </span>
+          </div>
+          <div className="flex items-center gap-6">
+            <span className="tracking-[0.5em] text-foreground text-xs font-medium">HUG</span>
+            <span className="text-muted-foreground/60">© {new Date().getFullYear()} BonaSoft</span>
+          </div>
         </div>
       </footer>
     </div>
