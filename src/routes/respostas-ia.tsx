@@ -19,7 +19,7 @@ import { api } from "@/lib/multiplex/client";
 export const Route = createFileRoute("/respostas-ia")({
   head: () => ({
     meta: [
-      { title: "Assistente de Respostas | HUG / VENDRA" },
+      { title: "Assistente de Respostas | HUG" },
       {
         name: "description",
         content:

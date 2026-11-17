@@ -20,7 +20,7 @@ function AppPage() {
 
   return (
     <div className="flex h-screen w-full items-center justify-center bg-background text-sm text-muted-foreground">
-      Carregando VENDRA by BonaSoft...
+      Carregando HUG by BonaSoft...
     </div>
   );
 }

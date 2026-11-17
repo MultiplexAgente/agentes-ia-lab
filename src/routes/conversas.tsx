@@ -6,15 +6,15 @@ import { useChatWorkspace } from "@/components/multiplex/ChatWorkspace";
 export const Route = createFileRoute("/conversas")({
   head: () => ({
     meta: [
-      { title: "Vendra AI | Assistente Inteligente Empresarial" },
+      { title: "HUG AI | Assistente Inteligente Empresarial" },
       {
         name: "description",
-        content: "Vendra AI - Assistente inteligente empresarial e atendimento comercial by BonaSoft (Motor Multiplex AI).",
+        content: "HUG AI - Assistente inteligente empresarial e atendimento comercial by BonaSoft (Motor Multiplex AI).",
       },
-      { property: "og:title", content: "Vendra AI | Assistente Inteligente Empresarial by BonaSoft" },
+      { property: "og:title", content: "HUG AI | Assistente Inteligente Empresarial by BonaSoft" },
       {
         property: "og:description",
-        content: "Vendra AI - Assistente inteligente empresarial e atendimento comercial by BonaSoft (Motor Multiplex AI).",
+        content: "HUG AI - Assistente inteligente empresarial e atendimento comercial by BonaSoft (Motor Multiplex AI).",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

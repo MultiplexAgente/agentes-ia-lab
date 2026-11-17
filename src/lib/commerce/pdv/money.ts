@@ -1,5 +1,5 @@
 /**
- * VENDRA POS (by BonaSoft) — Utilitários de Precisão Monetária
+ * HUG POS (by BonaSoft) — Utilitários de Precisão Monetária
  *
  * Garante que todas as operações financeiras e de caixa utilizem cálculos
  * baseados em centavos inteiros (integers) ou representações decimais seguras,

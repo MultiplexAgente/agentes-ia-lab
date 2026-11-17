@@ -63,16 +63,16 @@ interface AdminPayload {
 export const Route = createFileRoute("/admin/ai-routing")({
   head: () => ({
     meta: [
-      { title: "Auditoria Vendra AI | Motor Multiplex by BonaSoft" },
+      { title: "Auditoria HUG AI | Motor Multiplex by BonaSoft" },
       {
         name: "description",
         content:
-          "Painel técnico do Motor Multiplex AI no VENDRA by BonaSoft: telemetria de conversas, modelo resolvido, tokens, custo e prioridades de roteamento por empresa.",
+          "Painel técnico do Motor Multiplex AI no HUG by BonaSoft: telemetria de conversas, modelo resolvido, tokens, custo e prioridades de roteamento por empresa.",
       },
-      { property: "og:title", content: "Auditoria Vendra AI | Motor Multiplex by BonaSoft" },
+      { property: "og:title", content: "Auditoria HUG AI | Motor Multiplex by BonaSoft" },
       {
         property: "og:description",
-        content: "Telemetria de conversas, modelo resolvido, custo e prioridades de roteamento por empresa no VENDRA by BonaSoft.",
+        content: "Telemetria de conversas, modelo resolvido, custo e prioridades de roteamento por empresa no HUG by BonaSoft.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

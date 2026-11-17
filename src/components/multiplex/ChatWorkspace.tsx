@@ -20,14 +20,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  api,
-  getPublicSessionId,
-  getToken,
-  relativeGroup,
-  shortTime,
-} from "@/lib/multiplex/client";
+import { api, getPublicSessionId, getToken, relativeGroup, shortTime } from "@/lib/multiplex/client";
 import { cn } from "@/lib/utils";
+import { BonaParticleAtom } from "@/components/bonasoft/BonaLogo";
 
 interface ConversationItem {
   id: string;
@@ -553,13 +548,11 @@ export function useChatWorkspace() {
         <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-6 px-4 py-8">
           {/* EMPTY STATE HERO */}
           <div className="flex flex-col items-center gap-2 text-center">
-            <div className="relative">
-              <div className="flex size-14 items-center justify-center rounded-2xl bg-emerald-500 text-slate-950 font-black text-2xl shadow-lg ring-2 ring-emerald-500/20">
-                V
-              </div>
+            <div className="relative mb-1">
+              <BonaParticleAtom className="h-12 w-12 text-emerald-400" />
             </div>
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-foreground flex items-center justify-center gap-2">
-              Vendra AI <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">by BonaSoft</span>
+              HUG AI <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">BONASOFT HUG</span>
             </h1>
             <p className="text-xs text-muted-foreground font-medium">
               Assistente Inteligente Empresarial · Motor Multiplex AI

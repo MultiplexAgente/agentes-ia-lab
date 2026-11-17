@@ -55,10 +55,10 @@ interface WorkspaceData {
 export const Route = createFileRoute("/pdv")({
   head: () => ({
     meta: [
-      { title: "Vendra POS | Frente de Caixa" },
-      { name: "description", content: "Vendra POS - Frente de caixa ágil e multissegmento by BonaSoft." },
-      { property: "og:title", content: "Vendra POS | Frente de Caixa by BonaSoft" },
-      { property: "og:description", content: "Vendra POS - Ponto de Venda ágil e multissegmento by BonaSoft." },
+      { title: "HUG POS | Frente de Caixa" },
+      { name: "description", content: "HUG POS - Frente de caixa ágil e multissegmento by BonaSoft." },
+      { property: "og:title", content: "HUG POS | Frente de Caixa by BonaSoft" },
+      { property: "og:description", content: "HUG POS - Ponto de Venda ágil e multissegmento by BonaSoft." },
     ],
   }),
   component: PdvPage,
@@ -336,7 +336,7 @@ function PdvPage() {
   return (
     <AppShell>
       <PageFrame
-        title="Vendra POS"
+        title="HUG POS"
         description="Frente de caixa ágil e registro transacional de vendas by BonaSoft"
         actions={
           <div className="flex items-center gap-2">

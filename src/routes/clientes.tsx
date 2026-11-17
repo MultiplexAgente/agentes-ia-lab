@@ -18,10 +18,10 @@ interface Customer {
 export const Route = createFileRoute("/clientes")({
   head: () => ({
     meta: [
-      { title: "Clientes & CRM | VENDRA ERP" },
-      { name: "description", content: "Clientes cadastrados e relacionamento comercial no VENDRA by BonaSoft." },
-      { property: "og:title", content: "Clientes & CRM | VENDRA ERP" },
-      { property: "og:description", content: "Clientes cadastrados e relacionamento comercial no VENDRA by BonaSoft." },
+      { title: "Clientes & CRM | HUG ERP" },
+      { name: "description", content: "Clientes cadastrados e relacionamento comercial no HUG by BonaSoft." },
+      { property: "og:title", content: "Clientes & CRM | HUG ERP" },
+      { property: "og:description", content: "Clientes cadastrados e relacionamento comercial no HUG by BonaSoft." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],

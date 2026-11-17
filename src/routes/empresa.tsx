@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { COMMERCE_SEGMENTS, getSegmentConfig, type CommerceSegment, type SegmentConfig } from "@/lib/commerce/segments";
 import { type CompanySegmentSettings, DEFAULT_SEGMENT_SETTINGS } from "@/lib/commerce/company-segments";
+import { BonaParticleAtom } from "@/components/bonasoft/BonaLogo";
 
 const TOKEN_KEY = "multiplex_company_token";
 
@@ -75,16 +76,16 @@ interface Workspace {
 export const Route = createFileRoute("/empresa")({
   head: () => ({
     meta: [
-      { title: "Configurações da Empresa | VENDRA ERP" },
+      { title: "Configurações da Empresa | HUG ERP" },
       {
         name: "description",
         content:
-          "Configurações da empresa, segmentos comerciais, catálogo e Vendra AI no VENDRA by BonaSoft.",
+          "Configurações da empresa, segmentos comerciais, catálogo e HUG AI no HUG by BonaSoft.",
       },
-      { property: "og:title", content: "Configurações da Empresa | VENDRA ERP" },
+      { property: "og:title", content: "Configurações da Empresa | HUG ERP" },
       {
         property: "og:description",
-        content: "Configurações da empresa, segmentos comerciais, catálogo e Vendra AI no VENDRA by BonaSoft.",
+        content: "Configurações da empresa, segmentos comerciais, catálogo e HUG AI no HUG by BonaSoft.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -476,11 +477,9 @@ function CompanyPage() {
     return (
       <main className="mx-auto flex min-h-screen w-full max-w-md flex-col justify-center px-4">
         <div className="mb-6 flex flex-col items-center text-center">
-          <div className="flex size-10 items-center justify-center rounded-xl bg-emerald-500 text-slate-950 font-black text-sm mb-2 shadow-md">
-            V
-          </div>
-          <h1 className="text-2xl font-black tracking-tight">VENDRA ERP</h1>
-          <p className="text-xs font-semibold text-emerald-500 uppercase tracking-widest">by BonaSoft</p>
+          <BonaParticleAtom className="h-9 w-9 text-emerald-400 mb-2" />
+          <h1 className="text-2xl font-black tracking-widest">HUG ERP</h1>
+          <p className="text-xs font-semibold text-emerald-500 uppercase tracking-widest">BONASOFT HUG</p>
           <p className="text-xs text-muted-foreground mt-1">Configurações da Empresa e Catálogo</p>
         </div>
         <form onSubmit={signIn} className="space-y-3 rounded-2xl border border-border/70 bg-card/60 p-6 backdrop-blur">
@@ -1279,9 +1278,9 @@ function CompanyPage() {
       {draft && (
         <section className="rounded-xl border border-border/70 bg-card/40 p-5 shadow-sm space-y-4">
           <div>
-            <h2 className="text-lg font-semibold tracking-tight">Vendra AI · Motor Multiplex · Estratégia de Atendimento</h2>
+            <h2 className="text-lg font-semibold tracking-tight">HUG AI · Motor Multiplex · Estratégia de Atendimento</h2>
             <p className="text-xs text-muted-foreground">
-              Configure as prioridades e o motor de inteligência artificial da empresa no VENDRA by BonaSoft.
+              Configure as prioridades e o motor de inteligência artificial da empresa no HUG by BonaSoft.
             </p>
           </div>
 

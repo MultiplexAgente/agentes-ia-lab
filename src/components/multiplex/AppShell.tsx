@@ -22,6 +22,7 @@ import { CLOSE_SIDEBAR_EVENT, MultiplexMark, NEW_CHAT_EVENT } from "@/components
 import { ThemeToggle } from "@/components/multiplex/ThemeToggle";
 import { api, clearToken, getToken } from "@/lib/multiplex/client";
 import { cn } from "@/lib/utils";
+import { BonaParticleAtom } from "@/components/bonasoft/BonaLogo";
 
 const ENTERPRISE_NAV = [
   { to: "/inicio", label: "Início", icon: LayoutDashboard },
@@ -100,12 +101,10 @@ export function AppShell({ children, secondary }: { children: ReactNode; seconda
         {/* TOPO DA SIDEBAR */}
         <div className="flex h-14 shrink-0 items-center justify-between px-4">
           <Link to="/" className="flex items-center gap-2.5 text-[15px] font-semibold tracking-tight text-foreground">
-            <div className="flex size-7 items-center justify-center rounded-lg bg-emerald-500 text-slate-950 font-black text-xs tracking-wider shadow-sm">
-              V
-            </div>
+            <BonaParticleAtom className="h-6 w-6 text-emerald-400" />
             <div className="flex flex-col">
-              <span className="text-base font-black tracking-tight text-foreground leading-none">VENDRA</span>
-              <span className="text-[9px] font-semibold uppercase tracking-widest text-muted-foreground mt-0.5">by BonaSoft</span>
+              <span className="text-base font-black tracking-widest text-foreground leading-none">HUG</span>
+              <span className="text-[9px] font-semibold uppercase tracking-widest text-muted-foreground mt-0.5">BONASOFT HUG</span>
             </div>
           </Link>
           <div className="flex items-center gap-1">
@@ -127,7 +126,7 @@ export function AppShell({ children, secondary }: { children: ReactNode; seconda
             }}
           >
             <Plus className="size-4 text-muted-foreground" />
-            <span>Nova conversa Vendra AI</span>
+            <span>Nova conversa HUG AI</span>
           </Button>
         </div>
 
@@ -227,10 +226,8 @@ export function AppShell({ children, secondary }: { children: ReactNode; seconda
               <Menu className="size-4" />
             </Button>
             <div className="flex items-center gap-1.5">
-              <div className="flex size-5 items-center justify-center rounded bg-emerald-500 text-slate-950 font-black text-[10px]">
-                V
-              </div>
-              <span className="text-sm font-extrabold tracking-tight">VENDRA <span className="text-[10px] text-muted-foreground font-medium">by BonaSoft</span></span>
+              <BonaParticleAtom className="h-5 w-5 text-emerald-400" />
+              <span className="text-sm font-extrabold tracking-widest">HUG <span className="text-[10px] text-muted-foreground font-medium">BONASOFT</span></span>
             </div>
           </div>
           {!profile && (

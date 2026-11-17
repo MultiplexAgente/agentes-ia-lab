@@ -5,7 +5,7 @@ import { ArrowRight, ChevronRight, Check } from "lucide-react";
 export const Route = createFileRoute("/proposta")({
   head: () => ({
     meta: [
-      { title: "VENDRA | Uma nova forma de administrar seu negócio" },
+      { title: "HUG | Uma nova forma de administrar seu negócio" },
       {
         name: "description",
         content:
@@ -96,7 +96,7 @@ const EDITORIAL_SECTORS = [
 const ECOSYSTEM_ITEMS = [
   {
     id: "erp",
-    name: "Vendra ERP",
+    name: "HUG ERP",
     category: "Gestão Central",
     description:
       "Controle financeiro consolidado, estoque matricial, compras e faturamento integrado para matriz e filiais.",
@@ -105,7 +105,7 @@ const ECOSYSTEM_ITEMS = [
   },
   {
     id: "pos",
-    name: "Vendra POS",
+    name: "HUG POS",
     category: "Frente de Caixa",
     description:
       "Checkout ultra-rápido projetado para operar com leitor, teclado e balança. Resposta em menos de 1,2s por transação.",
@@ -114,7 +114,7 @@ const ECOSYSTEM_ITEMS = [
   },
   {
     id: "mobile",
-    name: "Vendra Mobile",
+    name: "HUG Mobile",
     category: "Operação Portátil",
     description:
       "Atendimento em salão, consulta ágil de preços no balcão e auditoria de inventário diretamente no smartphone.",
@@ -123,7 +123,7 @@ const ECOSYSTEM_ITEMS = [
   },
   {
     id: "store",
-    name: "Vendra Store",
+    name: "HUG Store",
     category: "Canal Digital",
     description:
       "Catálogo público e vendas digitais unificadas ao estoque físico, permitindo compras com retirada ou entrega rápida.",
@@ -132,7 +132,7 @@ const ECOSYSTEM_ITEMS = [
   },
   {
     id: "ai",
-    name: "Vendra AI",
+    name: "HUG AI",
     category: "Inteligência Comercial",
     description:
       "Análise preditiva de compras, detecção de padrões de consumo e auditoria em linguagem natural sobre seus dados reais.",
@@ -157,10 +157,10 @@ function PropostaSquarespacePage() {
           {/* LOGOTIPO ELEGANTE */}
           <Link to="/proposta" className="flex items-center gap-3">
             <span className="font-extrabold text-xl tracking-[0.18em] text-black">
-              VENDRA
+              HUG
             </span>
             <span className="text-[10px] font-mono tracking-widest uppercase text-black/50 pl-2.5 border-l border-black/20">
-              by BonaSoft
+              BONASOFT HUG
             </span>
           </Link>
 
@@ -207,7 +207,7 @@ function PropostaSquarespacePage() {
         <div className="max-w-4xl space-y-6">
           {/* IDENTIFICADOR DA MARCA */}
           <div className="text-xs font-mono tracking-[0.25em] uppercase text-[#0D9488] font-bold">
-            VENDRA BY BONASOFT
+            BONASOFT HUG
           </div>
 
           {/* HEADLINE EDITORIAL EXATA SOLICITADA */}
@@ -277,7 +277,7 @@ function PropostaSquarespacePage() {
             Cinco pilares. Uma operação contínua.
           </h2>
           <p className="text-base sm:text-lg text-black/65 font-normal">
-            Cada módulo do VENDRA foi concebido para resolver uma frente crítica do seu negócio com elegância, velocidade e consistência.
+            Cada módulo do HUG foi concebido para resolver uma frente crítica do seu negócio com elegância, velocidade e consistência.
           </p>
         </div>
 
@@ -329,7 +329,7 @@ function PropostaSquarespacePage() {
           {/* CABEÇALHO COM CONTRASTE */}
           <div className="max-w-3xl mb-16 md:mb-20 space-y-4">
             <span className="text-xs font-mono tracking-[0.25em] uppercase text-[#14B8A6] font-bold">
-              Vendra ERP
+              HUG ERP
             </span>
             <h2 className="text-4xl sm:text-6xl font-medium tracking-tight text-white leading-tight">
               Controle absoluto. Sem ruído.
@@ -348,7 +348,7 @@ function PropostaSquarespacePage() {
                 <span className="w-2.5 h-2.5 rounded-full bg-white/20" />
                 <span className="w-2.5 h-2.5 rounded-full bg-white/20" />
               </div>
-              <span>vendra.app/visao-geral</span>
+              <span>hug.bonasoft.app/visao-geral</span>
               <div className="w-12" />
             </div>
 
@@ -474,7 +474,7 @@ function PropostaSquarespacePage() {
       */}
       <footer className="border-t border-black/[0.08] bg-[#FAF9F6] py-16 px-6 sm:px-12 max-w-[1440px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-6 text-xs text-black/60 font-normal">
         <div className="flex items-center gap-3">
-          <span className="font-bold tracking-widest text-black">VENDRA</span>
+          <span className="font-bold tracking-widest text-black">HUG</span>
           <span className="font-mono text-[10px]">by BonaSoft</span>
         </div>
         <div>

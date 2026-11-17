@@ -1,7 +1,7 @@
 /**
- * VENDRA (by BonaSoft) — Contratos de Integração: Vendra ERP <-> Multiplex AI Engine (Vendra AI)
+ * HUG (by BonaSoft) — Contratos de Integração: HUG ERP <-> Multiplex AI Engine (HUG AI)
  *
- * Formaliza a comunicação desacoplada entre a plataforma SaaS comercial VENDRA
+ * Formaliza a comunicação desacoplada entre a plataforma SaaS comercial HUG
  * e o motor central de inteligência artificial Multiplex.
  *
  * A IA nunca altera o banco de dados diretamente sem passar pela camada de
@@ -83,7 +83,7 @@ export interface CommercialOrderDraft {
 }
 
 /**
- * Contrato de chamada ao Multiplex AI Engine (Vendra AI) pelo Vendra ERP
+ * Contrato de chamada ao Multiplex AI Engine (HUG AI) pelo HUG ERP
  */
 export interface MultiplexExecutionRequest {
   tenant: TenantCommerceContext;
@@ -99,7 +99,7 @@ export interface MultiplexExecutionRequest {
 }
 
 /**
- * Contrato de retorno do Multiplex AI Engine (Vendra AI) para o Vendra ERP
+ * Contrato de retorno do Multiplex AI Engine (HUG AI) para o HUG ERP
  */
 export interface MultiplexExecutionResponse {
   conversationId: string;

@@ -12,7 +12,7 @@ import { PdvCartManager } from "../src/lib/commerce/pdv/cart";
 import { CashRegisterService } from "../src/lib/commerce/pdv/cash-register";
 import { executePdvCheckout } from "../src/lib/commerce/pdv/transaction.server";
 
-describe("VENDRA POS (by BonaSoft) — Módulo de Precisão Monetária (PDV)", () => {
+describe("HUG POS (by BonaSoft) — Módulo de Precisão Monetária (PDV)", () => {
   it("converte valores decimais para centavos inteiros e vice-versa sem perda por float", () => {
     // Clássico problema 0.1 + 0.2 em ponto flutuante
     const cent1 = toCents(0.1);
@@ -56,7 +56,7 @@ describe("VENDRA POS (by BonaSoft) — Módulo de Precisão Monetária (PDV)", (
   });
 });
 
-describe("VENDRA POS (by BonaSoft) — Gerenciador de Carrinho PDV", () => {
+describe("HUG POS (by BonaSoft) — Gerenciador de Carrinho PDV", () => {
   let cart: PdvCartManager;
 
   beforeEach(() => {
@@ -147,7 +147,7 @@ describe("VENDRA POS (by BonaSoft) — Gerenciador de Carrinho PDV", () => {
   });
 });
 
-describe("VENDRA POS (by BonaSoft) — Gestão de Caixa e Movimentações (Cash Register)", () => {
+describe("HUG POS (by BonaSoft) — Gestão de Caixa e Movimentações (Cash Register)", () => {
   const dummySupabase = {
     from: () => ({
       select: () => ({ eq: () => ({ eq: () => ({ eq: () => ({ order: () => ({ maybeSingle: async () => ({ data: null }) }) }) }) }) }),
@@ -224,7 +224,7 @@ describe("VENDRA POS (by BonaSoft) — Gestão de Caixa e Movimentações (Cash 
   });
 });
 
-describe("VENDRA POS (by BonaSoft) — Execução Transacional e Idempotência (Checkout)", () => {
+describe("HUG POS (by BonaSoft) — Execução Transacional e Idempotência (Checkout)", () => {
   const mockProducts = [
     {
       id: "prod-uuid-1",
@@ -338,7 +338,7 @@ describe("VENDRA POS (by BonaSoft) — Execução Transacional e Idempotência (
     expect(result.changeDue).toBe(19.0);
     expect(result.customerName).toBe("Consumidor Final");
     expect(result.items.length).toBe(2);
-    expect(result.receiptText).toContain("VENDRA POS - FRENTE DE CAIXA");
+    expect(result.receiptText).toContain("HUG POS - FRENTE DE CAIXA");
     expect(result.receiptText).toContain("Amoxicilina 500mg");
     expect(result.receiptText).toContain("TROCO:");
     expect(result.receiptText).toContain("19,00");

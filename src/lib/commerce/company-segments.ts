@@ -1,5 +1,5 @@
 /**
- * VENDRA (by BonaSoft) — Gestão de Múltiplos Segmentos da Empresa
+ * HUG (by BonaSoft) — Gestão de Múltiplos Segmentos da Empresa
  *
  * Uma mesma empresa/tenant pode operar em múltiplos segmentos simultaneamente
  * (ex: Supermercado com Padaria e Açougue, ou Farmácia com Loja de Conveniência).

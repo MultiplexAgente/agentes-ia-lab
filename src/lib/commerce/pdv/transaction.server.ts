@@ -1,5 +1,5 @@
 /**
- * VENDRA POS (by BonaSoft) — Núcleo Transacional de Vendas PDV (Server-Side)
+ * HUG POS (by BonaSoft) — Núcleo Transacional de Vendas PDV (Server-Side)
  *
  * Responsável por:
  * 1. Garantir idempotência da transação via chave única (idempotencyKey).
@@ -151,7 +151,7 @@ function buildThermalReceipt(params: {
 
   let out = "";
   out += `           ${params.companyName.toUpperCase().slice(0, 30)}\n`;
-  out += `              VENDRA POS - FRENTE DE CAIXA\n`;
+  out += `               HUG POS - FRENTE DE CAIXA\n`;
   out += `                     by BonaSoft\n`;
   out += `${line}\n`;
   out += `Terminal: ${params.terminalCode} | Cupom: ${params.orderNumber}\n`;
@@ -198,7 +198,7 @@ function buildThermalReceipt(params: {
 
   out += `${line}\n`;
   out += `   Obrigado pela preferencia! Volte sempre.\n`;
-  out += `           VENDRA Cloud by BonaSoft\n`;
+  out += `            HUG Cloud by BonaSoft\n`;
 
   return out;
 }

@@ -6,14 +6,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { api, setToken } from "@/lib/multiplex/client";
+import { BonaParticleAtom } from "@/components/bonasoft/BonaLogo";
 
 export const Route = createFileRoute("/entrar")({
   head: () => ({
     meta: [
-      { title: "Entrar | VENDRA by BonaSoft" },
-      { name: "description", content: "Acesse a conta da sua empresa no VENDRA by BonaSoft." },
-      { property: "og:title", content: "Entrar | VENDRA by BonaSoft" },
-      { property: "og:description", content: "Acesse a conta da sua empresa no VENDRA by BonaSoft." },
+      { title: "Entrar | HUG by BonaSoft" },
+      { name: "description", content: "Acesse a conta da sua empresa no HUG by BonaSoft." },
+      { property: "og:title", content: "Entrar | HUG by BonaSoft" },
+      { property: "og:description", content: "Acesse a conta da sua empresa no HUG by BonaSoft." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -51,12 +52,10 @@ function LoginPage() {
     <main className="flex min-h-dvh items-center justify-center bg-background px-4">
       <div className="w-full max-w-sm">
         <div className="mb-8 flex flex-col items-center justify-center gap-1.5">
-          <div className="flex size-11 items-center justify-center rounded-xl bg-emerald-500 text-slate-950 font-black text-lg tracking-wider shadow-md">
-            V
-          </div>
-          <p className="font-display text-2xl font-black tracking-tight">VENDRA</p>
-          <p className="text-xs font-semibold text-emerald-500 uppercase tracking-widest">by BonaSoft</p>
-          <p className="text-xs text-muted-foreground mt-0.5">Seu negócio. Seu próximo nível.</p>
+          <BonaParticleAtom className="h-10 w-10 text-emerald-400 mb-1" />
+          <p className="font-display text-2xl font-bold tracking-[0.3em] text-foreground">HUG</p>
+          <p className="text-xs font-semibold text-emerald-400 uppercase tracking-widest">BONASOFT HUG</p>
+          <p className="text-xs text-muted-foreground mt-0.5">Seu negócio, em outra órbita.</p>
         </div>
         <form onSubmit={submit} className="space-y-4 rounded-2xl border border-border/60 bg-card/50 p-6 backdrop-blur">
           <h1 className="text-lg font-semibold">Entrar na sua conta</h1>
@@ -74,7 +73,7 @@ function LoginPage() {
             Entrar
           </Button>
           <Button type="button" variant="ghost" className="w-full" onClick={() => void navigate({ to: "/" })}>
-            Voltar para o chat
+            Voltar para o início
           </Button>
         </form>
       </div>
