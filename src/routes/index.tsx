@@ -5,7 +5,7 @@ import { ArrowRight } from "lucide-react";
 import horizon from "@/assets/hero-horizon.jpg";
 import monolith from "@/assets/monolith.jpg";
 import { BonaCard3D } from "@/components/bonasoft/BonaCard3D";
-import { BonaLogo } from "@/components/bonasoft/BonaLogo";
+import { BonaParticleAtom } from "@/components/bonasoft/BonaLogo";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -156,21 +156,20 @@ function Landing() {
         </Reveal>
       </section>
 
-      <footer className="border-t border-border">
-        <div className="mx-auto flex max-w-[1400px] flex-col items-center justify-between gap-4 px-6 py-10 text-xs text-muted-foreground md:flex-row md:px-10">
-          <div className="flex items-center gap-2.5">
-            <BonaLogo className="h-5 w-5 text-primary" />
-            <span className="font-sans font-light tracking-[0.24em] text-sm leading-none text-foreground uppercase">
+      <footer className="border-t border-border bg-background/40 py-12 px-6">
+        <div className="mx-auto flex max-w-[1400px] flex-col items-center justify-center gap-4 text-center">
+          <div className="flex items-center justify-center gap-3">
+            <BonaParticleAtom className="h-8 w-8 text-primary" />
+            <span className="font-sans font-light tracking-[0.26em] text-sm sm:text-base leading-none text-foreground uppercase">
               BONASOFT
             </span>
-            <span className="text-muted-foreground/40 pl-2 border-l border-border/60 text-[11px] font-mono">
+            <span className="text-muted-foreground/50 pl-2.5 border-l border-border/60 text-xs font-mono">
               HUG
             </span>
           </div>
-          <div className="flex items-center gap-6">
-            <span className="tracking-[0.5em] text-foreground text-xs font-medium">HUG</span>
-            <span className="text-muted-foreground/60">© {new Date().getFullYear()} BonaSoft</span>
-          </div>
+          <p className="text-xs text-muted-foreground/60 font-mono tracking-wider">
+            © {new Date().getFullYear()} BonaSoft. Todos os direitos reservados.
+          </p>
         </div>
       </footer>
     </div>
