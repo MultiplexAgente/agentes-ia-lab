@@ -576,7 +576,7 @@ function Landing() {
                   </div>
                   <p className="text-sm text-slate-100 leading-relaxed">
                     "Localizado no estoque central: <strong>4 unidades disponíveis</strong>. Preço
-                    tabelado <strong>€89,00</strong>. Deseja separar o pedido para retirada no balcão
+                    tabelado <strong>R$ 89,00</strong>. Deseja separar o pedido para retirada no balcão
                     ou gerar link de pagamento?"
                   </p>
                 </div>
@@ -654,7 +654,7 @@ function Landing() {
 
       {/* 
         ========================================================================
-        SEÇÃO PLANOS: Apresentação Transparente e Sem Poluição (€29, €59, €129)
+        SEÇÃO PLANOS: Apresentação Transparente e Sem Poluição (R$ 29, R$ 59, R$ 129)
         ========================================================================
       */}
       <section
@@ -692,14 +692,13 @@ function Landing() {
                       </span>
                     )}
                   </div>
-                  <div className="mt-5 flex items-baseline gap-1">
-                    <span className="text-2xl font-light text-slate-400">€</span>
+                  <div className="mt-5 flex items-baseline gap-1.5">
+                    <span className="text-2xl font-light text-slate-400">R$</span>
                     <span className="text-5xl font-medium text-white tracking-tight">
                       {plan.price}
                     </span>
                     <span className="text-xs font-mono text-slate-400 uppercase">/ mês</span>
                   </div>
-                  <p className="text-[11px] text-muted-foreground mt-1">sem IVA</p>
                   <p className="mt-3.5 text-sm text-slate-300/90 leading-relaxed font-light">
                     {plan.tagline}
                   </p>

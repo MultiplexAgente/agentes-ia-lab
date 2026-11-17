@@ -358,7 +358,7 @@ function PropostaSquarespacePage() {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 border-b border-white/[0.06] pb-10">
                 <div>
                   <span className="text-xs text-white/50 uppercase tracking-wider font-medium">Faturamento do Dia</span>
-                  <div className="text-3xl sm:text-4xl font-mono font-medium text-white mt-2">€ 42.180,00</div>
+                  <div className="text-3xl sm:text-4xl font-mono font-medium text-white mt-2">R$ 42.180,00</div>
                   <span className="text-xs text-[#14B8A6] mt-1 block font-mono font-semibold">+18% vs semana anterior</span>
                 </div>
                 <div>
