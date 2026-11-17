@@ -826,12 +826,9 @@ function Landing() {
             <span className="font-sans font-light tracking-[0.28em] text-sm sm:text-base leading-none text-foreground uppercase">
               BONASOFT
             </span>
-            <span className="text-muted-foreground/40 pl-2.5 border-l border-white/10 text-xs font-mono tracking-widest">
-              HUG
-            </span>
           </div>
           <p className="text-xs text-muted-foreground/60 font-mono tracking-wider">
-            HUG © {new Date().getFullYear()} BonaSoft. Todos os direitos reservados.
+            © {new Date().getFullYear()} BonaSoft. Todos os direitos reservados.
           </p>
         </div>
       </footer>
