@@ -744,10 +744,7 @@ function Landing() {
         <div className="pointer-events-none absolute left-1/2 top-1/2 h-[350px] w-[350px] sm:h-[500px] sm:w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-emerald-500/10 blur-[130px]" />
 
         <Reveal>
-          <span className="font-mono text-xs uppercase tracking-[0.4em] text-emerald-400">
-            HUG
-          </span>
-          <h2 className="relative mx-auto mt-3 max-w-4xl text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-medium leading-[1.08] tracking-[-0.035em] text-white">
+          <h2 className="relative mx-auto max-w-4xl text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-medium leading-[1.08] tracking-[-0.035em] text-white">
             O futuro do seu negócio
             <br />
             <span className="text-muted-foreground">começa em outra órbita.</span>
