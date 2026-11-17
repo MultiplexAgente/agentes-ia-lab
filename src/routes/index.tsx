@@ -4,7 +4,6 @@ import { motion, useScroll, useTransform, AnimatePresence } from "motion/react";
 import {
   ArrowRight,
   Check,
-  ChevronRight,
   ShoppingBag,
   Layers,
   MessageSquare,
@@ -379,10 +378,10 @@ function Landing() {
             </Link>
             <a
               href="#pilares"
-              className="group inline-flex w-full max-w-xs justify-center items-center gap-2.5 sm:w-auto rounded-full border border-white/20 bg-white/[0.08] px-8 py-4 text-sm font-medium text-white backdrop-blur-md transition-all duration-300 hover:border-emerald-400/60 hover:bg-white/[0.16] hover:shadow-[0_0_25px_rgba(255,255,255,0.1)] active:scale-[0.98]"
+              className="group inline-flex w-full max-w-xs justify-center items-center gap-3 sm:w-auto rounded-full border border-white/20 bg-white/[0.08] px-8 py-4 text-sm font-medium text-white backdrop-blur-md transition-all duration-300 hover:border-emerald-400/60 hover:bg-white/[0.16] hover:shadow-[0_0_25px_rgba(255,255,255,0.1)] active:scale-[0.98]"
             >
               <span>Conhecer a plataforma</span>
-              <ChevronRight className="h-4 w-4 text-emerald-400 transition-transform duration-300 group-hover:translate-x-1" />
+              <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
             </a>
           </motion.div>
         </motion.div>
