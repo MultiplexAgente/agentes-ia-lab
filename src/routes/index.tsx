@@ -198,7 +198,7 @@ const COMMERCIAL_SECTORS = [
 const APPROVED_PLANS = [
   {
     name: "Starter",
-    price: "29",
+    price: "299,00",
     tagline: "Para comércios e lojas que buscam agilidade no balcão e presença online.",
     features: [
       "Frente de caixa (PDV) ágil",
@@ -209,7 +209,7 @@ const APPROVED_PLANS = [
   },
   {
     name: "Business",
-    price: "59",
+    price: "499,00",
     featured: true,
     tagline: "Para negócios em crescimento que necessitam de multicanalidade e inteligência.",
     features: [
@@ -222,7 +222,7 @@ const APPROVED_PLANS = [
   },
   {
     name: "Premium",
-    price: "129",
+    price: "899,00",
     tagline: "Para empresas com alto volume operacional, múltiplas filiais e equipes ampliadas.",
     features: [
       "Todos os recursos do Business",
@@ -653,7 +653,7 @@ function Landing() {
 
       {/* 
         ========================================================================
-        SEÇÃO PLANOS: Apresentação Transparente e Sem Poluição (R$ 29, R$ 59, R$ 129)
+        SEÇÃO PLANOS: Apresentação Transparente e Sem Poluição (R$ 299,00, R$ 499,00, R$ 899,00)
         ========================================================================
       */}
       <section
