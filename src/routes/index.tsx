@@ -341,20 +341,8 @@ function Landing() {
         {/* Conteúdo Central do Hero */}
         <motion.div
           style={{ y: textY, opacity: fade }}
-          className="relative z-10 flex h-full flex-col items-center justify-start px-6 pt-[22svh] text-center sm:pt-[20vh]"
+          className="relative z-10 flex h-full flex-col items-center justify-start px-6 pt-[24svh] text-center sm:pt-[22vh]"
         >
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1.2, delay: 0.2 }}
-            className="mb-5 inline-flex items-center gap-2.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-1.5 backdrop-blur-md"
-          >
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="font-mono text-[10px] sm:text-[11px] uppercase tracking-[0.4em] text-emerald-300">
-              PLATAFORMA COMERCIAL EM ÓRBITA
-            </span>
-          </motion.div>
-
           <motion.h1
             initial={{ opacity: 0, y: 35, filter: "blur(12px)" }}
             animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
