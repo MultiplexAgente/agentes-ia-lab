@@ -146,7 +146,7 @@ function PropostaSquarespacePage() {
 
   return (
     <div className="min-h-screen w-full bg-[#FAF9F6] text-[#111111] font-sans antialiased selection:bg-[#0D9488]/20 selection:text-[#0F766E] overflow-x-hidden">
-      
+
       {/* 
         ========================================================================
         NAVBAR EDITORIAL MINIMALISTA (ESTILO SQUARESPACE)
@@ -283,9 +283,8 @@ function PropostaSquarespacePage() {
           {ECOSYSTEM_ITEMS.map((item, index) => (
             <div
               key={item.id}
-              className={`group rounded-2xl bg-white border border-black/[0.06] overflow-hidden flex flex-col transition-all hover:shadow-[0_20px_60px_rgba(0,0,0,0.06)] ${
-                index === 0 ? "md:col-span-2 lg:col-span-2" : ""
-              }`}
+              className={`group rounded-2xl bg-white border border-black/[0.06] overflow-hidden flex flex-col transition-all hover:shadow-[0_20px_60px_rgba(0,0,0,0.06)] ${index === 0 ? "md:col-span-2 lg:col-span-2" : ""
+                }`}
             >
               <div className="aspect-[16/10] overflow-hidden bg-slate-100 relative">
                 <img
@@ -417,11 +416,10 @@ function PropostaSquarespacePage() {
             <button
               key={sector.id}
               onClick={() => setActiveSector(sector)}
-              className={`text-sm font-medium tracking-wide whitespace-nowrap transition-colors relative pb-4 ${
-                activeSector.id === sector.id
-                  ? "text-black font-semibold"
-                  : "text-black/50 hover:text-black"
-              }`}
+              className={`text-sm font-medium tracking-wide whitespace-nowrap transition-colors relative pb-4 ${activeSector.id === sector.id
+                ? "text-black font-semibold"
+                : "text-black/50 hover:text-black"
+                }`}
             >
               {sector.name}
               {activeSector.id === sector.id && (
