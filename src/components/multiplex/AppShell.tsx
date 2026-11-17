@@ -13,6 +13,7 @@ import {
   Menu,
   X,
   LogIn,
+  Headphones,
 } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 
@@ -25,6 +26,7 @@ import { cn } from "@/lib/utils";
 const ENTERPRISE_NAV = [
   { to: "/inicio", label: "Início", icon: LayoutDashboard },
   { to: "/pdv", label: "Frente de Caixa", icon: Store },
+  { to: "/respostas-ia", label: "Respostas com I.A", icon: Headphones },
   { to: "/conversas", label: "Conversas & IA", icon: MessageSquare },
   { to: "/clientes", label: "Clientes", icon: Users },
   { to: "/catalogo", label: "Catálogo", icon: Boxes },
@@ -74,7 +76,7 @@ export function AppShell({ children, secondary }: { children: ReactNode; seconda
 
   // Proteção de rotas da empresa: visitantes são direcionados para /entrar
   useEffect(() => {
-    const isProtected = ["/inicio", "/pdv", "/conversas", "/clientes", "/catalogo", "/pedidos", "/integracoes", "/empresa"].some(
+    const isProtected = ["/inicio", "/pdv", "/respostas-ia", "/conversas", "/clientes", "/catalogo", "/pedidos", "/integracoes", "/empresa"].some(
       (path) => pathname === path || pathname.startsWith(`${path}/`),
     );
     if (isProtected && !loading && !getToken()) {

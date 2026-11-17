@@ -21,10 +21,12 @@ import { Route as IntegracoesRouteImport } from './routes/integracoes'
 import { Route as PdvRouteImport } from './routes/pdv'
 import { Route as PedidosRouteImport } from './routes/pedidos'
 import { Route as PropostaRouteImport } from './routes/proposta'
+import { Route as RespostasIaRouteImport } from './routes/respostas-ia'
 import { Route as AdminAiRoutingRouteImport } from './routes/admin.ai-routing'
 import { Route as ApiProductsRouteImport } from './routes/api/products'
 import { Route as ApiAdminAiRoutingRouteImport } from './routes/api/admin/ai-routing'
 import { Route as ApiAiModelsRouteImport } from './routes/api/ai/models'
+import { Route as ApiAiSuggestReplyRouteImport } from './routes/api/ai/suggest-reply'
 import { Route as ApiCompanyConversationsRouteImport } from './routes/api/company/conversations'
 import { Route as ApiCompanyCustomersRouteImport } from './routes/api/company/customers'
 import { Route as ApiCompanyLoginRouteImport } from './routes/api/company/login'
@@ -100,6 +102,11 @@ const PropostaRoute = PropostaRouteImport.update({
   path: '/proposta',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RespostasIaRoute = RespostasIaRouteImport.update({
+  id: '/respostas-ia',
+  path: '/respostas-ia',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminAiRoutingRoute = AdminAiRoutingRouteImport.update({
   id: '/admin/ai-routing',
   path: '/admin/ai-routing',
@@ -118,6 +125,11 @@ const ApiAdminAiRoutingRoute = ApiAdminAiRoutingRouteImport.update({
 const ApiAiModelsRoute = ApiAiModelsRouteImport.update({
   id: '/api/ai/models',
   path: '/api/ai/models',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAiSuggestReplyRoute = ApiAiSuggestReplyRouteImport.update({
+  id: '/api/ai/suggest-reply',
+  path: '/api/ai/suggest-reply',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiCompanyConversationsRoute = ApiCompanyConversationsRouteImport.update({
@@ -205,10 +217,12 @@ export interface FileRoutesByFullPath {
   '/pdv': typeof PdvRoute
   '/pedidos': typeof PedidosRoute
   '/proposta': typeof PropostaRoute
+  '/respostas-ia': typeof RespostasIaRoute
   '/admin/ai-routing': typeof AdminAiRoutingRoute
   '/api/products': typeof ApiProductsRoute
   '/api/admin/ai-routing': typeof ApiAdminAiRoutingRoute
   '/api/ai/models': typeof ApiAiModelsRoute
+  '/api/ai/suggest-reply': typeof ApiAiSuggestReplyRoute
   '/api/company/conversations': typeof ApiCompanyConversationsRoute
   '/api/company/customers': typeof ApiCompanyCustomersRoute
   '/api/company/login': typeof ApiCompanyLoginRoute
@@ -237,10 +251,12 @@ export interface FileRoutesByTo {
   '/pdv': typeof PdvRoute
   '/pedidos': typeof PedidosRoute
   '/proposta': typeof PropostaRoute
+  '/respostas-ia': typeof RespostasIaRoute
   '/admin/ai-routing': typeof AdminAiRoutingRoute
   '/api/products': typeof ApiProductsRoute
   '/api/admin/ai-routing': typeof ApiAdminAiRoutingRoute
   '/api/ai/models': typeof ApiAiModelsRoute
+  '/api/ai/suggest-reply': typeof ApiAiSuggestReplyRoute
   '/api/company/conversations': typeof ApiCompanyConversationsRoute
   '/api/company/customers': typeof ApiCompanyCustomersRoute
   '/api/company/login': typeof ApiCompanyLoginRoute
@@ -270,10 +286,12 @@ export interface FileRoutesById {
   '/pdv': typeof PdvRoute
   '/pedidos': typeof PedidosRoute
   '/proposta': typeof PropostaRoute
+  '/respostas-ia': typeof RespostasIaRoute
   '/admin/ai-routing': typeof AdminAiRoutingRoute
   '/api/products': typeof ApiProductsRoute
   '/api/admin/ai-routing': typeof ApiAdminAiRoutingRoute
   '/api/ai/models': typeof ApiAiModelsRoute
+  '/api/ai/suggest-reply': typeof ApiAiSuggestReplyRoute
   '/api/company/conversations': typeof ApiCompanyConversationsRoute
   '/api/company/customers': typeof ApiCompanyCustomersRoute
   '/api/company/login': typeof ApiCompanyLoginRoute
@@ -304,10 +322,12 @@ export interface FileRouteTypes {
     | '/pdv'
     | '/pedidos'
     | '/proposta'
+    | '/respostas-ia'
     | '/admin/ai-routing'
     | '/api/products'
     | '/api/admin/ai-routing'
     | '/api/ai/models'
+    | '/api/ai/suggest-reply'
     | '/api/company/conversations'
     | '/api/company/customers'
     | '/api/company/login'
@@ -336,10 +356,12 @@ export interface FileRouteTypes {
     | '/pdv'
     | '/pedidos'
     | '/proposta'
+    | '/respostas-ia'
     | '/admin/ai-routing'
     | '/api/products'
     | '/api/admin/ai-routing'
     | '/api/ai/models'
+    | '/api/ai/suggest-reply'
     | '/api/company/conversations'
     | '/api/company/customers'
     | '/api/company/login'
@@ -368,10 +390,12 @@ export interface FileRouteTypes {
     | '/pdv'
     | '/pedidos'
     | '/proposta'
+    | '/respostas-ia'
     | '/admin/ai-routing'
     | '/api/products'
     | '/api/admin/ai-routing'
     | '/api/ai/models'
+    | '/api/ai/suggest-reply'
     | '/api/company/conversations'
     | '/api/company/customers'
     | '/api/company/login'
@@ -401,10 +425,12 @@ export interface RootRouteChildren {
   PdvRoute: typeof PdvRoute
   PedidosRoute: typeof PedidosRoute
   PropostaRoute: typeof PropostaRoute
+  RespostasIaRoute: typeof RespostasIaRoute
   AdminAiRoutingRoute: typeof AdminAiRoutingRoute
   ApiProductsRoute: typeof ApiProductsRoute
   ApiAdminAiRoutingRoute: typeof ApiAdminAiRoutingRoute
   ApiAiModelsRoute: typeof ApiAiModelsRoute
+  ApiAiSuggestReplyRoute: typeof ApiAiSuggestReplyRoute
   ApiCompanyConversationsRoute: typeof ApiCompanyConversationsRoute
   ApiCompanyCustomersRoute: typeof ApiCompanyCustomersRoute
   ApiCompanyLoginRoute: typeof ApiCompanyLoginRoute
@@ -507,6 +533,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PropostaRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/respostas-ia': {
+      id: '/respostas-ia'
+      path: '/respostas-ia'
+      fullPath: '/respostas-ia'
+      preLoaderRoute: typeof RespostasIaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/ai-routing': {
       id: '/admin/ai-routing'
       path: '/admin/ai-routing'
@@ -533,6 +566,13 @@ declare module '@tanstack/react-router' {
       path: '/api/ai/models'
       fullPath: '/api/ai/models'
       preLoaderRoute: typeof ApiAiModelsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/ai/suggest-reply': {
+      id: '/api/ai/suggest-reply'
+      path: '/api/ai/suggest-reply'
+      fullPath: '/api/ai/suggest-reply'
+      preLoaderRoute: typeof ApiAiSuggestReplyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/company/conversations': {
@@ -649,10 +689,12 @@ const rootRouteChildren: RootRouteChildren = {
   PdvRoute: PdvRoute,
   PedidosRoute: PedidosRoute,
   PropostaRoute: PropostaRoute,
+  RespostasIaRoute: RespostasIaRoute,
   AdminAiRoutingRoute: AdminAiRoutingRoute,
   ApiProductsRoute: ApiProductsRoute,
   ApiAdminAiRoutingRoute: ApiAdminAiRoutingRoute,
   ApiAiModelsRoute: ApiAiModelsRoute,
+  ApiAiSuggestReplyRoute: ApiAiSuggestReplyRoute,
   ApiCompanyConversationsRoute: ApiCompanyConversationsRoute,
   ApiCompanyCustomersRoute: ApiCompanyCustomersRoute,
   ApiCompanyLoginRoute: ApiCompanyLoginRoute,
