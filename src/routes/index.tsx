@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion, useScroll, useTransform } from "motion/react";
 import { useRef } from "react";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Check, Layers, MessageSquare, ShoppingBag } from "lucide-react";
 import horizon from "@/assets/hero-horizon.jpg";
 import monolith from "@/assets/monolith.jpg";
 import { BonaCard3D } from "@/components/bonasoft/BonaCard3D";
@@ -24,9 +24,42 @@ export const Route = createFileRoute("/")({
 const ease = [0.22, 1, 0.36, 1] as const;
 
 const PILLARS = [
-  { n: "01", t: "Venda", d: "Balcão, online e canais de mensagem num só lugar." },
-  { n: "02", t: "Controle", d: "Estoque, clientes e pedidos atualizados em tempo real." },
-  { n: "03", t: "I.A", d: "Uma assistente que entende seu negócio e trabalha por você." },
+  {
+    tag: "Omnichannel & PDV",
+    title: "Venda",
+    headline: "Balcão, online e canais de mensagem num só lugar.",
+    description: "Operação ágil com PDV intuitivo, catálogo sincronizado e vendas unificadas.",
+    highlights: [
+      "Frente de caixa ágil e sem travas",
+      "Catálogo online e pedidos sincronizados",
+      "Emissão rápida de comprovantes e notas",
+    ],
+    icon: ShoppingBag,
+  },
+  {
+    tag: "Operação & Estoque",
+    title: "Controle",
+    headline: "Estoque, clientes e pedidos atualizados em tempo real.",
+    description: "Visão centralizada de movimentações, histórico de clientes e gestão precisa de mercadorias.",
+    highlights: [
+      "Baixa automática e alerta de reposição",
+      "Histórico completo de compras do cliente",
+      "Relatórios claros de faturamento diário",
+    ],
+    icon: Layers,
+  },
+  {
+    tag: "Assistente de Negócio",
+    title: "I.A",
+    headline: "Uma assistente que entende seu negócio e trabalha por você.",
+    description: "Agilidade para tirar dúvidas de clientes, sugerir respostas e consultar produtos em segundos.",
+    highlights: [
+      "Consulta instantânea de estoque via chat",
+      "Sugestões de resposta a dúvidas com AI Gateway",
+      "Criação assistida de orçamentos e pedidos",
+    ],
+    icon: MessageSquare,
+  },
 ];
 
 function Reveal({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
@@ -110,19 +143,57 @@ function Landing() {
           </p>
         </Reveal>
 
-        <div className="mt-14 sm:mt-24 grid gap-px overflow-hidden rounded-2xl border border-border bg-border md:grid-cols-3">
-          {PILLARS.map((p, i) => (
-            <Reveal key={p.n} delay={i * 0.15}>
-              <BonaCard3D
-                tiltIntensity={7.5}
-                className="group h-full bg-background p-8 sm:p-10 transition-colors duration-700 hover:bg-card md:p-12 cursor-pointer"
-              >
-                <span className="font-mono text-xs text-primary">{p.n}</span>
-                <h3 className="mt-8 sm:mt-12 text-xl sm:text-2xl md:text-3xl font-medium leading-snug tracking-[-0.02em]">{p.t}</h3>
-                <p className="mt-3.5 max-w-xs text-[15px] leading-relaxed text-muted-foreground">{p.d}</p>
-              </BonaCard3D>
-            </Reveal>
-          ))}
+        <div className="mt-14 sm:mt-24 grid gap-6 sm:gap-8 md:grid-cols-3">
+          {PILLARS.map((p, i) => {
+            const Icon = p.icon;
+            return (
+              <Reveal key={p.title} delay={i * 0.15}>
+                <BonaCard3D
+                  tiltIntensity={6.5}
+                  className="group relative flex h-full flex-col justify-between rounded-3xl border border-white/10 bg-gradient-to-b from-[#0c1410]/85 via-[#070d0a]/70 to-[#040806]/85 p-7 sm:p-9 backdrop-blur-xl shadow-2xl transition-all duration-500 hover:border-emerald-500/40 hover:shadow-[0_20px_50px_rgba(0,230,118,0.12)] cursor-pointer"
+                >
+                  <div className="flex flex-col">
+                    {/* Header: Semantic Icon & Domain Tag (sem números) */}
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-emerald-500/25 bg-emerald-500/10 text-emerald-400 transition-transform duration-300 group-hover:scale-110 shadow-[0_0_15px_rgba(0,230,118,0.15)]">
+                        <Icon className="h-5 w-5" />
+                      </div>
+                      <span className="inline-flex items-center rounded-full border border-emerald-500/20 bg-emerald-500/5 px-3 py-1 font-mono text-[11px] font-medium tracking-wider text-emerald-400/90 uppercase">
+                        {p.tag}
+                      </span>
+                    </div>
+
+                    {/* Title & Description */}
+                    <h3 className="mt-7 text-2xl sm:text-3xl font-medium tracking-tight text-foreground transition-colors group-hover:text-emerald-300">
+                      {p.title}
+                    </h3>
+                    <p className="mt-2 text-base font-normal leading-snug text-foreground/90">
+                      {p.headline}
+                    </p>
+                    <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+                      {p.description}
+                    </p>
+
+                    {/* Highlights list */}
+                    <div className="mt-6 space-y-2.5 border-t border-white/5 pt-6">
+                      {p.highlights.map((h) => (
+                        <div key={h} className="flex items-center gap-2.5 text-xs text-muted-foreground/90">
+                          <Check className="h-3.5 w-3.5 shrink-0 text-emerald-400" />
+                          <span>{h}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Subtle footer link cue */}
+                  <div className="mt-8 flex items-center gap-2 pt-2 text-xs font-medium text-emerald-400/80 transition-colors group-hover:text-emerald-300">
+                    <span>Ver funcionalidades</span>
+                    <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-1" />
+                  </div>
+                </BonaCard3D>
+              </Reveal>
+            );
+          })}
         </div>
       </section>
 
