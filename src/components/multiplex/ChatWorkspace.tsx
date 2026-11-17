@@ -552,7 +552,7 @@ export function useChatWorkspace() {
               <BonaParticleAtom className="h-12 w-12 text-emerald-400" />
             </div>
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-foreground flex items-center justify-center gap-2">
-              HUG AI <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">BONASOFT HUG</span>
+              HUG AI
             </h1>
             <p className="text-xs text-muted-foreground font-medium">
               Assistente Inteligente Empresarial · Motor Multiplex AI

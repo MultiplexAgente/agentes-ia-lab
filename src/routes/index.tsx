@@ -23,13 +23,13 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "HUG by BonaSoft — Vendas, gestão, ponto de venda, catálogo e inteligência comercial integrados em uma única plataforma.",
+          "HUG — Vendas, gestão, ponto de venda, catálogo e inteligência comercial integrados em uma única plataforma.",
       },
       { property: "og:title", content: "HUG — Seu negócio, em outra órbita" },
       {
         property: "og:description",
         content:
-          "Vendas, estoque, gestão empresarial e inteligência comercial integrados pela BonaSoft HUG.",
+          "Vendas, estoque, gestão empresarial e inteligência comercial integrados pelo HUG.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

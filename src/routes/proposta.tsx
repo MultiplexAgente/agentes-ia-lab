@@ -9,7 +9,7 @@ export const Route = createFileRoute("/proposta")({
       {
         name: "description",
         content:
-          "Vendas, gestão, estoque e inteligência empresarial conectados em uma única plataforma. by BonaSoft.",
+          "Vendas, gestão, estoque e inteligência empresarial conectados em uma única plataforma.",
       },
     ],
   }),
@@ -159,9 +159,6 @@ function PropostaSquarespacePage() {
             <span className="font-extrabold text-xl tracking-[0.18em] text-black">
               HUG
             </span>
-            <span className="text-[10px] font-mono tracking-widest uppercase text-black/50 pl-2.5 border-l border-black/20">
-              BONASOFT HUG
-            </span>
           </Link>
 
           {/* NAVEGAÇÃO MINIMALISTA */}
@@ -207,7 +204,7 @@ function PropostaSquarespacePage() {
         <div className="max-w-4xl space-y-6">
           {/* IDENTIFICADOR DA MARCA */}
           <div className="text-xs font-mono tracking-[0.25em] uppercase text-[#0D9488] font-bold">
-            BONASOFT HUG
+            HUG
           </div>
 
           {/* HEADLINE EDITORIAL EXATA SOLICITADA */}
@@ -348,7 +345,7 @@ function PropostaSquarespacePage() {
                 <span className="w-2.5 h-2.5 rounded-full bg-white/20" />
                 <span className="w-2.5 h-2.5 rounded-full bg-white/20" />
               </div>
-              <span>hug.bonasoft.app/visao-geral</span>
+              <span>app.hug.com/visao-geral</span>
               <div className="w-12" />
             </div>
 
@@ -475,7 +472,6 @@ function PropostaSquarespacePage() {
       <footer className="border-t border-black/[0.08] bg-[#FAF9F6] py-16 px-6 sm:px-12 max-w-[1440px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-6 text-xs text-black/60 font-normal">
         <div className="flex items-center gap-3">
           <span className="font-bold tracking-widest text-black">HUG</span>
-          <span className="font-mono text-[10px]">by BonaSoft</span>
         </div>
         <div>
           © {new Date().getFullYear()} BonaSoft. Todos os direitos reservados.

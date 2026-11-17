@@ -1,5 +1,5 @@
 /**
- * HUG POS (by BonaSoft) — Núcleo de Lógica do Carrinho de Vendas (PDV)
+ * HUG POS — Núcleo de Lógica do Carrinho de Vendas (PDV)
  *
  * Gerencia inclusão de itens, atualização de quantidades (incluindo fracionadas para balança),
  * descontos por item, descontos globais, acréscimos e cálculo seguro de totais e troco.

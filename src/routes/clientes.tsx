@@ -19,9 +19,9 @@ export const Route = createFileRoute("/clientes")({
   head: () => ({
     meta: [
       { title: "Clientes & CRM | HUG ERP" },
-      { name: "description", content: "Clientes cadastrados e relacionamento comercial no HUG by BonaSoft." },
+      { name: "description", content: "Clientes cadastrados e relacionamento comercial no HUG." },
       { property: "og:title", content: "Clientes & CRM | HUG ERP" },
-      { property: "og:description", content: "Clientes cadastrados e relacionamento comercial no HUG by BonaSoft." },
+      { property: "og:description", content: "Clientes cadastrados e relacionamento comercial no HUG." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],

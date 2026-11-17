@@ -56,9 +56,9 @@ export const Route = createFileRoute("/pdv")({
   head: () => ({
     meta: [
       { title: "HUG POS | Frente de Caixa" },
-      { name: "description", content: "HUG POS - Frente de caixa ágil e multissegmento by BonaSoft." },
-      { property: "og:title", content: "HUG POS | Frente de Caixa by BonaSoft" },
-      { property: "og:description", content: "HUG POS - Ponto de Venda ágil e multissegmento by BonaSoft." },
+      { name: "description", content: "HUG POS - Frente de caixa ágil e multissegmento." },
+      { property: "og:title", content: "HUG POS | Frente de Caixa" },
+      { property: "og:description", content: "HUG POS - Ponto de Venda ágil e multissegmento." },
     ],
   }),
   component: PdvPage,
@@ -337,7 +337,7 @@ function PdvPage() {
     <AppShell>
       <PageFrame
         title="HUG POS"
-        description="Frente de caixa ágil e registro transacional de vendas by BonaSoft"
+        description="Frente de caixa ágil e registro transacional de vendas"
         actions={
           <div className="flex items-center gap-2">
             <select

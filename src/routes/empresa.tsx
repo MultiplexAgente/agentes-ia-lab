@@ -80,12 +80,12 @@ export const Route = createFileRoute("/empresa")({
       {
         name: "description",
         content:
-          "Configurações da empresa, segmentos comerciais, catálogo e HUG AI no HUG by BonaSoft.",
+          "Configurações da empresa, segmentos comerciais, catálogo e HUG AI no HUG.",
       },
       { property: "og:title", content: "Configurações da Empresa | HUG ERP" },
       {
         property: "og:description",
-        content: "Configurações da empresa, segmentos comerciais, catálogo e HUG AI no HUG by BonaSoft.",
+        content: "Configurações da empresa, segmentos comerciais, catálogo e HUG AI no HUG.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -479,7 +479,6 @@ function CompanyPage() {
         <div className="mb-6 flex flex-col items-center text-center">
           <BonaParticleAtom className="h-9 w-9 text-emerald-400 mb-2" />
           <h1 className="text-2xl font-black tracking-widest">HUG ERP</h1>
-          <p className="text-xs font-semibold text-emerald-500 uppercase tracking-widest">BONASOFT HUG</p>
           <p className="text-xs text-muted-foreground mt-1">Configurações da Empresa e Catálogo</p>
         </div>
         <form onSubmit={signIn} className="space-y-3 rounded-2xl border border-border/70 bg-card/60 p-6 backdrop-blur">
@@ -1280,7 +1279,7 @@ function CompanyPage() {
           <div>
             <h2 className="text-lg font-semibold tracking-tight">HUG AI · Motor Multiplex · Estratégia de Atendimento</h2>
             <p className="text-xs text-muted-foreground">
-              Configure as prioridades e o motor de inteligência artificial da empresa no HUG by BonaSoft.
+              Configure as prioridades e o motor de inteligência artificial da empresa no HUG.
             </p>
           </div>
 

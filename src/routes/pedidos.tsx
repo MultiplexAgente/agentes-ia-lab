@@ -20,9 +20,9 @@ export const Route = createFileRoute("/pedidos")({
   head: () => ({
     meta: [
       { title: "Gestão de Pedidos | HUG ERP" },
-      { name: "description", content: "Gestão de pedidos e vendas comerciais no HUG by BonaSoft." },
+      { name: "description", content: "Gestão de pedidos e vendas comerciais no HUG." },
       { property: "og:title", content: "Gestão de Pedidos | HUG ERP" },
-      { property: "og:description", content: "Gestão de pedidos e vendas comerciais no HUG by BonaSoft." },
+      { property: "og:description", content: "Gestão de pedidos e vendas comerciais no HUG." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],

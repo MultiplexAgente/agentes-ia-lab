@@ -11,10 +11,10 @@ import { BonaParticleAtom } from "@/components/bonasoft/BonaLogo";
 export const Route = createFileRoute("/entrar")({
   head: () => ({
     meta: [
-      { title: "Entrar | HUG by BonaSoft" },
-      { name: "description", content: "Acesse a conta da sua empresa no HUG by BonaSoft." },
-      { property: "og:title", content: "Entrar | HUG by BonaSoft" },
-      { property: "og:description", content: "Acesse a conta da sua empresa no HUG by BonaSoft." },
+      { title: "Entrar | HUG" },
+      { name: "description", content: "Acesse a conta da sua empresa no HUG." },
+      { property: "og:title", content: "Entrar | HUG" },
+      { property: "og:description", content: "Acesse a conta da sua empresa no HUG." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -54,7 +54,6 @@ function LoginPage() {
         <div className="mb-8 flex flex-col items-center justify-center gap-1.5">
           <BonaParticleAtom className="h-10 w-10 text-emerald-400 mb-1" />
           <p className="font-display text-2xl font-bold tracking-[0.3em] text-foreground">HUG</p>
-          <p className="text-xs font-semibold text-emerald-400 uppercase tracking-widest">BONASOFT HUG</p>
           <p className="text-xs text-muted-foreground mt-0.5">Seu negócio, em outra órbita.</p>
         </div>
         <form onSubmit={submit} className="space-y-4 rounded-2xl border border-border/60 bg-card/50 p-6 backdrop-blur">

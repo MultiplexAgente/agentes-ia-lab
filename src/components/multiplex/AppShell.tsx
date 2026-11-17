@@ -102,10 +102,7 @@ export function AppShell({ children, secondary }: { children: ReactNode; seconda
         <div className="flex h-14 shrink-0 items-center justify-between px-4">
           <Link to="/" className="flex items-center gap-2.5 text-[15px] font-semibold tracking-tight text-foreground">
             <BonaParticleAtom className="h-6 w-6 text-emerald-400" />
-            <div className="flex flex-col">
-              <span className="text-base font-black tracking-widest text-foreground leading-none">HUG</span>
-              <span className="text-[9px] font-semibold uppercase tracking-widest text-muted-foreground mt-0.5">BONASOFT HUG</span>
-            </div>
+            <span className="text-base font-black tracking-widest text-foreground leading-none">HUG</span>
           </Link>
           <div className="flex items-center gap-1">
             <ThemeToggle />
@@ -227,7 +224,7 @@ export function AppShell({ children, secondary }: { children: ReactNode; seconda
             </Button>
             <div className="flex items-center gap-1.5">
               <BonaParticleAtom className="h-5 w-5 text-emerald-400" />
-              <span className="text-sm font-extrabold tracking-widest">HUG <span className="text-[10px] text-muted-foreground font-medium">BONASOFT</span></span>
+              <span className="text-sm font-extrabold tracking-widest">HUG</span>
             </div>
           </div>
           {!profile && (

@@ -1,5 +1,5 @@
 /**
- * HUG (by BonaSoft) — Contratos de Integração: HUG ERP <-> Multiplex AI Engine (HUG AI)
+ * HUG — Contratos de Integração: HUG ERP <-> Multiplex AI Engine (HUG AI)
  *
  * Formaliza a comunicação desacoplada entre a plataforma SaaS comercial HUG
  * e o motor central de inteligência artificial Multiplex.

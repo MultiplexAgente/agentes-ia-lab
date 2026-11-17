@@ -9,12 +9,12 @@ export const Route = createFileRoute("/conversas")({
       { title: "HUG AI | Assistente Inteligente Empresarial" },
       {
         name: "description",
-        content: "HUG AI - Assistente inteligente empresarial e atendimento comercial by BonaSoft (Motor Multiplex AI).",
+        content: "HUG AI - Assistente inteligente empresarial e atendimento comercial (Motor Multiplex AI).",
       },
-      { property: "og:title", content: "HUG AI | Assistente Inteligente Empresarial by BonaSoft" },
+      { property: "og:title", content: "HUG AI | Assistente Inteligente Empresarial" },
       {
         property: "og:description",
-        content: "HUG AI - Assistente inteligente empresarial e atendimento comercial by BonaSoft (Motor Multiplex AI).",
+        content: "HUG AI - Assistente inteligente empresarial e atendimento comercial (Motor Multiplex AI).",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

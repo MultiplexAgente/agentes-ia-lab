@@ -13,9 +13,9 @@ export const Route = createFileRoute("/integracoes")({
   head: () => ({
     meta: [
       { title: "Canais & Integrações | HUG ERP" },
-      { name: "description", content: "Canais de mensageria e integrações comerciais do HUG by BonaSoft." },
+      { name: "description", content: "Canais de mensageria e integrações comerciais do HUG." },
       { property: "og:title", content: "Canais & Integrações | HUG ERP" },
-      { property: "og:description", content: "Canais de mensageria e integrações comerciais do HUG by BonaSoft." },
+      { property: "og:description", content: "Canais de mensageria e integrações comerciais do HUG." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],

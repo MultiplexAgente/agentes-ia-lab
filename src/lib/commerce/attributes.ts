@@ -1,5 +1,5 @@
 /**
- * HUG (by BonaSoft) — Atributos Tipados por Segmento Comercial
+ * HUG — Atributos Tipados por Segmento Comercial
  *
  * Cada segmento possui regras de validação estritas e atributos específicos de domínio.
  * Atributos não são gravados como JSONB sem validação: este arquivo garante

@@ -63,16 +63,16 @@ interface AdminPayload {
 export const Route = createFileRoute("/admin/ai-routing")({
   head: () => ({
     meta: [
-      { title: "Auditoria HUG AI | Motor Multiplex by BonaSoft" },
+      { title: "Auditoria HUG AI | Motor Multiplex" },
       {
         name: "description",
         content:
-          "Painel técnico do Motor Multiplex AI no HUG by BonaSoft: telemetria de conversas, modelo resolvido, tokens, custo e prioridades de roteamento por empresa.",
+          "Painel técnico do Motor Multiplex AI no HUG: telemetria de conversas, modelo resolvido, tokens, custo e prioridades de roteamento por empresa.",
       },
-      { property: "og:title", content: "Auditoria HUG AI | Motor Multiplex by BonaSoft" },
+      { property: "og:title", content: "Auditoria HUG AI | Motor Multiplex" },
       {
         property: "og:description",
-        content: "Telemetria de conversas, modelo resolvido, custo e prioridades de roteamento por empresa no HUG by BonaSoft.",
+        content: "Telemetria de conversas, modelo resolvido, custo e prioridades de roteamento por empresa no HUG.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -95,9 +95,9 @@ function AiRoutingAdminPage() {
     setLoading(true);
     setError(null);
     try {
-       const response = await fetch(`/api/admin/ai-routing?limit=100`, {
-         headers: token ? { Authorization: `Bearer ${token}` } : {},
-       });
+      const response = await fetch(`/api/admin/ai-routing?limit=100`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error ?? "Falha ao carregar a auditoria.");
       setData(payload as AdminPayload);
@@ -108,7 +108,7 @@ function AiRoutingAdminPage() {
     } finally {
       setLoading(false);
     }
-   }, [token]);
+  }, [token]);
 
   useEffect(() => {
     void load();
@@ -121,8 +121,8 @@ function AiRoutingAdminPage() {
     try {
       const response = await fetch("/api/admin/ai-routing", {
         method: "POST",
-         headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-         body: JSON.stringify({ settings: draft }),
+        headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        body: JSON.stringify({ settings: draft }),
       });
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error ?? "Falha ao salvar.");
@@ -363,7 +363,7 @@ function AiRoutingAdminPage() {
                         </td>
                         <td className="p-2">{log.strategy}</td>
                         <td className="p-2">
-                           {TIER_LABELS[log.engine] ?? "Motor interno"}
+                          {TIER_LABELS[log.engine] ?? "Motor interno"}
                           {log.fallback_used && <span className="ml-1 text-amber-500">(fallback)</span>}
                         </td>
                         <td className="p-2 whitespace-nowrap">

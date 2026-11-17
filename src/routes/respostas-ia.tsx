@@ -143,11 +143,11 @@ function RespostasIaPage() {
         description="Descreva a dúvida recebida no balcão ou WhatsApp e receba uma resposta recomendada com contexto da loja via AI Gateway."
       >
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          
+
           {/* COLUNA ESQUERDA: FORMULÁRIO DE ENTRADA */}
           <div className="lg:col-span-7 space-y-6">
             <form onSubmit={handleGenerate} className="rounded-2xl border border-border/70 bg-card p-6 sm:p-8 space-y-6 shadow-sm">
-              
+
               {/* CAMPO: DÚVIDA DO CLIENTE */}
               <div className="space-y-2">
                 <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center justify-between">
@@ -206,11 +206,10 @@ function RespostasIaPage() {
                       key={t.id}
                       type="button"
                       onClick={() => setTone(t.id)}
-                      className={`p-3 rounded-xl border text-left transition-all ${
-                        tone === t.id
+                      className={`p-3 rounded-xl border text-left transition-all ${tone === t.id
                           ? "border-primary bg-primary/10 text-foreground font-semibold"
                           : "border-border bg-background/50 hover:bg-muted/40 text-muted-foreground"
-                      }`}
+                        }`}
                     >
                       <div className="text-xs">{t.label}</div>
                     </button>
@@ -247,7 +246,7 @@ function RespostasIaPage() {
 
           {/* COLUNA DIREITA: RESULTADO DA RESPOSTA SUGERIDA */}
           <div className="lg:col-span-5 space-y-6">
-            
+
             {/* CARD DE RESPOSTA ATIVA */}
             <div className="rounded-2xl border border-border/80 bg-card p-6 sm:p-8 space-y-5 shadow-sm min-h-[380px] flex flex-col justify-between">
               <div className="space-y-4">
