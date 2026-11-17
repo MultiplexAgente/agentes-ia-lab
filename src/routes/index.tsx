@@ -282,14 +282,11 @@ function Landing() {
       */}
       <header className="fixed inset-x-0 top-0 z-50 border-b border-white/[0.06] bg-[#03060a]/70 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-[1400px] items-center justify-between px-6 sm:h-20 sm:px-10">
-          <Link to="/" className="flex items-center gap-3">
-            <BonaParticleAtom className="h-6 w-6 text-emerald-400" />
-            <span className="font-sans font-light tracking-[0.32em] text-sm text-foreground uppercase">
-              BONASOFT
-            </span>
-            <span className="text-muted-foreground/40 pl-2 border-l border-white/10 text-xs font-mono tracking-widest">
-              HUG
-            </span>
+          <Link
+            to="/"
+            className="text-[14px] font-medium tracking-[0.45em] sm:text-[16px] sm:tracking-[0.55em] text-foreground transition-colors hover:text-white"
+          >
+            HUG
           </Link>
 
           <nav className="hidden items-center gap-9 text-xs tracking-wider uppercase text-muted-foreground/80 md:flex">
@@ -354,7 +351,7 @@ function Landing() {
           >
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
             <span className="font-mono text-[10px] sm:text-[11px] uppercase tracking-[0.4em] text-emerald-300">
-              BONASOFT HUG · PLATAFORMA EM ÓRBITA
+              PLATAFORMA COMERCIAL EM ÓRBITA
             </span>
           </motion.div>
 
@@ -795,7 +792,7 @@ function Landing() {
 
         <Reveal>
           <span className="font-mono text-xs uppercase tracking-[0.4em] text-emerald-400">
-            BONASOFT HUG
+            HUG
           </span>
           <h2 className="relative mx-auto mt-4 max-w-4xl text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-medium leading-[1.08] tracking-[-0.035em] text-white">
             O futuro do seu negócio
