@@ -1,5 +1,5 @@
 /**
- * BonaSoft Commerce — Núcleo de Lógica do Carrinho de Vendas (PDV)
+ * VENDRA POS (by BonaSoft) — Núcleo de Lógica do Carrinho de Vendas (PDV)
  *
  * Gerencia inclusão de itens, atualização de quantidades (incluindo fracionadas para balança),
  * descontos por item, descontos globais, acréscimos e cálculo seguro de totais e troco.

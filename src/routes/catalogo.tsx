@@ -25,10 +25,10 @@ interface Product {
 export const Route = createFileRoute("/catalogo")({
   head: () => ({
     meta: [
-      { title: "Catálogo de Produtos | BonaSoft Commerce" },
-      { name: "description", content: "Catálogo multissegmento de produtos e serviços no BonaSoft Commerce." },
-      { property: "og:title", content: "Catálogo de Produtos | BonaSoft Commerce" },
-      { property: "og:description", content: "Catálogo multissegmento de produtos e serviços no BonaSoft Commerce." },
+      { title: "Catálogo de Produtos | VENDRA ERP" },
+      { name: "description", content: "Catálogo multissegmento de produtos e serviços no VENDRA by BonaSoft." },
+      { property: "og:title", content: "Catálogo de Produtos | VENDRA ERP" },
+      { property: "og:description", content: "Catálogo multissegmento de produtos e serviços no VENDRA by BonaSoft." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],

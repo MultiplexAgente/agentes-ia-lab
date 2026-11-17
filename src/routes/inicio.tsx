@@ -14,10 +14,10 @@ interface Overview {
 export const Route = createFileRoute("/inicio")({
   head: () => ({
     meta: [
-      { title: "Painel Geral | BonaSoft Commerce" },
-      { name: "description", content: "Panorama operacional e comercial da sua empresa no BonaSoft Commerce." },
-      { property: "og:title", content: "Painel Geral | BonaSoft Commerce" },
-      { property: "og:description", content: "Panorama operacional e comercial da sua empresa no BonaSoft Commerce." },
+      { title: "Painel Geral | VENDRA ERP" },
+      { name: "description", content: "Vendra ERP - Panorama operacional e comercial da sua empresa by BonaSoft." },
+      { property: "og:title", content: "Painel Geral | VENDRA ERP" },
+      { property: "og:description", content: "Vendra ERP - Panorama operacional e comercial da sua empresa by BonaSoft." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],

@@ -75,16 +75,16 @@ interface Workspace {
 export const Route = createFileRoute("/empresa")({
   head: () => ({
     meta: [
-      { title: "Configurações da Empresa | BonaSoft Commerce" },
+      { title: "Configurações da Empresa | VENDRA ERP" },
       {
         name: "description",
         content:
-          "Configurações da empresa, segmento comercial, catálogo e inteligência artificial no BonaSoft Commerce.",
+          "Configurações da empresa, segmentos comerciais, catálogo e Vendra AI no VENDRA by BonaSoft.",
       },
-      { property: "og:title", content: "Configurações da Empresa | BonaSoft Commerce" },
+      { property: "og:title", content: "Configurações da Empresa | VENDRA ERP" },
       {
         property: "og:description",
-        content: "Configurações da empresa, segmento comercial, catálogo e inteligência artificial no BonaSoft Commerce.",
+        content: "Configurações da empresa, segmentos comerciais, catálogo e Vendra AI no VENDRA by BonaSoft.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -476,10 +476,11 @@ function CompanyPage() {
     return (
       <main className="mx-auto flex min-h-screen w-full max-w-md flex-col justify-center px-4">
         <div className="mb-6 flex flex-col items-center text-center">
-          <div className="flex size-10 items-center justify-center rounded-xl bg-primary text-primary-foreground font-bold text-sm mb-2 shadow-md">
-            BS
+          <div className="flex size-10 items-center justify-center rounded-xl bg-emerald-500 text-slate-950 font-black text-sm mb-2 shadow-md">
+            V
           </div>
-          <h1 className="text-2xl font-bold tracking-tight">BonaSoft Commerce</h1>
+          <h1 className="text-2xl font-black tracking-tight">VENDRA ERP</h1>
+          <p className="text-xs font-semibold text-emerald-500 uppercase tracking-widest">by BonaSoft</p>
           <p className="text-xs text-muted-foreground mt-1">Configurações da Empresa e Catálogo</p>
         </div>
         <form onSubmit={signIn} className="space-y-3 rounded-2xl border border-border/70 bg-card/60 p-6 backdrop-blur">
@@ -1278,9 +1279,9 @@ function CompanyPage() {
       {draft && (
         <section className="rounded-xl border border-border/70 bg-card/40 p-5 shadow-sm space-y-4">
           <div>
-            <h2 className="text-lg font-semibold tracking-tight">Motor de IA Multiplex · Estratégia de Atendimento</h2>
+            <h2 className="text-lg font-semibold tracking-tight">Vendra AI · Motor Multiplex · Estratégia de Atendimento</h2>
             <p className="text-xs text-muted-foreground">
-              Configure as prioridades e o motor de inteligência artificial da empresa no BonaSoft Commerce.
+              Configure as prioridades e o motor de inteligência artificial da empresa no VENDRA by BonaSoft.
             </p>
           </div>
 

@@ -1,5 +1,5 @@
 /**
- * BonaSoft Commerce — Camada de Segmentos Comerciais
+ * VENDRA (by BonaSoft) — Camada de Segmentos Comerciais
  *
  * Define os segmentos de mercado atendidos pela plataforma ERP SaaS,
  * seus termos vocabulários de domínio e ícones semânticos de negócio.

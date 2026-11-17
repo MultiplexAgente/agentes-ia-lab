@@ -1,5 +1,5 @@
 /**
- * BonaSoft Commerce — Gestão de Sessões de Caixa e Movimentações (PDV)
+ * VENDRA POS (by BonaSoft) — Gestão de Sessões de Caixa e Movimentações (PDV)
  *
  * Implementa abertura de caixa, saldo inicial, sangrias (retiradas),
  * suprimentos (reforços), fechamento com totalização por meio de pagamento

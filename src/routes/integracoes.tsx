@@ -12,10 +12,10 @@ interface Overview {
 export const Route = createFileRoute("/integracoes")({
   head: () => ({
     meta: [
-      { title: "Canais & Integrações | BonaSoft Commerce" },
-      { name: "description", content: "Canais de mensageria e integrações do BonaSoft Commerce." },
-      { property: "og:title", content: "Canais & Integrações | BonaSoft Commerce" },
-      { property: "og:description", content: "Canais de mensageria e integrações do BonaSoft Commerce." },
+      { title: "Canais & Integrações | VENDRA ERP" },
+      { name: "description", content: "Canais de mensageria e integrações comerciais do VENDRA by BonaSoft." },
+      { property: "og:title", content: "Canais & Integrações | VENDRA ERP" },
+      { property: "og:description", content: "Canais de mensageria e integrações comerciais do VENDRA by BonaSoft." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],

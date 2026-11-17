@@ -19,10 +19,10 @@ interface Order {
 export const Route = createFileRoute("/pedidos")({
   head: () => ({
     meta: [
-      { title: "Gestão de Pedidos | BonaSoft Commerce" },
-      { name: "description", content: "Gestão de pedidos e vendas comerciais no BonaSoft Commerce." },
-      { property: "og:title", content: "Gestão de Pedidos | BonaSoft Commerce" },
-      { property: "og:description", content: "Gestão de pedidos e vendas comerciais no BonaSoft Commerce." },
+      { title: "Gestão de Pedidos | VENDRA ERP" },
+      { name: "description", content: "Gestão de pedidos e vendas comerciais no VENDRA by BonaSoft." },
+      { property: "og:title", content: "Gestão de Pedidos | VENDRA ERP" },
+      { property: "og:description", content: "Gestão de pedidos e vendas comerciais no VENDRA by BonaSoft." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],

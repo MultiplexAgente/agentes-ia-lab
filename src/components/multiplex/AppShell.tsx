@@ -98,12 +98,12 @@ export function AppShell({ children, secondary }: { children: ReactNode; seconda
         {/* TOPO DA SIDEBAR */}
         <div className="flex h-14 shrink-0 items-center justify-between px-4">
           <Link to="/" className="flex items-center gap-2.5 text-[15px] font-semibold tracking-tight text-foreground">
-            <div className="flex size-7 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold text-xs tracking-wider shadow-sm">
-              BS
+            <div className="flex size-7 items-center justify-center rounded-lg bg-emerald-500 text-slate-950 font-black text-xs tracking-wider shadow-sm">
+              V
             </div>
             <div className="flex flex-col">
-              <span className="text-sm font-bold tracking-tight text-foreground leading-none">BonaSoft</span>
-              <span className="text-[10px] font-medium uppercase tracking-widest text-muted-foreground mt-0.5">Commerce</span>
+              <span className="text-base font-black tracking-tight text-foreground leading-none">VENDRA</span>
+              <span className="text-[9px] font-semibold uppercase tracking-widest text-muted-foreground mt-0.5">by BonaSoft</span>
             </div>
           </Link>
           <div className="flex items-center gap-1">
@@ -120,12 +120,12 @@ export function AppShell({ children, secondary }: { children: ReactNode; seconda
             variant="outline"
             className="w-full justify-start gap-2.5 rounded-xl border-border/70 font-medium text-foreground hover:bg-muted/60 transition-colors"
             onClick={async () => {
-              if (pathname !== "/") await navigate({ to: "/" });
+              if (pathname !== "/conversas") await navigate({ to: "/conversas" });
               window.dispatchEvent(new Event(NEW_CHAT_EVENT));
             }}
           >
             <Plus className="size-4 text-muted-foreground" />
-            <span>Novo chat</span>
+            <span>Nova conversa Vendra AI</span>
           </Button>
         </div>
 
@@ -225,10 +225,10 @@ export function AppShell({ children, secondary }: { children: ReactNode; seconda
               <Menu className="size-4" />
             </Button>
             <div className="flex items-center gap-1.5">
-              <div className="flex size-5 items-center justify-center rounded bg-primary text-primary-foreground font-bold text-[9px]">
-                BS
+              <div className="flex size-5 items-center justify-center rounded bg-emerald-500 text-slate-950 font-black text-[10px]">
+                V
               </div>
-              <span className="text-sm font-bold tracking-tight">BonaSoft Commerce</span>
+              <span className="text-sm font-extrabold tracking-tight">VENDRA <span className="text-[10px] text-muted-foreground font-medium">by BonaSoft</span></span>
             </div>
           </div>
           {!profile && (

@@ -1,7 +1,7 @@
 /**
- * BonaSoft Commerce — Contratos de Integração: Core ERP <-> Multiplex AI Engine
+ * VENDRA (by BonaSoft) — Contratos de Integração: Vendra ERP <-> Multiplex AI Engine (Vendra AI)
  *
- * Formaliza a comunicação desacoplada entre a plataforma SaaS comercial BonaSoft Commerce
+ * Formaliza a comunicação desacoplada entre a plataforma SaaS comercial VENDRA
  * e o motor central de inteligência artificial Multiplex.
  *
  * A IA nunca altera o banco de dados diretamente sem passar pela camada de
@@ -83,7 +83,7 @@ export interface CommercialOrderDraft {
 }
 
 /**
- * Contrato de chamada ao Multiplex AI Engine pelo BonaSoft Commerce
+ * Contrato de chamada ao Multiplex AI Engine (Vendra AI) pelo Vendra ERP
  */
 export interface MultiplexExecutionRequest {
   tenant: TenantCommerceContext;
@@ -99,7 +99,7 @@ export interface MultiplexExecutionRequest {
 }
 
 /**
- * Contrato de retorno do Multiplex AI Engine para o BonaSoft Commerce
+ * Contrato de retorno do Multiplex AI Engine (Vendra AI) para o Vendra ERP
  */
 export interface MultiplexExecutionResponse {
   conversationId: string;

@@ -18,10 +18,10 @@ interface Customer {
 export const Route = createFileRoute("/clientes")({
   head: () => ({
     meta: [
-      { title: "Clientes & CRM | BonaSoft Commerce" },
-      { name: "description", content: "Clientes cadastrados e relacionamento comercial no BonaSoft Commerce." },
-      { property: "og:title", content: "Clientes & CRM | BonaSoft Commerce" },
-      { property: "og:description", content: "Clientes cadastrados e relacionamento comercial no BonaSoft Commerce." },
+      { title: "Clientes & CRM | VENDRA ERP" },
+      { name: "description", content: "Clientes cadastrados e relacionamento comercial no VENDRA by BonaSoft." },
+      { property: "og:title", content: "Clientes & CRM | VENDRA ERP" },
+      { property: "og:description", content: "Clientes cadastrados e relacionamento comercial no VENDRA by BonaSoft." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],

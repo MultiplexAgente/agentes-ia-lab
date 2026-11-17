@@ -10,10 +10,10 @@ import { api, setToken } from "@/lib/multiplex/client";
 export const Route = createFileRoute("/entrar")({
   head: () => ({
     meta: [
-      { title: "Entrar | BonaSoft Commerce" },
-      { name: "description", content: "Acesse a conta da sua empresa no BonaSoft Commerce." },
-      { property: "og:title", content: "Entrar | BonaSoft Commerce" },
-      { property: "og:description", content: "Acesse a conta da sua empresa no BonaSoft Commerce." },
+      { title: "Entrar | VENDRA by BonaSoft" },
+      { name: "description", content: "Acesse a conta da sua empresa no VENDRA by BonaSoft." },
+      { property: "og:title", content: "Entrar | VENDRA by BonaSoft" },
+      { property: "og:description", content: "Acesse a conta da sua empresa no VENDRA by BonaSoft." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -51,11 +51,12 @@ function LoginPage() {
     <main className="flex min-h-dvh items-center justify-center bg-background px-4">
       <div className="w-full max-w-sm">
         <div className="mb-8 flex flex-col items-center justify-center gap-1.5">
-          <div className="flex size-10 items-center justify-center rounded-xl bg-primary text-primary-foreground font-bold text-sm tracking-wider shadow-md">
-            BS
+          <div className="flex size-11 items-center justify-center rounded-xl bg-emerald-500 text-slate-950 font-black text-lg tracking-wider shadow-md">
+            V
           </div>
-          <p className="font-display text-xl font-bold tracking-tight">BonaSoft Commerce</p>
-          <p className="text-xs text-muted-foreground">Plataforma ERP SaaS Comercial</p>
+          <p className="font-display text-2xl font-black tracking-tight">VENDRA</p>
+          <p className="text-xs font-semibold text-emerald-500 uppercase tracking-widest">by BonaSoft</p>
+          <p className="text-xs text-muted-foreground mt-0.5">Seu negócio. Seu próximo nível.</p>
         </div>
         <form onSubmit={submit} className="space-y-4 rounded-2xl border border-border/60 bg-card/50 p-6 backdrop-blur">
           <h1 className="text-lg font-semibold">Entrar na sua conta</h1>

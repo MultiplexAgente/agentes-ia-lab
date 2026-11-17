@@ -14,6 +14,7 @@ import {
   CreditCard,
   DollarSign,
   FileText,
+  Globe,
   Layers,
   Lock,
   MessageSquare,
@@ -39,17 +40,17 @@ import {
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "BonaSoft Commerce | A Plataforma SaaS Definitiva de Gestão Comercial e ERP" },
+      { title: "VENDRA | Seu negócio. Seu próximo nível. by BonaSoft" },
       {
         name: "description",
         content:
-          "Plataforma completa de gestão empresarial, PDV, controle de estoque, financeiro e inteligência artificial integrada para farmácias, mercados, moda, restaurantes e varejo.",
+          "VENDRA by BonaSoft - Gestão comercial, vendas, estoque, financeiro e inteligência artificial em uma única plataforma. Vendra ERP, Vendra POS, Vendra Mobile, Vendra Store e Vendra AI.",
       },
-      { property: "og:title", content: "BonaSoft Commerce | A Plataforma SaaS Definitiva de Gestão Comercial e ERP" },
+      { property: "og:title", content: "VENDRA | Seu negócio. Seu próximo nível. by BonaSoft" },
       {
         property: "og:description",
         content:
-          "Gestão comercial, vendas, estoque, financeiro e IA integrados em um único ecossistema cinematográfico.",
+          "Uma plataforma. Todas as operações. Mais possibilidades. Gestão comercial, estoque, PDV e IA empresarial by BonaSoft.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -58,26 +59,72 @@ export const Route = createFileRoute("/")({
   component: LandingPage,
 });
 
-// Segmentos comerciais do BonaSoft Commerce
+// Os 5 Pilares do Ecossistema VENDRA
+const VENDRA_PRODUCTS = [
+  {
+    name: "Vendra ERP",
+    badge: "Gestão Empresarial",
+    desc: "Sistema central de gestão empresarial: retaguarda completa, compras, estoque multidepósito, financeiro, DRE e controle multiempresa.",
+    icon: Building2,
+    gradient: "from-emerald-500/20 to-teal-500/10",
+    border: "border-emerald-500/30",
+  },
+  {
+    name: "Vendra POS",
+    badge: "Frente de Caixa",
+    desc: "Ponto de venda ágil para balcão, teclado, touchscreen e leitores de código de barras. Operação veloz com conferência de caixa.",
+    icon: Store,
+    gradient: "from-cyan-500/20 to-blue-500/10",
+    border: "border-cyan-500/30",
+  },
+  {
+    name: "Vendra Mobile",
+    badge: "Gestão Móvel",
+    desc: "Aplicativo móvel para gestores e operadores acompanharem vendas em tempo real, aprovarem compras e receberem alertas da IA.",
+    icon: Smartphone,
+    gradient: "from-teal-500/20 to-emerald-500/10",
+    border: "border-teal-500/30",
+  },
+  {
+    name: "Vendra Store",
+    badge: "Vendas Online",
+    desc: "Portal de e-commerce e catálogo digital integrado. Venda online com estoque sincronizado automaticamente com suas lojas físicas.",
+    icon: ShoppingBag,
+    gradient: "from-blue-500/20 to-indigo-500/10",
+    border: "border-blue-500/30",
+  },
+  {
+    name: "Vendra AI",
+    badge: "Inteligência Artificial",
+    desc: "Assistente inteligente empresarial integrado ao ERP. Responde dúvidas financeiras, prevê ruptura de estoque e analisa margens (powered by Multiplex).",
+    icon: Cpu,
+    gradient: "from-emerald-500/25 via-teal-500/20 to-cyan-500/20",
+    border: "border-emerald-500/40",
+  },
+];
+
+// Segmentos comerciais do VENDRA
 const SEGMENTS = [
   {
     id: "farmacia",
     name: "Farmácias & Drogarias",
+    domain: "farmacia.vendra.com",
     icon: Pill,
-    headline: "Rastreabilidade completa de medicamentos e controle sanitário",
+    headline: "Rastreabilidade de medicamentos, lotes e controle sanitário",
     description:
       "Gestão de lotes, datas de validade, registro Anvisa, princípio ativo, dosagem, apresentações e controle rigoroso de retenção de receitas.",
     features: [
       "Controle de lote e validade automático",
       "Consulta por princípio ativo e genérico",
       "Conformidade Anvisa e receituário",
-      "Integração rápida com leitor de barras EAN",
+      "Leitura rápida de código EAN no caixa",
     ],
     metric: "100% em conformidade sanitária",
   },
   {
     id: "mercado",
     name: "Mercados & Supermercados",
+    domain: "mercado.vendra.com",
     icon: Store,
     headline: "Frente de caixa ultra-rápida e integração direta com balanças",
     description:
@@ -93,6 +140,7 @@ const SEGMENTS = [
   {
     id: "moda",
     name: "Moda & Vestuário",
+    domain: "moda.vendra.com",
     icon: Tag,
     headline: "Matriz de grade por tamanho, cor, coleção e variantes",
     description:
@@ -108,6 +156,7 @@ const SEGMENTS = [
   {
     id: "gastronomia",
     name: "Restaurantes & Gastronomia",
+    domain: "gastro.vendra.com",
     icon: UtensilsCrossed,
     headline: "Comandas eletrônicas, mesas, delivery e ficha técnica",
     description:
@@ -123,6 +172,7 @@ const SEGMENTS = [
   {
     id: "beleza",
     name: "Beleza & Estética",
+    domain: "beauty.vendra.com",
     icon: Scissors,
     headline: "Agendamentos, serviços profissionais e controle de comissões",
     description:
@@ -138,6 +188,7 @@ const SEGMENTS = [
   {
     id: "petshop",
     name: "Pet Shops & Veterinárias",
+    domain: "pet.vendra.com",
     icon: Dog,
     headline: "Ficha clínica, serviços de banho & tosa e produtos especializados",
     description:
@@ -153,6 +204,7 @@ const SEGMENTS = [
   {
     id: "eletronicos",
     name: "Eletrônicos & Informática",
+    domain: "tech.vendra.com",
     icon: Cpu,
     headline: "Rastreio por IMEI, número de série e ordens de serviço",
     description:
@@ -168,6 +220,7 @@ const SEGMENTS = [
   {
     id: "construcao",
     name: "Materiais de Construção",
+    domain: "construccion.vendra.com",
     icon: Wrench,
     headline: "Múltiplas unidades (M², M³, KG), orçamentos e frete",
     description:
@@ -193,7 +246,7 @@ const PLANS = [
     highlight: false,
     features: [
       "1 Filial comercial ativa",
-      "Frente de Caixa (PDV Web) ilimitado",
+      "Vendra POS (Frente de Caixa Web) ilimitado",
       "Catálogo unificado e controle de estoque",
       "Gestão financeira básica e fluxo de caixa",
       "Cadastro ilimitado de clientes e produtos",
@@ -211,9 +264,9 @@ const PLANS = [
     highlight: true,
     features: [
       "Até 3 Filiais comerciais conectadas",
-      "PDV Web e PDV Desktop com sincronização em tempo real",
+      "Vendra POS Web e Desktop com sincronização em tempo real",
       "Suporte a Múltiplos Segmentos simultâneos",
-      "Motor Multiplex AI integrado ao ERP",
+      "Vendra AI integrado ao ERP (Motor Multiplex)",
       "Controle avançado de lotes, validade e grades",
       "Integrações comerciais (WhatsApp e Redes)",
       "Suporte prioritário via chat em tempo real",
@@ -230,8 +283,8 @@ const PLANS = [
     highlight: false,
     features: [
       "Filiais comerciais ilimitadas",
-      "Terminais de PDV ilimitados por loja",
-      "Treinamento personalizado do Multiplex AI com documentos da empresa",
+      "Terminais de Vendra POS ilimitados por loja",
+      "Vendra AI com treinamento em documentos da empresa",
       "DRE consolidado, centro de custos e conciliação bancária",
       "Relatórios executivos e BI preditivo",
       "Acesso completo a APIs e Webhooks",
@@ -296,27 +349,30 @@ function LandingPage() {
       </div>
 
       {/* NAVBAR FIXA GLASSMORPHIC */}
-      <header className="sticky top-0 z-50 w-full border-b border-white/[0.07] bg-[#05070D]/80 backdrop-blur-xl transition-all">
+      <header className="sticky top-0 z-50 w-full border-b border-white/[0.07] bg-[#05070D]/85 backdrop-blur-xl transition-all">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-          {/* LOGOTIPO BONASOFT COMMERCE */}
+          {/* LOGOTIPO VENDRA BY BONASOFT */}
           <Link to="/" className="flex items-center gap-3 group">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 via-teal-500 to-cyan-500 p-[1px] shadow-lg shadow-emerald-500/20 group-hover:shadow-emerald-500/40 transition-all">
-              <div className="w-full h-full bg-[#070A12] rounded-[11px] flex items-center justify-center">
-                <Building2 className="w-5 h-5 text-emerald-400" />
+              <div className="w-full h-full bg-[#070A12] rounded-[11px] flex items-center justify-center font-black text-emerald-400 text-lg">
+                V
               </div>
             </div>
             <div className="flex flex-col">
-              <span className="font-extrabold text-lg tracking-tight text-white flex items-center gap-1.5">
-                BonaSoft <span className="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent font-black">Commerce</span>
+              <span className="font-black text-xl tracking-tight text-white flex items-center gap-1.5">
+                VENDRA
               </span>
-              <span className="text-[10px] text-muted-foreground tracking-widest uppercase font-semibold">
-                Plataforma SaaS & ERP
+              <span className="text-[9px] text-emerald-400/90 tracking-widest uppercase font-bold">
+                by BonaSoft
               </span>
             </div>
           </Link>
 
           {/* NAVEGAÇÃO DESKTOP */}
           <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-300">
+            <a href="#produtos" className="hover:text-emerald-400 transition-colors">
+              Produtos
+            </a>
             <a href="#ecossistema" className="hover:text-emerald-400 transition-colors">
               Ecossistema
             </a>
@@ -324,10 +380,7 @@ function LandingPage() {
               Segmentos
             </a>
             <a href="#ia" className="hover:text-emerald-400 transition-colors">
-              Inteligência Artificial
-            </a>
-            <a href="#multiplataforma" className="hover:text-emerald-400 transition-colors">
-              Plataformas
+              Vendra AI
             </a>
             <a href="#planos" className="hover:text-emerald-400 transition-colors">
               Planos
@@ -347,7 +400,7 @@ function LandingPage() {
               className="relative inline-flex items-center justify-center p-0.5 overflow-hidden text-xs sm:text-sm font-bold text-white rounded-xl group bg-gradient-to-r from-emerald-500 to-cyan-500 group-hover:from-emerald-400 group-hover:to-cyan-400 shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 transition-all duration-300 active:scale-95"
             >
               <span className="relative px-4 py-2 transition-all ease-in duration-75 bg-[#05070D] rounded-[10px] group-hover:bg-transparent flex items-center gap-1.5">
-                Acessar Plataforma <ChevronRight className="w-4 h-4" />
+                Acessar VENDRA <ChevronRight className="w-4 h-4" />
               </span>
             </Link>
           </div>
@@ -355,42 +408,41 @@ function LandingPage() {
       </header>
 
       {/* 3. HERO SECTION CINEMATOGRÁFICA */}
-      <section className="relative z-10 pt-16 pb-24 md:pt-24 md:pb-36 overflow-hidden">
+      <section className="relative z-10 pt-16 pb-20 md:pt-24 md:pb-32 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           {/* BADGE DE LANÇAMENTO */}
           <motion.div
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 text-xs font-semibold mb-8 backdrop-blur-md"
+            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 text-xs font-semibold mb-8 backdrop-blur-md"
           >
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            Ecossistema Comercial & ERP de Alta Performance
+            VENDRA by BonaSoft · Uma plataforma. Todas as operações. Mais possibilidades.
           </motion.div>
 
-          {/* HEADLINE PRINCIPAL IMPACTANTE */}
+          {/* HEADLINE PRINCIPAL OFICIAL */}
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
             className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tight text-white max-w-5xl mx-auto leading-[1.08]"
           >
-            Seu negócio. <br className="hidden sm:inline" />
-            Uma plataforma. <br />
+            Seu negócio. <br />
             <span className="bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 bg-clip-text text-transparent">
-              Controle total.
+              Seu próximo nível.
             </span>
           </motion.h1>
 
-          {/* SUBHEADLINE */}
+          {/* SUBHEADLINE OFICIAL */}
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
             className="mt-6 text-base sm:text-xl text-slate-400 max-w-3xl mx-auto leading-relaxed font-normal"
           >
-            Gestão comercial, vendas, estoque, financeiro e inteligência artificial integrados em um único ecossistema.
-            Tudo o que sua empresa precisa para operar, crescer e vender mais.
+            Gestão comercial, vendas, estoque, financeiro e inteligência artificial em uma única plataforma.
+            Tudo o que sua empresa precisa para operar com excelência no Brasil e na Espanha.
           </motion.p>
 
           {/* BOTÕES DE CHAMADA DE AÇÃO (CTAs) */}
@@ -401,10 +453,10 @@ function LandingPage() {
             className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4"
           >
             <a
-              href="#ecossistema"
+              href="#produtos"
               className="w-full sm:w-auto px-8 py-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-bold text-sm tracking-wide shadow-xl shadow-emerald-500/30 hover:shadow-emerald-500/50 transition-all flex items-center justify-center gap-2 group active:scale-95"
             >
-              Conhecer a plataforma <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              Conhecer VENDRA <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </a>
 
             <Link
@@ -425,21 +477,21 @@ function LandingPage() {
             {/* LUZ DE FUNDO EM VOLTA DO MOCKUP */}
             <div className="absolute -inset-4 bg-gradient-to-r from-emerald-500/20 via-cyan-500/20 to-teal-500/20 rounded-3xl blur-2xl opacity-60 pointer-events-none" />
 
-            {/* MOCKUP PRINCIPAL DO ERP */}
+            {/* MOCKUP PRINCIPAL DO VENDRA ERP */}
             <div className="relative rounded-2xl border border-white/15 bg-[#090D18]/90 shadow-2xl backdrop-blur-2xl overflow-hidden text-left">
-              {/* BARRA SUPERIOR macOS / NAVEGADOR */}
+              {/* BARRA SUPERIOR NAVEGADOR VENDRA CLOUD */}
               <div className="h-11 border-b border-white/[0.08] bg-[#070A13] px-4 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span className="w-3 h-3 rounded-full bg-rose-500/80" />
                   <span className="w-3 h-3 rounded-full bg-amber-500/80" />
                   <span className="w-3 h-3 rounded-full bg-emerald-500/80" />
                   <span className="ml-3 text-xs text-slate-400 font-mono hidden sm:inline">
-                    bonasoft-commerce.app • Painel Executivo Consolidado
+                    app.vendra.com • Vendra ERP Consolidado
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                    Sincronizado • 4 Lojas Conectadas
+                    by BonaSoft • 4 Lojas Conectadas
                   </span>
                 </div>
               </div>
@@ -450,9 +502,9 @@ function LandingPage() {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
                   {[
                     { label: "Vendas Hoje", value: "€ 4.820,50", diff: "+18.4%", icon: DollarSign },
-                    { label: "Pedidos Faturados", value: "142 vendas", diff: "100% liquidados", icon: Receipt },
-                    { label: "Margem Bruta Média", value: "41.8%", diff: "+2.3% vs meta", icon: TrendingUp },
-                    { label: "Estoque em Alerta", value: "3 produtos", diff: "Reposição gerada", icon: Boxes },
+                    { label: "Vendra POS", value: "142 vendas", diff: "100% liquidados", icon: Receipt },
+                    { label: "Margem Média", value: "41.8%", diff: "+2.3% vs meta", icon: TrendingUp },
+                    { label: "Vendra AI Alert", value: "3 produtos", diff: "Reposição gerada", icon: Boxes },
                   ].map((kpi, idx) => {
                     const Icon = kpi.icon;
                     return (
@@ -480,9 +532,9 @@ function LandingPage() {
                     <div className="flex items-center justify-between mb-4">
                       <div>
                         <div className="text-xs text-slate-400 font-semibold uppercase tracking-wider">
-                          Fluxo de Vendas em Tempo Real
+                          Fluxo Transacional em Tempo Real
                         </div>
-                        <div className="text-lg font-bold text-white">Consolidado Multicanal (PDV + Loja Virtual)</div>
+                        <div className="text-lg font-bold text-white">Consolidado Multicanal (Vendra POS + Store)</div>
                       </div>
                       <span className="text-xs text-emerald-400 font-mono bg-emerald-500/10 px-2.5 py-1 rounded-md border border-emerald-500/20">
                         Pico às 14:30
@@ -505,12 +557,12 @@ function LandingPage() {
                     </div>
                   </div>
 
-                  {/* MINI CARD DO PDV EM TEMPO REAL */}
+                  {/* MINI CARD DO VENDRA POS */}
                   <div className="p-4 sm:p-5 rounded-xl border border-white/[0.08] bg-gradient-to-b from-white/[0.04] to-transparent flex flex-col justify-between">
                     <div>
                       <div className="flex items-center justify-between text-xs font-semibold text-slate-400 mb-2">
                         <span className="flex items-center gap-1.5 text-emerald-400">
-                          <Store className="w-3.5 h-3.5" /> PDV Balcão Ativo
+                          <Store className="w-3.5 h-3.5" /> Vendra POS Balcão
                         </span>
                         <span className="text-[10px] text-slate-500 font-mono">Terminal 01</span>
                       </div>
@@ -533,7 +585,7 @@ function LandingPage() {
 
                     <div className="mt-4 pt-3 border-t border-white/[0.08] flex items-center justify-between text-[11px] text-slate-400">
                       <span className="flex items-center gap-1 text-emerald-400 font-semibold">
-                        <CheckCircle2 className="w-3.5 h-3.5" /> Pago via Cartão / PIX
+                        <CheckCircle2 className="w-3.5 h-3.5" /> Cartão / PIX Confirmado
                       </span>
                       <span className="font-mono">Cupom #8492</span>
                     </div>
@@ -542,19 +594,19 @@ function LandingPage() {
               </div>
             </div>
 
-            {/* SATELLITE FLOATING CARDS (EFEITO DE PROFUNDIDADE) */}
+            {/* SATELLITE FLOATING CARDS */}
             <div className="hidden md:block absolute -bottom-8 -left-6 max-w-xs p-4 rounded-xl border border-emerald-500/30 bg-[#070A14]/95 shadow-2xl backdrop-blur-xl text-left animate-bounce duration-1000">
               <div className="flex items-center gap-2 text-xs font-bold text-emerald-400">
-                <Barcode className="w-4 h-4" /> Leitor de Código de Barras
+                <Barcode className="w-4 h-4" /> Vendra POS Scanner
               </div>
               <p className="text-xs text-slate-300 mt-1">
-                EAN-13 reconhecido em 18ms. Produto adicionado automaticamente ao carrinho do PDV.
+                EAN-13 reconhecido em 18ms. Produto adicionado automaticamente ao carrinho do caixa.
               </p>
             </div>
 
             <div className="hidden md:block absolute -top-6 -right-6 max-w-sm p-4 rounded-xl border border-cyan-500/30 bg-[#070A14]/95 shadow-2xl backdrop-blur-xl text-left">
               <div className="flex items-center gap-2 text-xs font-bold text-cyan-400">
-                <Cpu className="w-4 h-4" /> Multiplex AI Engine
+                <Cpu className="w-4 h-4" /> Vendra AI (Powered by Multiplex)
               </div>
               <p className="text-xs text-slate-300 mt-1">
                 &ldquo;Margem do setor de Farmácia subiu 4.2% nesta semana. Recomendo repor 32 unidades do lote #819.&rdquo;
@@ -564,31 +616,81 @@ function LandingPage() {
         </div>
       </section>
 
-      {/* 4. SEÇÃO: UM ECOSSISTEMA COMPLETO */}
-      <section id="ecossistema" className="relative z-10 py-24 border-t border-white/[0.08] bg-[#070A14]/60">
+      {/* 4. SEÇÃO: OS PRODUTOS DA FAMÍLIA VENDRA */}
+      <section id="produtos" className="relative z-10 py-24 border-t border-white/[0.08] bg-[#070A14]/60">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-16">
             <span className="text-xs font-bold uppercase tracking-widest text-emerald-400">
-              Unificação Absoluta
+              Família de Produtos
+            </span>
+            <h2 className="text-3xl sm:text-5xl font-black text-white mt-2 tracking-tight">
+              Os 5 Pilares do Ecossistema VENDRA
+            </h2>
+            <p className="text-slate-400 mt-4 text-base sm:text-lg">
+              Soluções integradas sob a mesma arquitetura de dados para cobrir 100% da operação do seu negócio.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {VENDRA_PRODUCTS.map((prod, idx) => {
+              const Icon = prod.icon;
+              return (
+                <div
+                  key={idx}
+                  className={`p-7 rounded-3xl border ${prod.border} bg-gradient-to-b ${prod.gradient} hover:scale-[1.02] transition-all duration-300 flex flex-col justify-between`}
+                >
+                  <div>
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="w-12 h-12 rounded-2xl bg-white/[0.06] border border-white/10 flex items-center justify-center text-emerald-400">
+                        <Icon className="w-6 h-6" />
+                      </div>
+                      <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-white/[0.08] text-slate-200 border border-white/10">
+                        {prod.badge}
+                      </span>
+                    </div>
+
+                    <h3 className="text-2xl font-black text-white">{prod.name}</h3>
+                    <p className="text-sm text-slate-300 mt-3 leading-relaxed">{prod.desc}</p>
+                  </div>
+
+                  <div className="mt-6 pt-4 border-t border-white/[0.08] flex items-center justify-between text-xs font-semibold text-emerald-400">
+                    <span>by BonaSoft</span>
+                    <span className="flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                      Ver detalhes <ChevronRight className="w-3.5 h-3.5" />
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* 5. SEÇÃO: UM ECOSSISTEMA COMPLETO */}
+      <section id="ecossistema" className="relative z-10 py-24 border-t border-white/[0.08]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <span className="text-xs font-bold uppercase tracking-widest text-cyan-400">
+              Unificação Total
             </span>
             <h2 className="text-3xl sm:text-5xl font-black text-white mt-2 tracking-tight">
               Tudo conectado. Tudo sob controle.
             </h2>
             <p className="text-slate-400 mt-4 text-base sm:text-lg">
-              Elimine a necessidade de múltiplos softwares desconexos. O BonaSoft Commerce integra cada engrenagem da
-              sua empresa em um único ecossistema fluido.
+              Elimine a necessidade de múltiplos softwares desconexos. O VENDRA integra cada engrenagem da sua empresa
+              em tempo real.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             {[
               {
-                title: "Gestão Empresarial & ERP",
-                desc: "Emissão de documentos, controle fiscal, cadastro universal de filiais e conformidade legal.",
+                title: "Vendra ERP Empresarial",
+                desc: "Emissão de documentos, controle fiscal, cadastro de filiais e conformidade internacional.",
                 icon: Building2,
               },
               {
-                title: "Frente de Caixa (PDV)",
+                title: "Vendra POS (Frente de Caixa)",
                 desc: "Checkout veloz para balcão, teclado, touchscreen e leitor de código de barras sem travas.",
                 icon: Store,
               },
@@ -613,12 +715,12 @@ function LandingPage() {
                 icon: Users,
               },
               {
-                title: "E-commerce & Catálogo",
+                title: "Vendra Store (E-commerce)",
                 desc: "Catálogo online unificado com estoque em tempo real entre suas lojas físicas e a internet.",
                 icon: ShoppingBag,
               },
               {
-                title: "Motor de IA Multiplex",
+                title: "Vendra AI (Multiplex)",
                 desc: "Inteligência analítica nativa que responde perguntas empresariais com base nos seus dados reais.",
                 icon: Cpu,
               },
@@ -639,7 +741,7 @@ function LandingPage() {
                     <p className="text-sm text-slate-400 mt-2 leading-relaxed">{module.desc}</p>
                   </div>
                   <div className="mt-4 pt-3 border-t border-white/[0.05] flex items-center text-xs font-semibold text-emerald-400 gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    Saiba mais <ChevronRight className="w-3.5 h-3.5" />
+                    Conhecer módulo <ChevronRight className="w-3.5 h-3.5" />
                   </div>
                 </div>
               );
@@ -648,19 +750,19 @@ function LandingPage() {
         </div>
       </section>
 
-      {/* 5. SEÇÃO: UMA PLATAFORMA PARA CADA SEGMENTO */}
-      <section id="segmentos" className="relative z-10 py-24 border-t border-white/[0.08]">
+      {/* 6. SEÇÃO: UMA PLATAFORMA PARA CADA SEGMENTO */}
+      <section id="segmentos" className="relative z-10 py-24 border-t border-white/[0.08] bg-[#070A14]/70">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-16">
-            <span className="text-xs font-bold uppercase tracking-widest text-cyan-400">
-              Especialização Profunda
+            <span className="text-xs font-bold uppercase tracking-widest text-emerald-400">
+              Especialização por Segmento
             </span>
             <h2 className="text-3xl sm:text-5xl font-black text-white mt-2 tracking-tight">
-              Uma plataforma. Feita para o seu segmento.
+              Uma plataforma. Feita para o seu setor.
             </h2>
             <p className="text-slate-400 mt-4 text-base sm:text-lg">
-              Sem adaptações improvisadas. O BonaSoft Commerce adapta seus campos, telas e regras de negócio para as
-              necessidades específicas do seu setor.
+              Sem adaptações improvisadas. O VENDRA adapta seus campos, telas e regras de negócio para as necessidades
+              específicas de cada comércio no Brasil e na Espanha.
             </p>
           </div>
 
@@ -697,8 +799,13 @@ function LandingPage() {
               className="p-6 sm:p-10 rounded-3xl border border-white/10 bg-gradient-to-br from-white/[0.04] to-transparent backdrop-blur-xl grid grid-cols-1 lg:grid-cols-12 gap-8 items-center"
             >
               <div className="lg:col-span-6 space-y-6">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                  <CheckCircle2 className="w-3.5 h-3.5" /> {activeSegment.metric}
+                <div className="flex flex-wrap items-center gap-2">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                    <CheckCircle2 className="w-3.5 h-3.5" /> {activeSegment.metric}
+                  </div>
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono bg-white/[0.05] text-cyan-300 border border-white/10">
+                    <Globe className="w-3 h-3" /> {activeSegment.domain}
+                  </span>
                 </div>
 
                 <h3 className="text-2xl sm:text-4xl font-extrabold text-white leading-tight">
@@ -737,21 +844,21 @@ function LandingPage() {
                     <activeSegment.icon className="w-5 h-5 text-emerald-400" />
                     <span className="font-bold text-sm text-white">{activeSegment.name}</span>
                   </div>
-                  <span className="text-xs text-muted-foreground font-mono">Ambiente Operacional</span>
+                  <span className="text-xs text-muted-foreground font-mono">{activeSegment.domain}</span>
                 </div>
 
                 <div className="space-y-3 text-xs">
                   <div className="p-3 rounded-lg border border-white/[0.06] bg-white/[0.02] flex justify-between items-center">
                     <div>
-                      <div className="font-semibold text-slate-200">Atributos Customizados do Setor</div>
-                      <div className="text-[11px] text-muted-foreground mt-0.5">Validados rigorosamente no catálogo e PDV</div>
+                      <div className="font-semibold text-slate-200">Campos & Atributos Especializados</div>
+                      <div className="text-[11px] text-muted-foreground mt-0.5">Validados rigorosamente no Vendra ERP e Vendra POS</div>
                     </div>
                     <span className="text-emerald-400 font-bold">Ativo</span>
                   </div>
 
                   <div className="p-3 rounded-lg border border-white/[0.06] bg-white/[0.02] flex justify-between items-center">
                     <div>
-                      <div className="font-semibold text-slate-200">Compatibilidade Multissegmento</div>
+                      <div className="font-semibold text-slate-200">Operação Multissegmento</div>
                       <div className="text-[11px] text-muted-foreground mt-0.5">Opere mercado, açougue e padaria na mesma empresa</div>
                     </div>
                     <span className="text-emerald-400 font-bold">Unificado</span>
@@ -759,7 +866,7 @@ function LandingPage() {
                 </div>
 
                 <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-medium">
-                  {activeSegment.name} opera com todas as capacidades do BonaSoft Commerce ativadas.
+                  {activeSegment.name} opera com todas as capacidades do VENDRA ativadas.
                 </div>
               </div>
             </motion.div>
@@ -767,19 +874,20 @@ function LandingPage() {
         </div>
       </section>
 
-      {/* 6. SEÇÃO: INTELIGÊNCIA ARTIFICIAL INTEGRADA */}
-      <section id="ia" className="relative z-10 py-24 border-t border-white/[0.08] bg-[#070A14]/70">
+      {/* 7. SEÇÃO: INTELIGÊNCIA ARTIFICIAL INTEGRADA (VENDRA AI) */}
+      <section id="ia" className="relative z-10 py-24 border-t border-white/[0.08]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-16">
             <span className="text-xs font-bold uppercase tracking-widest text-emerald-400">
-              Motor Multiplex AI
+              Vendra AI Engine
             </span>
             <h2 className="text-3xl sm:text-5xl font-black text-white mt-2 tracking-tight">
               Seu negócio ganha um novo nível de inteligência.
             </h2>
             <p className="text-slate-400 mt-4 text-base sm:text-lg">
-              A inteligência artificial não é um robô isolado. No BonaSoft Commerce, ela é o cérebro analítico do seu
-              ERP, transformando dados brutos de estoque, vendas e finanças em respostas e decisões imediatas.
+              A inteligência artificial não é um robô isolado. No VENDRA, o motor Vendra AI (powered by Multiplex) é o
+              cérebro analítico do seu ERP, transformando dados brutos de estoque, vendas e finanças em respostas e
+              decisões imediatas.
             </p>
           </div>
 
@@ -826,8 +934,8 @@ function LandingPage() {
                         <Cpu className="w-4 h-4" />
                       </div>
                       <div>
-                        <div className="text-sm font-bold text-white">Multiplex Business Intelligence</div>
-                        <div className="text-[10px] text-muted-foreground font-mono">Análise Direta do Banco de Dados</div>
+                        <div className="text-sm font-bold text-white">Vendra AI · Business Intelligence</div>
+                        <div className="text-[10px] text-muted-foreground font-mono">Motor Multiplex AI Integrado</div>
                       </div>
                     </div>
                     <span className="px-2.5 py-1 rounded text-[11px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
@@ -860,70 +968,6 @@ function LandingPage() {
                 </motion.div>
               </AnimatePresence>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 7. SEÇÃO: FUNCIONA EM TODOS OS AMBIENTES (MULTIPLATAFORMA) */}
-      <section id="multiplataforma" className="relative z-10 py-24 border-t border-white/[0.08]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="max-w-3xl mx-auto mb-16">
-            <span className="text-xs font-bold uppercase tracking-widest text-cyan-400">
-              Onipresença Operacional
-            </span>
-            <h2 className="text-3xl sm:text-5xl font-black text-white mt-2 tracking-tight">
-              Funciona em todos os ambientes da sua empresa.
-            </h2>
-            <p className="text-slate-400 mt-4 text-base sm:text-lg">
-              No balcão físico, no computador do escritório, no tablet ou no smartphone do gestor.
-              O BonaSoft Commerce acompanha o ritmo da sua operação.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              {
-                title: "Painel Web & Retaguarda",
-                subtitle: "Navegadores Desktop e Laptops",
-                desc: "Gestão completa de compras, estoque, cadastros, relatórios financeiros, DRE e configurações multiempresa.",
-                icon: LaptopIcon,
-                status: "Disponível na Web",
-              },
-              {
-                title: "Frente de Caixa (PDV)",
-                desc: "Frente de caixa rápida com leitor de código de barras, telas touchscreen e fechamento de caixa integrado.",
-                subtitle: "PDV Web & PDV Desktop",
-                icon: Store,
-                status: "Disponível na Web & Desktop",
-              },
-              {
-                title: "Aplicativo Mobile Gestor",
-                subtitle: "iOS & Android",
-                desc: "Acompanhe faturamento em tempo real, aprove compras, consulte preços e receba alertas da IA na palma da mão.",
-                icon: Smartphone,
-                status: "Em Homologação",
-              },
-            ].map((device, idx) => {
-              const Icon = device.icon;
-              return (
-                <div
-                  key={idx}
-                  className="p-8 rounded-3xl border border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.04] hover:border-cyan-500/30 transition-all text-left flex flex-col justify-between"
-                >
-                  <div>
-                    <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 mb-6">
-                      <Icon className="w-6 h-6" />
-                    </div>
-                    <span className="px-2.5 py-0.5 rounded text-[10px] font-semibold bg-white/[0.05] text-slate-300 border border-white/10">
-                      {device.status}
-                    </span>
-                    <h3 className="text-xl font-bold text-white mt-3">{device.title}</h3>
-                    <div className="text-xs font-mono text-emerald-400 mt-1">{device.subtitle}</div>
-                    <p className="text-sm text-slate-400 mt-3 leading-relaxed">{device.desc}</p>
-                  </div>
-                </div>
-              );
-            })}
           </div>
         </div>
       </section>
@@ -1006,11 +1050,12 @@ function LandingPage() {
           <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/10 via-cyan-500/10 to-teal-500/10 blur-3xl pointer-events-none" />
 
           <h2 className="text-4xl sm:text-6xl font-black text-white tracking-tight leading-tight">
-            Prepare sua empresa para o próximo nível.
+            Seu negócio. Seu próximo nível.
           </h2>
 
           <p className="mt-6 text-lg sm:text-xl text-slate-300 max-w-2xl mx-auto font-normal">
-            Centralize sua operação, simplifique sua gestão e transforme informações em decisões melhores.
+            Centralize sua operação com o VENDRA by BonaSoft, simplifique sua gestão e transforme informações em
+            decisões melhores.
           </p>
 
           <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -1031,38 +1076,39 @@ function LandingPage() {
         </div>
       </section>
 
-      {/* 10. RODAPÉ INSTITUCIONAL PROFISSONAL */}
+      {/* 10. RODAPÉ INSTITUCIONAL PROFISSIONAL */}
       <footer className="relative z-10 border-t border-white/[0.08] bg-[#04060A] py-16 text-xs text-slate-400">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-5 gap-8 mb-12">
             {/* BRAND */}
             <div className="col-span-2 space-y-4">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center text-emerald-400">
-                  <Building2 className="w-4 h-4" />
+                <div className="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center text-slate-950 font-black text-sm">
+                  V
                 </div>
-                <span className="font-extrabold text-base text-white">
-                  BonaSoft <span className="text-emerald-400">Commerce</span>
-                </span>
+                <div className="flex flex-col">
+                  <span className="font-black text-lg text-white">VENDRA</span>
+                  <span className="text-[9px] text-emerald-400 font-bold uppercase tracking-widest">by BonaSoft</span>
+                </div>
               </div>
               <p className="text-slate-400 max-w-sm leading-relaxed text-xs">
-                Plataforma SaaS de Gestão Comercial e ERP Multissegmento, com motor central de inteligência artificial
-                Multiplex.
+                Plataforma inteligente de gestão comercial, vendas e operação empresarial para múltiplos segmentos no
+                Brasil e na Espanha.
               </p>
               <div className="text-[11px] text-slate-500">
-                BonaSoft Technologies Ltd. Todos os direitos reservados.
+                BonaSoft Technologies. Todos os direitos reservados.
               </div>
             </div>
 
-            {/* COLUNA 1: PLATAFORMA */}
+            {/* COLUNA 1: PRODUTOS */}
             <div className="space-y-3">
-              <div className="font-bold text-slate-200 text-xs uppercase tracking-wider">Plataforma</div>
+              <div className="font-bold text-slate-200 text-xs uppercase tracking-wider">Produtos</div>
               <ul className="space-y-2">
-                <li><a href="#ecossistema" className="hover:text-emerald-400 transition-colors">Visão Geral</a></li>
-                <li><Link to="/pdv" className="hover:text-emerald-400 transition-colors">Frente de Caixa (PDV)</Link></li>
-                <li><a href="#ecossistema" className="hover:text-emerald-400 transition-colors">Controle de Estoque</a></li>
-                <li><a href="#ecossistema" className="hover:text-emerald-400 transition-colors">Gestão Financeira</a></li>
-                <li><a href="#ia" className="hover:text-emerald-400 transition-colors">Motor Multiplex AI</a></li>
+                <li><a href="#produtos" className="hover:text-emerald-400 transition-colors">Vendra ERP</a></li>
+                <li><Link to="/pdv" className="hover:text-emerald-400 transition-colors">Vendra POS (Frente de Caixa)</Link></li>
+                <li><a href="#produtos" className="hover:text-emerald-400 transition-colors">Vendra Mobile</a></li>
+                <li><a href="#produtos" className="hover:text-emerald-400 transition-colors">Vendra Store</a></li>
+                <li><a href="#ia" className="hover:text-emerald-400 transition-colors">Vendra AI</a></li>
               </ul>
             </div>
 
@@ -1074,7 +1120,7 @@ function LandingPage() {
                 <li><a href="#segmentos" className="hover:text-emerald-400 transition-colors">Supermercados</a></li>
                 <li><a href="#segmentos" className="hover:text-emerald-400 transition-colors">Moda & Vestuário</a></li>
                 <li><a href="#segmentos" className="hover:text-emerald-400 transition-colors">Restaurantes</a></li>
-                <li><a href="#segmentos" className="hover:text-emerald-400 transition-colors">Varejo Geral</a></li>
+                <li><a href="#segmentos" className="hover:text-emerald-400 transition-colors">Materiais de Construção</a></li>
               </ul>
             </div>
 
@@ -1092,7 +1138,7 @@ function LandingPage() {
           </div>
 
           <div className="pt-8 border-t border-white/[0.06] flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-slate-500">
-            <div>© {new Date().getFullYear()} BonaSoft Commerce. Desenvolvido para alta escala comercial.</div>
+            <div>© {new Date().getFullYear()} VENDRA by BonaSoft. Uma plataforma. Todas as operações. Mais possibilidades.</div>
             <div className="flex items-center gap-4">
               <span className="flex items-center gap-1 text-emerald-400">
                 <ShieldCheck className="w-3.5 h-3.5" /> Segurança Bancária 256-bit
@@ -1103,25 +1149,5 @@ function LandingPage() {
         </div>
       </footer>
     </div>
-  );
-}
-
-// Helper icon
-function LaptopIcon(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      {...props}
-    >
-      <path d="M20 16V7a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9m16 0H4m16 0 1.28 2.55a1 1 0 0 1-.9 1.45H3.62a1 1 0 0 1-.9-1.45L4 16" />
-    </svg>
   );
 }

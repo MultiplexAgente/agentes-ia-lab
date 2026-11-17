@@ -554,15 +554,15 @@ export function useChatWorkspace() {
           {/* EMPTY STATE HERO */}
           <div className="flex flex-col items-center gap-2 text-center">
             <div className="relative">
-              <div className="flex size-14 items-center justify-center rounded-2xl bg-primary text-primary-foreground font-bold text-xl shadow-lg ring-2 ring-primary/20">
-                BS
+              <div className="flex size-14 items-center justify-center rounded-2xl bg-emerald-500 text-slate-950 font-black text-2xl shadow-lg ring-2 ring-emerald-500/20">
+                V
               </div>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
-              BonaSoft Commerce
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-foreground flex items-center justify-center gap-2">
+              Vendra AI <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">by BonaSoft</span>
             </h1>
             <p className="text-xs text-muted-foreground font-medium">
-              Assistente de Operações · Motor Multiplex AI
+              Assistente Inteligente Empresarial · Motor Multiplex AI
             </p>
           </div>
 

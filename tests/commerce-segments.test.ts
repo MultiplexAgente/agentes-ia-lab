@@ -11,7 +11,7 @@ import {
 } from "../src/lib/commerce/company-segments";
 import { buildTools } from "../src/lib/multiplex/tools.server";
 
-describe("BonaSoft Commerce - Arquitetura de Segmentos", () => {
+describe("VENDRA (by BonaSoft) - Arquitetura de Segmentos", () => {
   it("deve cobrir todos os 8 segmentos principais + varejo geral", () => {
     expect(COMMERCE_SEGMENTS).toContain("food_service");
     expect(COMMERCE_SEGMENTS).toContain("pharmacy");
@@ -51,7 +51,7 @@ describe("BonaSoft Commerce - Arquitetura de Segmentos", () => {
   });
 });
 
-describe("BonaSoft Commerce - Validação Estrita de Atributos", () => {
+describe("VENDRA (by BonaSoft) - Validação Estrita de Atributos", () => {
   it("Farmácia: valida princípio ativo e controle de receita", () => {
     const result = validateSegmentAttributes("pharmacy", {
       active_ingredient: "Amoxicilina + Clavulanato",
@@ -150,7 +150,7 @@ describe("BonaSoft Commerce - Validação Estrita de Atributos", () => {
   });
 });
 
-describe("BonaSoft Commerce - Múltiplos Segmentos por Empresa & Permissões", () => {
+describe("VENDRA (by BonaSoft) - Múltiplos Segmentos por Empresa & Permissões", () => {
   it("permite que uma mesma empresa opere múltiplos segmentos ativos simultaneamente", () => {
     // Exemplo: Supermercado que também possui Padaria (food_service) e Farmácia (pharmacy)
     const settings = sanitizeSegmentSettings({
@@ -191,7 +191,7 @@ describe("BonaSoft Commerce - Múltiplos Segmentos por Empresa & Permissões", (
   });
 });
 
-describe("BonaSoft Commerce - Ferramenta de Código de Barras (lookup_barcode)", () => {
+describe("VENDRA (by BonaSoft) - Ferramenta de Código de Barras (lookup_barcode)", () => {
   it("registra a ferramenta lookup_barcode no motor de ferramentas do Multiplex", () => {
     const fakeContext = {
       supabase: {
