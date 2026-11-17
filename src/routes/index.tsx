@@ -79,7 +79,7 @@ function Landing() {
             Plataforma comercial inteligente
           </motion.p>
           <motion.h1 initial={{ opacity: 0, y: 30, filter: "blur(12px)" }} animate={{ opacity: 1, y: 0, filter: "blur(0px)" }} transition={{ duration: 1.6, ease, delay: 0.5 }}
-            className="max-w-5xl font-hero text-[clamp(2rem,7.5vw,5.25rem)] leading-[1]">
+            className="max-w-5xl text-[clamp(2.5rem,11vw,7.5rem)] font-medium leading-[0.95] tracking-[-0.04em]">
             Seu negócio,<br /><span className="text-muted-foreground">em outra órbita.</span>
           </motion.h1>
           <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1.2, ease, delay: 0.9 }}
@@ -102,7 +102,7 @@ function Landing() {
       {/* STATEMENT */}
       <section id="plataforma" className="mx-auto max-w-[1400px] px-6 py-24 sm:py-40 md:px-10 md:py-56">
         <Reveal>
-          <p className="max-w-5xl font-hero text-[clamp(1.75rem,4.5vw,3.75rem)] leading-[1.08]">
+          <p className="max-w-4xl text-[clamp(1.75rem,4vw,3.5rem)] font-normal leading-[1.15] tracking-[-0.03em]">
             Tudo que sua empresa precisa para vender.
             <span className="text-muted-foreground"> Nada que ela não precise.</span>
           </p>
@@ -113,7 +113,7 @@ function Landing() {
             <Reveal key={p.n} delay={i * 0.15}>
               <div className="group h-full bg-background p-8 sm:p-10 transition-colors duration-700 hover:bg-card md:p-12">
                 <span className="font-mono text-xs text-primary">{p.n}</span>
-                <h3 className="mt-10 sm:mt-16 font-hero text-2xl sm:text-3xl">{p.t}</h3>
+                <h3 className="mt-10 sm:mt-16 text-2xl sm:text-3xl font-medium tracking-[-0.02em]">{p.t}</h3>
                 <p className="mt-4 max-w-xs text-[15px] leading-relaxed text-muted-foreground">{p.d}</p>
               </div>
             </Reveal>
@@ -128,7 +128,7 @@ function Landing() {
         <div className="relative z-10 mx-auto flex h-full max-w-[1400px] items-end px-6 pb-20 sm:pb-32 md:px-10">
           <Reveal>
             <p className="mb-6 text-[11px] uppercase tracking-[0.6em] text-primary">I.A</p>
-            <h2 className="max-w-3xl font-hero text-[clamp(2.25rem,6vw,5rem)] leading-[1]">
+            <h2 className="max-w-2xl text-[clamp(2.25rem,5vw,4.5rem)] font-medium leading-[1] tracking-[-0.04em]">
               Você pede.<br />Ela executa.
             </h2>
             <p className="mt-6 max-w-md text-[16px] sm:mt-8 sm:text-[17px] leading-relaxed text-muted-foreground">
@@ -142,7 +142,7 @@ function Landing() {
       <section id="comecar" className="relative overflow-hidden px-6 py-32 text-center sm:py-48 md:py-64">
         <div className="pointer-events-none absolute left-1/2 top-1/2 h-[360px] w-[360px] sm:h-[600px] sm:w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/10 blur-[140px]" />
         <Reveal>
-          <h2 className="relative mx-auto max-w-5xl font-hero text-[clamp(2.25rem,7vw,6rem)] leading-[1]">
+          <h2 className="relative mx-auto max-w-4xl text-[clamp(2.5rem,7vw,6rem)] font-medium leading-[0.95] tracking-[-0.045em]">
             O futuro do seu<br />negócio começa aqui.
           </h2>
           <Link to="/entrar" onClick={() => window.__lovableEvents?.track?.("project.cta_clicked", { cta: "criar_conta" })} className="group relative mt-10 sm:mt-14 inline-flex items-center gap-3 rounded-full bg-foreground px-9 py-4 text-sm font-medium text-background transition hover:bg-primary">
