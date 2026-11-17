@@ -41,6 +41,10 @@ export const Route = createFileRoute("/")({
 
 const ease = [0.22, 1, 0.36, 1] as const;
 
+const BONASOFT_WHATSAPP_NUMBER = "556692734632";
+const getBonaSoftWhatsAppUrl = (mensagem: string) =>
+  `https://wa.me/${BONASOFT_WHATSAPP_NUMBER}?text=${encodeURIComponent(mensagem)}`;
+
 // 1. Narrativa Contínua dos Três Pilares (Sem formato de cards, composições amplas)
 const NARRATIVE_PILLARS = [
   {
@@ -305,12 +309,14 @@ function Landing() {
           </nav>
 
           <div className="flex items-center gap-3">
-            <Link
-              to="/entrar"
-              className="rounded-full border border-white/20 bg-white/5 px-5 py-2 text-xs font-medium text-foreground backdrop-blur-md transition hover:border-emerald-400/60 hover:bg-white/10"
+            <a
+              href={getBonaSoftWhatsAppUrl("Olá, BonaSoft! Gostaria de conhecer a plataforma HUG para minha empresa.")}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-5 py-2 text-xs font-semibold text-emerald-400 backdrop-blur-md transition hover:border-emerald-400 hover:bg-emerald-500/20 shadow-sm"
             >
-              Entrar
-            </Link>
+              Falar no WhatsApp
+            </a>
           </div>
         </div>
       </header>
@@ -367,16 +373,18 @@ function Landing() {
             transition={{ duration: 1.2, ease, delay: 1 }}
             className="mt-7 flex w-full flex-col items-center gap-3.5 sm:w-auto sm:flex-row sm:gap-4"
           >
-            <Link
-              to="/entrar"
+            <a
+              href={getBonaSoftWhatsAppUrl("Olá, BonaSoft! Quero começar a usar o HUG no meu negócio.")}
+              target="_blank"
+              rel="noopener noreferrer"
               onClick={() =>
-                window.__lovableEvents?.track?.("project.cta_clicked", { cta: "comecar_agora" })
+                window.__lovableEvents?.track?.("project.cta_clicked", { cta: "comecar_agora_whatsapp" })
               }
               className="group inline-flex w-full max-w-xs justify-center items-center gap-3 sm:w-auto rounded-full border border-white/15 bg-white/[0.05] px-8 py-4 text-sm font-medium text-white backdrop-blur-md transition-all duration-300 hover:border-emerald-400/60 hover:bg-white/[0.12] active:bg-zinc-700 active:border-zinc-500 active:text-zinc-200 active:scale-[0.98]"
             >
-              <span>Começar agora</span>
+              <span>Começar no WhatsApp</span>
               <ChevronRight className="h-4 w-4 text-emerald-400 transition-transform duration-300 group-hover:translate-x-1" />
-            </Link>
+            </a>
             <a
               href="#pilares"
               className="group inline-flex w-full max-w-xs justify-center items-center gap-3 sm:w-auto rounded-full border border-white/15 bg-white/[0.05] px-8 py-4 text-sm font-medium text-white backdrop-blur-md transition-all duration-300 hover:border-emerald-400/60 hover:bg-white/[0.12] active:bg-zinc-700 active:border-zinc-500 active:text-zinc-200 active:scale-[0.98]"
@@ -533,13 +541,15 @@ function Landing() {
                 respostas imediatas.
               </p>
               <div className="pt-1">
-                <Link
-                  to="/respostas-ia"
+                <a
+                  href={getBonaSoftWhatsAppUrl("Olá, BonaSoft! Gostaria de agendar uma demonstração da inteligência HUG para meu negócio.")}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 text-sm font-medium text-emerald-400 transition hover:text-emerald-300"
                 >
-                  <span>Experimentar assistente no app</span>
+                  <span>Falar com especialista no WhatsApp</span>
                   <ArrowRight className="h-4 w-4" />
-                </Link>
+                </a>
               </div>
             </Reveal>
 
@@ -714,16 +724,18 @@ function Landing() {
                 </div>
 
                 <div className="mt-8 pt-4">
-                  <Link
-                    to="/entrar"
+                  <a
+                    href={getBonaSoftWhatsAppUrl(`Olá, BonaSoft! Quero contratar o plano ${plan.name} do HUG (R$ ${plan.price}/mês).`)}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className={`block w-full text-center rounded-full py-3.5 text-xs font-medium uppercase tracking-wider transition ${
                       plan.featured
                         ? "bg-white text-black hover:bg-emerald-400"
                         : "border border-white/20 text-white hover:bg-white/10"
                     }`}
                   >
-                    Começar com {plan.name}
-                  </Link>
+                    Contratar {plan.name} via WhatsApp
+                  </a>
                 </div>
               </Reveal>
             ))}
@@ -750,16 +762,18 @@ function Landing() {
             <span className="text-muted-foreground">começa em outra órbita.</span>
           </h2>
           <div className="mt-7 sm:mt-8 flex justify-center">
-            <Link
-              to="/entrar"
+            <a
+              href={getBonaSoftWhatsAppUrl("Olá, BonaSoft! Quero levar a operação da minha empresa para a plataforma HUG.")}
+              target="_blank"
+              rel="noopener noreferrer"
               onClick={() =>
-                window.__lovableEvents?.track?.("project.cta_clicked", { cta: "criar_conta" })
+                window.__lovableEvents?.track?.("project.cta_clicked", { cta: "whatsapp_bonasoft_footer" })
               }
               className="group relative inline-flex items-center gap-3 rounded-full border border-white/20 bg-white/[0.08] px-9 py-4 text-sm font-medium text-white backdrop-blur-md transition-all duration-300 hover:border-emerald-400/60 hover:bg-white/[0.16] hover:shadow-[0_0_25px_rgba(255,255,255,0.1)] active:bg-zinc-700 active:border-zinc-500 active:scale-[0.98]"
             >
-              Criar minha conta HUG
+              Falar no WhatsApp da BonaSoft
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-            </Link>
+            </a>
           </div>
         </Reveal>
       </section>
