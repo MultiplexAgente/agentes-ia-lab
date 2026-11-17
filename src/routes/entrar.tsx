@@ -10,10 +10,10 @@ import { api, setToken } from "@/lib/multiplex/client";
 export const Route = createFileRoute("/entrar")({
   head: () => ({
     meta: [
-      { title: "Entrar | Multiplex" },
-      { name: "description", content: "Acesse a conta da sua empresa no Multiplex." },
-      { property: "og:title", content: "Entrar | Multiplex" },
-      { property: "og:description", content: "Acesse a conta da sua empresa no Multiplex." },
+      { title: "Entrar | BonaSoft Commerce" },
+      { name: "description", content: "Acesse a conta da sua empresa no BonaSoft Commerce." },
+      { property: "og:title", content: "Entrar | BonaSoft Commerce" },
+      { property: "og:description", content: "Acesse a conta da sua empresa no BonaSoft Commerce." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -50,7 +50,13 @@ function LoginPage() {
   return (
     <main className="flex min-h-dvh items-center justify-center bg-background px-4">
       <div className="w-full max-w-sm">
-        <p className="mb-8 text-center font-display text-xl font-semibold tracking-[0.16em]">MULTIPLEX</p>
+        <div className="mb-8 flex flex-col items-center justify-center gap-1.5">
+          <div className="flex size-10 items-center justify-center rounded-xl bg-primary text-primary-foreground font-bold text-sm tracking-wider shadow-md">
+            BS
+          </div>
+          <p className="font-display text-xl font-bold tracking-tight">BonaSoft Commerce</p>
+          <p className="text-xs text-muted-foreground">Plataforma ERP SaaS Comercial</p>
+        </div>
         <form onSubmit={submit} className="space-y-4 rounded-2xl border border-border/60 bg-card/50 p-6 backdrop-blur">
           <h1 className="text-lg font-semibold">Entrar na sua conta</h1>
           <div className="space-y-2">

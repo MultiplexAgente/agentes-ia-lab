@@ -47,12 +47,12 @@ interface ChatMessage {
 
 const GUEST_CHATS_STORAGE_KEY = "multiplex.guest.conversations";
 
-// Sugestões limpas sem emojis
+// Sugestões comerciais objetivas sem emojis
 const QUICK_ACTIONS = [
-  { label: "Ideias e planejamento", prompt: "Me ajude a estruturar um plano estratégico para um novo projeto." },
-  { label: "Redigir ou revisar texto", prompt: "Poderia me ajudar a escrever um texto profissional e persuasivo?" },
-  { label: "Programação e desenvolvimento", prompt: "Explique como estruturar uma solução eficiente em TypeScript e React." },
-  { label: "Análise e produtividade", prompt: "Quais são as melhores metodologias para otimizar processos com automação e IA?" },
+  { label: "Consultar catálogo e preços", prompt: "Quais produtos estão disponíveis no catálogo da nossa empresa?" },
+  { label: "Registrar novo pedido", prompt: "Quero registrar um novo pedido comercial para um cliente." },
+  { label: "Cadastrar novo cliente", prompt: "Gostaria de cadastrar um novo cliente na base da empresa." },
+  { label: "Resumo operacional e vendas", prompt: "Apresente um resumo consolidado das operações comerciais recentes." },
 ];
 
 const GROUPS = ["Hoje", "Ontem", "Esta semana", "Mais antigas"] as const;
@@ -331,7 +331,7 @@ export function useChatWorkspace() {
         }
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Falha ao se comunicar com a Multiplex.");
+      setError(err instanceof Error ? err.message : "Falha ao se comunicar com o motor de inteligência.");
     } finally {
       setBusy(false);
     }
@@ -552,13 +552,18 @@ export function useChatWorkspace() {
         {topBar}
         <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-6 px-4 py-8">
           {/* EMPTY STATE HERO */}
-          <div className="flex flex-col items-center gap-3 text-center">
+          <div className="flex flex-col items-center gap-2 text-center">
             <div className="relative">
-              <MultiplexMark className="size-16 rounded-full shadow-[0_0_32px_rgba(59,130,246,0.25)] ring-2 ring-primary/20" />
+              <div className="flex size-14 items-center justify-center rounded-2xl bg-primary text-primary-foreground font-bold text-xl shadow-lg ring-2 ring-primary/20">
+                BS
+              </div>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-foreground">
-              Como posso ajudar hoje?
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+              BonaSoft Commerce
             </h1>
+            <p className="text-xs text-muted-foreground font-medium">
+              Assistente de Operações · Motor Multiplex AI
+            </p>
           </div>
 
           {/* COMPOSER CENTRALIZADO */}

@@ -66,7 +66,7 @@ publicChatRouter.post('/chat/new', (req: Request, res: Response) => {
  * Recupera o estado atual de uma sessão
  */
 publicChatRouter.get('/chat/session/:sessionId', (req: Request, res: Response) => {
-  const { sessionId } = req.params;
+  const sessionId = String(req.params.sessionId || '');
   const session = publicAIConversationService.sessions.get(sessionId);
 
   if (!session) {

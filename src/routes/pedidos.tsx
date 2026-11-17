@@ -19,10 +19,10 @@ interface Order {
 export const Route = createFileRoute("/pedidos")({
   head: () => ({
     meta: [
-      { title: "Pedidos | Multiplex" },
-      { name: "description", content: "Pedidos reais registrados na sua operação." },
-      { property: "og:title", content: "Pedidos | Multiplex" },
-      { property: "og:description", content: "Pedidos reais registrados na sua operação." },
+      { title: "Gestão de Pedidos | BonaSoft Commerce" },
+      { name: "description", content: "Gestão de pedidos e vendas comerciais no BonaSoft Commerce." },
+      { property: "og:title", content: "Gestão de Pedidos | BonaSoft Commerce" },
+      { property: "og:description", content: "Gestão de pedidos e vendas comerciais no BonaSoft Commerce." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -41,7 +41,7 @@ function OrdersPage() {
           loading={loading}
           error={error}
           empty={rows.length === 0}
-          emptyText="Nenhum pedido registrado. Peça ao Multiplex no chat: “quero criar um pedido”."
+          emptyText="Nenhum pedido registrado. Registre vendas no balcão ou através do assistente de operações."
         >
           <div className="space-y-3">
             {rows.map((order) => (

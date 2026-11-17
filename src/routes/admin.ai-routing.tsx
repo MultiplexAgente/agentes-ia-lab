@@ -63,16 +63,16 @@ interface AdminPayload {
 export const Route = createFileRoute("/admin/ai-routing")({
   head: () => ({
     meta: [
-      { title: "Auditoria de roteamento · Multiplex" },
+      { title: "Auditoria do Motor de IA Multiplex | BonaSoft Commerce" },
       {
         name: "description",
         content:
-          "Painel administrativo do Multiplex: logs de cada conversa, modelo escolhido, tokens, custo e prioridades de roteamento por empresa.",
+          "Painel técnico do Motor Multiplex AI no BonaSoft Commerce: telemetria de conversas, modelo resolvido, tokens, custo e prioridades de roteamento por empresa.",
       },
-      { property: "og:title", content: "Auditoria de roteamento · Multiplex" },
+      { property: "og:title", content: "Auditoria do Motor de IA Multiplex | BonaSoft Commerce" },
       {
         property: "og:description",
-        content: "Logs de conversas, modelo escolhido, custo e prioridades de roteamento por empresa.",
+        content: "Telemetria de conversas, modelo resolvido, custo e prioridades de roteamento por empresa no BonaSoft Commerce.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

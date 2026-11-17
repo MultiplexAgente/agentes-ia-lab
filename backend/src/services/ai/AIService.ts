@@ -162,6 +162,7 @@ export class AIService {
         const choice = completion.choices[0];
         if (choice.message.tool_calls && choice.message.tool_calls.length > 0) {
           for (const tc of choice.message.tool_calls) {
+            if (!('function' in tc)) continue;
             const toolName = tc.function.name;
             const toolArgs = JSON.parse(tc.function.arguments || '{}');
             const toolResult = await ToolRegistry.execute(toolName, toolArgs, {

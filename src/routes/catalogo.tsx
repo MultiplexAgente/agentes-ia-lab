@@ -16,10 +16,10 @@ interface Product {
 export const Route = createFileRoute("/catalogo")({
   head: () => ({
     meta: [
-      { title: "Catálogo | Multiplex" },
-      { name: "description", content: "Catálogo real de produtos da sua empresa no Multiplex." },
-      { property: "og:title", content: "Catálogo | Multiplex" },
-      { property: "og:description", content: "Catálogo real de produtos da sua empresa no Multiplex." },
+      { title: "Catálogo de Produtos | BonaSoft Commerce" },
+      { name: "description", content: "Catálogo multissegmento de produtos e serviços no BonaSoft Commerce." },
+      { property: "og:title", content: "Catálogo de Produtos | BonaSoft Commerce" },
+      { property: "og:description", content: "Catálogo multissegmento de produtos e serviços no BonaSoft Commerce." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -38,7 +38,7 @@ function CatalogPage() {
           loading={loading}
           error={error}
           empty={rows.length === 0}
-          emptyText="Nenhum produto cadastrado. Cadastre em Configurações para o Multiplex responder com seus dados."
+          emptyText="Nenhum produto cadastrado. Cadastre em Configurações para disponibilizar no catálogo e nas operações com IA."
         >
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
             {rows.map((product) => (

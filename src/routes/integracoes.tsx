@@ -12,10 +12,10 @@ interface Overview {
 export const Route = createFileRoute("/integracoes")({
   head: () => ({
     meta: [
-      { title: "Integrações | Multiplex" },
-      { name: "description", content: "Canais conectados à sua operação no Multiplex." },
-      { property: "og:title", content: "Integrações | Multiplex" },
-      { property: "og:description", content: "Canais conectados à sua operação no Multiplex." },
+      { title: "Canais & Integrações | BonaSoft Commerce" },
+      { name: "description", content: "Canais de mensageria e integrações do BonaSoft Commerce." },
+      { property: "og:title", content: "Canais & Integrações | BonaSoft Commerce" },
+      { property: "og:description", content: "Canais de mensageria e integrações do BonaSoft Commerce." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],

@@ -58,16 +58,16 @@ interface Workspace {
 export const Route = createFileRoute("/empresa")({
   head: () => ({
     meta: [
-      { title: "Painel da empresa · Multiplex" },
+      { title: "Configurações da Empresa | BonaSoft Commerce" },
       {
         name: "description",
         content:
-          "Cada empresa configura seu próprio catálogo, prioridades de atendimento da Multiplex e preço por token.",
+          "Configurações da empresa, segmento comercial, catálogo e inteligência artificial no BonaSoft Commerce.",
       },
-      { property: "og:title", content: "Painel da empresa · Multiplex" },
+      { property: "og:title", content: "Configurações da Empresa | BonaSoft Commerce" },
       {
         property: "og:description",
-        content: "Configure catálogo, prioridades de atendimento e preço por token da sua empresa.",
+        content: "Configurações da empresa, segmento comercial, catálogo e inteligência artificial no BonaSoft Commerce.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

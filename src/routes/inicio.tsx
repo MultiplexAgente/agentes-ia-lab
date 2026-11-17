@@ -14,10 +14,10 @@ interface Overview {
 export const Route = createFileRoute("/inicio")({
   head: () => ({
     meta: [
-      { title: "Início | Multiplex" },
-      { name: "description", content: "Panorama real da sua operação no Multiplex." },
-      { property: "og:title", content: "Início | Multiplex" },
-      { property: "og:description", content: "Panorama real da sua operação no Multiplex." },
+      { title: "Painel Geral | BonaSoft Commerce" },
+      { name: "description", content: "Panorama operacional e comercial da sua empresa no BonaSoft Commerce." },
+      { property: "og:title", content: "Painel Geral | BonaSoft Commerce" },
+      { property: "og:description", content: "Panorama operacional e comercial da sua empresa no BonaSoft Commerce." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],

@@ -95,9 +95,14 @@ export function AppShell({ children, secondary }: { children: ReactNode; seconda
       >
         {/* TOPO DA SIDEBAR */}
         <div className="flex h-14 shrink-0 items-center justify-between px-4">
-          <Link to="/" className="flex items-center gap-2.5 text-[15px] font-semibold tracking-[0.12em] text-foreground">
-            <MultiplexMark className="size-6 shadow-sm" />
-            <span>MULTIPLEX</span>
+          <Link to="/" className="flex items-center gap-2.5 text-[15px] font-semibold tracking-tight text-foreground">
+            <div className="flex size-7 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold text-xs tracking-wider shadow-sm">
+              BS
+            </div>
+            <div className="flex flex-col">
+              <span className="text-sm font-bold tracking-tight text-foreground leading-none">BonaSoft</span>
+              <span className="text-[10px] font-medium uppercase tracking-widest text-muted-foreground mt-0.5">Commerce</span>
+            </div>
           </Link>
           <div className="flex items-center gap-1">
             <ThemeToggle />
@@ -217,7 +222,12 @@ export function AppShell({ children, secondary }: { children: ReactNode; seconda
             <Button variant="ghost" size="icon" onClick={() => setNavOpen(true)}>
               <Menu className="size-4" />
             </Button>
-            <span className="text-sm font-semibold tracking-[0.12em]">MULTIPLEX</span>
+            <div className="flex items-center gap-1.5">
+              <div className="flex size-5 items-center justify-center rounded bg-primary text-primary-foreground font-bold text-[9px]">
+                BS
+              </div>
+              <span className="text-sm font-bold tracking-tight">BonaSoft Commerce</span>
+            </div>
           </div>
           {!profile && (
             <Button

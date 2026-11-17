@@ -18,10 +18,10 @@ interface Customer {
 export const Route = createFileRoute("/clientes")({
   head: () => ({
     meta: [
-      { title: "Clientes | Multiplex" },
-      { name: "description", content: "Clientes reais cadastrados na sua empresa." },
-      { property: "og:title", content: "Clientes | Multiplex" },
-      { property: "og:description", content: "Clientes reais cadastrados na sua empresa." },
+      { title: "Clientes & CRM | BonaSoft Commerce" },
+      { name: "description", content: "Clientes cadastrados e relacionamento comercial no BonaSoft Commerce." },
+      { property: "og:title", content: "Clientes & CRM | BonaSoft Commerce" },
+      { property: "og:description", content: "Clientes cadastrados e relacionamento comercial no BonaSoft Commerce." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -40,7 +40,7 @@ function CustomersPage() {
           loading={loading}
           error={error}
           empty={rows.length === 0}
-          emptyText="Nenhum cliente cadastrado. Peça ao Multiplex no chat: “quero cadastrar um cliente”."
+          emptyText="Nenhum cliente cadastrado ainda. Cadastre clientes manualmente ou solicite ao assistente de operações."
         >
           <div className="rounded-xl border border-border/60">
             <Table>

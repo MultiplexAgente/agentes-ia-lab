@@ -6,17 +6,17 @@ import { useChatWorkspace } from "@/components/multiplex/ChatWorkspace";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Multiplex | Plataforma conversacional de operações" },
+      { title: "BonaSoft Commerce | ERP SaaS Multissegmento" },
       {
         name: "description",
         content:
-          "Converse com o Multiplex para consultar catálogo, cadastrar clientes, criar pedidos e acompanhar sua operação.",
+          "BonaSoft Commerce - ERP comercial integrado ao motor de inteligência artificial Multiplex para vendas, pedidos, catálogo e clientes.",
       },
-      { property: "og:title", content: "Multiplex | Plataforma conversacional de operações" },
+      { property: "og:title", content: "BonaSoft Commerce | ERP SaaS Multissegmento" },
       {
         property: "og:description",
         content:
-          "Converse com o Multiplex para consultar catálogo, cadastrar clientes, criar pedidos e acompanhar sua operação.",
+          "BonaSoft Commerce - ERP comercial integrado ao motor de inteligência artificial Multiplex para vendas, pedidos, catálogo e clientes.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
