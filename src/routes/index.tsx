@@ -371,14 +371,14 @@ function Landing() {
               onClick={() =>
                 window.__lovableEvents?.track?.("project.cta_clicked", { cta: "comecar_agora" })
               }
-              className="group inline-flex w-full max-w-xs justify-center items-center gap-3 sm:w-auto rounded-full bg-white px-8 py-4 text-sm font-semibold text-black transition-all duration-300 hover:bg-emerald-400 hover:shadow-[0_0_35px_rgba(0,230,118,0.35)] active:scale-[0.98]"
+              className="group inline-flex w-full max-w-xs justify-center items-center gap-3 sm:w-auto rounded-full border border-white/20 bg-white/[0.08] px-8 py-4 text-sm font-medium text-white backdrop-blur-md transition-all duration-300 hover:border-emerald-400/60 hover:bg-white/[0.16] hover:shadow-[0_0_25px_rgba(255,255,255,0.1)] active:bg-zinc-700 active:border-zinc-500 active:scale-[0.98]"
             >
               <span>Começar agora</span>
               <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
             </Link>
             <a
               href="#pilares"
-              className="group inline-flex w-full max-w-xs justify-center items-center gap-3 sm:w-auto rounded-full border border-white/20 bg-white/[0.08] px-8 py-4 text-sm font-medium text-white backdrop-blur-md transition-all duration-300 hover:border-emerald-400/60 hover:bg-white/[0.16] hover:shadow-[0_0_25px_rgba(255,255,255,0.1)] active:scale-[0.98]"
+              className="group inline-flex w-full max-w-xs justify-center items-center gap-3 sm:w-auto rounded-full border border-white/20 bg-white/[0.08] px-8 py-4 text-sm font-medium text-white backdrop-blur-md transition-all duration-300 hover:border-emerald-400/60 hover:bg-white/[0.16] hover:shadow-[0_0_25px_rgba(255,255,255,0.1)] active:bg-zinc-700 active:border-zinc-500 active:scale-[0.98]"
             >
               <span>Conhecer a plataforma</span>
               <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
@@ -754,7 +754,7 @@ function Landing() {
               onClick={() =>
                 window.__lovableEvents?.track?.("project.cta_clicked", { cta: "criar_conta" })
               }
-              className="group relative inline-flex items-center gap-3 rounded-full bg-foreground px-9 py-4 text-sm font-medium text-background transition hover:bg-emerald-400 hover:text-black shadow-[0_0_35px_rgba(255,255,255,0.15)]"
+              className="group relative inline-flex items-center gap-3 rounded-full border border-white/20 bg-white/[0.08] px-9 py-4 text-sm font-medium text-white backdrop-blur-md transition-all duration-300 hover:border-emerald-400/60 hover:bg-white/[0.16] hover:shadow-[0_0_25px_rgba(255,255,255,0.1)] active:bg-zinc-700 active:border-zinc-500 active:scale-[0.98]"
             >
               Criar minha conta HUG
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
