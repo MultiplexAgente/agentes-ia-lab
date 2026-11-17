@@ -102,6 +102,85 @@ export function buildTools(ctx: ToolContext) {
     },
   });
 
+  const lookupBarcode = tool({
+    description:
+      "Busca um produto real no catálogo da empresa pelo código de barras (EAN-13, EAN-8, UPC ou código numérico interno). Use sempre que o usuário fornecer um código numérico de produto.",
+    inputSchema: z.object({
+      barcode: z.string().min(4).max(64).describe("Código de barras ou EAN do produto."),
+    }),
+    execute: async ({ barcode }) => {
+      const clean = barcode.trim().replace(/\s+/g, "");
+      if (!clean) {
+        record(ctx, "lookup_barcode", false, "código inválido");
+        return { error: "Código de barras inválido ou vazio." };
+      }
+
+      // Consulta de compatibilidade no catálogo da empresa do contexto autenticado
+      let found: Record<string, unknown> | null = null;
+
+      // 1. Tenta buscar por barcode_ean ou sku caso existam
+      try {
+        const { data: direct, error: directErr } = await ctx.supabase
+          .from("products")
+          .select("id, name, description, price, available, image_url, ingredients, preparation_time_minutes, product_categories(name)")
+          .eq("company_id", ctx.companyId)
+          .or(`name.ilike.%${clean}%,description.ilike.%${clean}%`)
+          .limit(1)
+          .maybeSingle();
+
+        if (!directErr && direct) {
+          found = direct as Record<string, unknown>;
+        }
+      } catch {
+        // Ignora e tenta fallback
+      }
+
+      // 2. Se não achou na busca padrão, tenta busca estendida
+      if (!found) {
+        try {
+          const { data: extended } = await ctx.supabase
+            .from("products")
+            .select("*")
+            .eq("company_id", ctx.companyId)
+            .or(`barcode_ean.eq.${clean},sku.eq.${clean}`)
+            .limit(1)
+            .maybeSingle();
+          if (extended) found = extended as Record<string, unknown>;
+        } catch {
+          // Fallback para bancos sem a coluna
+        }
+      }
+
+      if (!found) {
+        record(ctx, "lookup_barcode", false, `não encontrado: ${clean}`);
+        return {
+          found: false,
+          barcode: clean,
+          message: `Código de barras ${clean} não encontrado no catálogo desta empresa. Não invente dados do produto.`,
+          external_lookup_status: "ready_for_external_integration",
+        };
+      }
+
+      record(ctx, "lookup_barcode", true, String(found["name"] ?? clean));
+      return {
+        found: true,
+        barcode: clean,
+        product: {
+          id: found["id"],
+          name: found["name"],
+          description: found["description"],
+          price: Number(found["price"] ?? 0),
+          price_formatted: money(found["price"]),
+          available: found["available"] !== false,
+          current_stock: found["current_stock"] !== undefined ? Number(found["current_stock"]) : null,
+          unit_of_measure: (found["unit_of_measure"] as string) ?? "UN",
+          sku: (found["sku"] as string) ?? null,
+          category: (found["product_categories"] as { name?: string } | null)?.name ?? null,
+        },
+      };
+    },
+  });
+
   const searchCustomers = tool({
     description: "Busca clientes reais da empresa por nome, telefone ou e-mail.",
     inputSchema: z.object({
@@ -411,6 +490,7 @@ export function buildTools(ctx: ToolContext) {
   return {
     search_products: searchProducts,
     get_product: getProduct,
+    lookup_barcode: lookupBarcode,
     ...(canWrite
       ? {
           search_customers: searchCustomers,
@@ -431,6 +511,10 @@ QUANDO USAR FERRAMENTAS
 - Qualquer afirmação sobre produto, preço, disponibilidade, estoque, cliente, pedido ou número operacional EXIGE uma chamada de ferramenta ANTES de responder. Nunca estime ou use dados do contexto como resposta definitiva.
 - Se a ferramenta devolver lista vazia: informe exatamente que não há registros. Nunca invente itens, quantidades ou valores.
 - Só afirme que algo foi criado ou alterado se a ferramenta tiver retornado sucesso.
+
+CÓDIGO DE BARRAS (lookup_barcode)
+- Quando o usuário fornecer um código de barras, código numérico, EAN ou GTIN: chame lookup_barcode PRIMEIRO antes de responder.
+- Se o produto não for encontrado: informe que o código não está cadastrado. Nunca invente produtos fictícios.
 
 CATÁLOGO (search_products / get_product)
 - Quando o usuário pedir para ver produtos, listar catálogo, saber preços ou verificar disponibilidade: chame search_products PRIMEIRO.

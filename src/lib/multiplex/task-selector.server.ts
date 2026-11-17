@@ -39,7 +39,7 @@ const RULES: Array<{ type: TaskType; words: string[] }> = [
   { type: "CREATE_ORDER", words: ["criar pedido", "novo pedido", "quero um pedido", "fazer um pedido", "montar pedido"] },
   { type: "QUERY_ORDER", words: ["meus pedidos", "consultar pedido", "status do pedido", "pedidos recentes", "ver pedido"] },
   { type: "CREATE_CUSTOMER", words: ["cadastrar cliente", "novo cliente", "criar cliente", "adicionar cliente"] },
-  { type: "PRODUCT_SEARCH", words: ["produto", "produtos", "cardápio", "cardapio", "catálogo", "catalogo", "estoque", "preço", "preco", "quanto custa", "valor"] },
+  { type: "PRODUCT_SEARCH", words: ["produto", "produtos", "cardápio", "cardapio", "catálogo", "catalogo", "estoque", "preço", "preco", "quanto custa", "valor", "código de barras", "codigo de barras", "ean", "gtin", "leitor de código", "bip"] },
   { type: "PROPERTY_SEARCH", words: ["imóvel", "imovel", "apartamento", "aluguel", "metros quadrados"] },
   { type: "CODING", words: ["código", "codigo", "script", "sql", "typescript", "javascript", "python", "webhook", "api"] },
   { type: "DATA_ANALYSIS", words: ["faturamento", "relatório", "relatorio", "métrica", "metrica", "quantos", "estatística", "estatistica", "resumo da operação", "resumo da operacao"] },

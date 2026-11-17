@@ -1,6 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 
+import { COMMERCE_SEGMENTS, type CommerceSegment } from "@/lib/commerce/segments";
+import { validateSegmentAttributes, normalizeProductWithLegacy } from "@/lib/commerce/attributes";
 import { requireCompanySession } from "@/lib/multiplex/company-auth.server";
 import { getServiceClient, isUuid } from "@/lib/multiplex/supabase.server";
 
@@ -11,8 +13,15 @@ const ProductSchema = z.object({
   price: z.coerce.number().min(0).max(1000000),
   categoryId: z.string().uuid().nullable().optional(),
   available: z.boolean().optional(),
+  segment: z.enum(COMMERCE_SEGMENTS).optional().default("food_service"),
+  barcodeEan: z.string().max(64).nullable().optional(),
+  sku: z.string().max(64).nullable().optional(),
+  unitOfMeasure: z.string().max(20).optional().default("UN"),
+  currentStock: z.coerce.number().optional().nullable(),
+  minStock: z.coerce.number().optional().nullable(),
   ingredients: z.array(z.string().max(120)).max(40).optional(),
   preparationTimeMinutes: z.coerce.number().int().min(0).max(600).optional(),
+  segmentAttributes: z.record(z.unknown()).optional().nullable(),
 });
 
 function slugify(value: string): string {
@@ -60,6 +69,20 @@ export const Route = createFileRoute("/api/company/products")({
           return Response.json({ error: "Preencha nome e preço do produto." }, { status: 400 });
         }
         const input = parsed.data;
+        const segment = (input.segment ?? "food_service") as CommerceSegment;
+
+        // Validação estrita de atributos de domínio pelo Zod
+        let validatedAttributes: Record<string, unknown> = {};
+        if (input.segmentAttributes) {
+          const attrValidation = validateSegmentAttributes(segment, input.segmentAttributes);
+          if (!attrValidation.valid) {
+            return Response.json(
+              { error: `Atributos inválidos para o segmento ${segment}: ${attrValidation.errors.join(", ")}` },
+              { status: 400 }
+            );
+          }
+          validatedAttributes = attrValidation.data as Record<string, unknown>;
+        }
 
         if (input.categoryId) {
           const { data: category } = await supabase
@@ -73,38 +96,75 @@ export const Route = createFileRoute("/api/company/products")({
           }
         }
 
-        const values = {
+        // Se for gastronomia, sincroniza ingredients e preparationTimeMinutes
+        const ingredients = input.ingredients ?? (validatedAttributes["ingredients"] as string[] | undefined) ?? [];
+        const prepTime = input.preparationTimeMinutes ?? (validatedAttributes["preparation_time_minutes"] as number | undefined) ?? 20;
+
+        const baseValues = {
           company_id: session.companyId,
           category_id: input.categoryId ?? null,
           name: input.name,
           description: input.description ?? null,
           price: input.price,
           available: input.available ?? true,
-          ingredients: input.ingredients ?? [],
-          preparation_time_minutes: input.preparationTimeMinutes ?? 20,
+          ingredients,
+          preparation_time_minutes: prepTime,
           updated_at: new Date().toISOString(),
         };
 
+        const extendedValues = {
+          ...baseValues,
+          segment,
+          barcode_ean: input.barcodeEan ?? (validatedAttributes["barcode_ean"] as string | undefined) ?? null,
+          sku: input.sku ?? null,
+          unit_of_measure: input.unitOfMeasure ?? (validatedAttributes["unit_of_measure"] as string | undefined) ?? "UN",
+          current_stock: input.currentStock ?? null,
+          min_stock: input.minStock ?? null,
+          segment_attributes: validatedAttributes,
+        };
+
         if (input.id) {
-          const { data, error } = await supabase
+          // Tenta update com colunas estendidas; se falhar por coluna inexistente, usa baseValues
+          let updateRes = await supabase
             .from("products")
-            .update(values)
+            .update(extendedValues)
             .eq("id", input.id)
             .eq("company_id", session.companyId)
-            .select("id, category_id, name, description, price, available, ingredients, preparation_time_minutes")
+            .select("*")
             .maybeSingle();
-          if (error) return Response.json({ error: error.message }, { status: 500 });
-          if (!data) return Response.json({ error: "Produto não encontrado." }, { status: 404 });
-          return Response.json({ product: data });
+
+          if (updateRes.error && updateRes.error.message.includes("column")) {
+            updateRes = await supabase
+              .from("products")
+              .update(baseValues)
+              .eq("id", input.id)
+              .eq("company_id", session.companyId)
+              .select("*")
+              .maybeSingle();
+          }
+
+          if (updateRes.error) return Response.json({ error: updateRes.error.message }, { status: 500 });
+          if (!updateRes.data) return Response.json({ error: "Produto não encontrado." }, { status: 404 });
+          return Response.json({ product: updateRes.data });
         }
 
-        const { data, error } = await supabase
+        // Tenta insert com colunas estendidas; se falhar por coluna inexistente, usa baseValues
+        let insertRes = await supabase
           .from("products")
-          .insert(values)
-          .select("id, category_id, name, description, price, available, ingredients, preparation_time_minutes")
+          .insert(extendedValues)
+          .select("*")
           .maybeSingle();
-        if (error) return Response.json({ error: error.message }, { status: 500 });
-        return Response.json({ product: data });
+
+        if (insertRes.error && insertRes.error.message.includes("column")) {
+          insertRes = await supabase
+            .from("products")
+            .insert(baseValues)
+            .select("*")
+            .maybeSingle();
+        }
+
+        if (insertRes.error) return Response.json({ error: insertRes.error.message }, { status: 500 });
+        return Response.json({ product: insertRes.data });
       },
 
       DELETE: async ({ request }) => {

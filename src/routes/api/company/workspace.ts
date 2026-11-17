@@ -1,5 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 
+import { COMMERCE_SEGMENTS, getSegmentConfig } from "@/lib/commerce/segments";
+import { normalizeProductWithLegacy } from "@/lib/commerce/attributes";
+import { loadCompanySegmentSettings } from "@/lib/commerce/company-segments";
 import { requireCompanySession } from "@/lib/multiplex/company-auth.server";
 import {
   MODEL_CATALOG,
@@ -25,7 +28,7 @@ export const Route = createFileRoute("/api/company/workspace")({
           return Response.json({ error: session.error }, { status: session.status });
         }
 
-        const [{ data: categories }, { data: products }, settingsResult] = await Promise.all([
+        const [{ data: categories }, { data: rawProducts }, settingsResult, segmentSettings] = await Promise.all([
           supabase
             .from("product_categories")
             .select("id, name, slug, active, sort_order")
@@ -33,13 +36,33 @@ export const Route = createFileRoute("/api/company/workspace")({
             .order("sort_order", { ascending: true }),
           supabase
             .from("products")
-            .select(
-              "id, category_id, name, description, price, available, ingredients, preparation_time_minutes",
-            )
+            .select("*")
             .eq("company_id", session.companyId)
             .order("name", { ascending: true }),
           loadSettings(supabase, session.companyId),
+          loadCompanySegmentSettings(supabase, session.companyId),
         ]);
+
+        const products = (rawProducts ?? []).map((row: any) => {
+          const itemSegment = row.segment || segmentSettings.primarySegment;
+          return {
+            id: row.id,
+            category_id: row.category_id,
+            name: row.name,
+            description: row.description,
+            price: row.price,
+            available: row.available,
+            segment: itemSegment,
+            barcode_ean: row.barcode_ean ?? (row.segment_attributes as any)?.barcode_ean ?? null,
+            sku: row.sku ?? null,
+            unit_of_measure: row.unit_of_measure ?? (row.segment_attributes as any)?.unit_of_measure ?? "UN",
+            current_stock: row.current_stock !== undefined ? Number(row.current_stock) : null,
+            min_stock: row.min_stock !== undefined ? Number(row.min_stock) : null,
+            ingredients: row.ingredients ?? [],
+            preparation_time_minutes: row.preparation_time_minutes ?? 20,
+            segment_attributes: normalizeProductWithLegacy(itemSegment, row),
+          };
+        });
 
         const { data: usage } = await supabase
           .from("ai_routing_audit")
@@ -56,11 +79,19 @@ export const Route = createFileRoute("/api/company/workspace")({
         }>;
 
         return Response.json({
-          company: { id: session.companyId, name: session.companyName },
+          company: {
+            id: session.companyId,
+            name: session.companyName,
+            segment: segmentSettings.primarySegment,
+            secondarySegments: segmentSettings.secondarySegments,
+            activeSegments: segmentSettings.activeSegments,
+          },
           user: { email: session.email, role: session.role },
           settings: settingsResult.settings,
+          segmentSettings,
+          availableSegments: COMMERCE_SEGMENTS.map((s) => getSegmentConfig(s)),
           categories: categories ?? [],
-          products: products ?? [],
+          products,
           usage: {
             calls: rows.length,
             tokens: rows.reduce((sum, r) => sum + (r.tokens_prompt ?? 0) + (r.tokens_completion ?? 0), 0),

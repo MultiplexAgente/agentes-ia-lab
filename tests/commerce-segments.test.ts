@@ -1,17 +1,15 @@
 import { describe, expect, it } from "vitest";
-import { COMMERCE_SEGMENTS, getSegmentConfig, SEGMENT_CONFIGS } from "../src/lib/commerce/segments";
+import { COMMERCE_SEGMENTS, getSegmentConfig } from "../src/lib/commerce/segments";
 import {
   validateSegmentAttributes,
   normalizeProductWithLegacy,
-  FoodServiceAttributesSchema,
-  PharmacyAttributesSchema,
-  GroceryAttributesSchema,
-  FashionAttributesSchema,
-  BeautyAttributesSchema,
-  PetShopAttributesSchema,
-  ElectronicsAttributesSchema,
-  ConstructionAttributesSchema,
 } from "../src/lib/commerce/attributes";
+import {
+  sanitizeSegmentSettings,
+  saveCompanySegmentSettings,
+  DEFAULT_SEGMENT_SETTINGS,
+} from "../src/lib/commerce/company-segments";
+import { buildTools } from "../src/lib/multiplex/tools.server";
 
 describe("BonaSoft Commerce - Arquitetura de Segmentos", () => {
   it("deve cobrir todos os 8 segmentos principais + varejo geral", () => {
@@ -149,5 +147,159 @@ describe("BonaSoft Commerce - Validação Estrita de Atributos", () => {
     expect((normalized as any).ingredients).toHaveLength(4);
     expect((normalized as any).preparation_time_minutes).toBe(25);
     expect((normalized as any).allows_custom_notes).toBe(true);
+  });
+});
+
+describe("BonaSoft Commerce - Múltiplos Segmentos por Empresa & Permissões", () => {
+  it("permite que uma mesma empresa opere múltiplos segmentos ativos simultaneamente", () => {
+    // Exemplo: Supermercado que também possui Padaria (food_service) e Farmácia (pharmacy)
+    const settings = sanitizeSegmentSettings({
+      primarySegment: "grocery",
+      secondarySegments: ["food_service", "pharmacy"],
+    });
+
+    expect(settings.primarySegment).toBe("grocery");
+    expect(settings.secondarySegments).toEqual(["food_service", "pharmacy"]);
+    expect(settings.activeSegments).toEqual(["grocery", "food_service", "pharmacy"]);
+
+    // As capacidades devem agregar as funcionalidades de todos os segmentos ativos
+    expect(settings.capabilities.hasWeightedMeasurement).toBe(true); // do supermercado
+    expect(settings.capabilities.hasTablesOrTabs).toBe(true);        // da lanchonete/padaria
+    expect(settings.capabilities.hasPrescriptionControl).toBe(true); // da farmácia
+  });
+
+  it("bloqueia alteração de segmentos por usuários sem privilégio de admin ou owner", async () => {
+    const mockSupabase = {} as any;
+    const settings = DEFAULT_SEGMENT_SETTINGS;
+
+    const operatorAttempt = await saveCompanySegmentSettings(
+      mockSupabase,
+      "company-123",
+      "operator",
+      settings
+    );
+    expect(operatorAttempt.ok).toBe(false);
+    expect(operatorAttempt.error).toContain("proprietários e administradores");
+
+    const cashierAttempt = await saveCompanySegmentSettings(
+      mockSupabase,
+      "company-123",
+      "cashier",
+      settings
+    );
+    expect(cashierAttempt.ok).toBe(false);
+  });
+});
+
+describe("BonaSoft Commerce - Ferramenta de Código de Barras (lookup_barcode)", () => {
+  it("registra a ferramenta lookup_barcode no motor de ferramentas do Multiplex", () => {
+    const fakeContext = {
+      supabase: {
+        from: () => ({
+          select: () => ({
+            eq: () => ({
+              or: () => ({
+                limit: () => ({
+                  maybeSingle: async () => ({ data: null, error: null }),
+                }),
+              }),
+            }),
+          }),
+        }),
+      } as any,
+      companyId: "comp-123",
+      scope: "authenticated" as const,
+      calls: [],
+    };
+
+    const tools = buildTools(fakeContext);
+    expect(tools).toHaveProperty("lookup_barcode");
+    expect(tools).toHaveProperty("search_products");
+    expect(tools).toHaveProperty("get_product");
+  });
+
+  it("lookup_barcode responde com mensagem anti-alucinação quando produto não existe", async () => {
+    const fakeContext = {
+      supabase: {
+        from: () => ({
+          select: () => ({
+            eq: () => ({
+              or: () => ({
+                limit: () => ({
+                  maybeSingle: async () => ({ data: null, error: null }),
+                }),
+              }),
+            }),
+          }),
+        }),
+      } as any,
+      companyId: "comp-123",
+      scope: "authenticated" as const,
+      calls: [],
+    };
+
+    const tools = buildTools(fakeContext);
+    const result = await tools.lookup_barcode.execute({ barcode: "7899999999999" });
+
+    expect(result).toHaveProperty("found", false);
+    expect(result.message).toContain("não encontrado no catálogo desta empresa");
+    expect(result.message).toContain("Não invente dados do produto");
+  });
+
+  it("lookup_barcode rejeita códigos inválidos ou vazios", async () => {
+    const fakeContext = {
+      supabase: {} as any,
+      companyId: "comp-123",
+      scope: "authenticated" as const,
+      calls: [],
+    };
+
+    const tools = buildTools(fakeContext);
+    const result = await tools.lookup_barcode.execute({ barcode: "   " });
+    expect(result).toHaveProperty("error");
+  });
+
+  it("lookup_barcode retorna produto real formatado quando o código existe no catálogo da empresa", async () => {
+    const fakeContext = {
+      supabase: {
+        from: () => ({
+          select: () => ({
+            eq: () => ({
+              or: () => ({
+                limit: () => ({
+                  maybeSingle: async () => ({
+                    data: {
+                      id: "prod-456",
+                      name: "Dipirona Monoidratada 500mg 10 comprimidos",
+                      description: "Analgésico e antitérmico",
+                      price: 8.5,
+                      available: true,
+                      current_stock: 42,
+                      unit_of_measure: "CX",
+                      barcode_ean: "7891000315507",
+                      product_categories: { name: "Medicamentos" },
+                    },
+                    error: null,
+                  }),
+                }),
+              }),
+            }),
+          }),
+        }),
+      } as any,
+      companyId: "comp-123",
+      scope: "authenticated" as const,
+      calls: [],
+    };
+
+    const tools = buildTools(fakeContext);
+    const result = await tools.lookup_barcode.execute({ barcode: "7891000315507" });
+
+    expect(result).toHaveProperty("found", true);
+    expect(result.product.name).toContain("Dipirona Monoidratada");
+    expect(result.product.price).toBe(8.5);
+    expect(result.product.price_formatted).toContain("8,50");
+    expect(result.product.current_stock).toBe(42);
+    expect(result.product.unit_of_measure).toBe("CX");
   });
 });
