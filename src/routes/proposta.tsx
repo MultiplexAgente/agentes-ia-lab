@@ -472,7 +472,7 @@ function PropostaSquarespacePage() {
           <span className="font-bold tracking-widest text-black">HUG</span>
         </div>
         <div>
-          © {new Date().getFullYear()} BonaSoft. Todos os direitos reservados.
+          © {new Date().getFullYear()} <a href="https://bonasoftmt.com" target="_blank" rel="noopener noreferrer" className="hover:text-black transition-colors underline-offset-4 hover:underline">BonaSoft</a>. Todos os direitos reservados.
         </div>
       </footer>
     </div>

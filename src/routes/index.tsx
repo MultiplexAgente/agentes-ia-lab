@@ -42,6 +42,27 @@ export const Route = createFileRoute("/")({
 
 const ease = [0.22, 1, 0.36, 1] as const;
 
+export const BONASOFT_WEBSITE_URL = "https://bonasoftmt.com";
+
+/**
+ * Manipulador universal de clique para abrir o site oficial da BonaSoft (https://bonasoftmt.com)
+ */
+export function openBonaSoftWebsite(e?: React.SyntheticEvent) {
+  if (e) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+  const url = BONASOFT_WEBSITE_URL;
+  try {
+    const win = window.open(url, "_blank", "noopener,noreferrer");
+    if (!win || win.closed || typeof win.closed === "undefined") {
+      window.location.href = url;
+    }
+  } catch {
+    window.location.href = url;
+  }
+}
+
 const BONASOFT_WHATSAPP_NUMBER = "556692734632";
 const getBonaSoftWhatsAppUrl = (mensagem: string) =>
   `https://wa.me/${BONASOFT_WHATSAPP_NUMBER}?text=${encodeURIComponent(mensagem)}`;
@@ -781,18 +802,27 @@ function Landing() {
       {/* 
         ========================================================================
         RODAPÉ: Centralizado com o Átomo Quântico em Movimento Oficial da BonaSoft
+        Direcionando para o site oficial (https://bonasoftmt.com)
         ========================================================================
       */}
       <footer className="border-t border-white/[0.08] bg-[#020408] py-10 px-6">
         <div className="mx-auto flex max-w-[1400px] flex-col items-center justify-center gap-5 text-center">
-          <div className="flex items-center justify-center gap-3">
-            <BonaParticleAtom className="h-8 w-8 text-emerald-400" />
-            <span className="font-sans font-light tracking-[0.28em] text-sm sm:text-base leading-none text-foreground uppercase">
+          <a
+            href={BONASOFT_WEBSITE_URL}
+            onClick={openBonaSoftWebsite}
+            role="button"
+            tabIndex={0}
+            title="BonaSoft — Desenvolvimento de Sistemas (Acessar site oficial)"
+            aria-label="Acessar o site oficial da BonaSoft"
+            className="inline-flex items-center justify-center gap-3 py-2 px-4 cursor-pointer group opacity-90 hover:opacity-100 transition-all duration-300 hover:scale-105 active:scale-95"
+          >
+            <BonaParticleAtom className="h-8 w-8 text-emerald-400 shrink-0 transition-transform duration-300 group-hover:rotate-12" />
+            <span className="font-sans font-light tracking-[0.28em] text-sm sm:text-base leading-none text-foreground uppercase group-hover:text-emerald-400 transition-colors">
               BONASOFT
             </span>
-          </div>
+          </a>
           <p className="text-xs text-muted-foreground/60 font-mono tracking-wider">
-            © {new Date().getFullYear()} BonaSoft. Todos os direitos reservados.
+            © {new Date().getFullYear()} <a href={BONASOFT_WEBSITE_URL} onClick={openBonaSoftWebsite} className="hover:text-emerald-400 transition-colors underline-offset-4 hover:underline">BonaSoft</a>. Todos os direitos reservados.
           </p>
         </div>
       </footer>

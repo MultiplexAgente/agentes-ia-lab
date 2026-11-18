@@ -171,7 +171,7 @@ function LoginPage() {
         </form>
 
         <p className="mt-6 text-center text-xs text-muted-foreground/70">
-          © 2026 BonaSoft. Todos os direitos reservados.
+          © 2026 <a href="https://bonasoftmt.com" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors underline-offset-4 hover:underline">BonaSoft</a>. Todos os direitos reservados.
         </p>
       </div>
     </main>
