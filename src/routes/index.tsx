@@ -316,12 +316,12 @@ function Landing() {
 
           <div className="flex items-center gap-3">
             <a
-              href={getBonaSoftWhatsAppUrl("Olá, BonaSoft! Gostaria de conhecer a plataforma HUG para minha empresa.")}
+              href={getBonaSoftWhatsAppUrl("Olá, BonaSoft! Gostaria de agendar uma consultoria e conhecer a plataforma HUG para minha empresa.")}
               target="_blank"
               rel="noopener noreferrer"
               className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-5 py-2 text-xs font-semibold text-emerald-400 backdrop-blur-md transition hover:border-emerald-400 hover:bg-emerald-500/20 shadow-sm"
             >
-              Falar no WhatsApp
+              Falar com Especialista
             </a>
           </div>
         </div>
@@ -380,12 +380,12 @@ function Landing() {
             className="mt-7 flex w-full flex-col items-center gap-3.5 sm:w-auto sm:flex-row sm:gap-4"
           >
             <a
-              href={getBonaSoftWhatsAppUrl("Olá, BonaSoft! Quero começar a usar o HUG no meu negócio.")}
+              href={getBonaSoftWhatsAppUrl("Olá, BonaSoft! Gostaria de falar com um especialista e conhecer a plataforma HUG para minha empresa.")}
               target="_blank"
               rel="noopener noreferrer"
               className="group inline-flex w-full max-w-xs justify-center items-center gap-3 sm:w-auto rounded-full border border-white/15 bg-white/[0.05] px-8 py-4 text-sm font-medium text-white backdrop-blur-md transition-all duration-300 hover:border-emerald-400/60 hover:bg-white/[0.12] active:bg-zinc-700 active:border-zinc-500 active:text-zinc-200 active:scale-[0.98]"
             >
-              <span>Começar no WhatsApp</span>
+              <span>Falar com Especialista</span>
               <ChevronRight className="h-4 w-4 text-emerald-400 transition-transform duration-300 group-hover:translate-x-1" />
             </a>
             <a
@@ -545,12 +545,12 @@ function Landing() {
               </p>
               <div className="pt-1">
                 <a
-                  href={getBonaSoftWhatsAppUrl("Olá, BonaSoft! Gostaria de agendar uma demonstração da inteligência HUG para meu negócio.")}
+                  href={getBonaSoftWhatsAppUrl("Olá, BonaSoft! Gostaria de agendar uma demonstração executiva da inteligência HUG para meu negócio.")}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 text-sm font-medium text-emerald-400 transition hover:text-emerald-300"
                 >
-                  <span>Falar com especialista no WhatsApp</span>
+                  <span>Falar com Especialista</span>
                   <ArrowRight className="h-4 w-4" />
                 </a>
               </div>
@@ -728,7 +728,7 @@ function Landing() {
 
                 <div className="mt-8 pt-4">
                   <a
-                    href={getBonaSoftWhatsAppUrl(`Olá, BonaSoft! Quero contratar o plano ${plan.name} do HUG (R$ ${plan.price}/mês).`)}
+                    href={getBonaSoftWhatsAppUrl(`Olá, BonaSoft! Gostaria de falar com um especialista para contratar o plano ${plan.name} do HUG (R$ ${plan.price}/mês).`)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className={`block w-full text-center rounded-full py-3.5 text-xs font-medium uppercase tracking-wider transition ${
@@ -737,7 +737,7 @@ function Landing() {
                         : "border border-white/20 text-white hover:bg-white/10"
                     }`}
                   >
-                    Contratar {plan.name} via WhatsApp
+                    Falar com Especialista • {plan.name}
                   </a>
                 </div>
               </Reveal>
@@ -766,12 +766,12 @@ function Landing() {
           </h2>
           <div className="mt-7 sm:mt-8 flex justify-center">
             <a
-              href={getBonaSoftWhatsAppUrl("Olá, BonaSoft! Quero levar a operação da minha empresa para a plataforma HUG.")}
+              href={getBonaSoftWhatsAppUrl("Olá, BonaSoft! Gostaria de falar com um especialista e levar a operação da minha empresa para a plataforma HUG.")}
               target="_blank"
               rel="noopener noreferrer"
               className="group relative inline-flex items-center gap-3 rounded-full border border-white/20 bg-white/[0.08] px-9 py-4 text-sm font-medium text-white backdrop-blur-md transition-all duration-300 hover:border-emerald-400/60 hover:bg-white/[0.16] hover:shadow-[0_0_25px_rgba(255,255,255,0.1)] active:bg-zinc-700 active:border-zinc-500 active:scale-[0.98]"
             >
-              Falar no WhatsApp da BonaSoft
+              Falar com Especialista
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </a>
           </div>
