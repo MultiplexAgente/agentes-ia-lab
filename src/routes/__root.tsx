@@ -112,26 +112,74 @@ function RootShell({ children }: { children: ReactNode }) {
     <html lang="pt-BR" className="dark">
       <head>
         <HeadContent />
-        <script
+        <style
           dangerouslySetInnerHTML={{
-            __html:
-              'try{function p(){var b=document.querySelectorAll("#lovable-badge,[id*=\"lovable\"],[class*=\"lovable-badge\"],[data-lovable-badge],a[href*=\"lovable.dev\"]");for(var i=0;i<b.length;i++)b[i].remove()}p();if(window.MutationObserver)new MutationObserver(p).observe(document.documentElement,{childList:true,subtree:true})}catch(e){}',
+            __html: `
+              #lovable-badge,
+              [id*="lovable" i],
+              [class*="lovable" i],
+              [data-lovable],
+              [data-lovable-badge],
+              a[href*="lovable"],
+              iframe[src*="lovable"],
+              div:has(> a[href*="lovable"]),
+              div:has(> button[aria-label*="lovable" i]),
+              body > div[style*="fixed"][style*="bottom"] {
+                display: none !important;
+                visibility: hidden !important;
+                opacity: 0 !important;
+                pointer-events: none !important;
+                width: 0 !important;
+                height: 0 !important;
+                position: absolute !important;
+                left: -99999px !important;
+                top: -99999px !important;
+                z-index: -99999 !important;
+              }
+            `,
           }}
         />
-        
         <script
           dangerouslySetInnerHTML={{
             __html: `(function(){
-              function purge(){
-                var b=document.querySelectorAll('#lovable-badge,[id*="lovable"],[class*="lovable-badge"],[data-lovable-badge],a[href*="lovable.dev"]');
-                for(var i=0;i<b.length;i++){b[i].remove();}
+              function kill(){
+                try{
+                  var b=document.querySelectorAll('#lovable-badge,[id*="lovable" i],[class*="lovable" i],[data-lovable],[data-lovable-badge],a[href*="lovable"],iframe[src*="lovable"]');
+                  for(var i=0;i<b.length;i++){
+                    b[i].style.setProperty('display','none','important');
+                    b[i].remove();
+                  }
+                  var all=document.querySelectorAll('div,a,button,span,aside,footer');
+                  for(var j=0;j<all.length;j++){
+                    var el=all[j];
+                    var txt=(el.innerText||el.textContent||'').trim();
+                    if(txt.indexOf('Edit with')!==-1&&txt.indexOf('Lovable')!==-1){
+                      var p=el;
+                      while(p&&p!==document.body){
+                        var st=window.getComputedStyle(p);
+                        if(st.position==='fixed'||st.position==='absolute'){
+                          p.style.setProperty('display','none','important');
+                          p.remove();
+                          break;
+                        }
+                        p=p.parentElement;
+                      }
+                      el.style.setProperty('display','none','important');
+                      el.remove();
+                    }
+                  }
+                }catch(e){}
               }
-              try{
-                purge();
-                if(window.MutationObserver){
-                  new MutationObserver(purge).observe(document.documentElement,{childList:true,subtree:true});
+              if(typeof window!=='undefined'){
+                kill();
+                if(document.readyState==='loading'){
+                  document.addEventListener('DOMContentLoaded',kill);
                 }
-              }catch(e){}
+                window.addEventListener('load',kill);
+                if(window.MutationObserver){
+                  new MutationObserver(kill).observe(document.documentElement,{childList:true,subtree:true});
+                }
+              }
             })();`,
           }}
         />
