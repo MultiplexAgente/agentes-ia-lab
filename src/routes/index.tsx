@@ -210,12 +210,12 @@ const COMMERCIAL_SECTORS = [
       "https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=1600&q=85",
   },
   {
-    id: "construcao",
-    name: "Materiais & Ferramentas",
-    title: "Materiais de Construção & Ferramentas",
+    id: "materiais",
+    name: "Materiais",
+    title: "Materiais, Papelarias, Livrarias & Ferramentas",
     narrative:
-      "Venda ágil no balcão e televendas, conversão fracionada de unidades (m², kg, metro linear, saco, barra de ferro), controle de estoque de ferramentas e expedição de entregas.",
-    kpi: "Balcão & Entregas · Venda Fracionada",
+      "Venda ágil no balcão e encomendas, busca instantânea por SKU, EAN ou ISBN, cálculo com conversão fracionada de unidades (m², kg, metro linear, resma, pacote, caixa), controle rigoroso de estoque e expedição com rotas de entrega.",
+    kpi: "Balcão & Encomendas · SKU, ISBN & Fracionado",
     image:
       "https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=1600&q=85",
   },

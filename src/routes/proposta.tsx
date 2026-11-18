@@ -82,11 +82,11 @@ const EDITORIAL_SECTORS = [
       "https://images.unsplash.com/photo-1550009158-9ebf69173e03?auto=format&fit=crop&w=1600&q=85",
   },
   {
-    id: "construcao",
-    name: "Materiais & Ferramentas",
-    title: "Materiais de Construção & Ferramentas",
-    tagline: "Venda no balcão e televendas, conversão fracionada (m², kg, metro linear, saco, barra), controle de ferramentas e expedição de entregas.",
-    kpi: "Conversão de Unidades · Logística de Entrega",
+    id: "materiais",
+    name: "Materiais",
+    title: "Materiais, Papelarias, Livrarias & Ferramentas",
+    tagline: "Venda ágil no balcão e encomendas, conversão fracionada (m², kg, metro, resma, pacote, caixa), catálogo com leitor de código de barras e ISBN, controle de estoque e expedição de entregas.",
+    kpi: "Balcão & Expedição · Conversão Fracionada & ISBN",
     image:
       "https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=1600&q=85",
   },
