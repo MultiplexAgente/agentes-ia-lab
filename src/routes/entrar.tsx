@@ -90,12 +90,9 @@ function LoginPage() {
 
           {/* Campo Pequeno de Código da Empresa com Memória Local */}
           <div className="space-y-1.5">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="codigo" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Cód. Empresa / Loja
-              </Label>
-              <span className="text-[10px] text-muted-foreground font-mono">Salvo no aparelho</span>
-            </div>
+            <Label htmlFor="codigo" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Cód. Empresa / Loja
+            </Label>
             <div className="relative">
               <Building2 className="absolute left-3 top-2.5 size-4 text-muted-foreground" />
               <Input
