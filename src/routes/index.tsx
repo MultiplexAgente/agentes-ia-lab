@@ -21,13 +21,13 @@ import { BonaParticleAtom } from "@/components/bonasoft/BonaLogo";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "HUG — Seu negócio, em outra órbita" },
+      { title: "HUG — Gestão Empresarial Integrada" },
       {
         name: "description",
         content:
           "HUG — Vendas, gestão, ponto de venda, catálogo e inteligência comercial integrados em uma única plataforma.",
       },
-      { property: "og:title", content: "HUG — Seu negócio, em outra órbita" },
+      { property: "og:title", content: "HUG — Gestão Empresarial Integrada" },
       {
         property: "og:description",
         content:

@@ -79,7 +79,6 @@ function LoginPage() {
             className="size-16 rounded-full object-cover shadow-2xl ring-2 ring-primary/40 shrink-0 mb-3"
           />
           <h1 className="font-display text-2xl font-bold tracking-tight text-foreground">HUG</h1>
-          <p className="text-xs text-muted-foreground">Seu negócio, em outra órbita.</p>
         </div>
 
         <form onSubmit={submit} className="space-y-4 rounded-2xl border border-border/80 bg-card/90 backdrop-blur p-6 shadow-xl">

@@ -77,10 +77,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "HUG — Seu negócio, em outra órbita" },
-      { name: "description", content: "HUG — Seu negócio, em outra órbita. Plataforma integrada de gestão empresarial, PDV, estoque e inteligência comercial." },
+      { title: "HUG — Gestão Empresarial Integrada" },
+      { name: "description", content: "HUG — Plataforma integrada de gestão empresarial, PDV, estoque e inteligência comercial." },
       { name: "author", content: "HUG" },
-      { property: "og:title", content: "HUG — Seu negócio, em outra órbita" },
+      { property: "og:title", content: "HUG — Gestão Empresarial Integrada" },
       { property: "og:description", content: "HUG — Vendas, estoque, gestão empresarial e inteligência comercial integrados em uma única plataforma." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
