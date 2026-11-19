@@ -24,7 +24,17 @@
     "exactOptionalPropertyTypes": false,
     "noUncheckedSideEffectImports": true,
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": [
+        "./src/*",
+        "../six-project-domain-garden/src/*",
+        "../hug-mercados-bridge/src/*",
+        "../hug-moda-connect/src/*",
+        "../hug-gastronomia-table-connect/src/*",
+        "../hug-beleza-data-bridge/src/*",
+        "../hug-construcao-connect/src/*",
+        "../multiplex-control-hub/src/*",
+        "../hug-ia-core/src/*"
+      ]
     }
   }
 }
